@@ -1,0 +1,175 @@
+RexInclusiv
+Circe <select{|RexInclusiv}>
+MirrorCirce 
+Madrasi <select{|RexInclusiv}>
+Volage
+Hypervolage
+BichromChess
+MonochromChess
+GridChess <str>
+KoeKo
+BlackEdgemover
+WhiteEdgemover
+Leofamily
+ChineseChess
+Patrouille
+PWC
+NoCapture
+ImmunChess <select{|RexInclusiv}>
+MirrorImmunChess
+ContactGridChess
+Imitator <str>
+CavalierMajeur
+HaanerChess
+CouscousCirce
+ChameleonCirce <str>
+EquipollentsCirce
+FileCirce
+Sentinelles <select{|PionAdvers|PionNeutre|ParaSentinelles|Berolina}> <select{|MaximumWhite|MaximumBlack|MaximumTotal}> <int>
+BlackMaximummer <select{|Ultra}>
+WhiteMaximummer <select{|Ultra}>
+BlackMinimummer <select{|Ultra}>
+WhiteMinimummer <select{|Ultra}>
+MagicSquares <str>
+DiagramCirce
+Tibet
+DoubleTibet
+Hole <str>
+BlackMustCapture <select{|Ultra}>
+WhiteMustCapture <select{|Ultra}>
+TransmutedKings
+BlackFollowMyLeader
+WhiteFollowMyLeader
+DuellistChess
+ParrainCirce
+ContraParrain
+SymmetryCirce
+NoIProm
+VogtlaenderChess
+EinsteinChess
+Bicolores
+NewKoeko
+CirceClone
+AntiCirce <select{|Cheylan|Calvet}>
+MirrorFileCirce
+AntipodeanCirce
+MirrorCirceClone
+MirrorAntiCirce <select{|Cheylan|Calvet}>
+DiagramAntiCirce <select{|Cheylan|Calvet}>
+FileAntiCirce <select{|Cheylan|Calvet}>
+SymmetryAntiCirce <select{|Cheylan|Calvet}>
+MirrorAntiCirce <select{|Cheylan|Calvet}>
+AntipodeanAntiCirce <select{|Cheylan|Calvet}>
+EquipollentsAntiCirce <select{|Cheylan|Calvet}>
+FileImmunChess <select{|RexInclusiv}>
+DiagramImmunChess <select{|RexInclusiv}>
+MirrorFileImmunChess <select{|RexInclusiv}>
+SymmetryImmunChess <select{|RexInclusiv}>
+AntipodeanImmunChess <select{|RexInclusiv}>
+EquipollentsImmunChess <select{|RexInclusiv}>
+CageImmunChess <select{|RexInclusiv}>
+ReversalEinsteinChess
+SuperCirce
+RelegationChess
+NorskSjakk
+TraitorChess
+AndernachChess
+BlackForcedSquare
+WhiteForcedSquare
+BlackConsequentForcedSquare
+WhiteConsequentForcedSquare
+ReflectiveKings
+ChameleonChess
+FunctionaryChess
+GlasgowChess
+AntiAndernachChess
+FrischaufCirce <str>
+VerticalMirrorCirce
+Isardam <select{|TypeB}>
+ChecklessChess
+DiametralCirce
+PromOnly <str>
+ExclusiveChess
+Marscirce
+MarsMirrorCirce
+PhantomChess <select{|RexInclusiv}>
+WhiteTransmutedKing
+BlackTransmutedKing
+WhiteReflectiveKing
+BlackReflectiveKing
+AntiEinsteinChess
+MirrorCouscousCirce
+BlackRoyalSquare
+WhiteRoyalSquare
+CirceAssassin
+PlusChess
+BrunnerChess
+CentralChess
+ExtinctionChess
+RepublicanChess <select{|Type1|Type2}>
+ActuatedRevolvingBoard
+MessignyChess <select{|RexExclusiv}>
+Woozles <select{|RexExclusiv}>
+BiWoozles <select{|RexExclusiv}>
+Heffalumps <select{|RexExclusiv}>
+BiHeffalumps <select{|RexExclusiv}>
+WhitePromSquares <str>
+BlackPromSquares <str>
+NoWhitePromotion
+NoBlackPromotion
+EiffelChess
+ActuatedRevolvingCentre
+Maximummer <select{|Ultra}>
+UltraSchachZwang
+WhiteUltraSchachZwang
+BlackUltraSchachZwang
+ShieldedKings
+StingChess
+NoWhiteCapture
+NoBlackCapture
+AprilChess
+AlphabeticChess
+LineChameleonChess
+CirceTurncoats
+CirceDoubleAgents
+AMU
+SingleBox <select{|Type1|Type2|Type3}>
+MAFF
+OWU
+WhiteOscillatingKings <select{|TypeB|TypeC}>
+BlackOscillatingKings <select{|TypeB|TypeC}>
+AntiKings
+AntiMarsCirce
+AntiMarsMirrorCirce
+AntiMarsAntipodeanCirce
+WhiteSuperTransmutingKing
+BlackSuperTransmutingKing
+AntiSuperCirce
+UltraPatrol
+SwappingKings
+RoyalDynasty
+SAT
+StrictSAT
+Take&MakeChess
+BlackSynchronMover
+WhiteSynchronMover
+BlackAntiSynchronMover
+WhiteAntiSynchronMover
+Masand
+BGL
+AnnanChess
+NormalPawn
+BlackChecks
+GenevaChess <select{|RexInclusiv}>
+VaultingKings <str>
+WhiteVaultingKing
+BlackVaultingKing
+ProteanChess
+Lortap
+Antikoeko
+CastlingChess
+ChameleonPursuit
+LosingChess
+GhostChess
+CageCirce
+Football

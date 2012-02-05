@@ -1,0 +1,15 @@
+# -*- coding: utf-8 -*-
+version: 0.12.2b
+languages: {en: English, ru: Русский}
+default-lang: ru
+horsehead-glyph: N
+fairy-zoo:
+  - [white Le, white Pa, white Va, white Na, '', white G, white N]
+  - [black Le, black Pa, black Va, black Na, '', black G, black N]
+  - ['', '', '', '', '', neutral G, neutral N]
+auto-compactify: 1
+popeye-executable:
+  nt: PY459USR\pywin32.exe -maxmem 1G
+  posix: /home/dima/devel/popeye/4.59/py -maxmem 2G
+popeye-stop-max-bytes: 81920
+popeye-sticky-options: [Variation, NoBoard]

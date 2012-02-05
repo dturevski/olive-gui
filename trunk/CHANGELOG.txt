@@ -1,0 +1,7 @@
+version: current
+changes:
+  - Typo on the about screen
+---
+version: 0.12.2b
+changes:
+  - Basic functionality 

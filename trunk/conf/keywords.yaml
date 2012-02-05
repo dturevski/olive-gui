@@ -1,0 +1,308 @@
+Soundness: 
+  - Cooked
+  - Unsound
+  - Shortmate
+Key: 
+  - Checking key
+  - Flight giving key
+  - Flight taking key
+  - Flight giving and taking key
+  - 2 flights giving key
+  - 3+ flights giving key
+Line effects: 
+  - Barulin (A)
+  - Somov (B1)
+  - B2
+  - Isaev
+  - Levman
+Pins & unpins: 
+  - Pinning
+  - Indirect pinning
+  - Selfpinning
+  - Indirect selfpinning
+  - Unpinning
+  - Indirect unpinning
+  - Half-pin
+  - Third-pin
+  - Fourth-pin
+  - Pelle move
+  - Schiffmann
+  - Nietvelt
+Playing on specific squares: 
+  - King star flight
+  - King Y-flight
+  - BK star
+  - WK star
+  - BB star
+  - WB star
+  - BQ star
+  - WQ star
+  - BK cross
+  - WK cross
+  - BR cross
+  - WR cross
+  - BQ cross
+  - WQ cross
+  - BS wheel
+  - WS wheel
+  - Pickaninny
+  - Albino
+  - Play on same square
+  - Mates on same square
+  - Defences on same square
+  - Defences on the threat square
+  - Rovno
+  - Umnov
+  - Loshinski magnet
+  - Keller paradox
+  - Corner to corner
+  - Four corners
+  - Platzwechsel
+  - Asymmetrical solution
+Changed play: 
+  - Changed mates
+  - Mutate
+  - Reciprocal
+  - Lacny
+  - Lacny 4-fold
+  - Lacny 5-fold
+  - Transferred mates
+  - Rukhlis
+  - Ideal Rukhlis
+Single phase: 
+  - Fleck
+  - Karlstrom-Fleck
+Two phase: 
+  - Reversal
+  - Threat reversal
+  - Anti-reversal
+  - Threat anti-reversal
+  - Le Grand
+  - Pseudo Le Grand
+  - Shedey cycle
+  - Erokhin
+  - Kiss cycle
+  - Lender combination
+  - Jurasevic cycle
+  - Pseudo Jurasevic cycle
+  - Rudenko
+Multiphase: 
+  - Barnes
+  - Urania
+  - Banny
+  - Vladimirov
+  - Ukrainian
+  - Ukrainian 4-fold
+  - Ukrainian 5-fold
+  - Zagoruiko
+  - Dombrovskis
+  - Hannelius
+  - Stocchi
+  - Banny cycle
+  - Complete Lacny
+  - Complete Shedey cycle
+  - Rice cycle 4-fold
+  - Rice cycle
+  - Shedey cycle 4-fold
+Maneuvers: 
+  - Rundlauf
+  - Switchback
+  - Ambush
+  - Zigzag
+  - Snake
+  - Pendulum maneuver
+  - Staircase
+  - Reti maneuver
+  - Herlin maneuver
+  - Systematic movement
+  - Critical move
+  - Anti-critical move
+  - Bristol
+  - Anti-Bristol
+  - Indian
+  - Doubling
+  - Turton doubling
+  - Zepler doubling
+  - Loyd clearance
+  - Loyd-Turton
+  - Brunner-Turton
+  - Cheney-Loyd
+Correction: 
+  - Black correction
+  - Secondary black correction
+  - Tertiary black correction
+  - 4th degree black correction
+  - 5th degree black correction
+  - White correction
+  - Secondary white correction
+  - Tertiary white correction
+  - 4th degree white correction
+  - 5th degree white correction
+  - Arrival correction
+Misc/Unsorted: 
+  - No pawns
+  - Block
+  - Valladao
+  - Dual avoidance
+  - White combinations
+  - Domination
+  - Focal
+  - Annihilation
+  - Castling
+  - Grotesque
+  - White minimal
+  - Duel
+  - Task
+  - Perpetuum mobile
+  - American Indian
+  - Oneliner
+  - Christmas tree
+  - ODT
+  - Zilahi
+  - Cyclic Zilahi
+Retrograde analysis: 
+  - Retro
+  - Cantcastler
+  - Ceriani-Frolkin
+  - pRA
+Checks: 
+  - Provoked check
+  - Cross-checks
+  - |
+    Check - Non-check
+  - Half check
+  - Perpetual check
+Tempo: 
+  - Tempo move
+  - Tempo duel
+  - Win of tempo
+  - Loss of tempo
+  - Pseudo-twomover
+Pawns: 
+  - En passant
+  - Promotion
+  - White underpromotion
+  - Black underpromotion
+  - Excelsior
+  - Allumwandlung
+  - Babson
+  - Holst
+  - Phoenix
+Logical: 
+  - Logical problem
+  - Roman theme
+  - Anti-Roman defence
+  - Dresden theme
+  - Anti-Dresden defence
+  - Hamburg theme
+  - Elbe theme
+  - Swiss theme
+  - Berlin theme
+  - Munich theme
+Sacrifice: 
+  - Active sacrifice
+  - Passive sacrifice
+  - Clearance sacrifice
+  - Sequential sacrifice of different units
+  - Multiple sacrifice of a single unit
+Batteries: 
+  - Battery play
+  - Half-battery
+  - Third-battery
+  - Siers battery
+  - Popandopulo batteries
+  - Mansfield battery
+  - Rehm device
+  - Two step battery
+  - Battery creation
+  - Battery destruction
+  - Indirect battery
+  - Anti-battery
+Decoy & Deflect: 
+  - Decoy
+  - Deflect
+  - Incarceration
+  - Mousetrap
+  - Seeberger
+Selfblocks & unblocks: 
+  - Selfblock
+  - Remote selfblock
+  - Mutual block
+  - 3-fold cyclic block
+  - 4-fold cyclic block
+  - Unblock
+  - Remote unblock
+  - Stocchi blocks
+  - Bikos
+Interference: 
+  - Grimshaw
+  - Novotny
+  - Latvian Novotny
+  - Azerbaijani Novotny
+  - Finnish Novotny
+  - Romanian Novotny
+  - English Novotny
+  - Perfect Novotny
+  - Sequential Novotny
+  - Holzhausen
+  - Plachutta
+  - Wurzburg-Plachutta
+  - Organ pipes
+  - Pickabish
+  - Masked interference
+  - Double interference
+  - Anticipatory interference
+  - Interference through the BK
+  - Valve
+  - Bi-valve
+  - Gamage
+  - Goethart
+  - Anti-Goethart
+Model mates: 
+  - Model mates
+  - Ideal mates
+  - Echo mates
+  - Chameleon echo mates
+  - Octet
+  - Models with pin
+  - Models with two pins
+  - Models with three pins
+  - Changed model mates
+  - Bohemian task
+  - New Bohemian school
+  - Vienna school
+Checkmate patterns: 
+  - Anastasia's mate
+  - Anderssen's mate
+  - Arabian mate
+  - Back-rank mate
+  - Bishop and knight checkmate
+  - Blackburne's mate
+  - Box mate
+  - Corner mate
+  - Cozio's mate
+  - Damiano's bishop mate
+  - Damiano's mate
+  - David and Goliath mate
+  - Double bishop mate
+  - Dovetail mate
+  - Epaulette mate
+  - Greco's mate
+  - h-file mate
+  - Hook mate
+  - King and two bishops checkmate
+  - King and two knights checkmate
+  - Lolli's mate
+  - Max Lange's mate
+  - Morphy's mate
+  - Opera mate
+  - Pillsbury's mate
+  - Queen mate
+  - Reti's mate
+  - Smothered mate
+  - Suffocation mate
+  - Swallow's tail mate
+System: 
+  - Attention
+  - To delete
+  - Locked

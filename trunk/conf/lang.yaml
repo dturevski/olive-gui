@@ -1,0 +1,279 @@
+# common
+CO_OK:
+  en: OK
+  ru: OK
+CO_Cancel:
+  en: Cancel
+  ru: Отмена
+CO_Yes:
+  en: "Yes"
+  ru: Да
+CO_No:
+  en: "No"
+  ru: Нет
+
+# tab captions
+TC_Info:
+  en: Info
+  ru: О композиции
+TC_Pieces:
+  en: Pieces
+  ru: Фигуры
+TC_Pieces_Ortho:
+  en: Orthodox
+  ru: Обычные
+TC_Pieces_Fairy:
+  en: Fairy
+  ru: Сказочные
+TC_Edit:
+  en: Metadata
+  ru: Метаданные
+TC_Solution:
+  en: Solution
+  ru: Решение
+TC_Popeye:
+  en: Popeye
+  ru: Popeye
+TC_YAML:
+  en: YAML
+  ru: YAML
+
+# window titles
+WT_New_Collection:
+  en: New collection
+  ru: Новая коллекция
+WT_Saved:
+  en: Saved
+  ru: Сохранено
+WT_Not_saved:
+  en: Not saved
+  ru: Не сохранено
+
+# menu items
+MI_File:
+  en: File
+  ru: Файл
+MI_New:
+  en: New collection
+  ru: Новая коллекция
+MI_Open:
+  en: Open collection
+  ru: Открыть коллекцию
+MI_Save:
+  en: Save collection
+  ru: Сохранить коллекцию
+MI_Save_as:
+  en: Save collection as
+  ru: Сохранить коллекцию как
+MI_Language:
+  en: Change language
+  ru: Сменить язык
+MI_Exit:
+  en: Exit
+  ru: Выйти
+MI_Edit:
+  en: Edit
+  ru: Правка
+MI_Add_entry:
+  en: Add new entry
+  ru: Добавить новую композицию
+MI_Delete_entry:
+  en: Delete current entry
+  ru: Удалить текущую композицию
+MI_Fairy_pieces:
+  en: Fairy pieces
+  ru: Сказочные фигуры
+MI_Delete_piece:
+  en: Delete piece
+  ru: Удалить фигуру
+MI_Delete_all_pieces:
+  en: Delete all pieces
+  ru: Удалить все фигуры
+MI_Add_piece:
+  en: Add piece
+  ru: Добавить фигуру
+MI_Run_Popeye:
+  en: Run Popeye
+  ru: Запустить Popeye
+MI_Stop_Popeye:
+  en: Terminate Popeye
+  ru: Остановить Popeye
+MI_Options:
+  en: Options and conditions
+  ru: Опции и сказочные условия
+MI_Twins:
+  en: Twins
+  ru: Близнецы
+MI_Shift_up:
+  en: Shift position up
+  ru: Сдвинуть позицию вверх
+MI_Shift_down:
+  en: Shift position down
+  ru: Сдвинуть позицию вниз
+MI_Shift_left:
+  en: Shift position left
+  ru: Сдвинуть позицию влево
+MI_Shift_right:
+  en: Shift position right
+  ru: Сдвинуть позицию вправо
+MI_Rotate_CCW:
+  en: Rotate position 90° counterclockwise
+  ru: Повернуть позицию на 90° против часовой стрелки
+MI_Rotate_CW:
+  en: Rotate position 90° clockwise
+  ru: Повернуть позицию на 90° по часовой стрелке
+MI_Mirror_vertical:
+  en: Mirror position vertically
+  ru: Отразить позицию относительно вертикальной оси
+MI_Mirror_horizontal:
+  en: Mirror position horizontally
+  ru: Отразить позицию относительно горизонтальной оси
+MI_Clear:
+  en: Clear board
+  ru: Очистить доску
+MI_Popeye:
+  en: Popeye
+  ru: Popeye
+MI_Help:
+  en: Help
+  ru: Справка
+MI_About:
+  en: About
+  ru: О программе
+MI_Add_keyword:
+  en: Add keyword
+  ru: Добавить ключевое слово
+MI_Import:
+  en: Import
+  ru: Импорт
+MI_Export:
+  en: Export
+  ru: Экспорт
+MI_Import_PBM:
+  en: Problemist(e) .PBM
+  ru: Problemist(e) .PBM
+MI_Export_HTML:
+  en: HTML
+  ru: HTML
+MI_Export_PDF:
+  en: PDF
+  ru: PDF
+
+# Piece properties
+PP_Color:
+  en: "Color:"
+  ru: "Цвет:"
+PP_Type:
+  en: "Type:"
+  ru: "Тип:"
+PP_Fairy_properties:
+  en: "Fairy properties:"
+  ru: "Сказочные свойства:"
+
+
+# entry properties
+EP_Authors:
+  en: Authors
+  ru: Авторы
+EP_Source:
+  en: Source
+  ru: Место публикации
+EP_Date:
+  en: Date
+  ru: Дата
+EP_Distinction:
+  en: Distinction
+  ru: Отличие
+EP_Stipulation:
+  en: Stipulation
+  ru: Задание
+EP_Pieces_count:
+  en: Pieces count
+  ru: Количество фигур
+EP_Intended_solutions:
+  en: Intended solutions
+  ru: Количество решений
+EP_Intended_solutions_shortened:
+  en: Sol.
+  ru: Реш.
+
+# EE labels
+EE_Authors_memo:
+  en: <b>Lastname,&nbsp;Firstname</b> each with a newline
+  ru: <b>Фамилия,&nbsp;Имя&nbsp;Отчество</b> каждого с новой строки
+EE_Source_memo:
+  en: "Torney, Magazine / issue # / problem #"
+  ru: Конкурс, Журнал / № журнала / № задачи
+EE_Date_memo:
+  en: Year / Month / Day
+  ru: Год / Месяц / День
+EE_Popeye:
+  en: Options
+  ru: Опции
+EE_Popeye_memo:
+  en: Popeye <i>Options</i> and <i>Conditions</i> fields; each with a newline
+  ru: Директивы Popeye <i>Options</i> и <i>Conditions</i>; каждую с новой строки
+EE_Twins:
+  en: Twins
+  ru: Близнецы
+EE_Twins_memo:
+  en: YACPDB format
+  ru: В формате YACPDB
+
+# Popeye screen
+PS_SStipulation:
+  en: SStipulation
+  ru: SStipulation
+PS_Compact:
+  en: Short notation
+  ru: Сокр. нотация
+PS_Original_output:
+  en: Original notation
+  ru: Ориг. нотация
+PS_Tch:
+  en: tch
+  ru: tch
+PS_Tch_settings:
+  en: tch settings
+  ru: Настройки tch
+PS_Options:
+  en: Options
+  ru: Опции
+PS_Twins:
+  en: Twins
+  ru: Близнецы
+PS_Edit:
+  en: Edit solution
+  ru: Редактировать решение 
+
+# Solution screen
+SS_Solution:
+  en: "Solution:"
+  ru: "Решение:"
+SS_Keywords:
+  en: "Keywords:"
+  ru: "Ключевые слова:"
+SS_Comments:
+  en: "Comments:"
+  ru: "Комментарии:"
+
+  
+# messages
+MSG_Terminated:
+  en: Terminated
+  ru: Остановлено
+MSG_Not_saved:
+  en: Open collection contains unsaved changes. Would you like to save it?
+  ru: Открытая коллекция содержит несохраненные изменения. Сохранить?
+MSG_Popeye_failed:
+  en: Failed to run popeye executable (%s)
+  ru: Не удалось запустить исполняемый файл popeye (%s)
+MSG_YAML_failed:
+  en: Failed to parse YAML data (%s)
+  ru: Ошибка парсинга YAML (%s)
+MSG_IO_failed:
+  en: I/O error
+  ru: Ошибка ввода-вывода
+MSG_PBM_import_failed:
+  en: Failed to read Problemiste format
+  ru: Ошибка при чтении формата Problemist

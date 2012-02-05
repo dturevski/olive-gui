@@ -1,0 +1,31 @@
+Try
+Defence <int>
+SetPlay
+Threat <int>
+WhiteToPlay
+Variation
+MoveNumbers
+StartMoveNumber <int>
+NoWk
+NoBk
+Duplex
+NoThreat
+MaxSolutions <int>
+MaxFlightsquares <int>
+EnPassant <str>
+CastlingMutuallyExclusive <str>
+NoBoard
+NoShortVariations
+HalfDuplex
+PostKeyPlay
+NonTrivial <int> <int>
+Intelligent <int>
+MaxTime <int>
+NoCastling <str>
+Quodlibet
+StopOnShortSolutions
+Beep
+SuppressGrid
+WriteGrid
+KeepMatingPiece
+LastCapture <str>

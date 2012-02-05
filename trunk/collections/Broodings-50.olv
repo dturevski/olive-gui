@@ -1,0 +1,197 @@
+---
+algebraic:
+  black: [Kc5, Pc4, Pd6, Pg7, Pf6, Pg5, Rg4, Rh4, Bh3, Pg2, Pe3, Pb2, Sb1, Qa2]
+  white: [Pg6, Be6, Kf5, Pd2, Ba3, Sb4, Sc6, Qb7, Ra7]
+authors: ['Јаневски, Живко']
+comments: [!!python/unicode 'White battery destruction; black arrival correction on
+    a3, a great selfmate to solve! [CJF]']
+date: 2009-02
+keywords: [Battery destruction, Arrival correction]
+options: []
+solution: !!python/unicode "1.Ra6 ! (2.Qa7+ Kb5 3.Sd4+ Rxd4#)\n  1...Qxa3 2.d4+ c4xd3\
+  \ ep. 3.Sxd3+ Qxd3#\n  1...Sxa3 2.Sd3+ cxd3 3.Qb4+ Rxb4#\n  1...d5 2.Qe7+ Kb5 3.Sd4+\
+  \ Rxd4#"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/1'
+stipulation: s#3
+---
+algebraic:
+  black: [Ke3, Sd1, Rb1, Pb2, Pd2, Pd3, Sf8, Ph5, Pg6, Bf5]
+  white: [Kf1, Bg2, Sb5, Rd7, Se6, Qf7]
+authors: [!!python/unicode 'Chlubna, Friedrich']
+comments: [!!python/unicode 'Broodings (50/2)', !!python/unicode 'Lucid logic; FC
+    had to be here. [CJF]']
+date: '1995'
+options: []
+solution: '1.Sc3? Bxc3? 2.Qf2!
+
+  but 1…Sf2!
+
+
+  1.Rd5! (2.Re5)
+
+  1…Bh4 2.Qf2 Bxf2 3.Sc3 Be1 4.Sxd1 Rxd1 5.Rh5 ~ 6.Rh3.'
+source: !!python/unicode 'Sinfonie Scacchistiche'
+stipulation: s#6
+---
+algebraic:
+  black: [Qg4, Pf3, Pf4, Pf6, Pe5, Pd2, Kc3, Pb2, Rb3, Rb4, Pa5, Pb6]
+  white: [Pf5, Pe4, Bc5, Sd4, Bb1, Ka6]
+authors: ['Müller, Dieter', !!python/unicode 'Wiehagen, Rolf']
+comments: [!!python/unicode 'Fourfold Zilahi, models and WB/WS sacrifices, passive
+    & active! [CJF]']
+date: 2009-02
+keywords: [Zilahi, Model mates]
+options: []
+solution: !!python/unicode "a) \n  1.Rb4-c4 Bc5-b4 +   2.a5*b4 Sd4-b5 # \n\nb) bRb4-->f3\n\
+  \  1.b6*c5 Ka6*a5   2.c5-c4 Sd4-e2 # \n\n+c) bKc3<-->bPf4\n  1.e5*d4 Bc5*b6   2.Kf4-e5\
+  \ Bb6-c7 # \n\n+d) bPd2<-->wPe4\n  1.Rf3-g3 Sd4-f3   2.e4*f3 Bc5-e3 #"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/3'
+stipulation: h#2
+twins: {b: Move b4 f3, c: Continued Exchange c3 f4, d: Continued Exchange d2 e4}
+---
+algebraic:
+  black: [Ph5, Sa5, Rh6, Ke6, Ph7, Rb7, Qf8, Bd8]
+  white: [Re2, Pd3, Pf4, Be4, Be5, Ka6]
+authors: ['Abdurahmanović, Fadil']
+comments: [!!python/unicode 'Beautiful. [CJF]']
+date: 2009-02
+intended-solutions: '4'
+keywords: [Indian, HOTF]
+options: []
+solution: !!python/unicode "1...Be5-a1   2.Qf8*f4 Re2-b2   3.Ke6-e5 + Rb2-b6 # \n\
+  1...Be5-h8   2.Bd8-f6 f4-f5 +   3.Ke6-f7 Be4-d5 # \n1...Be4-h1   2.Qf8-c5 Re2-g2\
+  \   3.Ke6-d5 + Rg2-g6 # \n1...Re2-g2   2.Bd8-b6 Be4-d5 +   3.Ke6-f5 Rg2-g5 #"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/4'
+stipulation: h#2.5
+---
+algebraic:
+  black: [Pe4, Kg2, Rb1, Pe5, Pf5, Ph3]
+  white: [Rd7, Ba6, Kg8, Pe3, Pd2]
+authors: [!!python/unicode 'Jonsson, Bernt Christer']
+comments: [!!python/unicode 'Elegant Zilahi [CJF]']
+date: 2009-02
+intended-solutions: '2'
+keywords: [Zilahi]
+options: []
+solution: !!python/unicode "1.Rg1 Bf1+ 2.Kh1+ Bg2+ 3.hxg2 Rh7# \n1.Kf3 Rd3 2.exd3\
+  \ Bb5 3.Ke4 Bc6#"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/5'
+stipulation: h#3
+---
+algebraic:
+  black: [Sc1, Qg3, Rh3, Ph2, Rg2, Pc2, Pc4, Ka4, Bd5, Pc6, Bb8]
+  white: [Rb2, Kh1]
+authors: [!!python/unicode 'Macleod, Norman Alasdair']
+comments: [!!python/unicode 'version of P0522194 by CJF', 'I know Norman wanted a
+    longer setting, but was this it…? [CJF]']
+date: 2009-02
+keywords: [Switchback, Tempo move, Selfblock]
+options: []
+solution: !!python/unicode '1.Qg3-b3 Rb2-b1   2.Qb3-b5 Rb1-b2   3.Rh3-b3 Rb2-b1   4.Rb3-b4
+  Rb1-b2   5.Sc1-b3 Rb2-a2 #'
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/6'
+stipulation: h#5
+---
+algebraic:
+  black: [Sd3, Gb4, Pc6, Pd6, Pe5, Kg7, Nb7]
+  white: [Ka1, Pg3, Pg4, Pg5, Bg6, Rh8, Pe7]
+authors: [!!python/unicode 'Wenda, Klaus']
+comments: [!!python/unicode 'Fleck with rebirth clash on g8 and g1. Repays close study!
+    [CJF]']
+date: 2009-02
+keywords: [Fleck]
+options: [Defence 1, AntiCirce Cheylan]
+solution: !!python/unicode "1.e7-e8=S/N+ ?\nbut\n  1...Kg7-f8 !\n\n1.Ka1-b1 ? threat:\
+  \ 2.Rh8-g8/e7-e8=S/e7-e8=N #\n  1...Sd3-f2 2.e7-e8=S #\n  1...Nb7-c5 2.e7-e8=N #\n\
+  \  1...Sd3-f4 2.Rh8-g8 #\nbut\n  1...Gb4*e7[bGe7->e1] !\n\n1.Ka1-a2 !threat: 2.Rh8-g8/e7-e8=S/e7-e8=N\
+  \ #\n  1...Sd3-f2 2.e7-e8=S #\n  1...Nb7-c5 2.e7-e8=N #\n  1...Sd3-f4 2.Rh8-g8 #\n\
+  \  1...Gb4*e7[bGe7->e1] 2.Rh8-g8 #\n  1...Sd3-c1 + 2.Rh8-g8 #"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/7'
+stipulation: '#2'
+---
+algebraic:
+  black: [Sc8, Bh8, Rg8, Pg5, Pg3, Ph2, Pc7, Pc5, Pc3, Sa3, Ba2, Rh1, Kg1]
+  white: [Kh5, Qf7, Pg2, Pc2, Rb1, Ne1, Nf1]
+authors: [!!python/unicode 'Rice, John Michael']
+comments: [!!python/unicode 'Characteristic halfbattery with clarity of conception
+    and execution. [CJF]']
+date: 2009-02
+keywords: [Half-battery, Changed mates, Black correction]
+options: [Defence 1, AntiCirce]
+solution: !!python/unicode "1.Nd3? (>2.Nf~)\n  1... Sc~ 2.Nxc7(Nc8)#\n  1... R~ 2.Nxg3(Ng8)#\n\
+  but\n  1... Re8!\n\n1.Nf~? (>2.Nd3)\nbut\n  1... Rd8!\n\n1.Nd2!? (>2.Nd3)\nbut\n\
+  \  1... cxd2(Pd7)!\n\n1.Nd5! (>2.Nd3)\n1... Sc~ 2.Nxc5(Nc8)#\n1... R~ 2.Nxg5(Ng8)#\n\
+  1... Re8 2.Qf1#"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/8'
+stipulation: '#2'
+---
+algebraic:
+  black: [Pc7, Rf7, Bg5, Kb4, Pe3]
+  white: [PAe4, Pc6, Qe5, Pb3, Ka2, VAd6]
+authors: [!!python/unicode 'Mcdowell, Michael', !!python/unicode 'Stephenson, Brian
+    David']
+comments: [!!python/unicode 'A witty idea in perfect construction, from my old BCM
+    solvers.[CJF]']
+date: 2009-02
+intended-solutions: '2'
+options: []
+solution: !!python/unicode "1.Bg5-e7 PAe4*e7   2.Rf7-f8 VAd6*f8 # \n1.Rf7-f4 VAd6*f4\
+  \   2.Bg5-h4 PAe4*h4 #"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/9'
+stipulation: h#2
+---
+algebraic:
+  black: [Kd2, Re7, Pc7, Pb5, EHa5, EHa6, EHc8, EHe8, EHg4, EHh2, LEb2]
+  white: [Kf6, Pd6, EHa2]
+authors: [!!python/unicode 'Feather, Christopher John']
+comments: [!!python/unicode 'J.E.Driver in memoriam', !!python/unicode 'John, the
+    inventor of the edgehog, was the nicest man I ever met.[CJF]']
+date: 2009-02
+intended-solutions: '3'
+keywords: [Model mates, Chameleon echo mates, Indirect unpinning, Promotion]
+options: []
+solution: !!python/unicode "1.EHa5-b6 d6-d7   2.Kd2-d1 d7-d8=EH   3.LEb2-e2 EHd8-d2\
+  \ # \n1.EHc8-e6 d6*c7   2.Kd2-c1 c7-c8=EH   3.LEb2-d2 EHc8-c2 # \n1.EHe8-c6 d6*e7\
+  \   2.Kd2-e1 e7-e8=EH   3.LEb2-f2 EHe8-e2 #"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/10'
+stipulation: h#3
+---
+algebraic:
+  black: [Sf3, LEf8, Lh8, Kd1, Pf4]
+  white: [LEa1, Kg8, LEh1, Ra2]
+authors: ['Петков, Петко Андонов']
+comments: [!!python/unicode 'Reciprocal white leobatteries, and transformation of
+    black leo/locust battery into new batteries, from the fairy Mozart. [CJF]']
+date: 2009-02
+intended-solutions: '2'
+keywords: [Anti-battery]
+options: []
+solution: !!python/unicode "1.LEh1-h7 LEf8-f6+ 2.Kg8-g7 Sf3-e5 3.LEh7-b1+ LEf6*a1\
+  \ # \n1.LEa1-d4 LEf8-h6+ 2.Kg8-h7 Sf3-h4 3.LEd4-g1+ LEh6*h1 #"
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/11'
+stipulation: hs#3
+---
+algebraic:
+  black: [Bg5, Pe6, Pg7, Re7, Kg8]
+  white: [Pe2, Ph4, Pf4, Rg6, Rd7, Kd8]
+authors: ['Bakcsi, György', 'Laborczi, Zoltán']
+comments: ['Hungarian humour! The Mirror Circe effects all lie in what cannot happen
+    in the final position. Studying György’s works (can it really be about 40 years
+    ago?) was what taught me how to compose.[CJF]']
+date: 2009-02
+options: [MirrorCirce]
+solution: !!python/unicode '1.Re7-f7 + Rd7-e7   2.Rf7-f5 Rg6-h6   3.Rf5-f6 Re7*e6   4.Rf6-g6
+  + Re6-f6 ='
+source: !!python/unicode 'Broodings'
+source-id: !!python/unicode '50/12'
+stipulation: h=4
