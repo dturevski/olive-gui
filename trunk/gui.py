@@ -463,7 +463,7 @@ class AboutDialog(QtGui.QDialog):
         vbox.addWidget(lblLogo, QtCore.Qt.AlignCenter)
         vbox.addWidget(QtGui.QLabel('olive v'+Conf.value('version') + ' is free software licensed under GNU GPL'))
         vbox.addWidget(QtGui.QLabel('&copy; 2011-2012 Dmitri Turevski &lt;<a href="mailto:dmitri.turevski@gmail.com">dmitri.turevski@gmail.com</a>&gt;'))
-        vbox.addWidget(QtGui.QLabel('For more information please visit <a href="http://www.yacpdb.org/olive/">http://www.yacpdb.org/olive/</a>'))
+        vbox.addWidget(QtGui.QLabel('For more information please visit <a href="http://code.google.com/p/olive-gui/">http://code.google.com/p/olive-gui/</a>'))
 
         vbox.addStretch(1)
         buttonOk = QtGui.QPushButton(Lang.value('CO_OK'), self)
