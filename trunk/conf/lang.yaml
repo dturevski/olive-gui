@@ -199,8 +199,8 @@ EP_Intended_solutions_shortened:
 
 # EE labels
 EE_Authors_memo:
-  en: <b>Lastname,&nbsp;Firstname</b> each with a newline
-  ru: <b>Фамилия,&nbsp;Имя&nbsp;Отчество</b> каждого с новой строки
+  en: <b>Lastname,&nbsp;Firstname</b><br/>each with a newline
+  ru: <b>Фамилия,&nbsp;Имя&nbsp;Отчество</b><br/>каждого с новой строки
 EE_Source_memo:
   en: "Torney, Magazine / issue # / problem #"
   ru: Конкурс, Журнал / № журнала / № задачи

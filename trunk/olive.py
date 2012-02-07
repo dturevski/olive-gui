@@ -7,7 +7,7 @@ Usage:
 """
 
 import sys
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 import gui
 
 def main():
@@ -17,8 +17,12 @@ def main():
 
     # Qt bootstrap
     app = QtGui.QApplication(sys.argv)
+    
+    QtCore.QCoreApplication.setOrganizationName("OSS");
+    QtCore.QCoreApplication.setOrganizationDomain("yacpdb.org");
+    QtCore.QCoreApplication.setApplicationName("olive");
 
-    # loading fonts 
+     # loading fonts 
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004d_.ttf')
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004x_.ttf')
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004y_.ttf')

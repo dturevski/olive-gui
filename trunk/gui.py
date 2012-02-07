@@ -5,6 +5,7 @@ import yaml, os, os.path, tempfile, copy, PyQt4
 import legacy.popeye, legacy.chess
 import options, model, pbm
 
+import ctypes
 
 class SigWrapper(QtCore.QObject):
     sigLangChanged = QtCore.pyqtSignal() 
@@ -182,6 +183,7 @@ class Mainframe(QtGui.QMainWindow):
         
         # Toolbars
         self.toolbar = self.addToolBar('')
+        self.toolbar.setObjectName('thetoolbar')
         map(self.toolbar.addAction, [self.newAction, self.openAction, self.saveAction])
         self.toolbar.addSeparator()
         map(self.toolbar.addAction, [self.addEntryAction, self.deleteEntryAction])
@@ -205,9 +207,17 @@ class Mainframe(QtGui.QMainWindow):
         Mainframe.sigWrapper.sigFocusOnSolution.connect(self.onFocusOnSolution)
         
         self.setWindowIcon(QtGui.QIcon('resources/icons/olive.ico'))
-        
-        # todo: save geometry on exit and restore here
-        #self.setGeometry(0, 0, self.sizeHint().width(), self.sizeHint().height())
+        if 'nt' == os.name:
+            myappid = 'com.google.code.olive-gui.' + Conf.value('version')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+        settings = QtCore.QSettings()
+        settings.clear()
+        if len(settings.value("geometry").toByteArray()):
+            self.restoreGeometry(settings.value("geometry").toByteArray());
+            self.restoreState(settings.value("windowState").toByteArray());
+        else:
+            self.setGeometry(32, 32, 32, 32)
         self.show()
     
     def updateTitle(self): 
@@ -276,7 +286,6 @@ class Mainframe(QtGui.QMainWindow):
         # window title
         self.updateTitle()
         Conf.values['default-lang'] = Lang.current
-        Conf.write()
         
     def onNewFile(self):
         if not self.doDirtyCheck():
@@ -451,19 +460,36 @@ class Mainframe(QtGui.QMainWindow):
             Mainframe.model.onBoardChanged()
             Mainframe.sigWrapper.sigModelChanged.emit()
         return callable
+        
+    def closeEvent(self, event):
+        if not self.doDirtyCheck():
+            event.ignore()
+        settings = QtCore.QSettings();
+        settings.setValue("geometry", self.saveGeometry());
+        settings.setValue("windowState", self.saveState());
 
+        self.chessBox.sync()
+        Conf.write()
+        event.accept()            
+
+class ClickableLabel(QtGui.QLabel):
+    def __init__(self, str):
+        super(ClickableLabel, self).__init__(str)
+        self.setOpenExternalLinks(True)
+        
 class AboutDialog(QtGui.QDialog):                
     def __init__(self):
         super(AboutDialog, self).__init__()
+        self.setAutoFillBackground(True)
         self.setBackgroundRole(QtGui.QPalette.Light)
         vbox = QtGui.QVBoxLayout()
         lblLogo = QtGui.QLabel()
         iconLogo = QtGui.QIcon('resources/icons/olive-logo.png')
         lblLogo.setPixmap(iconLogo.pixmap(331, 139))
         vbox.addWidget(lblLogo, QtCore.Qt.AlignCenter)
-        vbox.addWidget(QtGui.QLabel('olive v'+Conf.value('version') + ' is free software licensed under GNU GPL'))
-        vbox.addWidget(QtGui.QLabel('&copy; 2011-2012 Dmitri Turevski &lt;<a href="mailto:dmitri.turevski@gmail.com">dmitri.turevski@gmail.com</a>&gt;'))
-        vbox.addWidget(QtGui.QLabel('For more information please visit <a href="http://code.google.com/p/olive-gui/">http://code.google.com/p/olive-gui/</a>'))
+        vbox.addWidget(ClickableLabel('olive v'+Conf.value('version') + ' is free software licensed under GNU GPL'))
+        vbox.addWidget(ClickableLabel('&copy; 2011-2012 Dmitri Turevski &lt;<a href="mailto:dmitri.turevski@gmail.com">dmitri.turevski@gmail.com</a>&gt;'))
+        vbox.addWidget(ClickableLabel('For more information please visit <a href="http://code.google.com/p/olive-gui/">http://code.google.com/p/olive-gui/</a>'))
 
         vbox.addStretch(1)
         buttonOk = QtGui.QPushButton(Lang.value('CO_OK'), self)
@@ -535,8 +561,11 @@ class FenView(QtGui.QLineEdit):
         self.skip_model_changed = False
         
 class OverviewList(QtGui.QTreeWidget):
+
     def __init__(self):
         super(OverviewList, self).__init__()
+        self.setAlternatingRowColors(True)
+        
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         self.currentItemChanged.connect(self.onCurrentItemChanged)
@@ -727,13 +756,11 @@ class ChessBoxItemManagable(ChessBoxItem):
         
     def remove(self):
         self.changePiece(None)
-        self.manager.sync()
         
     def choose(self):
         dialog = AddFairyPieceDialog(Lang)
         if(dialog.exec_()):
             self.changePiece(dialog.getPiece())
-            self.manager.sync()
 
 class BoardView(QtGui.QWidget):
     def __init__(self):
@@ -927,7 +954,6 @@ class ChessBox(QtGui.QWidget):
         for item in self.items:
             if not item.piece is None:
                 item.changePiece(None)
-        self.sync()
                 
     def sync(self):
         zoo = Conf.value('fairy-zoo')
@@ -937,7 +963,7 @@ class ChessBox(QtGui.QWidget):
                     zoo[i][j] = self.items[i*ChessBox.cols + j].piece.serialize()
                 else:
                     zoo[i][j] = ''
-        Conf.write()
+        
                 
 class AddFairyPieceDialog(options.OkCancelDialog):
     def __init__(self, Lang):
@@ -977,8 +1003,7 @@ class EasyEditView(QtGui.QWidget):
         super(EasyEditView, self).__init__()
         grid = QtGui.QGridLayout()
         # authors
-        self.labelAuthors = QtGui.QLabel('<a href="#">' + Lang.value('EP_Authors') + '</a>:')
-        self.labelAuthors.setToolTip(Lang.value('EE_Authors_memo'))
+        self.labelAuthors = QtGui.QLabel(Lang.value('EP_Authors')+':<br/><br/>'+ Lang.value('EE_Authors_memo'))
         self.inputAuthors = QtGui.QTextEdit()
         grid.addWidget(self.labelAuthors, 0, 0)
         grid.addWidget(self.inputAuthors, 0, 1)
@@ -1107,7 +1132,7 @@ class EasyEditView(QtGui.QWidget):
         self.skip_model_changed = False
         
     def onLangChanged(self):
-        self.labelAuthors.setText('<a href="#">' + Lang.value('EP_Authors') + '</a>:')
+        self.labelAuthors.setText(Lang.value('EP_Authors')+':<br/><br/>'+ Lang.value('EE_Authors_memo'))
         self.labelAuthors.setToolTip(Lang.value('EE_Authors_memo'))
         self.labelSource.setText(Lang.value('EP_Source') + ':')
         self.memoSource.setText(Lang.value('EE_Source_memo'))

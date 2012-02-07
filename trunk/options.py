@@ -151,12 +151,20 @@ class TwinsInputWidget(QtGui.QTextEdit):
         menu = self.createStandardContextMenu()
         menu.addSeparator()
         twins = self.getTwins()
-        next_letter = 'b'
         if len(twins):
             next_letter = chr(ord(sorted(twins.keys())[-1]) + 1)
-        for t in TwinsInputWidget.twinsExamples:
-            command = next_letter + ': ' + t
-            menu.addAction(command, self.createCallable(command))
+            continuedMenu = menu.addMenu(next_letter + ': Continued')
+            for t in TwinsInputWidget.twinsExamples:
+                command = next_letter + ': ' + t
+                c_command = next_letter + ': Continued ' + t
+                menu.addAction(command, self.createCallable(command))
+                continuedMenu.addAction(c_command, self.createCallable(c_command))
+        else:
+            for next_letter in ['a', 'b']:
+                submenu = menu.addMenu(next_letter + ': ')
+                for t in TwinsInputWidget.twinsExamples:
+                    command = next_letter + ': ' + t
+                    submenu.addAction(command, self.createCallable(command))
         menu.exec_(e.globalPos())
     def getTwins(self):
         twins = {}

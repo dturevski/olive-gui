@@ -1,6 +1,10 @@
 version: current
 changes:
   - about screen changed
+  - alternating backgrounds in overview
+  - fixed icon issues for Windows 7
+  - exit handler (unsaved changes, windows geometry etc)
+  - Twins dialog context menu changed
 ---
 version: 0.12.2b
 changes:
