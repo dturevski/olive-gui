@@ -307,7 +307,8 @@ class Board:
                     ' '.join([name + ''.join(c[color][specs][name]) for name in c[color][specs].keys()])
                 lines.append(line)
         return "\n".join(lines)
-        
+    
+
 class Pieces:
     def __init__(self, board):
         self.current = board.head

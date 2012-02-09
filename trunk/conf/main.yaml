@@ -6,7 +6,7 @@ fairy-zoo:
 - ['', '', '', '', '', neutral G, neutral N]
 horsehead-glyph: N
 languages: {en: English, ru: Русский}
-popeye-executable: {nt: PY459USR\pywin32.exe -maxmem 1G, posix: /home/dima/devel/popeye/4.59/py
+popeye-executable: {nt: PY459USR\pywin32.exe -maxmem 1G, posix: /home/dima/temp/popeye/py
     -maxmem 2G}
 popeye-sticky-options: [Variation, NoBoard]
 popeye-stop-max-bytes: 81920
