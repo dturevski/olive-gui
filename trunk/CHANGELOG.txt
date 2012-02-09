@@ -5,6 +5,9 @@ changes:
   - fixed icon issues for Windows 7
   - exit handler (unsaved changes, windows geometry etc)
   - Twins dialog context menu changed
+  - PDF export
+  - Clearing popeye output on model index change
+  - Confirm entry deletion
 ---
 version: 0.12.2b
 changes:

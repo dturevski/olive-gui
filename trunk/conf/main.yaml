@@ -1,8 +1,8 @@
 auto-compactify: 1
 default-lang: ru
 fairy-zoo:
-- [white LE, white PA, white VA, white NA, '', white G, white N]
-- [black LE, black PA, black VA, black NA, '', black G, black N]
+- [white LE, white PA, white VA, white NA, black L, white G, white N]
+- [black LE, black PA, black VA, black NA, white L, black G, black N]
 - ['', '', '', '', '', neutral G, neutral N]
 horsehead-glyph: N
 languages: {en: English, ru: Русский}

@@ -3,7 +3,7 @@
 from PyQt4 import QtGui, QtCore
 import yaml, os, os.path, tempfile, copy, PyQt4
 import legacy.popeye, legacy.chess
-import options, model, pbm
+import options, model, pbm, pdf
 
 import ctypes
 
@@ -33,7 +33,8 @@ class Mainframe(QtGui.QMainWindow):
         self.init()
         
     def init(self):               
-        
+        Mainframe.model = model.Model()
+
         # widgets
         hbox = QtGui.QHBoxLayout()
         
@@ -114,7 +115,6 @@ class Mainframe(QtGui.QMainWindow):
         self.exportPdfAction = QtGui.QAction(Lang.value('MI_Export_PDF'), self)        
         self.exportPdfAction.triggered.connect(self.onExportPdf)
         self.exportHtmlAction.setEnabled(False)
-        self.exportPdfAction.setEnabled(False)
 
         self.addEntryAction = QtGui.QAction(QtGui.QIcon('resources/icons/add.png'), Lang.value('MI_Add_entry'), self)        
         self.addEntryAction.triggered.connect(self.onAddEntry)
@@ -194,7 +194,6 @@ class Mainframe(QtGui.QMainWindow):
         
         self.createTransformActions()
         
-        Mainframe.model = model.Model()
         self.updateTitle()
         self.overview.rebuild()
         
@@ -398,7 +397,18 @@ class Mainframe(QtGui.QMainWindow):
         pass
 
     def onExportPdf(self):
-        pass
+        default_dir = './collections/pdf/'
+        fileName = QtGui.QFileDialog.getSaveFileName(self,\
+            Lang.value('MI_Export') + ' ' + Lang.value('MI_Export_PDF'), default_dir, "(*.pdf)")
+        if not fileName:
+            return
+        try:
+            ed = pdf.ExportDocument(Mainframe.model.entries, Lang)
+            ed.doExport(fileName)
+        except IOError:
+            msgBox(Lang.value('MSG_IO_failed'))
+        except:
+            msgBox(Lang.value('MSG_PDF_export_failed'))
         
     def onAddEntry(self):
         idx = Mainframe.model.current + 1
@@ -406,6 +416,9 @@ class Mainframe(QtGui.QMainWindow):
         self.overview.insertItem(idx)
         
     def onDeleteEntry(self):
+        dialog = YesNoDialog(Lang.value('MSG_Confirm_delete_entry'))
+        if not dialog.exec_():
+            return
         self.overview.skip_current_item_changed = True
         idx = Mainframe.model.current
         Mainframe.model.delete(idx)
@@ -498,6 +511,26 @@ class AboutDialog(QtGui.QDialog):
 
         self.setLayout(vbox)
         self.setWindowTitle(Lang.value('MI_About'))
+
+class YesNoDialog(QtGui.QDialog):                
+    def __init__(self, msg):
+        super(YesNoDialog, self).__init__()
+        
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(QtGui.QLabel(msg))
+        vbox.addStretch(1)
+        
+        hbox = QtGui.QHBoxLayout()
+        hbox.addStretch(1)
+        buttonYes = QtGui.QPushButton(Lang.value('CO_Yes'), self)
+        buttonYes.clicked.connect(self.accept)
+        buttonNo = QtGui.QPushButton(Lang.value('CO_No'), self)
+        buttonNo.clicked.connect(self.reject)
+        
+        hbox.addWidget(buttonYes)
+        hbox.addWidget(buttonNo)
+        vbox.addLayout(hbox)
+        self.setLayout(vbox)
 
 class YesNoCancelDialog(QtGui.QDialog):                
     def __init__(self, msg):
@@ -868,41 +901,13 @@ class InfoView(QtGui.QTextEdit):
         self.setText("<br/><br/>".join([x for x in chunks if x != '']))
         
     def meta(self):
-        html = ''
-        e = Mainframe.model.entries[Mainframe.model.current]
-        parts = []
-        if(e.has_key('authors')):
-            parts.append("<b>" + "<br/>".join(e['authors']) + "</b>")
-        if(model.notEmpty(e, 'source')):
-            s = "<i>" + e['source'] + "</i>"
-            if(model.notEmpty(e, 'source-id')):
-                s = s + "<i> (" + e['source-id'] + ")</i>"
-            if(model.notEmpty(e, 'date')):
-                s = s + "<i>, " + e['date'] + "</i>"
-            parts.append(s)
-        if(model.notEmpty(e, 'distinction')):
-            parts.append(e['distinction'])
-        return "<br/>".join(parts)
+        return pdf.ExportDocument.header(Mainframe.model.entries[Mainframe.model.current])
         
     def solver(self):
-        e = Mainframe.model.entries[Mainframe.model.current]
-        parts = []
-        if(model.notEmpty(e, 'intended-solutions')):
-            if '.' in e['intended-solutions']:
-                parts.append(e['intended-solutions'])
-            else:
-                parts.append(e['intended-solutions'] + " " + Lang.value('EP_Intended_solutions_shortened'))
-        if(e.has_key('options')):
-            parts.append("<b>" + "<br/>".join(e['options']) + "</b>")
-        if(e.has_key('twins')):
-            parts.append("<br/>".join([k + ') ' + e['twins'][k] for k in sorted(e['twins'].keys())]))
-        return "<br/>".join(parts)
+        return pdf.ExportDocument.solver(Mainframe.model.entries[Mainframe.model.current], Lang)
 
     def legend(self):
-        legend =  Mainframe.model.board.getLegend()
-        if len(legend) == 0:
-            return ''
-        return "<br/>".join([", ".join(legend[k]) + ': ' + k for k in legend.keys()])
+        return pdf.ExportDocument.legend(Mainframe.model.board)
      
         
 class ChessBox(QtGui.QWidget):
@@ -1441,6 +1446,7 @@ class PopeyeView(QtGui.QSplitter):
         self.raw_output = ''
         self.raw_mode = True
         self.solutionOutput = None
+        self.current_index = Mainframe.model.current
         
     def toggleCompact(self):
         self.raw_mode = not self.raw_mode
@@ -1520,6 +1526,9 @@ class PopeyeView(QtGui.QSplitter):
         if self.skip_model_changed:
             return
 
+        if self.current_index != Mainframe.model.current:
+            self.reset()
+            
         self.skip_model_changed = True
 
         if Mainframe.model.entries[Mainframe.model.current].has_key('stipulation'):
