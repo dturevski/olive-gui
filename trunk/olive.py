@@ -6,8 +6,13 @@ Usage:
     filename - YAML collection
 """
 
+# standard
 import sys
+
+# 3rd party
 from PyQt4 import QtGui, QtCore
+
+# local
 import gui
 
 def main():

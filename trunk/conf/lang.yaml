@@ -156,8 +156,11 @@ MI_Export_HTML:
   en: HTML
   ru: HTML
 MI_Export_PDF:
-  en: PDF
-  ru: PDF
+  en: Collection to PDF
+  ru: Коллекцию в PDF
+MI_Export_Image:
+  en: Diagram to image file 
+  ru: Диаграмму в файл изображения
 
 # Piece properties
 PP_Color:
@@ -202,7 +205,7 @@ EE_Authors_memo:
   en: <b>Lastname,&nbsp;Firstname</b><br/>each with a newline
   ru: <b>Фамилия,&nbsp;Имя&nbsp;Отчество</b><br/>каждого с новой строки
 EE_Source_memo:
-  en: "Torney, Magazine / issue # / problem #"
+  en: "Tourney, Magazine / issue # / problem #"
   ru: Конкурс, Журнал / № журнала / № задачи
 EE_Date_memo:
   en: Year / Month / Day
@@ -225,11 +228,11 @@ PS_SStipulation:
   en: SStipulation
   ru: SStipulation
 PS_Compact:
-  en: Short notation
-  ru: Сокр. нотация
+  en: Make more compact
+  ru: Сделать компактнее
 PS_Original_output:
   en: Original notation
-  ru: Ориг. нотация
+  ru: Оригинальная нотация
 PS_Tch:
   en: tch
   ru: tch
@@ -275,11 +278,21 @@ MSG_IO_failed:
   en: I/O error
   ru: Ошибка ввода-вывода
 MSG_PBM_import_failed:
-  en: Failed to read Problemiste format
-  ru: Ошибка при чтении формата Problemist
+  en: Failed to read Problemiste format (known olive bug)
+  ru: Ошибка при чтении формата Problemist (внутренняя ошибка, файл возможно в порядке)
 MSG_PDF_export_failed:
-  en: PDF export failed
-  ru: Ошибка при экспорте PDF
+  en: |
+    PDF export failed.
+    Perhaps the collection contains records that can not be properly fitted into the template (e.g. extensively long solution)
+  ru: |
+    Ошибка при экспорте PDF.
+    Возможно коллекция содержит записи, которые не могут быть корректно отображены c использованием примененного шаблона (напр. слишком пространная запись решения).
+MSG_Image_export_failed:
+  en: Image export failed. Unsupported format.
+  ru: Не удалось экспортировать изображение. Формат не поддерживается.
 MSG_Confirm_delete_entry:
   en: Delete this entry?
   ru: Удалить эту композицию?
+MSG_Not_supported:
+  en: "Not supported: %s"
+  ru: "Не поддерживается: %s"

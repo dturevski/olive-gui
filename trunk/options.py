@@ -15,7 +15,7 @@ class ParamStr(QtGui.QLineEdit):
         self.trigger = self.textChanged
         self.setFixedWidth(50)
     def get(self):
-        return str(self.text())
+        return unicode(self.text()).encode('ascii', 'replace')
     def set(self, v):
         self.setText(v)
 
@@ -168,7 +168,7 @@ class TwinsInputWidget(QtGui.QTextEdit):
         menu.exec_(e.globalPos())
     def getTwins(self):
         twins = {}
-        for line in [x.strip() for x in unicode(self.toPlainText()).encode('utf-8').split("\n") if x.strip() != '']:
+        for line in [x.strip() for x in unicode(self.toPlainText()).encode('ascii',  'replace').split("\n") if x.strip() != '']:
             parts = line.split(":")
             if len(parts) != 2:
                 continue

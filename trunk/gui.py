@@ -1,11 +1,24 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui, QtCore
-import yaml, os, os.path, tempfile, copy, PyQt4
-import legacy.popeye, legacy.chess
-import options, model, pbm, pdf
-
+# standard
+import os
+import tempfile
+import copy
 import ctypes
+
+# 3rd party
+import yaml
+from PyQt4 import QtGui, QtCore
+
+# local
+import legacy.popeye
+import legacy.chess
+import options
+import model
+import pbm
+import pdf
+import xfen2img
+
 
 class SigWrapper(QtCore.QObject):
     sigLangChanged = QtCore.pyqtSignal() 
@@ -114,6 +127,8 @@ class Mainframe(QtGui.QMainWindow):
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
         self.exportPdfAction = QtGui.QAction(Lang.value('MI_Export_PDF'), self)        
         self.exportPdfAction.triggered.connect(self.onExportPdf)
+        self.exportImgAction = QtGui.QAction(Lang.value('MI_Export_Image'), self)        
+        self.exportImgAction.triggered.connect(self.onExportImg)
         self.exportHtmlAction.setEnabled(False)
 
         self.addEntryAction = QtGui.QAction(QtGui.QIcon('resources/icons/add.png'), Lang.value('MI_Add_entry'), self)        
@@ -159,8 +174,9 @@ class Mainframe(QtGui.QMainWindow):
         self.importMenu = self.fileMenu.addMenu(Lang.value('MI_Import'))
         self.importMenu.addAction(self.importPbmAction)
         self.exportMenu = self.fileMenu.addMenu(Lang.value('MI_Export'))
-        self.exportMenu.addAction(self.exportHtmlAction)
+        #self.exportMenu.addAction(self.exportHtmlAction)
         self.exportMenu.addAction(self.exportPdfAction)
+        self.exportMenu.addAction(self.exportImgAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
 
@@ -269,6 +285,7 @@ class Mainframe(QtGui.QMainWindow):
         self.importPbmAction.setText(Lang.value('MI_Import_PBM'))
         self.exportHtmlAction.setText(Lang.value('MI_Export_HTML'))
         self.exportPdfAction.setText(Lang.value('MI_Export_PDF'))
+        self.exportImgAction.setText(Lang.value('MI_Export_Image'))
         
         for i, k in enumerate(Mainframe.transform_names)  :
             self.transforms[i].setText(Lang.value('MI_' + k))
@@ -320,7 +337,7 @@ class Mainframe(QtGui.QMainWindow):
         else:
             if len(Mainframe.model.entries) == 0:
                 Mainframe.model = model.Model()
-            Mainframe.model.filename = str(fileName)
+            Mainframe.model.filename = unicode(fileName)
         finally:
             self.overview.rebuild()
             Mainframe.sigWrapper.sigModelChanged.emit()
@@ -381,12 +398,12 @@ class Mainframe(QtGui.QMainWindow):
             file = open(fileName)
             for data in pbm.PbmEntries(file):
                 Mainframe.model.add(model.makeSafe(data), False)
-            f.close()
+            file.close()
             Mainframe.model.is_dirty = False
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
-        except:
-            msgBox(Lang.value('MSG_PBM_import_failed'))
+        #except:
+        #    msgBox(Lang.value('MSG_PBM_import_failed'))
         finally:
             if len(Mainframe.model.entries) == 0:
                 Mainframe.model = model.Model()
@@ -409,6 +426,18 @@ class Mainframe(QtGui.QMainWindow):
             msgBox(Lang.value('MSG_IO_failed'))
         except:
             msgBox(Lang.value('MSG_PDF_export_failed'))
+    def onExportImg(self):
+        fileName = QtGui.QFileDialog.getSaveFileName(self,\
+            Lang.value('MI_Export') + ' / ' + Lang.value('MI_Export_Image'), '', "(*.png)")
+        if not fileName:
+            return
+        try:
+            print Mainframe.model.board.toFen(), fileName 
+            xfen2img.convert(Mainframe.model.board.toFen(), str(fileName))
+        except IOError:
+            msgBox(Lang.value('MSG_IO_failed'))
+        #except:
+        #    msgBox(Lang.value('MSG_Image_export_failed'))
         
     def onAddEntry(self):
         idx = Mainframe.model.current + 1
@@ -1093,7 +1122,7 @@ class EasyEditView(QtGui.QWidget):
         if Mainframe.model.entries[Mainframe.model.current].has_key('source'):
             self.inputSource.setText(Mainframe.model.entries[Mainframe.model.current]['source'])
         else:
-            self.inputAuthors.setText("")
+            self.inputSource.setText("")
         
         issue_id, source_id = Mainframe.model.parseSourceId()
         self.inputIssueId.setText(issue_id)
@@ -1112,18 +1141,24 @@ class EasyEditView(QtGui.QWidget):
         
         Mainframe.model.entries[Mainframe.model.current]['authors'] = [x.strip() for x in unicode(self.inputAuthors.toPlainText()).split("\n") if x.strip() != '']
         Mainframe.model.entries[Mainframe.model.current]['source'] = unicode(self.inputSource.text()).strip()
-        Mainframe.model.entries[Mainframe.model.current]['source-id'] = \
-            '/'.join([x for x in [unicode(self.inputIssueId.text()).strip(), unicode(self.inputSourceId.text()).encode('utf-8').strip()] if x != ''])
-        if len(self.inputIssueId.text()) > 0 and len(self.inputSourceId.text()) == 0:
-            Mainframe.model.entries[Mainframe.model.current]['source-id'] = Mainframe.model.entries[Mainframe.model.current]['source-id'] + '/'
-        date = unicode(self.inputDateYear.text()).encode('utf-8').strip()
-        if self.inputDateMonth.currentIndex() != 0:
-            date = date + '-' + ("%02d" % self.inputDateMonth.currentIndex())
-            if self.inputDateDay.currentIndex() != 0:
-                date = date + '-' + ("%02d" % self.inputDateDay.currentIndex())
-        Mainframe.model.entries[Mainframe.model.current]['date'] = unicode(date).encode('utf-8')
+        i_id, s_id = unicode(self.inputIssueId.text()).strip(), unicode(self.inputSourceId.text()).strip()
+        is_id = '/'.join([i_id,  s_id])
+        if is_id.startswith('/'):
+            is_id = is_id[1:]
+        Mainframe.model.entries[Mainframe.model.current]['source-id'] = is_id
 
-        for k in ['source', 'source-id', 'date']:
+        date = model.myint(unicode(self.inputDateYear.text()).encode('ascii', 'replace'))
+        if date != 0:
+            date = str(date)
+            if self.inputDateMonth.currentIndex() != 0:
+                date = date + '-' + ("%02d" % self.inputDateMonth.currentIndex())
+                if self.inputDateDay.currentIndex() != 0:
+                    date = date + '-' + ("%02d" % self.inputDateDay.currentIndex())
+            Mainframe.model.entries[Mainframe.model.current]['date'] = date
+        elif Mainframe.model.entries[Mainframe.model.current].has_key('date'):
+            del Mainframe.model.entries[Mainframe.model.current]['date']
+
+        for k in ['source', 'source-id']:
             if Mainframe.model.entries[Mainframe.model.current][k] == '':
                 del Mainframe.model.entries[Mainframe.model.current][k]
         for k in ['authors']:
@@ -1202,8 +1237,8 @@ class DistinctionWidget(QtGui.QWidget):
         distinction.name = DistinctionWidget.names[self.name.currentIndex()]
         distinction.lo = self.lo.value()
         distinction.hi = self.hi.value()
-        distinction.comment = str(self.comment.text())
-        return str(distinction)
+        distinction.comment = unicode(self.comment.text())
+        return unicode(distinction)
         
     def onModelChanged(self):
         if self.skip_model_changed:
@@ -1339,7 +1374,7 @@ class PopeyeView(QtGui.QSplitter):
         
         self.input = PopeyeInputWidget()
         self.input.setReadOnly(True)
-        self.output = QtGui.QTextEdit()
+        self.output = PopeyeOutputWidget(self)
         self.output.setReadOnly(True)
         #self.output.setTextColor(QtGui.QColor(255,255,255))
         #self.output.setTextBackgroundColor(QtGui.QColor(255, 0, 0))
@@ -1392,8 +1427,8 @@ class PopeyeView(QtGui.QSplitter):
     def onChanged(self):
         if self.skip_model_changed:
                 return
-        Mainframe.model.entries[Mainframe.model.current]['stipulation'] = unicode(self.inputStipulation.currentText()).encode('utf-8').strip()
-        Mainframe.model.entries[Mainframe.model.current]['intended-solutions'] = unicode(self.inputIntended.text()).encode('utf-8').strip()
+        Mainframe.model.entries[Mainframe.model.current]['stipulation'] = unicode(self.inputStipulation.currentText()).encode('ascii', 'ignore').strip()
+        Mainframe.model.entries[Mainframe.model.current]['intended-solutions'] = unicode(self.inputIntended.text()).encode('ascii', 'ignore').strip()
         for k in ['stipulation', 'intended-solutions']:
             if Mainframe.model.entries[Mainframe.model.current][k] == '':
                 del Mainframe.model.entries[Mainframe.model.current][k]
@@ -1428,10 +1463,14 @@ class PopeyeView(QtGui.QSplitter):
     def onTchSettings(self):
         pass
     def onEdit(self):
-        lines = self.raw_output.strip().split("\n")
-        if len(lines) < 2:
-            return
-        Mainframe.model.entries[Mainframe.model.current]['solution'] = ("\n".join(lines[1:-2])).strip()
+        if self.raw_mode:
+            lines = self.raw_output.strip().split("\n")
+            if len(lines) < 2:
+                return
+            Mainframe.model.entries[Mainframe.model.current]['solution'] = ("\n".join(lines[1:-2])).strip()
+        else:
+            Mainframe.model.entries[Mainframe.model.current]['solution'] = self.solutionOutput.solution
+        
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
         Mainframe.sigWrapper.sigFocusOnSolution.emit()
@@ -1445,12 +1484,14 @@ class PopeyeView(QtGui.QSplitter):
         self.output.setText("")
         self.raw_output = ''
         self.raw_mode = True
+        self.compact_possible = False
         self.solutionOutput = None
         self.current_index = Mainframe.model.current
         
     def toggleCompact(self):
         self.raw_mode = not self.raw_mode
         self.output.setText([self.solutionOutput.solution, self.raw_output][self.raw_mode])
+        
     def startPopeye(self):
         
         self.actions['stop'].setEnabled(True)
@@ -1516,9 +1557,22 @@ class PopeyeView(QtGui.QSplitter):
             if Conf.value('auto-compactify'):
                 self.toggleCompact()
             self.btnCompact.setEnabled(True)"""
+            self.compact_possible = True
         except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as e:
-            print e
-            
+            self.compact_possible = False
+
+    def onCompact(self):
+        try:
+            solution = legacy.popeye.parse_output(self.entry_copy, self.raw_output)
+            self.solutionOutput = legacy.chess.SolutionOutput(False)
+            b = legacy.chess.Board()
+            b.from_algebraic(self.entry_copy['algebraic'])
+            self.solutionOutput.create_output(solution, b)
+            self.toggleCompact()
+        except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as e:
+            msgBox(Lang.value('MSG_Not_supported') % str(e))
+            self.compact_possible = False
+
     def onModelChanged(self):
         self.input.setText(legacy.popeye.create_input(Mainframe.model.entries[Mainframe.model.current],\
             self.sstip.isChecked(), copy.deepcopy(Conf.value('popeye-sticky-options')),\
@@ -1550,6 +1604,22 @@ class PopeyeView(QtGui.QSplitter):
         self.labelIntended.setText(Lang.value('EP_Intended_solutions') + ':')
         self.btnEdit.setText(Lang.value('PS_Edit'))
 
+class PopeyeOutputWidget(QtGui.QTextEdit):
+    def __init__(self,  parentView):
+        self.parentView = parentView
+        super(PopeyeOutputWidget, self).__init__()
+    def contextMenuEvent(self, e):
+        menu = self.createStandardContextMenu()
+        if self.parentView.compact_possible:
+            menu.addSeparator()
+            if self.parentView.solutionOutput is None:
+                menu.addAction(Lang.value('PS_Compact'), self.parentView.onCompact)
+            else:
+                menu.addAction(
+                               [Lang.value('PS_Original_output'),
+                                Lang.value('PS_Compact')][self.parentView.raw_mode], 
+                                self.parentView.toggleCompact)
+        menu.exec_(e.globalPos())
 
 def msgBox(msg):    
     box = QtGui.QMessageBox() 

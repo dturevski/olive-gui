@@ -1,5 +1,9 @@
 # roughly adapted from http://www.yacpdb.org/xfen/index.php.html
+
+# standard
 import re
+
+# 3rd party
 from PIL import Image, ImageDraw
 
 RE_TOKEN = re.compile('^(B?)(!?)([kqrbsnpeaofwdx])([1-7])?$', re.IGNORECASE)
@@ -117,5 +121,6 @@ def convert(xfen, filename):
         sprite = sprites.crop((sprite_x, sprite_y, sprite_x + cs, sprite_y + cs))
         img.paste(sprite, (img_x, img_y))
         if with_border:
-            canvas.rectangle((img_x, img_y, img_x + cs - 1, img_y + cs - 1), outline="#000000");
+            canvas.rectangle((img_x, img_y, img_x + cs - 1, img_y + cs - 1), outline="#000000")
+    print filename
     img.save(filename)

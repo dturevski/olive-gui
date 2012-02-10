@@ -2,7 +2,7 @@ import re
 import chess
 
 # regular expressions to parse popeye options
-RE_PY_OPTIONS = [re.compile('^'+expr+'$') for expr in [
+RE_PY_OPTIONS = [re.compile('^'+expr+'$', re.IGNORECASE) for expr in [
     'Try',
     'WhiteToPlay',
     'MoveNumbers',
@@ -37,7 +37,7 @@ RE_PY_OPTIONS = [re.compile('^'+expr+'$') for expr in [
     "Hole [a-h][1-8]",
     "Quodlibet"]]
 
-RE_PY_TWINS = [re.compile('^'+expr) for expr in [
+RE_PY_TWINS = [re.compile('^'+expr, re.IGNORECASE) for expr in [
     "(?P<command>Stipulation)\s+(?P<args>\S+)",
     "(?P<command>Condition)\s+(?P<args>\S+)",
     "(?P<command>Move)\s+(?P<args>[a-h][1-8]\s+[a-h][1-8])",
@@ -49,9 +49,9 @@ RE_PY_TWINS = [re.compile('^'+expr) for expr in [
     "(?P<command>Mirror)\s+(?P<args>[a-h][1-8]\s+[a-h][1-8])",
     "(?P<command>Shift)\s+(?P<args>[a-h][1-8]\s+[a-h][1-8])",
     "(?P<command>PolishType)"]]
-RE_PY_CONT = re.compile('^Cont(inued)?')
+RE_PY_CONT = re.compile('^Cont(inued)?', re.IGNORECASE)
 
-RE_PY_STIP = re.compile('^(?P<style>h|s|r|(hs)|())(?P<aim>[#=])(?P<movecount>[0-9\.]+)$')
+RE_PY_STIP = re.compile('^(?P<style>h|s|r|(hs)|())(?P<aim>[#=])(?P<movecount>[0-9\.]+)$', re.IGNORECASE)
 
 # regular expressions to parse popeye output
 RE_PY_MOVEHEAD = re.compile('^(?P<moveno>[0-9]+)(?P<side>\.+)')
@@ -60,7 +60,7 @@ RE_PY_PROMOTION = re.compile('^(?P<dep_square>[a-h][1-8])(?P<cap_mod>[\-\*])(?P<
 RE_PY_CASTLING = re.compile('^(?P<castling>0-0(-0)?)')
 RE_PY_EPCAPTURE = re.compile('^(?P<dep_square>[a-h][1-8])\*(?P<arr_square>[a-h][1-8]) ep\.')
 RE_PY_MOVETAIL = re.compile('^(?P<checkstalemate>[\+=#])?( +)?(?P<mark>[!?]?)')
-RE_PY_TWINSTART = re.compile('^(?P<twin_id>[a-z])\)(?P<twin_descr>.*)')
+RE_PY_TWINSTART = re.compile('^\+?(?P<twin_id>[a-z])\)(?P<twin_descr>.*)')
 RE_PY_TRASH = re.compile('^\s*(zugzwang\.)|(threat:)|(but)\s*')
 
 def parse_ply_tail(ply, text):
@@ -154,7 +154,8 @@ def parse_ply(text, side_to_move):
 def create_input(problem, sstip, sticky, pieces_clause):
     lines = ["BeginProblem"]
     # stipulation
-    lines.append(["Stipulation ", "SStipulation "][sstip] + problem['stipulation'])
+    if problem.has_key('stipulation'):
+        lines.append(["Stipulation ", "SStipulation "][sstip] + problem['stipulation'])
     #options and conditions
     options, conditions = sticky, []
     if problem.has_key('options'):
@@ -170,8 +171,9 @@ def create_input(problem, sstip, sticky, pieces_clause):
     if len(conditions) > 0:
         lines.append("Condition " + " ".join(conditions))
     # pieces
-    lines.append("Pieces")
-    lines.append(pieces_clause)
+    if pieces_clause != '':
+        lines.append("Pieces")
+        lines.append(pieces_clause)
     #for color in ['white', 'black', 'neutral']:
     #    if problem['algebraic'].has_key(color):
     #        lines.append("  " + color + " " + " ".join(problem['algebraic'][color]))

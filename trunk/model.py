@@ -1,4 +1,11 @@
-import yaml, re, exceptions, copy, datetime
+# standard
+import re
+import exceptions
+import copy
+import datetime
+
+# 3rd party
+import yaml
 
 COLORS = ['black', 'white',  'neutral']
 FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing', \
@@ -10,8 +17,15 @@ def algebraicToIdx(a1):
 def idxToAlgebraic(idx):
     return 'abcdefgh'[idx%8] + '87654321'[idx>>3]
 def myint(string):
+    f, s = False,  []
+    for char in string:
+        if char in '0123456789':
+            s.append(char)
+            f = True
+        elif f:
+            break
     try:
-        return int(string)
+        return int(''.join(s))
     except exceptions.ValueError:
         return 0
 

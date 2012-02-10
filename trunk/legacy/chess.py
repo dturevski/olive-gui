@@ -1062,6 +1062,7 @@ class UnsupportedError(Exception):
         return self.message
         
 def from_xy(xy):
+    print xy
     return '87654321'.find(xy[1])*8 + 'abcdefgh'.find(xy[0])
 def to_xy(square):
     return 'abcdefgh'[square%8] + '87654321'[int(square/8)]

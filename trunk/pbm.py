@@ -9,8 +9,15 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
-import sys, array, model, copy
+#
+
+# standard
+import sys
+import array
+import copy
+
+# local
+import model
 
 class PbmEntries:
     def __init__(self, file):
@@ -197,14 +204,18 @@ class Record:
             d = model.Distinction()
             parts = self.info['distinction'].split(u'°')
             d.lo = model.myint(parts[0])
+            if len(parts) > 1:
+                d.hi = model.myint(parts[1])
             tail = (u'°'.join(parts[1:])).lower()
+            if len(parts) == 1:
+                tail = self.info['distinction'].lower()
             if 'special' in tail:
                 d.special = True
             if 'priz' in tail or 'prix' in tail:
                 d.name = 'Prize'
-            if 'hono' in tail or 'menti' in tail or 'hm' in tail:
+            if 'hono' in tail or 'menti' in tail or 'hm' in tail or 'dicser' in tail:
                 d.name = 'HM'
-            if 'com' in tail or 'cm' in tail or 'c.' in tail:
+            if 'com' in tail or 'cm' in tail or 'c.' in tail or 'elisme' in tail:
                 d.name = 'Comm'
             if 'place' in tail:
                 d.name = 'Place'

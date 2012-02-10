@@ -1,5 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
-from reportlab.pdfgen import canvas
+
+# 3rd party
 import reportlab.rl_config
 reportlab.rl_config.warnOnMissingFontGlyphs = 0
 from reportlab.pdfbase import pdfmetrics
@@ -9,6 +10,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib import colors
 
+# local
 import model
 
 A4_LANDSCAPE_H, A4_LANDSCAPE_W = A4
@@ -44,7 +46,9 @@ class ExportDocument:
         self.records, self.Lang = records, Lang
         styles = getSampleStyleSheet()
         styles.add(ParagraphStyle(name='Justify', wordWrap=True))       
+        styles.add(ParagraphStyle(name='Pre', wordWrap=True, fontName=FONT_FAMILY, fontSize=FONT_SIZE['rightpane'], spaceAfter=FONT_SIZE['rightpane']))       
         self.style = styles['Justify']
+        self.style_pre = styles['Pre']
     def doExport(self, filename):
         frameTemplate = reportlab.platypus.Frame(\
             0, 0, A4_LANDSCAPE_W, A4_LANDSCAPE_H,
@@ -100,6 +104,7 @@ class ExportDocument:
             ('VALIGN', (0,0), (-1,0), 'BOTTOM'),
             ('VALIGN', (0,1), (-1,1), 'TOP')
              ]))
+        print t.wrap(0, 0)
         return t
         
     def leftTop(self, e):
@@ -138,7 +143,7 @@ class ExportDocument:
             return story
         parts = []
         if e.has_key('solution'):
-            parts.append('<br/>'.join(e['solution'].split("\n")))
+            story.append(reportlab.platypus.Preformatted(wrapParagraph(e['solution'],  50), self.style_pre))
         if e.has_key('keywords'):
             parts.append('<i>' + ', '.join(e['keywords']) + '</i>')
         if e.has_key('comments'):
@@ -212,3 +217,52 @@ class ExportDocument:
             '<font face="%s" size=%d>%s</font>' % (CHESS_FONTS[fonts[i]][0], FONT_SIZE['chess'], ''.join(spans[i])) 
             for i in xrange(len(fonts))
             ])
+
+def wrapParagraph(str,  w):
+    lines = []
+    for line in str.split("\n"):
+        lines.extend(wrapNice(removeInlineIdents(line), w))
+    return "\n".join(lines)
+    
+def wrapNice(line, w):
+    if len(line) < w:
+        return [line]
+    words = line.split(' ')
+    cur_line_words = []
+    total = 0
+    for i in xrange(len(words)):
+        if total == 0:
+            new_total = len(words[i])
+        else:
+            new_total = total + 1 + len(words[i])
+        if new_total > w:
+            if len(words[i]) <= w:
+                retval = [' '.join(cur_line_words)]
+                retval.extend(wrapNice(' '.join(words[i:]), w))
+                return retval
+            else: # rough wrap
+                slice_size = w - total - 1
+                cur_line_words.append(words[i][0:slice_size])
+                retval = [' '.join(cur_line_words)]
+                tail = ' '.join([words[i][slice_size:]]+words[i+1:])
+                retval.extend(wrapNice(tail, w))
+                return retval
+        elif new_total == w:
+            cur_line_words.append(words[i])
+            retval = [' '.join(cur_line_words)]
+            if i == len(words) - 1:
+                return retval
+            else:
+                retval.extend(wrapNice(' '.join(words[i+1:]), w))
+                return retval
+        else:
+            cur_line_words.append(words[i])
+            total = new_total
+    return [' '.join(cur_line_words)]
+        
+def removeInlineIdents(line):
+    outer = 0
+    while outer < len(line) and line[outer] == ' ':
+        outer = outer + 1
+    return line[0:outer] + ' '.join([x for x in line.strip().split(' ') if x != ''])
+line="Hey y'all, this is a great song, but I wasn't too happy with the solo's I found on the so G--5-------7-6~-7-9p7p6-9p7p6-7-9--------5----------------7-7-6~--| I made an attempt as well. hope you like it, grtz. Band: Buena vista social club song: Chan chan tuning: standard (eBGDAE) This is how I play the trumpet solo:"
