@@ -457,7 +457,7 @@ class Model:
         issue_id, source_id = '', ''
         if not self.entries[self.current].has_key('source-id'):
             return issue_id, source_id
-        parts = str(self.entries[self.current]['source-id']).split("/")
+        parts = unicode(self.entries[self.current]['source-id']).split("/")
         if len(parts) == 1:
             source_id = parts[0]
         else:
