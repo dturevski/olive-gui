@@ -139,7 +139,7 @@ class Mainframe(QtGui.QMainWindow):
 
         self.exitAction = QtGui.QAction(QtGui.QIcon('resources/icons/exit.png'), Lang.value('MI_Exit'), self)        
         self.exitAction.setShortcut('Ctrl+Q')
-        self.exitAction.triggered.connect(QtGui.qApp.quit)
+        self.exitAction.triggered.connect(self.close)
 
         self.startPopeyeAction = QtGui.QAction(QtGui.QIcon('resources/icons/key.png'), Lang.value('MI_Run_Popeye'), self)        
         self.startPopeyeAction.setShortcut('F7')
