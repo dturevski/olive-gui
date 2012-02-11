@@ -104,7 +104,6 @@ class ExportDocument:
             ('VALIGN', (0,0), (-1,0), 'BOTTOM'),
             ('VALIGN', (0,1), (-1,1), 'TOP')
              ]))
-        print t.wrap(0, 0)
         return t
         
     def leftTop(self, e):
@@ -265,4 +264,3 @@ def removeInlineIdents(line):
     while outer < len(line) and line[outer] == ' ':
         outer = outer + 1
     return line[0:outer] + ' '.join([x for x in line.strip().split(' ') if x != ''])
-line="Hey y'all, this is a great song, but I wasn't too happy with the solo's I found on the so G--5-------7-6~-7-9p7p6-9p7p6-7-9--------5----------------7-7-6~--| I made an attempt as well. hope you like it, grtz. Band: Buena vista social club song: Chan chan tuning: standard (eBGDAE) This is how I play the trumpet solo:"

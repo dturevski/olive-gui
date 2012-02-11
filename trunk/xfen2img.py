@@ -122,5 +122,4 @@ def convert(xfen, filename):
         img.paste(sprite, (img_x, img_y))
         if with_border:
             canvas.rectangle((img_x, img_y, img_x + cs - 1, img_y + cs - 1), outline="#000000")
-    print filename
     img.save(filename)

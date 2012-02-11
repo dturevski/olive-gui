@@ -1,5 +1,5 @@
 auto-compactify: 1
-default-lang: ru
+default-lang: en
 fairy-zoo:
 - [white LE, white PA, white VA, white NA, black L, white G, white N]
 - [black LE, black PA, black VA, black NA, white L, black G, black N]

@@ -35,8 +35,8 @@ source: !!python/unicode 'Sinfonie Scacchistiche'
 stipulation: s#6
 ---
 algebraic:
-  black: [Qg4, Pf3, Pf4, Pf6, Pe5, Pd2, Kc3, Pb2, Rb3, Rb4, Pa5, Pb6]
-  white: [Pf5, Pe4, Bc5, Sd4, Bb1, Ka6]
+  black: [Kc3, Pf4, Pb6, Pa5, Rb4, Rb3, Pb2, Pd2, Pe5, Pf6, Pf3, Qg4]
+  white: [Ka6, Bb1, Sd4, Bc5, Pe4, Pf5]
 authors: ['Müller, Dieter', !!python/unicode 'Wiehagen, Rolf']
 comments: [!!python/unicode 'Fourfold Zilahi, models and WB/WS sacrifices, passive
     & active! [CJF]']
@@ -190,8 +190,7 @@ comments: ['Hungarian humour! The Mirror Circe effects all lie in what cannot ha
     ago?) was what taught me how to compose.[CJF]']
 date: 2009-02
 options: [MirrorCirce]
-solution: !!python/unicode '1.Re7-f7 + Rd7-e7   2.Rf7-f5 Rg6-h6   3.Rf5-f6 Re7*e6   4.Rf6-g6
-  + Re6-f6 ='
+solution: !!python/unicode '1.Rf7+ Re7 2.Rf5 Rh6 3.Rf6 Rxe6 4.Rg6+ Rf6='
 source: !!python/unicode 'Broodings'
 source-id: !!python/unicode '50/12'
 stipulation: h=4

@@ -1,4 +1,7 @@
+# standard
 import re
+
+# local
 import chess
 
 # regular expressions to parse popeye options
@@ -103,6 +106,19 @@ def parse_ply(text, side_to_move):
         text = re.sub(RE_PY_PROMOTION, '', text).strip()
         return parse_ply_tail(ply, text) 
 
+    #RE_PY_EPCAPTURE = re.compile('^(?P<dep_square>[a-h][1-8])\*(?P<arr_square>[a-h][1-8]) ep\.')
+    # ep must be tried befor reg move
+    m = RE_PY_EPCAPTURE.match(text)
+    if m:
+        dep_square = chess.from_xy(m.group('dep_square'))
+        arr_square = chess.from_xy(m.group('arr_square'))
+        dep_piece = 'pP'[side_to_move == chess.WHITE]
+        arr_piece = dep_piece
+        capture = ('pP'[side_to_move == chess.BLACK], chess.LookupTables.ep(dep_square, arr_square))
+        ply['move'] = chess.Move((dep_piece, dep_square), (arr_piece, arr_square), capture)
+        text = re.sub(RE_PY_EPCAPTURE, '', text).strip()
+        return parse_ply_tail(ply, text) 
+        
     m = RE_PY_REGULARMOVE.match(text)
     if m:
         dep_square = chess.from_xy(m.group('dep_square'))
@@ -119,37 +135,28 @@ def parse_ply(text, side_to_move):
     if m:
         if m.group('castling') == '0-0':
             if side_to_move == chess.BLACK:
-                ply['move'] = chess.Move(('k', chess.from_xy('e8')), ('k', chess.from_xy('g8')) ('', -1))
+                ply['move'] = chess.Move(('k', chess.from_xy('e8')), ('k', chess.from_xy('g8')), ('', -1))
                 ply['move'].is_castling, ply['move'].rook_before, ply['move'].rook_after = \
                     True, chess.from_xy('h8'), chess.from_xy('f8') 
             else:
-                ply['move'] = chess.Move(('K', chess.from_xy('e1')), ('K', chess.from_xy('g1')) ('', -1))
+                ply['move'] = chess.Move(('K', chess.from_xy('e1')), ('K', chess.from_xy('g1')), ('', -1))
                 ply['move'].is_castling, ply['move'].rook_before, ply['move'].rook_after = \
                     True, chess.from_xy('h1'), chess.from_xy('f1') 
         else:
             if side_to_move == chess.BLACK:
-                ply['move'] = chess.Move(('k', chess.from_xy('e8')), ('k', chess.from_xy('c8')) ('', -1))
+                ply['move'] = chess.Move(('k', chess.from_xy('e8')), ('k', chess.from_xy('c8')), ('', -1))
                 ply['move'].is_castling, ply['move'].rook_before, ply['move'].rook_after = \
                     True, chess.from_xy('a8'), chess.from_xy('d8') 
             else:
-                ply['move'] = chess.Move(('K', chess.from_xy('e1')), ('K', chess.from_xy('c1')) ('', -1))
+                ply['move'] = chess.Move(('K', chess.from_xy('e1')), ('K', chess.from_xy('c1')), ('', -1))
                 ply['move'].is_castling, ply['move'].rook_before, ply['move'].rook_after = \
                     True, chess.from_xy('a1'), chess.from_xy('d1')         
         text = re.sub(RE_PY_CASTLING, '', text).strip()
         return parse_ply_tail(ply, text) 
 
-    #RE_PY_EPCAPTURE = re.compile('^(?P<dep_square>[a-h][1-8])\*(?P<arr_square>[a-h][1-8]) ep\.')
-    m = RE_PY_EPCAPTURE.match(text)
-    if m:
-        dep_square = chess.from_xy(m.group('dep_square'))
-        arr_square = chess.from_xy(m.group('arr_square'))
-        dep_piece = 'pP'[side_to_move == chess.WHITE]
-        capture = ('pP'[side_to_move == chess.BLACK], LookupTables.ep(arr_piece, arr_square))
-        ply['move'] = chess.Move((dep_piece, dep_square), (arr_piece, arr_square), capture)
-        text = re.sub(RE_PY_EPCAPTURE, '', text).strip()
-        return parse_ply_tail(ply, text) 
 
-    raise ParseError("Can't match next ply:\n%s" % text)
+
+    raise ParseError("Can't match next ply:\n%s" % "\n".join(text.split("\n")[:3]))
 
 def create_input(problem, sstip, sticky, pieces_clause):
     lines = ["BeginProblem"]
@@ -212,7 +219,7 @@ def parse_output(problem, output):
     b = chess.Board()
     b.from_algebraic(problem['algebraic'])
     prev_twin = None
-    for k in twins:
+    for k in sorted(twins.keys()):
         if problem.has_key('twins') and problem['twins'].has_key(k):
             twin = chess.TwinNode(k, problem['twins'][k], prev_twin, problem)
         else:

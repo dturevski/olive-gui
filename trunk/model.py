@@ -341,12 +341,12 @@ def unquote(str):
     if len(str) < 2:
         return str
     if str[0] == '"' and str[-1] == '"':
-        return unquote(str[1:-2])
+        return unquote(str[1:-1])
     elif str[0] == "'" and str[-1] == "'":
-        return unquote(str[1:-2])
+        return unquote(str[1:-1])
     else:
         return str
-        
+
 def makeSafe(e):
     r = {}
     if not isinstance(e, dict):

@@ -455,7 +455,7 @@ class Move:
         action = ['', 'x'][self.cap[1] != -1]
         arrival = 'abcdefgh'[self.arr[1]%8] + '87654321'[int(self.arr[1]/8)]
         ep = ['', ' e.p.'][(self.cap[1] != -1) and (self.cap[1] != self.arr[1])]
-        promotion = ['', self.arr[0].upper()][self.dep[0] != self.arr[0]]
+        promotion = ['', '='+self.arr[0].upper()][self.dep[0] != self.arr[0]]
         letter = ['', '[' + self.letter + ']'][self.letter != '']
         
         return piece+self.disambiguation+depfile+action+arrival+ep+promotion+\
@@ -949,11 +949,13 @@ class TwinNode(Node):
             self.anticipator.make(board)
         for i in xrange(len(self.commands)):
             if 'Move' == self.commands[i]:
+                board.drop(from_xy(self.arguments[i][1]))
                 board.move(from_xy(self.arguments[i][0]), from_xy(self.arguments[i][1]))
             if 'Exchange' == self.commands[i]:
-                piece = board.board[from_xy(self.arguments[i][1])]
+                piece = copy.deepcopy(board.board[from_xy(self.arguments[i][1])])
+                board.drop(from_xy(self.arguments[i][1]))
                 board.move(from_xy(self.arguments[i][0]), from_xy(self.arguments[i][1]))
-                board.add(piece[NAME], from_xy(self.commands[i][0]), piece[ID])
+                board.add(piece[NAME], from_xy(self.arguments[i][0]), piece[ID])
             if 'Remove' == self.commands[i]:
                 board.drop(from_xy(self.arguments[i][0]))
             if 'Substitute' == self.commands[i]:
@@ -1062,7 +1064,6 @@ class UnsupportedError(Exception):
         return self.message
         
 def from_xy(xy):
-    print xy
     return '87654321'.find(xy[1])*8 + 'abcdefgh'.find(xy[0])
 def to_xy(square):
     return 'abcdefgh'[square%8] + '87654321'[int(square/8)]

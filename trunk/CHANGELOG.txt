@@ -1,4 +1,4 @@
-version: current
+version: trunk
 changes:
   - about screen changed
   - alternating backgrounds in overview
@@ -8,6 +8,11 @@ changes:
   - PDF export
   - Clearing popeye output on model index change
   - Confirm entry deletion
+  - Export to image
+  - Compactifying popeye output + lots of bugs fixed in legacy (yacpdb) code
+  - PBM import: partially fixed (still fails on some pbm files, e.g. from albums.zip)
+  - bug fixed: metadata tab
+  - bug fixed: Unicode in non unicode fields (twins, stipulation etc)
 ---
 version: 0.12.2b
 changes:

@@ -319,6 +319,9 @@ class Mainframe(QtGui.QMainWindow):
         fileName = QtGui.QFileDialog.getOpenFileName(self, Lang.value('MI_Open'), default_dir, "(*.olv)")
         if not fileName:
             return
+        self.openCollection(fileName)
+
+    def openCollection(self,  fileName):
         try:
             f = open(fileName, 'r')
             Mainframe.model = model.Model()
