@@ -405,8 +405,8 @@ class Mainframe(QtGui.QMainWindow):
             Mainframe.model.is_dirty = False
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
-        #except:
-        #    msgBox(Lang.value('MSG_PBM_import_failed'))
+        except:
+            msgBox(Lang.value('MSG_PBM_import_failed'))
         finally:
             if len(Mainframe.model.entries) == 0:
                 Mainframe.model = model.Model()
@@ -417,7 +417,7 @@ class Mainframe(QtGui.QMainWindow):
         pass
 
     def onExportPdf(self):
-        default_dir = './collections/pdf/'
+        default_dir = './collections/'
         fileName = QtGui.QFileDialog.getSaveFileName(self,\
             Lang.value('MI_Export') + ' ' + Lang.value('MI_Export_PDF'), default_dir, "(*.pdf)")
         if not fileName:
@@ -439,8 +439,8 @@ class Mainframe(QtGui.QMainWindow):
             xfen2img.convert(Mainframe.model.board.toFen(), str(fileName))
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
-        #except:
-        #    msgBox(Lang.value('MSG_Image_export_failed'))
+        except:
+            msgBox(Lang.value('MSG_Image_export_failed'))
         
     def onAddEntry(self):
         idx = Mainframe.model.current + 1
