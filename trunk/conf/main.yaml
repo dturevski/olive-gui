@@ -1,5 +1,5 @@
 auto-compactify: 1
-default-lang: en
+default-lang: ru
 fairy-zoo:
 - [white LE, white PA, white VA, white NA, black L, white G, white N]
 - [black LE, black PA, black VA, black NA, white L, black G, black N]
@@ -10,4 +10,4 @@ popeye-executable: {nt: PY459USR\pywin32.exe -maxmem 1G, posix: /home/dima/temp/
     -maxmem 2G}
 popeye-sticky-options: [Variation, NoBoard]
 popeye-stop-max-bytes: 81920
-version: 0.12.2.2b
+version: 0.12.2b
