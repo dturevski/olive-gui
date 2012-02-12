@@ -146,7 +146,7 @@ class ExportDocument:
         if e.has_key('algebraic'):
             b.fromAlgebraic(e['algebraic'])
         x = unicode(self.board2Html(b).decode("ISO-8859-1"))
-        story.append(reportlab.platypus.Paragraph('<para autoLeading="max">'+x+'</para>', self.style))
+        story.append(BorderedParagraph('<para autoLeading="max">'+x+'</para>', self.style))
         s_left = ''
         if e.has_key('stipulation'):
             s_left = e['stipulation']
@@ -241,6 +241,13 @@ class ExportDocument:
             for i in xrange(len(fonts))
             ])
 
+class BorderedParagraph(reportlab.platypus.Paragraph):
+    def __init__(self,  str,  style):
+        reportlab.platypus.Paragraph.__init__(self, str, style)
+    def draw(self):
+        reportlab.platypus.Paragraph.draw(self)
+        self.canv.rect(-1, -5, 2+8*FONT_SIZE['chess'], 2+8*FONT_SIZE['chess'], stroke=1, fill=0)
+        
 def wrapParagraph(str,  w):
     lines = []
     for line in str.split("\n"):
