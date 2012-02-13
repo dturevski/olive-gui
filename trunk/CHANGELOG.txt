@@ -1,8 +1,13 @@
 ---
 version: trunk
-todo:
-  - icon issues for Windows 7
+todo: 
+  - yacpdb communication: check, add, sync down, sync up
+  - Import: .cvv? .pgn?
+changes: []
+---
+version: 0.12.2.3b
 changes:
+  - icon issues for Windows 7
   - Diagram borders in PDF
   - bug fixed: legacy.chess.Move.disambuguate() was never called in certain cases
     resulting in incorrect compact output
