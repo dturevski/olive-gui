@@ -1,8 +1,16 @@
+---
 version: trunk
+todo:
+  - icon issues for Windows 7
+changes:
+  - Diagram borders in PDF
+  - bug fixed: legacy.chess.Move.disambuguate() was never called in certain cases
+    resulting in incorrect compact output
+---
+version: 0.12.2.2b
 changes:
   - about screen changed
   - alternating backgrounds in overview
-  - fixed icon issues for Windows 7
   - exit handler (unsaved changes, windows geometry etc)
   - Twins dialog context menu changed
   - PDF export

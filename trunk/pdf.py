@@ -246,6 +246,7 @@ class BorderedParagraph(reportlab.platypus.Paragraph):
         reportlab.platypus.Paragraph.__init__(self, str, style)
     def draw(self):
         reportlab.platypus.Paragraph.draw(self)
+        # -5 is deep magic, maybe it has something to do with platypus.Paragraph::_spaceBefore or such
         self.canv.rect(-1, -5, 2+8*FONT_SIZE['chess'], 2+8*FONT_SIZE['chess'], stroke=1, fill=0)
         
 def wrapParagraph(str,  w):

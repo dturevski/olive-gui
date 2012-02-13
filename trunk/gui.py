@@ -221,13 +221,13 @@ class Mainframe(QtGui.QMainWindow):
         Mainframe.sigWrapper.sigFocusOnPopeye.connect(self.onFocusOnPopeye)
         Mainframe.sigWrapper.sigFocusOnSolution.connect(self.onFocusOnSolution)
         
+                
         self.setWindowIcon(QtGui.QIcon('resources/icons/olive.ico'))
         if 'nt' == os.name:
             myappid = 'com.google.code.olive-gui.' + Conf.value('version')
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
         settings = QtCore.QSettings()
-        settings.clear()
         if len(settings.value("geometry").toByteArray()):
             self.restoreGeometry(settings.value("geometry").toByteArray());
             self.restoreState(settings.value("windowState").toByteArray());
@@ -914,8 +914,8 @@ class BoardView(QtGui.QWidget):
                     glyph = glyph[1:-1]
                 lbl.setFont(Mainframe.fonts[model.FairyHelper.fontinfo[glyph]['family']])
                 lbl.setText(model.FairyHelper.fontinfo[glyph]['chars'][((i>>3) + (i%8))%2])
-        if(Mainframe.model.entries[Mainframe.model.current].has_key('stipulation')):
-            self.labelStipulation.setText(Mainframe.model.entries[Mainframe.model.current]['stipulation'])
+        if(Mainframe.model.cur().has_key('stipulation')):
+            self.labelStipulation.setText(Mainframe.model.cur()['stipulation'])
         else:
             self.labelStipulation.setText("")
         self.labelPiecesCount.setText(Mainframe.model.board.getPiecesCount())
@@ -933,10 +933,10 @@ class InfoView(QtGui.QTextEdit):
         self.setText("<br/><br/>".join([x for x in chunks if x != '']))
         
     def meta(self):
-        return pdf.ExportDocument.header(Mainframe.model.entries[Mainframe.model.current])
+        return pdf.ExportDocument.header(Mainframe.model.cur())
         
     def solver(self):
-        return pdf.ExportDocument.solver(Mainframe.model.entries[Mainframe.model.current], Lang)
+        return pdf.ExportDocument.solver(Mainframe.model.cur(), Lang)
 
     def legend(self):
         return pdf.ExportDocument.legend(Mainframe.model.board)
@@ -1117,13 +1117,13 @@ class EasyEditView(QtGui.QWidget):
 
         self.skip_model_changed = True
 
-        if Mainframe.model.entries[Mainframe.model.current].has_key('authors'):
-            self.inputAuthors.setText("\n".join(Mainframe.model.entries[Mainframe.model.current]['authors']))
+        if Mainframe.model.cur().has_key('authors'):
+            self.inputAuthors.setText("\n".join(Mainframe.model.cur()['authors']))
         else:
             self.inputAuthors.setText("")
 
-        if Mainframe.model.entries[Mainframe.model.current].has_key('source'):
-            self.inputSource.setText(Mainframe.model.entries[Mainframe.model.current]['source'])
+        if Mainframe.model.cur().has_key('source'):
+            self.inputSource.setText(Mainframe.model.cur()['source'])
         else:
             self.inputSource.setText("")
         
@@ -1142,13 +1142,13 @@ class EasyEditView(QtGui.QWidget):
         if self.skip_model_changed:
             return
         
-        Mainframe.model.entries[Mainframe.model.current]['authors'] = [x.strip() for x in unicode(self.inputAuthors.toPlainText()).split("\n") if x.strip() != '']
-        Mainframe.model.entries[Mainframe.model.current]['source'] = unicode(self.inputSource.text()).strip()
+        Mainframe.model.cur()['authors'] = [x.strip() for x in unicode(self.inputAuthors.toPlainText()).split("\n") if x.strip() != '']
+        Mainframe.model.cur()['source'] = unicode(self.inputSource.text()).strip()
         i_id, s_id = unicode(self.inputIssueId.text()).strip(), unicode(self.inputSourceId.text()).strip()
         is_id = '/'.join([i_id,  s_id])
         if is_id.startswith('/'):
             is_id = is_id[1:]
-        Mainframe.model.entries[Mainframe.model.current]['source-id'] = is_id
+        Mainframe.model.cur()['source-id'] = is_id
 
         date = model.myint(unicode(self.inputDateYear.text()).encode('ascii', 'replace'))
         if date != 0:
@@ -1157,16 +1157,16 @@ class EasyEditView(QtGui.QWidget):
                 date = date + '-' + ("%02d" % self.inputDateMonth.currentIndex())
                 if self.inputDateDay.currentIndex() != 0:
                     date = date + '-' + ("%02d" % self.inputDateDay.currentIndex())
-            Mainframe.model.entries[Mainframe.model.current]['date'] = date
-        elif Mainframe.model.entries[Mainframe.model.current].has_key('date'):
-            del Mainframe.model.entries[Mainframe.model.current]['date']
+            Mainframe.model.cur()['date'] = date
+        elif Mainframe.model.cur().has_key('date'):
+            del Mainframe.model.cur()['date']
 
         for k in ['source', 'source-id']:
-            if Mainframe.model.entries[Mainframe.model.current][k] == '':
-                del Mainframe.model.entries[Mainframe.model.current][k]
+            if Mainframe.model.cur()[k] == '':
+                del Mainframe.model.cur()[k]
         for k in ['authors']:
-            if len(Mainframe.model.entries[Mainframe.model.current][k]) == 0:
-                del Mainframe.model.entries[Mainframe.model.current][k]
+            if len(Mainframe.model.cur()[k]) == 0:
+                del Mainframe.model.cur()[k]
         
         
         self.skip_model_changed = True
@@ -1215,14 +1215,14 @@ class DistinctionWidget(QtGui.QWidget):
         if self.skip_model_changed:
             return
         distinction = self.get()
-        if Mainframe.model.entries[Mainframe.model.current].has_key('distinction'):
-            if distinction == Mainframe.model.entries[Mainframe.model.current]['distinction']:
+        if Mainframe.model.cur().has_key('distinction'):
+            if distinction == Mainframe.model.cur()['distinction']:
                 return
         else:
             if distinction =='':
                 return
         self.skip_model_changed = True
-        Mainframe.model.entries[Mainframe.model.current]['distinction'] = distinction
+        Mainframe.model.cur()['distinction'] = distinction
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
         self.skip_model_changed = False
@@ -1247,8 +1247,8 @@ class DistinctionWidget(QtGui.QWidget):
         if self.skip_model_changed:
             return
         distinction = model.Distinction()
-        if Mainframe.model.entries[Mainframe.model.current].has_key('distinction'):
-            distinction = model.Distinction.fromString(Mainframe.model.entries[Mainframe.model.current]['distinction'])
+        if Mainframe.model.cur().has_key('distinction'):
+            distinction = model.Distinction.fromString(Mainframe.model.cur()['distinction'])
         self.skip_model_changed = True
         self.set(distinction)
         self.skip_model_changed = False
@@ -1308,16 +1308,16 @@ class SolutionView(QtGui.QWidget):
     def onChanged(self):
         if self.skip_model_changed:
             return
-        Mainframe.model.entries[Mainframe.model.current]['solution'] = unicode(self.solution.toPlainText()).strip()        
-        Mainframe.model.entries[Mainframe.model.current]['keywords'] = [x.strip() for x in unicode(self.keywords.toPlainText()).split("\n") if x.strip() != '']
-        Mainframe.model.entries[Mainframe.model.current]['comments'] = [x.strip() for x in unicode(self.comments.toPlainText()).split("\n\n") if x.strip() != '']
+        Mainframe.model.cur()['solution'] = unicode(self.solution.toPlainText()).strip()        
+        Mainframe.model.cur()['keywords'] = [x.strip() for x in unicode(self.keywords.toPlainText()).split("\n") if x.strip() != '']
+        Mainframe.model.cur()['comments'] = [x.strip() for x in unicode(self.comments.toPlainText()).split("\n\n") if x.strip() != '']
 
         for k in ['solution']:
-            if Mainframe.model.entries[Mainframe.model.current][k] == '':
-                del Mainframe.model.entries[Mainframe.model.current][k]
+            if Mainframe.model.cur()[k] == '':
+                del Mainframe.model.cur()[k]
         for k in ['keywords', 'comments']:
-            if len(Mainframe.model.entries[Mainframe.model.current][k]) == 0:
-                del Mainframe.model.entries[Mainframe.model.current][k]
+            if len(Mainframe.model.cur()[k]) == 0:
+                del Mainframe.model.cur()[k]
         
         
         self.skip_model_changed = True
@@ -1331,16 +1331,16 @@ class SolutionView(QtGui.QWidget):
         
         self.skip_model_changed = True
 
-        if Mainframe.model.entries[Mainframe.model.current].has_key('solution'):
-            self.solution.setText(Mainframe.model.entries[Mainframe.model.current]['solution'])
+        if Mainframe.model.cur().has_key('solution'):
+            self.solution.setText(Mainframe.model.cur()['solution'])
         else:
             self.solution.setText("")
-        if Mainframe.model.entries[Mainframe.model.current].has_key('keywords'):
-            self.keywords.setText("\n".join(Mainframe.model.entries[Mainframe.model.current]['keywords']))
+        if Mainframe.model.cur().has_key('keywords'):
+            self.keywords.setText("\n".join(Mainframe.model.cur()['keywords']))
         else:
             self.keywords.setText("")
-        if Mainframe.model.entries[Mainframe.model.current].has_key('comments'):
-            self.comments.setText("\n\n".join(Mainframe.model.entries[Mainframe.model.current]['comments']))
+        if Mainframe.model.cur().has_key('comments'):
+            self.comments.setText("\n\n".join(Mainframe.model.cur()['comments']))
         else:
             self.comments.setText("")
             
@@ -1430,11 +1430,11 @@ class PopeyeView(QtGui.QSplitter):
     def onChanged(self):
         if self.skip_model_changed:
                 return
-        Mainframe.model.entries[Mainframe.model.current]['stipulation'] = unicode(self.inputStipulation.currentText()).encode('ascii', 'ignore').strip()
-        Mainframe.model.entries[Mainframe.model.current]['intended-solutions'] = unicode(self.inputIntended.text()).encode('ascii', 'ignore').strip()
+        Mainframe.model.cur()['stipulation'] = unicode(self.inputStipulation.currentText()).encode('ascii', 'ignore').strip()
+        Mainframe.model.cur()['intended-solutions'] = unicode(self.inputIntended.text()).encode('ascii', 'ignore').strip()
         for k in ['stipulation', 'intended-solutions']:
-            if Mainframe.model.entries[Mainframe.model.current][k] == '':
-                del Mainframe.model.entries[Mainframe.model.current][k]
+            if Mainframe.model.cur()[k] == '':
+                del Mainframe.model.cur()[k]
         self.skip_model_changed = True
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
@@ -1442,23 +1442,23 @@ class PopeyeView(QtGui.QSplitter):
         
     def onOptions(self):
         entry_options = []
-        if Mainframe.model.entries[Mainframe.model.current].has_key('options'):
-            entry_options = Mainframe.model.entries[Mainframe.model.current]['options']
+        if Mainframe.model.cur().has_key('options'):
+            entry_options = Mainframe.model.cur()['options']
         dialog = options.OptionsDialog(model.FairyHelper.options, sorted(model.FairyHelper.conditions),\
             14, 3, entry_options, Lang)
         if(dialog.exec_()):
-            Mainframe.model.entries[Mainframe.model.current]['options'] = dialog.getOptions()
+            Mainframe.model.cur()['options'] = dialog.getOptions()
             self.skip_model_changed = True
             Mainframe.model.markDirty()
             Mainframe.sigWrapper.sigModelChanged.emit()
             self.skip_model_changed = False
     def onTwins(self):
         twins = {}
-        if Mainframe.model.entries[Mainframe.model.current].has_key('twins'):
-            twins = Mainframe.model.entries[Mainframe.model.current]['twins']
+        if Mainframe.model.cur().has_key('twins'):
+            twins = Mainframe.model.cur()['twins']
         dialog = options.TwinsDialog(Mainframe.model.twinsAsText(), Lang)
         if(dialog.exec_()):
-            Mainframe.model.entries[Mainframe.model.current]['twins'] = dialog.getTwins()
+            Mainframe.model.cur()['twins'] = dialog.getTwins()
             self.skip_model_changed = True
             Mainframe.model.markDirty()
             Mainframe.sigWrapper.sigModelChanged.emit()
@@ -1470,9 +1470,9 @@ class PopeyeView(QtGui.QSplitter):
             lines = self.raw_output.strip().split("\n")
             if len(lines) < 2:
                 return
-            Mainframe.model.entries[Mainframe.model.current]['solution'] = ("\n".join(lines[1:-2])).strip()
+            Mainframe.model.cur()['solution'] = ("\n".join(lines[1:-2])).strip()
         else:
-            Mainframe.model.entries[Mainframe.model.current]['solution'] = self.solutionOutput.solution
+            Mainframe.model.cur()['solution'] = self.solutionOutput.solution
         
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
@@ -1501,7 +1501,7 @@ class PopeyeView(QtGui.QSplitter):
         self.actions['start'].setEnabled(False)        
 
         self.reset()
-        self.entry_copy = copy.deepcopy(Mainframe.model.entries[Mainframe.model.current])
+        self.entry_copy = copy.deepcopy(Mainframe.model.cur())
                 
         Mainframe.sigWrapper.sigFocusOnPopeye.emit()
         
@@ -1577,7 +1577,7 @@ class PopeyeView(QtGui.QSplitter):
             self.compact_possible = False
 
     def onModelChanged(self):
-        self.input.setText(legacy.popeye.create_input(Mainframe.model.entries[Mainframe.model.current],\
+        self.input.setText(legacy.popeye.create_input(Mainframe.model.cur(),\
             self.sstip.isChecked(), copy.deepcopy(Conf.value('popeye-sticky-options')),\
             Mainframe.model.board.toPopeyePiecesClause()))
         if self.skip_model_changed:
@@ -1588,16 +1588,16 @@ class PopeyeView(QtGui.QSplitter):
             
         self.skip_model_changed = True
 
-        if Mainframe.model.entries[Mainframe.model.current].has_key('stipulation'):
-            stipulation = Mainframe.model.entries[Mainframe.model.current]['stipulation']
+        if Mainframe.model.cur().has_key('stipulation'):
+            stipulation = Mainframe.model.cur()['stipulation']
             if stipulation in PopeyeView.stipulations:
                 self.inputStipulation.setCurrentIndex(PopeyeView.stipulations.index(stipulation))
             self.inputStipulation.setEditText(stipulation)
         else:
             self.inputStipulation.setCurrentIndex(0)
             
-        if Mainframe.model.entries[Mainframe.model.current].has_key('intended-solutions'):
-            self.inputIntended.setText(str(Mainframe.model.entries[Mainframe.model.current]['intended-solutions']))
+        if Mainframe.model.cur().has_key('intended-solutions'):
+            self.inputIntended.setText(str(Mainframe.model.cur()['intended-solutions']))
         else:
             self.inputIntended.setText("")
         
@@ -1636,7 +1636,7 @@ class YamlView(QtGui.QTextEdit):
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
 
     def onModelChanged(self):
-        self.setText(yaml.dump(Mainframe.model.entries[Mainframe.model.current], encoding=None, allow_unicode=True))
+        self.setText(yaml.dump(Mainframe.model.cur(), encoding=None, allow_unicode=True))
 class Conf:
     file = 'conf/main.yaml'
     keywords_file = 'conf/keywords.yaml'

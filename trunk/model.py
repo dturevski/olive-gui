@@ -413,6 +413,9 @@ class Model:
         self.is_dirty = False
         self.filename = '';
     
+    def cur(self):
+        return self.entries[self.current]
+    
     def setNewCurrent(self,  idx):
         self.current = idx
         if self.entries[idx].has_key('algebraic'):

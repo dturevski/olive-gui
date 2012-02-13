@@ -457,9 +457,9 @@ class Move:
         ep = ['', ' e.p.'][(self.cap[1] != -1) and (self.cap[1] != self.arr[1])]
         promotion = ['', '='+self.arr[0].upper()][self.dep[0] != self.arr[0]]
         letter = ['', '[' + self.letter + ']'][self.letter != '']
-        
-        return piece+self.disambiguation+depfile+action+arrival+ep+promotion+\
+        retval = piece+self.disambiguation+depfile+action+arrival+ep+promotion+\
                 checkmate+letter+self.mark
+        return retval
     
     def __eq__(self, that):
         if isinstance(that, NullMove):
@@ -833,11 +833,12 @@ class Node:
         raise UnsupportedError("Popeye semantics 2")
         
     def dump(self, board, so, self_as_text = ''):
-        if not isinstance(self.move, NullMove):
-            self.move.disambiguate(board)
-        self.make(board)
+        #if not isinstance(self.move, NullMove):
+        #    self.move.disambiguate(board)
+        #    print "ret from dis for ", str(self.move)
         if self_as_text == '':
-            self_as_text = self.as_text()
+            self_as_text = self.as_text(board)
+        self.make(board)
         so.add(self_as_text, board, not isinstance(self.move, NullMove))
         sibling_move_no = str(((self.ply_no + 1 + 1) >> 1))
         ellipsis = ['...', '.'][(self.ply_no + 1)%2]
@@ -876,7 +877,7 @@ class Node:
                         so.add('but: ', board, False)
                     if (self.ply_no + 1)%2 == 1:
                         so.add(sibling_move_no + '.', board, False)
-                text = '/'.join([s.as_text() for s in groups[digest]])
+                text = '/'.join([s.as_text(board) for s in groups[digest]])
                 groups[digest][0].dump(board, so, text)
         
         self.unmake(board)
@@ -917,12 +918,14 @@ class MoveNode(Node):
         self.move.make(board)
     def unmake(self, board):
         self.move.unmake(board)
-    def as_text(self):
+    def as_text(self, board):
         if isinstance(self.move, NullMove):
             if self.is_set:
                 return 'setplay: '
             if self.is_threat:
                 return 'threat: '
+        else:
+            self.move.disambiguate(board)
         return str(self.move)
     
     def hash(self):
@@ -997,9 +1000,11 @@ class TwinNode(Node):
             return retval
         retval += " ".join([self.commands[i] + " " + " ".join(self.arguments[i]) for i in xrange(len(self.commands))])
         return retval
-    def dump(self, board, so):
+    def dump(self, board, so, quiet = False):
         self.make(board)
-        so.add(self.as_text(), board, True)
+        
+        if not quiet:
+            so.add(self.as_text(), board, True)
         sibling_move_no = str(((self.ply_no + 1 + 1) >> 1))
         ellipsis = ['...', '.'][(self.ply_no + 1)%2]
         
@@ -1053,7 +1058,7 @@ class SolutionOutput:
             self.cur_node_id += 1
     def create_output(self, root_node, board):
         for twin in root_node.siblings:
-            twin.dump(board, self)
+            twin.dump(board, self, 1 == len(root_node.siblings))
             self.solution += "\n\n"
         self.solution = self.solution.strip()
 
