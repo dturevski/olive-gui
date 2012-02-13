@@ -4,7 +4,6 @@
 import os
 import tempfile
 import copy
-import ctypes
 
 # 3rd party
 import yaml
@@ -43,17 +42,26 @@ class Mainframe(QtGui.QMainWindow):
 
     def __init__(self):
         super(Mainframe, self).__init__()
-        self.init()
-        
-    def init(self):               
+
         Mainframe.model = model.Model()
 
+        self.initLayout()
+        self.initActions()
+        self.initMenus()
+        self.initToolbar()        
+        self.initSignals()
+        self.initFrame()
+
+        self.updateTitle()
+        self.overview.rebuild()
+        self.show()
+
+    def initLayout(self):
         # widgets
         hbox = QtGui.QHBoxLayout()
         
         # left pane
         widgetLeftPane = QtGui.QWidget()
-        #widgetLeftPane.setFixedWidth(300)
         vboxLeftPane = QtGui.QVBoxLayout()
         vboxLeftPane.setSpacing(0)
         vboxLeftPane.setContentsMargins(0, 0, 0, 0)
@@ -71,7 +79,6 @@ class Mainframe(QtGui.QMainWindow):
         self.tabBar1.addTab(self.chessBox, Lang.value('TC_Pieces'))
 
         vboxLeftPane.addWidget(self.tabBar1, 1)
-
         widgetLeftPane.setLayout(vboxLeftPane)
         
         # right pane
@@ -99,12 +106,7 @@ class Mainframe(QtGui.QMainWindow):
         self.setCentralWidget(cw)
         self.centralWidget().setLayout(hbox)
         
-        
-        self.statusBar()
-        
-        
-        
-        # Actions
+    def initActions(self):
         self.newAction = QtGui.QAction(QtGui.QIcon('resources/icons/page-white.png'), Lang.value('MI_New'), self)        
         self.newAction.setShortcut('Ctrl+N')
         self.newAction.triggered.connect(self.onNewFile)
@@ -125,7 +127,7 @@ class Mainframe(QtGui.QMainWindow):
 
         self.exportHtmlAction = QtGui.QAction(Lang.value('MI_Export_HTML'), self)        
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
-        self.exportPdfAction = QtGui.QAction(Lang.value('MI_Export_PDF'), self)        
+        self.exportPdfAction = QtGui.QAction(QtGui.QIcon('resources/icons/printer.png'), Lang.value('MI_Export_PDF'), self)        
         self.exportPdfAction.triggered.connect(self.onExportPdf)
         self.exportImgAction = QtGui.QAction(Lang.value('MI_Export_Image'), self)        
         self.exportImgAction.triggered.connect(self.onExportImg)
@@ -161,7 +163,8 @@ class Mainframe(QtGui.QMainWindow):
             self.langActions[-1].triggered.connect(self.makeSetNewLang(key))
             self.langActions[-1].setCheckable(True)
             self.langActions[-1].setChecked(key == Lang.current)
-        
+
+    def initMenus(self):
         # Menus
         menubar = self.menuBar()
         # File menu
@@ -190,14 +193,14 @@ class Mainframe(QtGui.QMainWindow):
         map(self.popeyeMenu.addAction, [self.startPopeyeAction, self.stopPopeyeAction,\
             self.optionsAction, self.twinsAction])
         
-        
+        # help menu
         menubar.addSeparator()
         self.helpMenu = menubar.addMenu(Lang.value('MI_Help'))
         self.aboutAction = QtGui.QAction(QtGui.QIcon('resources/icons/information.png'), Lang.value('MI_About'), self)        
         self.aboutAction.triggered.connect(self.onAbout)
         self.helpMenu.addAction(self.aboutAction)
-        
-        # Toolbars
+
+    def initToolbar(self):
         self.toolbar = self.addToolBar('')
         self.toolbar.setObjectName('thetoolbar')
         map(self.toolbar.addAction, [self.newAction, self.openAction, self.saveAction])
@@ -206,38 +209,31 @@ class Mainframe(QtGui.QMainWindow):
         self.toolbar.addSeparator()
         map(self.toolbar.addAction, [self.startPopeyeAction, self.stopPopeyeAction,\
             self.optionsAction, self.twinsAction])
-        self.toolbar.addSeparator()
-        
+        self.toolbar.addSeparator()        
         self.createTransformActions()
-        
-        self.updateTitle()
-        self.overview.rebuild()
-        
-        
+
+    def initSignals(self):
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigFocusOnPieces.connect(self.onFocusOnPieces)
         Mainframe.sigWrapper.sigFocusOnStipulation.connect(self.onFocusOnStipulation)
         Mainframe.sigWrapper.sigFocusOnPopeye.connect(self.onFocusOnPopeye)
         Mainframe.sigWrapper.sigFocusOnSolution.connect(self.onFocusOnSolution)
-        
-                
-        self.setWindowIcon(QtGui.QIcon('resources/icons/olive.ico'))
-        if 'nt' == os.name:
-            try:
-                myappid = 'OrgYacpdb.OliveShmolive.CurrentVersion'
-                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-            except:
-                pass
 
+    def initFrame(self):
+        # window banner
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/olive.png')))
+        
+        # restoring windows and toolbars geometry 
         settings = QtCore.QSettings()
         if len(settings.value("geometry").toByteArray()):
             self.restoreGeometry(settings.value("geometry").toByteArray());
             self.restoreState(settings.value("windowState").toByteArray());
         else:
+            # first run
             self.setGeometry(32, 32, 32, 32)
-        self.show()
-    
+
+        
     def updateTitle(self): 
         docname = Lang.value('WT_New_Collection')
         if Mainframe.model.filename != '':

@@ -8,6 +8,8 @@ Usage:
 
 # standard
 import sys
+import os
+import ctypes
 
 # 3rd party
 from PyQt4 import QtGui, QtCore
@@ -16,7 +18,15 @@ from PyQt4 import QtGui, QtCore
 import gui
 
 def main():
-    
+
+    # trick to make Windows 7 display the app icon in the taskbar:
+    if 'nt' == os.name:
+        try:
+            myappid = 'OrgYacpdb.OliveShmolive.CurrentVersion'
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except:
+            pass
+            
     # loading configs
     gui.Conf.read()
     gui.Lang.read()
@@ -24,6 +34,7 @@ def main():
     # Qt bootstrap
     app = QtGui.QApplication(sys.argv)
     
+    # required for QSetting to work properly
     QtCore.QCoreApplication.setOrganizationName("OSS");
     QtCore.QCoreApplication.setOrganizationDomain("yacpdb.org");
     QtCore.QCoreApplication.setApplicationName("olive");
@@ -34,12 +45,13 @@ def main():
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004y_.ttf')
 
     mainframe = gui.Mainframe()
+    
+    # if invoked with "olive.py filename.olv" - read filename.olv
     if len(sys.argv) and sys.argv[-1][-4:] == '.olv':
         mainframe.openCollection(sys.argv[-1])
-
     
+    # entering main loop
     sys.exit(app.exec_())
-
 
 if __name__ == '__main__':
     main()  
