@@ -224,8 +224,11 @@ class Mainframe(QtGui.QMainWindow):
                 
         self.setWindowIcon(QtGui.QIcon('resources/icons/olive.ico'))
         if 'nt' == os.name:
-            myappid = 'com.google.code.olive-gui.' + Conf.value('version')
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+            try:
+                myappid = 'OrgYacpdb.OliveShmolive.CurrentVersion'
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+            except:
+                pass
 
         settings = QtCore.QSettings()
         if len(settings.value("geometry").toByteArray()):
