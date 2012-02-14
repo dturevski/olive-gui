@@ -1,4 +1,11 @@
-import array, copy, popeye
+# -*- coding: utf-8 -*-
+
+# standard
+import array
+import copy
+
+# local
+import popeye
 
 # globals
 PIECES = 'KkQqRrBbSsPp'
@@ -994,9 +1001,10 @@ class TwinNode(Node):
     def as_text(self):
         retval = self.id + ') '
         if not self.anticipator is None:
-            retval += 'Continued '
+            retval = self.id + '=' + chr(ord(self.id)-1) + ') + '
+        
         if len(self.commands) == 0:
-            retval += 'Diagram'
+            #retval += 'Diagram'
             return retval
         retval += " ".join([self.commands[i] + " " + " ".join(self.arguments[i]) for i in xrange(len(self.commands))])
         return retval
