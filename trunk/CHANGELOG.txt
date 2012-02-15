@@ -1,6 +1,9 @@
 ---
 version: trunk
 todo: 
+  - import pbm: ask encoding
+  - file -> save template
+  - prettify legend
   - yacpdb communication: check, add, sync down, sync up
   - Import: .cvv? .pgn?
 changes: []
