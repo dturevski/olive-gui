@@ -65,6 +65,9 @@ MI_Save:
 MI_Save_as:
   en: Save collection as
   ru: Сохранить коллекцию как
+MI_Save_template:
+  en: Save template
+  ru: Сохранить шаблон
 MI_Language:
   en: Change language
   ru: Сменить язык
@@ -296,3 +299,8 @@ MSG_Confirm_delete_entry:
 MSG_Not_supported:
   en: "Not supported: %s"
   ru: "Не поддерживается: %s"
+
+ # MISC
+MISC_Encoding:
+  en: "Character encoding:"
+  ru: "Кодировка:"

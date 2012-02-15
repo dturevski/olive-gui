@@ -1,10 +1,12 @@
 auto-compactify: 1
 default-lang: ru
 fairy-zoo:
-- [white LE, white PA, white VA, white NA, black L, white G, white N]
-- [black LE, black PA, black VA, black NA, white L, black G, black N]
-- [neutral NA, neutral LE, '', '', '', neutral G, neutral N]
+- [white LE, white PA, white VA, white NA, '', white G, white N]
+- [black LE, black PA, black VA, black NA, '', black G, black N]
+- ['', '', '', '', '', neutral G, neutral N]
 horsehead-glyph: N
+import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
+import-post-decode-default: ISO-8859-1
 languages: {en: English, ru: Русский}
 popeye-executable: {nt: PY459USR\pywin32.exe -maxmem 1G, posix: /home/dima/temp/popeye/py
     -maxmem 2G}

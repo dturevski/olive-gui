@@ -1,14 +1,7 @@
----
-authors: []
-source: ""
-source-id: ""
-date: ""
-algebraic: 
-  white: []
+algebraic:
   black: []
-stipulation: "#2"
-options:
-  - SetPlay
-  - Defence 1
-solution: ""
+  white: []
 keywords: []
+options: []
+solution: ''
+stipulation: h#2

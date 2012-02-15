@@ -19,6 +19,9 @@ import copy
 # local
 import model
 
+# may be altered from outside
+PBM_ENCODING = "ISO-8859-1"
+
 class PbmEntries:
     def __init__(self, file):
         self.file = file
@@ -60,7 +63,7 @@ def read_string(file):
     file.seek(offset)
     string = file.read(read_int(file, 'H'))
     file.seek(cur_pos)
-    return unicode(string.decode("ISO-8859-1"))
+    return unicode(string.decode(PBM_ENCODING))
 
 def byte2piece(byte):
     if byte == 32:

@@ -7,6 +7,10 @@ import datetime
 # 3rd party
 import yaml
 
+# local
+import legacy.popeye
+import legacy.chess
+
 COLORS = ['black', 'white',  'neutral']
 FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing', \
     'Royal', 'Volage', 'Functionary', 'HalfNeutral', \
@@ -485,3 +489,23 @@ class Model:
             return ''
         return "\n".join([k + ': ' + self.entries[self.current]['twins'][k] for k in sorted(self.entries[self.current]['twins'].keys())])
     
+    def saveDefaultEntry(self):
+        f = open(Model.file, 'w')
+        try:
+            f.write(unicode(yaml.dump(self.defaultEntry, encoding=None, allow_unicode=True)).encode('utf8'))
+        finally:
+            f.close()
+            
+def createPrettyTwinsText(e):
+    if not e.has_key('twins'):
+        return ''
+    formatted, prev_twin = [], None
+    for k in sorted(e['twins'].keys()):
+        try:
+            twin = legacy.chess.TwinNode(k, e['twins'][k], prev_twin, e)
+        except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as exc:
+            formatted.append('%s) %s' %(k, e['twins'][k]))
+        else:
+            formatted.append(twin.as_text())
+            prev_twin = twin
+    return "<br/>".join(formatted)

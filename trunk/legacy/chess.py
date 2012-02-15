@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 # standard
 import array
@@ -1001,13 +1001,33 @@ class TwinNode(Node):
     def as_text(self):
         retval = self.id + ') '
         if not self.anticipator is None:
-            retval = self.id + '=' + chr(ord(self.id)-1) + ') + '
+            retval = self.id + '=' + self.anticipator.id + ') '
         
         if len(self.commands) == 0:
             #retval += 'Diagram'
             return retval
-        retval += " ".join([self.commands[i] + " " + " ".join(self.arguments[i]) for i in xrange(len(self.commands))])
-        return retval
+        parts = []
+        for i in xrange(len(self.commands)):
+            if 'Move' == self.commands[i]:
+                parts.append(u'%s→%s' % (self.arguments[i][0], self.arguments[i][1]))
+            if 'Exchange' == self.commands[i]:
+                parts.append(u'%s↔%s' % (self.arguments[i][0], self.arguments[i][1]))
+            if 'Remove' == self.commands[i]:
+                parts.append(u'-%s' % self.arguments[i][0])
+            if 'Substitute' == self.commands[i]:
+                parts.append(u'%s→%s' % (self.arguments[i][0].upper(), self.arguments[i][1].upper()))
+            if 'Add' == self.commands[i]:
+                parts.append(u'+%s %s ' % (self.arguments[i][0], self.arguments[i][1]))
+            if 'Rotate' == self.commands[i]:
+                board.rotate(self.arguments[i][0])
+            if 'Mirror' == self.commands[i]:
+                board.mirror(self.arguments[i][0])
+            if 'Shift' == self.commands[i]:
+                parts.append(u'%s⇒%s' % (self.arguments[i][0], self.arguments[i][1]))
+            if 'PolishType' == self.commands[i]:
+                parts.append(u'Polish')
+        #retval += " ".join([self.commands[i] + " " + " ".join(self.arguments[i]) for i in xrange(len(self.commands))])
+        return retval + ' '.join(parts)
     def dump(self, board, so, quiet = False):
         self.make(board)
         

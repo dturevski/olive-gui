@@ -1,12 +1,16 @@
 ---
 version: trunk
 todo: 
-  - import pbm: ask encoding
-  - file -> save template
   - prettify legend
+  - different notations in compactify
   - yacpdb communication: check, add, sync down, sync up
   - Import: .cvv? .pgn?
-changes: []
+  - yacpdb bug: not escaping >| etc when dumping YAML
+  - icons on model dialogs
+changes:
+  - file -> save template
+  - import pbm: ask encoding
+  - bug fixed: non-ascii filenames
 ---
 version: 0.12.2.3b
 changes:

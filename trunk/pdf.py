@@ -206,7 +206,7 @@ class ExportDocument:
         if(e.has_key('options')):
             parts.append("<b>" + "<br/>".join(e['options']) + "</b>")
         if(e.has_key('twins')):
-            parts.append("<br/>".join([k + ') ' + e['twins'][k] for k in sorted(e['twins'].keys())]))
+            parts.append(model.createPrettyTwinsText(e))
         return "<br/>".join(parts)
     solver = staticmethod(solver)
     

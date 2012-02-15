@@ -122,6 +122,9 @@ class Mainframe(QtGui.QMainWindow):
         self.saveAsAction = QtGui.QAction(QtGui.QIcon('resources/icons/page-white-save.png'), Lang.value('MI_Save_as'), self)        
         self.saveAsAction.triggered.connect(self.onSaveFileAs)
 
+        self.saveTemplateAction = QtGui.QAction(Lang.value('MI_Save_template'), self)        
+        self.saveTemplateAction.triggered.connect(self.onSaveTemplate)
+
         self.importPbmAction = QtGui.QAction(Lang.value('MI_Import_PBM'), self)        
         self.importPbmAction.triggered.connect(self.onImportPbm)
 
@@ -169,7 +172,8 @@ class Mainframe(QtGui.QMainWindow):
         menubar = self.menuBar()
         # File menu
         self.fileMenu = menubar.addMenu(Lang.value('MI_File'))
-        map(self.fileMenu.addAction, [self.newAction, self.openAction, self.saveAction, self.saveAsAction])
+        map(self.fileMenu.addAction, [self.newAction, self.openAction,\
+            self.saveAction, self.saveAsAction, self.saveTemplateAction])
         self.fileMenu.addSeparator()
         self.langMenu = self.fileMenu.addMenu(Lang.value('MI_Language'))
         map(self.langMenu.addAction, self.langActions)
@@ -274,6 +278,7 @@ class Mainframe(QtGui.QMainWindow):
         self.openAction.setText(Lang.value('MI_Open'))
         self.saveAction.setText(Lang.value('MI_Save'))
         self.saveAsAction.setText(Lang.value('MI_Save_as'))
+        self.saveTemplateAction.setText(Lang.value('MI_Save_template'))
         self.addEntryAction.setText(Lang.value('MI_Add_entry'))
         self.deleteEntryAction.setText(Lang.value('MI_Delete_entry'))
         self.startPopeyeAction.setText(Lang.value('MI_Run_Popeye'))
@@ -322,7 +327,7 @@ class Mainframe(QtGui.QMainWindow):
 
     def openCollection(self,  fileName):
         try:
-            f = open(fileName, 'r')
+            f = open(unicode(fileName), 'r')
             Mainframe.model = model.Model()
             Mainframe.model.delete(0)
             for data in yaml.load_all(f):
@@ -367,9 +372,16 @@ class Mainframe(QtGui.QMainWindow):
         fileName = QtGui.QFileDialog.getSaveFileName(self, Lang.value('MI_Save_as'), default_dir, "(*.olv)")
         if not fileName:
             return
-        Mainframe.model.filename = str(fileName)
+        Mainframe.model.filename = unicode(fileName)
         self.onSaveFile()
-        
+
+    def onSaveTemplate(self):
+        Mainframe.model.defaultEntry = copy.deepcopy(Mainframe.model.cur())
+        #try:
+        Mainframe.model.saveDefaultEntry()
+        #except IOError:
+        #    msgBox(Lang.value('MSG_IO_failed'))
+            
     def doDirtyCheck(self):
         if not Mainframe.model.is_dirty:
             return True
@@ -384,20 +396,43 @@ class Mainframe(QtGui.QMainWindow):
         else:
             return False
         return False
+    
+    def getOpenFileNameAndEncoding(self, title, dir, filter):
+        dialog = QtGui.QFileDialog()
+        dialog.setOption(QtGui.QFileDialog.DontUseNativeDialog, True)
+        dialog.setFilter(filter)
+        dialog.setWindowTitle(title)
         
+        encodings = Conf.value('import-post-decode')
+        keys = sorted(encodings.keys())
+        combo = QtGui.QComboBox()
+        combo.addItems(["%s (%s)" % (k, encodings[k]) for k in keys])
+        combo.setCurrentIndex(keys.index(Conf.value('import-post-decode-default')))
+
+        grid = dialog.layout()
+        grid.addWidget(QtGui.QLabel(Lang.value('MISC_Encoding')), 4, 0)
+        grid.addWidget(combo, 4, 1)
+        
+        fileName = False
+        if dialog.exec_() and len(dialog.selectedFiles()):
+            fileName = dialog.selectedFiles()[0]
+        return fileName, keys[combo.currentIndex()]
+    
     def onImportPbm(self):
         if not self.doDirtyCheck():
             return
         default_dir = './collections/'
         if Mainframe.model.filename != '':
             default_dir, tail = os.path.split(Mainframe.model.filename)
-        fileName = QtGui.QFileDialog.getOpenFileName(self, Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
+        #fileName = QtGui.QFileDialog.getOpenFileName(self, Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
+        fileName, encoding = self.getOpenFileNameAndEncoding(Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
         if not fileName:
             return
         try:
             Mainframe.model = model.Model()
             Mainframe.model.delete(0)
-            file = open(fileName)
+            file = open(unicode(fileName))
+            pbm.PBM_ENCODING = encoding
             for data in pbm.PbmEntries(file):
                 Mainframe.model.add(model.makeSafe(data), False)
             file.close()
@@ -423,7 +458,7 @@ class Mainframe(QtGui.QMainWindow):
             return
         try:
             ed = pdf.ExportDocument(Mainframe.model.entries, Lang)
-            ed.doExport(fileName)
+            ed.doExport(unicode(fileName))
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
         except:
@@ -435,7 +470,7 @@ class Mainframe(QtGui.QMainWindow):
             return
         try:
             print Mainframe.model.board.toFen(), fileName 
-            xfen2img.convert(Mainframe.model.board.toFen(), str(fileName))
+            xfen2img.convert(Mainframe.model.board.toFen(), unicode(fileName))
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
         except:
