@@ -1,7 +1,4 @@
-algebraic:
-  black: []
-  white: []
-keywords: []
+algebraic: {}
+comments: [По В.Гурову]
 options: []
-solution: ''
 stipulation: h#2

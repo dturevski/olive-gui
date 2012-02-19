@@ -11,6 +11,8 @@ import popeye
 PIECES = 'KkQqRrBbSsPp'
 BLACK = False
 WHITE = True
+NOTATION = {'K':u'Кр', 'Q':u'Ф', 'R':u'Л', 'B':u'С', 'S':u'К', 'P':u'п'}
+
 
 NAME = 0
 PREV = 1
@@ -457,13 +459,14 @@ class Move:
         if self.is_castling:
             return ['O-O', 'O-O-O'][self.rook_before in [0, 56]] + checkmate
         
-        piece = [self.dep[0], ''][self.dep[0] in 'pP'].upper()
+        piece = [NOTATION[self.dep[0].upper()], ''][self.dep[0] in 'pP']
         depfile = ['', 'abcdefgh'[self.dep[1]%8]][(self.cap[1] != -1) and (self.dep[0] in 'pP')]
         action = ['', 'x'][self.cap[1] != -1]
         arrival = 'abcdefgh'[self.arr[1]%8] + '87654321'[int(self.arr[1]/8)]
         ep = ['', ' e.p.'][(self.cap[1] != -1) and (self.cap[1] != self.arr[1])]
         promotion = ['', '='+self.arr[0].upper()][self.dep[0] != self.arr[0]]
         letter = ['', '[' + self.letter + ']'][self.letter != '']
+        
         retval = piece+self.disambiguation+depfile+action+arrival+ep+promotion+\
                 checkmate+letter+self.mark
         return retval
@@ -933,7 +936,7 @@ class MoveNode(Node):
                 return 'threat: '
         else:
             self.move.disambiguate(board)
-        return str(self.move)
+        return unicode(self.move)
     
     def hash(self):
         return self.move.hash()

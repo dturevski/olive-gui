@@ -7,10 +7,12 @@ todo:
   - Import: .cvv? .pgn?
   - yacpdb bug: not escaping >| etc when dumping YAML
   - icons on model dialogs
+  - selection handling
 changes:
   - file -> save template
   - import pbm: ask encoding
   - bug fixed: non-ascii filenames
+  - bug fixed: paste xfen
 ---
 version: 0.12.2.3b
 changes:

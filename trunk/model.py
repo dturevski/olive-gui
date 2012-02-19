@@ -262,7 +262,7 @@ class Board:
             elif('(' == fen[i]):
                 idx = fen.find(')', i)
                 if idx != -1:
-                    self.add(makePieceFromXfen(fen[i+1:idx-1]), j)
+                    self.add(makePieceFromXfen(fen[i+1:idx]), j)
                     j = j + 1
                     i = idx
             elif fen[i].lower() in 'kqrbspeofawdx':

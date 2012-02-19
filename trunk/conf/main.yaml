@@ -8,6 +8,10 @@ horsehead-glyph: N
 import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
 import-post-decode-default: ISO-8859-1
 languages: {en: English, ru: Русский}
+notations:
+  English: [K, Q, R, B, S, P]
+  FIDE: [K, D, T, L, S, B]
+  Русская: [Кр, Ф, Л, С, К, п]
 popeye-executable: {nt: PY459USR\pywin32.exe -maxmem 1G, posix: /home/dima/temp/popeye/py
     -maxmem 2G}
 popeye-sticky-options: [Variation, NoBoard]

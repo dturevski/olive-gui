@@ -665,12 +665,87 @@ class OverviewList(QtGui.QTreeWidget):
         super(OverviewList, self).__init__()
         self.setAlternatingRowColors(True)
         
+        self.clipboard = QtGui.QApplication.clipboard()
+        
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         self.currentItemChanged.connect(self.onCurrentItemChanged)
+        
+        #self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
+        self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        
+        
         self.skip_model_changed = False
         self.skip_current_item_changed = False
         
+    def mousePressEvent(self, e):
+        if e.buttons() != QtCore.Qt.RightButton:
+            return QtGui.QTreeWidget.mousePressEvent(self, e)
+        
+        hasSelection = len(self.selectionModel().selectedRows()) > 0
+        
+        menu = QtGui.QMenu('')
+        
+
+        copyAction = QtGui.QAction(Lang.value('MI_Copy'), self)
+        copyAction.triggered.connect(self.onCopy)
+        copyAction.setEnabled(hasSelection)
+        menu.addAction(copyAction)
+        
+        cutAction = QtGui.QAction(Lang.value('MI_Cut'), self)
+        cutAction.triggered.connect(self.onCut)
+        cutAction.setEnabled(hasSelection)
+        menu.addAction(cutAction)
+        
+        pasteAction = QtGui.QAction(Lang.value('MI_Paste'), self)
+        pasteAction.triggered.connect(self.onPaste)
+        pasteAction.setEnabled(len(self.clipboard.text()) > 0)
+        menu.addAction(pasteAction)
+        
+        saveSelection = QtGui.QAction(Lang.value('MI_Save_selection_as'), self)
+        saveSelection.triggered.connect(self.onSaveSelectionAs)
+        saveSelection.setEnabled(hasSelection)
+        menu.addAction(saveSelection)
+        
+        menu.exec_(e.globalPos())
+
+    def getSelectionAsYaml(self):
+        text = ''
+        for idx in sorted([x.row() for x in self.selectionModel().selectedRows()]):
+            text = text + "---\n"
+            text = text + unicode(yaml.dump(\
+                    Mainframe.model.entries[idx], encoding=None, allow_unicode=True
+                    )).encode('utf8')
+        return text
+        
+    def onCopy(self):
+        self.clipboard.setText(self.getSelectionAsYaml())
+
+    def onCut(self):
+        self.onCopy()
+        selection = sorted([x.row() for x in self.selectionModel().selectedRows()])
+        selection.reverse()
+        for idx in selection:
+            Mainframe.model.delete(idx)
+        self.rebuild()
+        Mainframe.sigWrapper.sigModelChanged.emit()
+
+        
+    def onPaste(self):
+        try:
+            data = yaml.load(unicode(self.clipboard.text()))
+        except yaml.YAMLError, e:
+            msgBox(Lang.value('MSG_YAML_failed') % e)
+            return
+        for entry in data:
+            Mainframe.model.insert(entry, True, Mainframe.model.current + 1)
+        self.overview.rebuild()
+        Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def onSaveSelectionAs(self):
+        pass
+
     def init(self):
         self.setColumnCount(6)
         self.onLangChanged()
@@ -1291,9 +1366,10 @@ class KeywordsInputWidget(QtGui.QTextEdit):
     def __init__(self):
         super(KeywordsInputWidget, self).__init__()
         self.kwdMenu = QtGui.QMenu(Lang.value('MI_Add_keyword'))
-        for section in sorted(Conf.keywords.keys()):
+        #for section in sorted(Conf.keywords.keys()):
+        for section in Conf.keywords.keys():
             submenu = self.kwdMenu.addMenu(section)
-            for keyword in Conf.keywords[section]:
+            for keyword in sorted(Conf.keywords[section]):
                 action = QtGui.QAction(keyword, self)        
                 action.triggered.connect(self.createCallable(keyword))
                 submenu.addAction(action)

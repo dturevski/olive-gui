@@ -164,6 +164,18 @@ MI_Export_PDF:
 MI_Export_Image:
   en: Diagram to image file 
   ru: Диаграмму в файл изображения
+MI_Cut:
+  en: Cut 
+  ru: Вырезать
+MI_Copy:
+  en: Copy 
+  ru: Копировать
+MI_Paste:
+  en: Paste 
+  ru: Вставить
+MI_Save_selection_as:
+  en: Save selection as
+  ru: Сохранить выбранное как
 
 # Piece properties
 PP_Color:
