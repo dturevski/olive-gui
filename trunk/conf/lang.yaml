@@ -155,6 +155,9 @@ MI_Export:
 MI_Import_PBM:
   en: Problemist(e) .PBM
   ru: Problemist(e) .PBM
+MI_Import_CCV:
+  en: Fancy .CCV
+  ru: Fancy .CCV
 MI_Export_HTML:
   en: HTML
   ru: HTML
@@ -298,6 +301,9 @@ MSG_IO_failed:
 MSG_PBM_import_failed:
   en: Failed to read Problemiste format (known olive bug)
   ru: Ошибка при чтении формата Problemist (внутренняя ошибка, файл возможно в порядке)
+MSG_CCV_import_failed:
+  en: Failed to read Fancy format
+  ru: Ошибка при чтении формата Fancy
 MSG_PDF_export_failed:
   en: |
     PDF export failed.

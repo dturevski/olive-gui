@@ -464,7 +464,7 @@ class Move:
         action = ['', 'x'][self.cap[1] != -1]
         arrival = 'abcdefgh'[self.arr[1]%8] + '87654321'[int(self.arr[1]/8)]
         ep = ['', ' e.p.'][(self.cap[1] != -1) and (self.cap[1] != self.arr[1])]
-        promotion = ['', '='+self.arr[0].upper()][self.dep[0] != self.arr[0]]
+        promotion = ['', '='+NOTATION[self.arr[0].upper()]][self.dep[0] != self.arr[0]]
         letter = ['', '[' + self.letter + ']'][self.letter != '']
         
         retval = piece+self.disambiguation+depfile+action+arrival+ep+promotion+\
@@ -1029,8 +1029,9 @@ class TwinNode(Node):
                 parts.append(u'%s⇒%s' % (self.arguments[i][0], self.arguments[i][1]))
             if 'polishType' == self.commands[i]:
                 parts.append(u'Polish')
-        #retval += " ".join([self.commands[i] + " " + " ".join(self.arguments[i]) for i in xrange(len(self.commands))])
-        return retval + ' '.join(parts)
+        retval += " ".join([self.commands[i].title() + " " + " ".join(self.arguments[i]) for i in xrange(len(self.commands))])
+        #return retval + ' '.join(parts)
+        return retval
     def dump(self, board, so, quiet = False):
         self.make(board)
         

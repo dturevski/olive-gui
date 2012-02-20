@@ -3,9 +3,10 @@ version: trunk
 todo: 
   - prettify legend
   - yacpdb communication: check, add, sync down, sync up
-  - Import: .cvv? .pgn?
   - yacpdb bug: not escaping >| etc when dumping YAML
   - icons on model dialogs
+---
+version: 0.12.2.4b
 changes:
   - file -> save template
   - different notations in compactify
@@ -13,6 +14,7 @@ changes:
   - import pbm: ask encoding
   - bug fixed: non-ascii filenames
   - bug fixed: paste xfen
+  - Import: .cvv
 ---
 version: 0.12.2.3b
 changes:

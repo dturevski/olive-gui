@@ -17,6 +17,7 @@ import model
 import pbm
 import pdf
 import xfen2img
+import fancy
 
 
 class SigWrapper(QtCore.QObject):
@@ -128,6 +129,9 @@ class Mainframe(QtGui.QMainWindow):
         self.importPbmAction = QtGui.QAction(Lang.value('MI_Import_PBM'), self)        
         self.importPbmAction.triggered.connect(self.onImportPbm)
 
+        self.importCcvAction = QtGui.QAction(Lang.value('MI_Import_CCV'), self)        
+        self.importCcvAction.triggered.connect(self.onImportCcv)
+
         self.exportHtmlAction = QtGui.QAction(Lang.value('MI_Export_HTML'), self)        
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
         self.exportPdfAction = QtGui.QAction(QtGui.QIcon('resources/icons/printer.png'), Lang.value('MI_Export_PDF'), self)        
@@ -180,6 +184,7 @@ class Mainframe(QtGui.QMainWindow):
         self.fileMenu.addSeparator()
         self.importMenu = self.fileMenu.addMenu(Lang.value('MI_Import'))
         self.importMenu.addAction(self.importPbmAction)
+        self.importMenu.addAction(self.importCcvAction)
         self.exportMenu = self.fileMenu.addMenu(Lang.value('MI_Export'))
         #self.exportMenu.addAction(self.exportHtmlAction)
         self.exportMenu.addAction(self.exportPdfAction)
@@ -287,6 +292,7 @@ class Mainframe(QtGui.QMainWindow):
         self.twinsAction.setText(Lang.value('MI_Twins'))
         self.aboutAction.setText(Lang.value('MI_About'))
         self.importPbmAction.setText(Lang.value('MI_Import_PBM'))
+        self.importCcvAction.setText(Lang.value('MI_Import_CCV'))
         self.exportHtmlAction.setText(Lang.value('MI_Export_HTML'))
         self.exportPdfAction.setText(Lang.value('MI_Export_PDF'))
         self.exportImgAction.setText(Lang.value('MI_Export_Image'))
@@ -446,7 +452,32 @@ class Mainframe(QtGui.QMainWindow):
                 Mainframe.model = model.Model()
             self.overview.rebuild()
             Mainframe.sigWrapper.sigModelChanged.emit()
-        
+            
+    def onImportCcv(self):
+        if not self.doDirtyCheck():
+            return
+        default_dir = './collections/'
+        if Mainframe.model.filename != '':
+            default_dir, tail = os.path.split(Mainframe.model.filename)
+        fileName, encoding = self.getOpenFileNameAndEncoding(Lang.value('MI_Import_CCV'), default_dir, "(*.ccv)")
+        if not fileName:
+            return
+        try:
+            Mainframe.model = model.Model()
+            Mainframe.model.delete(0)
+            for data in fancy.readCvv(fileName, encoding):
+                Mainframe.model.add(model.makeSafe(data), False)
+            Mainframe.model.is_dirty = False
+        #except IOError:
+        #    msgBox(Lang.value('MSG_IO_failed'))
+        #except:
+        #    msgBox(Lang.value('MSG_CCV_import_failed'))
+        finally:
+            if len(Mainframe.model.entries) == 0:
+                Mainframe.model = model.Model()
+            self.overview.rebuild()
+            Mainframe.sigWrapper.sigModelChanged.emit()
+            
     def onExportHtml(self):
         pass
 
@@ -743,6 +774,7 @@ class OverviewList(QtGui.QTreeWidget):
             msgBox(Lang.value('MSG_YAML_failed') % e)
             return
         for entry in data:
+            entry = model.makeSafe(entry)
             Mainframe.model.insert(entry, True, Mainframe.model.current + 1)
         self.rebuild()
         Mainframe.sigWrapper.sigModelChanged.emit()
