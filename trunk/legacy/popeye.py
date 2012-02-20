@@ -239,7 +239,7 @@ def parse_twin(text):
         for expr in RE_PY_TWINS:
             m = expr.match(text)
             if expr.match(text):
-                commands.append(m.group('command'))
+                commands.append(m.group('command').lower())
                 if not m.group('command') in ['PolishType']:
                     arguments.append(m.group('args').split())
                 else:

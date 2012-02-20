@@ -711,12 +711,12 @@ class OverviewList(QtGui.QTreeWidget):
         menu.exec_(e.globalPos())
 
     def getSelectionAsYaml(self):
-        text = ''
+        text = u''
         for idx in sorted([x.row() for x in self.selectionModel().selectedRows()]):
             text = text + "---\n"
-            text = text + unicode(yaml.dump(\
+            text = text + yaml.dump(\
                     Mainframe.model.entries[idx], encoding=None, allow_unicode=True
-                    )).encode('utf8')
+                    )
         return text
         
     def onCopy(self):
@@ -728,23 +728,40 @@ class OverviewList(QtGui.QTreeWidget):
         selection.reverse()
         for idx in selection:
             Mainframe.model.delete(idx)
+        if len(Mainframe.model.entries) == 0:
+            Mainframe.model = model.Model()
         self.rebuild()
         Mainframe.sigWrapper.sigModelChanged.emit()
 
         
     def onPaste(self):
         try:
-            data = yaml.load(unicode(self.clipboard.text()))
+            data = yaml.load_all(unicode(self.clipboard.text()))
+            if isinstance(data,  dict):
+                data = [data]
         except yaml.YAMLError, e:
             msgBox(Lang.value('MSG_YAML_failed') % e)
             return
         for entry in data:
             Mainframe.model.insert(entry, True, Mainframe.model.current + 1)
-        self.overview.rebuild()
+        self.rebuild()
         Mainframe.sigWrapper.sigModelChanged.emit()
 
     def onSaveSelectionAs(self):
-        pass
+        default_dir = './collections/'
+        if Mainframe.model.filename != '':
+            default_dir, tail = os.path.split(Mainframe.model.filename)
+        fileName = QtGui.QFileDialog.getSaveFileName(self, Lang.value('MI_Save_selection_as'), default_dir, "(*.olv)")
+        if not fileName:
+            return
+
+        f = open(fileName, 'w')
+        try:
+            f.write(self.getSelectionAsYaml().encode('utf8'))
+        except IOError:
+            msgBox(Lang.value('MSG_IO_failed'))
+        finally:
+            f.close()
 
     def init(self):
         self.setColumnCount(6)
@@ -1662,25 +1679,25 @@ class PopeyeView(QtGui.QSplitter):
         self.actions['stop'].setEnabled(False)
         self.actions['start'].setEnabled(True)
         try:
-            """solution = legacy.popeye.parse_output(self.entry_copy, self.raw_output)
-            self.solutionOutput = legacy.chess.SolutionOutput(False)
-            b = legacy.chess.Board()
-            b.from_algebraic(self.entry_copy['algebraic'])
-            self.solutionOutput.create_output(solution, b)
-            if Conf.value('auto-compactify'):
-                self.toggleCompact()
-            self.btnCompact.setEnabled(True)"""
             self.compact_possible = True
         except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as e:
             self.compact_possible = False
 
+    def setLegacyNotation(self,  notation):
+        legacy_notation = {}
+        notations = Conf.value('notations')
+        for a, b in zip(notations['en'], notations[notation]):
+            legacy_notation[a] = b
+        legacy.chess.NOTATION = legacy_notation
+
     def onCompact(self):
         try:
-            solution = legacy.popeye.parse_output(self.entry_copy, self.raw_output)
+            self.setLegacyNotation(Conf.value('default-notation'))
+            self.solution = legacy.popeye.parse_output(self.entry_copy, self.raw_output)
             self.solutionOutput = legacy.chess.SolutionOutput(False)
             b = legacy.chess.Board()
             b.from_algebraic(self.entry_copy['algebraic'])
-            self.solutionOutput.create_output(solution, b)
+            self.solutionOutput.create_output(self.solution, b)
             self.toggleCompact()
         except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as e:
             msgBox(Lang.value('MSG_Not_supported') % str(e))
@@ -1712,11 +1729,22 @@ class PopeyeView(QtGui.QSplitter):
             self.inputIntended.setText("")
         
         self.skip_model_changed = False
+        
     def onLangChanged(self):
         self.labelStipulation.setText(Lang.value('EP_Stipulation') + ':')
         self.labelIntended.setText(Lang.value('EP_Intended_solutions') + ':')
         self.btnEdit.setText(Lang.value('PS_Edit'))
-
+        
+    def createChangeNotationCallable(self, notation):
+        def callable():
+            self.solutionOutput = legacy.chess.SolutionOutput(False)
+            self.setLegacyNotation(notation)
+            b = legacy.chess.Board()
+            b.from_algebraic(self.entry_copy['algebraic'])
+            self.solutionOutput.create_output(self.solution, b)
+            self.output.setText(self.solutionOutput.solution)    
+        return callable
+        
 class PopeyeOutputWidget(QtGui.QTextEdit):
     def __init__(self,  parentView):
         self.parentView = parentView
@@ -1728,10 +1756,11 @@ class PopeyeOutputWidget(QtGui.QTextEdit):
             if self.parentView.solutionOutput is None:
                 menu.addAction(Lang.value('PS_Compact'), self.parentView.onCompact)
             else:
-                menu.addAction(
-                               [Lang.value('PS_Original_output'),
-                                Lang.value('PS_Compact')][self.parentView.raw_mode], 
-                                self.parentView.toggleCompact)
+                submenu = menu.addMenu(Lang.value('PS_Notation'))
+                submenu.addAction(Lang.value('PS_Original_output'), self.parentView.toggleCompact)
+                notations = Conf.value('notations')
+                for notation in notations.keys():
+                    submenu.addAction(''.join(notations[notation]), self.parentView.createChangeNotationCallable(notation))
         menu.exec_(e.globalPos())
 
 def msgBox(msg):    

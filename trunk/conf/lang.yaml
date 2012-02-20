@@ -248,6 +248,9 @@ PS_Compact:
 PS_Original_output:
   en: Original notation
   ru: Оригинальная нотация
+PS_Notation:
+  en: Notation
+  ru: Нотация
 PS_Tch:
   en: tch
   ru: tch

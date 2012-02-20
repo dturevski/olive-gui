@@ -961,34 +961,34 @@ class TwinNode(Node):
         if not self.anticipator is None:
             self.anticipator.make(board)
         for i in xrange(len(self.commands)):
-            if 'Move' == self.commands[i]:
+            if 'move' == self.commands[i]:
                 board.drop(from_xy(self.arguments[i][1]))
                 board.move(from_xy(self.arguments[i][0]), from_xy(self.arguments[i][1]))
-            if 'Exchange' == self.commands[i]:
+            if 'exchange' == self.commands[i]:
                 piece = copy.deepcopy(board.board[from_xy(self.arguments[i][1])])
                 board.drop(from_xy(self.arguments[i][1]))
                 board.move(from_xy(self.arguments[i][0]), from_xy(self.arguments[i][1]))
                 board.add(piece[NAME], from_xy(self.arguments[i][0]), piece[ID])
-            if 'Remove' == self.commands[i]:
+            if 'remove' == self.commands[i]:
                 board.drop(from_xy(self.arguments[i][0]))
-            if 'Substitute' == self.commands[i]:
+            if 'substitute' == self.commands[i]:
                 for color in [BLACK, WHITE]:
                     new_name = [self.arguments[i][1].lower(), self.arguments[i][1].upper()][color==WHITE]
                     for piece, square  in Pieces(board, color):
                         if piece.lower() == self.arguments[i][0].lower():
                             board.board[square][NAME] = new_name
-            if 'Add' == self.commands[i]:
+            if 'add' == self.commands[i]:
                 new_piece = [self.arguments[i][1][0].lower(), self.arguments[i][1][0].upper()][self.arguments[i][1] == 'white']
                 board.add(new_piece, from_xy(self.arguments[i][1][1:]), from_xy(self.arguments[i][1][1:]))
-            if 'Rotate' == self.commands[i]:
+            if 'rotate' == self.commands[i]:
                 board.rotate(self.arguments[i][0])
-            if 'Mirror' == self.commands[i]:
+            if 'mirror' == self.commands[i]:
                 board.mirror(self.arguments[i][0])
-            if 'Shift' == self.commands[i]:
+            if 'shift' == self.commands[i]:
                 x = 'abcdefgh'.find(self.arguments[i][0][0]) - 'abcdefgh'.find(self.arguments[i][1][0])
                 y = '87654321'.find(self.arguments[i][0][1]) - '87654321'.find(self.arguments[i][1][1])
                 board.shift(x, y)
-            if 'PolishType' == self.commands[i]:
+            if 'polishtype' == self.commands[i]:
                 aux_board = Board()
                 for color in [BLACK, WHITE]:
                     for name, square in Pieces(board, color):
@@ -1011,23 +1011,23 @@ class TwinNode(Node):
             return retval
         parts = []
         for i in xrange(len(self.commands)):
-            if 'Move' == self.commands[i]:
+            if 'move' == self.commands[i]:
                 parts.append(u'%s→%s' % (self.arguments[i][0], self.arguments[i][1]))
-            if 'Exchange' == self.commands[i]:
+            if 'exchange' == self.commands[i]:
                 parts.append(u'%s↔%s' % (self.arguments[i][0], self.arguments[i][1]))
-            if 'Remove' == self.commands[i]:
+            if 'remove' == self.commands[i]:
                 parts.append(u'-%s' % self.arguments[i][0])
-            if 'Substitute' == self.commands[i]:
+            if 'substitute' == self.commands[i]:
                 parts.append(u'%s→%s' % (self.arguments[i][0].upper(), self.arguments[i][1].upper()))
-            if 'Add' == self.commands[i]:
+            if 'add' == self.commands[i]:
                 parts.append(u'+%s %s ' % (self.arguments[i][0], self.arguments[i][1]))
-            if 'Rotate' == self.commands[i]:
-                board.rotate(self.arguments[i][0])
-            if 'Mirror' == self.commands[i]:
-                board.mirror(self.arguments[i][0])
-            if 'Shift' == self.commands[i]:
+            if 'rotate' == self.commands[i]:
+                parts.append(u'↻%s°' % self.arguments[i][0])
+            if 'mirror' == self.commands[i]:
+                parts.append(u'%s' % self.arguments[i][0])
+            if 'shift' == self.commands[i]:
                 parts.append(u'%s⇒%s' % (self.arguments[i][0], self.arguments[i][1]))
-            if 'PolishType' == self.commands[i]:
+            if 'polishType' == self.commands[i]:
                 parts.append(u'Polish')
         #retval += " ".join([self.commands[i] + " " + " ".join(self.arguments[i]) for i in xrange(len(self.commands))])
         return retval + ' '.join(parts)
