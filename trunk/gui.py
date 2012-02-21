@@ -383,10 +383,10 @@ class Mainframe(QtGui.QMainWindow):
 
     def onSaveTemplate(self):
         Mainframe.model.defaultEntry = copy.deepcopy(Mainframe.model.cur())
-        #try:
-        Mainframe.model.saveDefaultEntry()
-        #except IOError:
-        #    msgBox(Lang.value('MSG_IO_failed'))
+        try:
+            Mainframe.model.saveDefaultEntry()
+        except IOError:
+            msgBox(Lang.value('MSG_IO_failed'))
             
     def doDirtyCheck(self):
         if not Mainframe.model.is_dirty:
@@ -468,10 +468,10 @@ class Mainframe(QtGui.QMainWindow):
             for data in fancy.readCvv(fileName, encoding):
                 Mainframe.model.add(model.makeSafe(data), False)
             Mainframe.model.is_dirty = False
-        #except IOError:
-        #    msgBox(Lang.value('MSG_IO_failed'))
-        #except:
-        #    msgBox(Lang.value('MSG_CCV_import_failed'))
+        except IOError:
+            msgBox(Lang.value('MSG_IO_failed'))
+        except:
+            msgBox(Lang.value('MSG_CCV_import_failed'))
         finally:
             if len(Mainframe.model.entries) == 0:
                 Mainframe.model = model.Model()
@@ -500,7 +500,6 @@ class Mainframe(QtGui.QMainWindow):
         if not fileName:
             return
         try:
-            print Mainframe.model.board.toFen(), fileName 
             xfen2img.convert(Mainframe.model.board.toFen(), unicode(fileName))
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))

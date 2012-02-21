@@ -4,12 +4,38 @@ import yaml
 # local
 import model
 
+# order matters, copied from the end of the binary fancy.exe (v2.9)
+FANCY_PIECES = [\
+    '15', '16', '24', '25', '35', '37', 'al', 'am', 'an', 'ao', 'ar',\
+    'b', 'bh', 'bk', 'bl', 'bp', 'br', 'bs', 'bt', 'bu', 'c', 'ca', 'cg',\
+    'ch', 'cr', 'ct', 'cy', 'da', 'dg', 'dr', 'ds', 'du', 'ea', 'eh', 'ek', 'em',\
+    'eq', 'fe', 'fr', 'g', 'g2', 'g3', 'gh', 'gi', 'gl', 'gn', 'gr', 'gt', 'ha',\
+    'k', 'ka', 'kh', 'l', 'lb', 'le', 'li', 'ln', 'lr', 'm', 'ma', 'mo',\
+    'n', 'nd', 'ne', 'nh', 'o', 'oa', 'ok', 'or', 'p', 'pa', 'pr', 'q',\
+    'r', 'rb', 'rf', 'rh', 'rl', 'rn', 'ro', 'rp', 'rr', 's', 'si', 'sk',\
+    'sp', 'sq', 'ss', 'sw', 'tr', 'uu', 'va', 'wa', 'we', 'wr', 'z', 'zh',\
+    'zr', 'ag', 'be', 'bi', 'bm', 'bw', 'do', 'et', 'f', 'mg', 'ml', 'mm',\
+    'na', 'nl', 'ra', 're', 'rm', 'rw', 'so', '36', 'b1', 'b2', 'b3', 'bo', 'cp',\
+    'qe', 'qf', 'qq', 'rt', 'pp', 'rk', 'ze'\
+    ]
+FANCY_SPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing', \
+    'Royal', 'Volage', 'Beamtet', 'Functionary', 'HalfNeutral', \
+    'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
+    
 def fancyCodeToPiece(code):
-    fancy = 'prsbqkgn'
-    color = ['black', 'white'][code % 2]
-    if code > 16:
-        return model.Piece('DU', color, [])
-    return model.Piece(fancy[(code-1) >> 1], color, [])
+    if code <= 16:
+        fancy = 'prsbqkgn'
+        color = ['black', 'white'][code % 2]
+        return model.Piece(fancy[(code-1) >> 1], color, [])
+    try:
+        color = ['white', 'black', 'neutral'][(code % 100) - 17]
+        name = FANCY_PIECES[((code // 100) % 1000) - 1]
+        specs = []
+        if (code // 100000) > 0:
+            specs.append(FANCY_SPECS[(code // 100000) - 1])
+        return model.Piece(name, color, specs)
+    except:
+        return model.Piece('du', 'black', [])
     
 def parseTwins(lines):
     twins = {}
@@ -28,13 +54,14 @@ def parseConditions(words):
     acc = []
     for word in words:
         word = word.strip()
-        if word == '':
+        if word == '' or word.lower() == 'imitator':
             continue
         if isConditionStartWord(word):
             if len(acc):
                 conditions.append(' '.join(acc))
             acc = [word]
         else:
+            print 'not starting', word
             acc.append(word)
     if len(acc):
         conditions.append(' '.join(acc))
@@ -69,10 +96,14 @@ def readCvv(fileName, encoding):
         # creating yacpdb-like entry
         entry = {}
         board = model.Board()
+        imitators = []
         for i in xrange(64):
             code = e[i>>3][i%8]
             if code:
-                board.add(fancyCodeToPiece(code), i)
+                if code == 20:
+                    imitators.append(model.idxToAlgebraic(i))
+                else:
+                    board.add(fancyCodeToPiece(code), i)
         entry['algebraic'] = board.toAlgebraic()
         if e[8][0] != '':
             entry['authors'] = [e[8][0]]
@@ -83,8 +114,11 @@ def readCvv(fileName, encoding):
         extra = e[11][0].split('\\n')
         stip_cond = extra[0].split(' ')
         entry['stipulation'] = stip_cond[0]
+        entry['options'] = []
+        if len(imitators):
+            entry['options'].append('Imitator ' + ''.join(imitators))
         if len(stip_cond) > 1:
-            entry['options'] = parseConditions(stip_cond[1:])
+            entry['options'].extend(parseConditions(stip_cond[1:]))
         if len(extra) > 1:
             entry['twins'] = parseTwins(extra[1:])
         

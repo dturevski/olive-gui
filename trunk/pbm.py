@@ -219,7 +219,7 @@ class Record:
             if 'hono' in tail or 'menti' in tail or 'hm' in tail or 'dicser' in tail:
                 d.name = 'HM'
             if 'com' in tail or 'cm' in tail or 'c.' in tail or 'elisme' in tail:
-                d.name = 'Comm'
+                d.name = 'Comm.'
             if 'place' in tail:
                 d.name = 'Place'
             r['distinction'] = "%s, (%s)" % (str(d), self.info['distinction'])
