@@ -5,6 +5,8 @@ todo:
   - yacpdb communication: check, add, sync down, sync up
   - yacpdb bug: not escaping >| etc when dumping YAML
   - icons on model dialogs
+  - Intelligent 0
+  - Clear Board -> Clear popeye output
 ---
 version: 0.12.2.4b
 changes:
