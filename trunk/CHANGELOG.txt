@@ -7,6 +7,7 @@ todo:
   - icons on model dialogs
   - Intelligent 0
   - Clear Board -> Clear popeye output
+  - Memleaks in options dialog?
 ---
 version: 0.12.2.4b
 changes:
