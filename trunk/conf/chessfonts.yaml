@@ -1,0 +1,28 @@
+diagram-fonts: [ISDiagram, GC]
+inline-fonts: [default, Ches]
+defaults:
+  diagram: ISDiagram
+  inline: Ches
+config:
+  GC:
+    display-name: Good Companions
+    prefix: GC2004
+    empty-squares: {light: 79, dark: 80}
+    edges: {W: 78, NW: 75, N: 76, NE: 77, E: 81, SE: 84, S: 83, SW: 82}
+    aux-postfix: y
+    glyphs-tab: resources/fonts/xfen.txt
+    size: 8
+  ISDiagram:
+    display-name: ISDiagram (orthodox)
+    prefix: ISDiagram
+    empty-squares: {light: 63, dark: 64}
+    edges: {W: 73, NW: 77, N: 75, NE: 78, E: 74, SE: 79, S: 76, SW: 80}
+    aux-postfix: !!python/unicode ''
+    glyphs-tab: resources/fonts/xfen-isdiagram.txt
+    size: 8
+  Ches:
+    display-name: Ches
+    prefix: Ches
+    kqrbsp: [117, 115, 113, 111, 109, 33]
+  default:
+    display-name: default

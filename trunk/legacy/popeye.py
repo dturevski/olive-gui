@@ -18,7 +18,7 @@ RE_PY_OPTIONS = [re.compile('^'+expr+'$', re.IGNORECASE) for expr in [
     'NoBoard',
     'NoShortVariations',
     'NonTrivial [0-9][0-9]* +[0-9][0-9]*',
-    'Intelligent [1-9][0-9]*',
+    'Intelligent( [1-9][0-9]*)?',
     'MaxTime [1-9][0-9]*',
     'StopOnShortSolutions',
     'Beep',

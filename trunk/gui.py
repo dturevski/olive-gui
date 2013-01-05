@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 # standard
 import os
 import tempfile
 import copy
+import string
 
 # 3rd party
 import yaml
@@ -36,10 +37,10 @@ class Mainframe(QtGui.QMainWindow):
     currentlyDragged = None
     transform_names = ['Shift_up','Shift_down','Shift_left',\
         'Shift_right','Rotate_CW','Rotate_CCW',\
-        'Mirror_vertical','Mirror_horizontal','Clear']
+        'Mirror_vertical','Mirror_horizontal', 'Invert_colors','Clear']
     transform_icons = ['up','down','left',\
         'right','rotate-clockwise','rotate-anticlockwise',\
-        'left-right','up-down','out']
+        'left-right','up-down', 'switch','out']
 
     def __init__(self):
         super(Mainframe, self).__init__()
@@ -87,11 +88,13 @@ class Mainframe(QtGui.QMainWindow):
         self.solutionView = SolutionView()
         self.popeyeView = PopeyeView()
         self.yamlView = YamlView()
+        self.publishingView = PublishingView()
         self.tabBar2 = QtGui.QTabWidget()
         self.tabBar2.addTab(self.popeyeView, Lang.value('TC_Popeye'))
         self.tabBar2.addTab(self.solutionView, Lang.value('TC_Solution'))
         self.tabBar2.addTab(self.easyEditView, Lang.value('TC_Edit'))
         self.tabBar2.addTab(self.yamlView, Lang.value('TC_YAML'))
+        self.tabBar2.addTab(self.publishingView, Lang.value('TC_Publishing'))
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         self.overview = OverviewList()
         self.overview.init()
@@ -150,17 +153,23 @@ class Mainframe(QtGui.QMainWindow):
         self.exitAction.setShortcut('Ctrl+Q')
         self.exitAction.triggered.connect(self.close)
 
-        self.startPopeyeAction = QtGui.QAction(QtGui.QIcon('resources/icons/key.png'), Lang.value('MI_Run_Popeye'), self)        
+        self.startPopeyeAction = QtGui.QAction(QtGui.QIcon('resources/icons/key.png'), Lang.value('MI_Run_Popeye'), self)
+        self.startPopeyeAction = QtGui.QAction(QtGui.QIcon('resources/icons/key.png'), Lang.value('MI_Run_Popeye'), self)
         self.startPopeyeAction.setShortcut('F7')
         self.startPopeyeAction.triggered.connect(self.popeyeView.startPopeye)
         self.stopPopeyeAction = QtGui.QAction(QtGui.QIcon('resources/icons/stop.png'), Lang.value('MI_Stop_Popeye'), self)        
         self.stopPopeyeAction.triggered.connect(self.popeyeView.stopPopeye)
+        self.listLegalBlackMoves = QtGui.QAction(QtGui.QIcon('resources/icons/anyblack.png'), Lang.value('MI_Legal_black_moves'), self)        
+        self.listLegalBlackMoves.triggered.connect(self.popeyeView.makeListLegal('black'))
+        self.listLegalWhiteMoves = QtGui.QAction(QtGui.QIcon('resources/icons/anywhite.png'), Lang.value('MI_Legal_white_moves'), self)        
+        self.listLegalWhiteMoves.triggered.connect(self.popeyeView.makeListLegal('white'))
         self.optionsAction = QtGui.QAction(QtGui.QIcon('resources/icons/cog-key.png'), Lang.value('MI_Options'), self)        
         self.optionsAction.triggered.connect(self.popeyeView.onOptions)
         self.twinsAction = QtGui.QAction(QtGui.QIcon('resources/icons/gemini.png'), Lang.value('MI_Twins'), self)        
         self.twinsAction.triggered.connect(self.popeyeView.onTwins)
 
         self.popeyeView.setActions({'start':self.startPopeyeAction, 'stop':self.stopPopeyeAction,\
+            'legalb':self.listLegalBlackMoves, 'legalw':self.listLegalWhiteMoves,
             'options':self.optionsAction, 'twins':self.twinsAction})
         
         langs = Conf.value('languages')    
@@ -200,6 +209,7 @@ class Mainframe(QtGui.QMainWindow):
         # Popeye menu
         self.popeyeMenu = menubar.addMenu(Lang.value('MI_Popeye'))
         map(self.popeyeMenu.addAction, [self.startPopeyeAction, self.stopPopeyeAction,\
+            self.listLegalBlackMoves, self.listLegalWhiteMoves,
             self.optionsAction, self.twinsAction])
         
         # help menu
@@ -217,10 +227,14 @@ class Mainframe(QtGui.QMainWindow):
         map(self.toolbar.addAction, [self.addEntryAction, self.deleteEntryAction])
         self.toolbar.addSeparator()
         map(self.toolbar.addAction, [self.startPopeyeAction, self.stopPopeyeAction,\
+            self.listLegalBlackMoves, self.listLegalWhiteMoves,
             self.optionsAction, self.twinsAction])
+        self.toolbar.addSeparator()  
+        self.quickOptionsView = QuickOptionsView(self)
+        self.quickOptionsView.embedTo(self.toolbar)
         self.toolbar.addSeparator()        
         self.createTransformActions()
-
+        
     def initSignals(self):
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
@@ -276,6 +290,7 @@ class Mainframe(QtGui.QMainWindow):
         self.tabBar2.setTabText(1, Lang.value('TC_Solution'))
         self.tabBar2.setTabText(2, Lang.value('TC_Edit'))
         self.tabBar2.setTabText(3, Lang.value('TC_YAML'))
+        self.tabBar2.setTabText(4, Lang.value('TC_Publishing'))
         
         #actions
         self.exitAction.setText(Lang.value('MI_Exit'))
@@ -288,6 +303,8 @@ class Mainframe(QtGui.QMainWindow):
         self.deleteEntryAction.setText(Lang.value('MI_Delete_entry'))
         self.startPopeyeAction.setText(Lang.value('MI_Run_Popeye'))
         self.stopPopeyeAction.setText(Lang.value('MI_Stop_Popeye'))
+        self.listLegalWhiteMoves.setText(Lang.value('MI_Legal_white_moves'))
+        self.listLegalBlackMoves.setText(Lang.value('MI_Legal_black_moves'))
         self.optionsAction.setText(Lang.value('MI_Options'))
         self.twinsAction.setText(Lang.value('MI_Twins'))
         self.aboutAction.setText(Lang.value('MI_About'))
@@ -340,7 +357,6 @@ class Mainframe(QtGui.QMainWindow):
                 Mainframe.model.add(model.makeSafe(data), False)
             f.close()
             Mainframe.model.is_dirty = False
-            self.overview.rebuild()
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
             Mainframe.model = model.Model()
@@ -564,6 +580,8 @@ class Mainframe(QtGui.QMainWindow):
                 Mainframe.model.board.mirror('a1<-->h1')
             elif command == 'Clear':
                 Mainframe.model.board.clear()
+            elif command == 'Invert_colors':
+                Mainframe.model.board.invertColors()
             else:
                 pass
             Mainframe.model.onBoardChanged()
@@ -573,6 +591,7 @@ class Mainframe(QtGui.QMainWindow):
     def closeEvent(self, event):
         if not self.doDirtyCheck():
             event.ignore()
+            return
         settings = QtCore.QSettings();
         settings.setValue("geometry", self.saveGeometry());
         settings.setValue("windowState", self.saveState());
@@ -585,6 +604,49 @@ class ClickableLabel(QtGui.QLabel):
     def __init__(self, str):
         super(ClickableLabel, self).__init__(str)
         self.setOpenExternalLinks(True)
+
+class QuickOptionsView(): # for clarity this View is not a widget
+    def __init__(self, mainframeInstance):
+        self.quickies = [ \
+            {'option':'SetPlay', 'icon':'setplay.png', 'lang':'QO_SetPlay'},
+            {'option':'Defence 1', 'icon':'tries.png', 'lang':'QO_Tries'},
+            {'option':'PostKeyPlay', 'icon':'postkeyplay.png', 'lang':'QO_PostKeyPlay'},
+            {'option':'Intelligent', 'icon':'intelligent.png', 'lang':'QO_IntelligentMode'}
+            ]
+        self.actions = []
+        for q in self.quickies:
+            action = QtGui.QAction(QtGui.QIcon('resources/icons/'+q['icon']), Lang.value(q['lang']), mainframeInstance)        
+            action.setCheckable(True)
+            action.triggered.connect(self.makeToggleOption(q['option']))
+            self.actions.append(action)
+        
+        Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
+
+        self.skip_model_changed = False
+        
+    def makeToggleOption(self, option): 
+        def toggleOption():
+            Mainframe.model.toggleOption(option)
+            self.skip_model_changed = True
+            Mainframe.sigWrapper.sigModelChanged.emit()
+            self.skip_model_changed = False
+        return toggleOption
+
+    def embedTo(self, toolbar):
+        for action in self.actions:
+            toolbar.addAction(action)
+
+    def onModelChanged(self):
+        if self.skip_model_changed:
+            return
+        for i in xrange(len(self.quickies)):
+            self.actions[i].setChecked(Mainframe.model.cur().has_key('options') and \
+                self.quickies[i]['option'] in Mainframe.model.cur()['options'])
+                
+    def onLangChanged(self):
+        for i in xrange(len(self.quickies)):
+            self.actions[i].setText(Lang.value(self.quickies[i]['lang']))
         
 class AboutDialog(QtGui.QDialog):                
     def __init__(self):
@@ -597,7 +659,9 @@ class AboutDialog(QtGui.QDialog):
         lblLogo.setPixmap(iconLogo.pixmap(331, 139))
         vbox.addWidget(lblLogo, QtCore.Qt.AlignCenter)
         vbox.addWidget(ClickableLabel('olive v'+Conf.value('version') + ' is free software licensed under GNU GPL'))
-        vbox.addWidget(ClickableLabel('&copy; 2011-2012 Dmitri Turevski &lt;<a href="mailto:dmitri.turevski@gmail.com">dmitri.turevski@gmail.com</a>&gt;'))
+        vbox.addWidget(ClickableLabel(u'© 2011-2013'))
+        vbox.addWidget(ClickableLabel(u'<b>Dmitri Turevski</b> &lt;<a href="mailto:dmitri.turevski@gmail.com">dmitri.turevski@gmail.com</a>&gt; - coding'))
+        vbox.addWidget(ClickableLabel(u'<b>Борислав Гађански</b> &lt;<a href="mailto:borislav.gadjanski@gmail.com">borislav.gadjanski@gmail.com</a>&gt; - serbian language'))
         vbox.addWidget(ClickableLabel('For more information please visit <a href="http://code.google.com/p/olive-gui/">http://code.google.com/p/olive-gui/</a>'))
 
         vbox.addStretch(1)
@@ -1517,24 +1581,43 @@ class PopeyeInputWidget(QtGui.QTextEdit):
     def contextMenuEvent(self, e):
         menu = self.createStandardContextMenu()
         menu.addSeparator()
-        for k in ['start', 'stop', 'options', 'twins']:
+        for k in ['start', 'stop', 'legalb', 'legalw', 'options', 'twins']:
             menu.addAction(self.actions[k])
         menu.exec_(e.globalPos())
         
 class PopeyeView(QtGui.QSplitter):
     stipulations = ['', '#2', '#3', '#4', 'h#2', 'h#3', 'h#', 's#2', 's#', 'hs#', 'Ser-h#']
-
+    
+    def makeListLegal(self, color):
+        def callable():
+            entry = copy.deepcopy(Mainframe.model.cur())
+            
+            entry['stipulation'] = '~1'
+            if entry.has_key('twins'):
+                del entry['twins']
+            if not entry.has_key('options'):
+                entry['options'] = []
+            entry['options'] = [x for x in entry['options'] if x not in ['SetPlay', 'WhiteToPlay', 'Duplex', 'HalfDuplex']]
+            if 'black' == color:
+                entry['options'].append('HalfDuplex')
+                
+            input = legacy.popeye.create_input(entry, \
+                False, copy.deepcopy(Conf.value('popeye-sticky-options')),
+                Mainframe.model.board.toPopeyePiecesClause())
+            self.runPopeyeInGui(input)
+            
+        return callable
+        
     def setActions(self, actions):
         self.actions = actions
-        self.actions['stop'].setEnabled(False)
-        self.actions['start'].setEnabled(True)
+        self.setActionEnabled(True)
         self.input.setActions(actions)
 
     def __init__(self):
         super(PopeyeView, self).__init__(QtCore.Qt.Horizontal)
         
         self.input = PopeyeInputWidget()
-        self.input.setReadOnly(True)
+        #self.input.setReadOnly(True)
         self.output = PopeyeOutputWidget(self)
         self.output.setReadOnly(True)
         #self.output.setTextColor(QtGui.QColor(255,255,255))
@@ -1616,7 +1699,11 @@ class PopeyeView(QtGui.QSplitter):
             twins = Mainframe.model.cur()['twins']
         dialog = options.TwinsDialog(Mainframe.model.twinsAsText(), Lang)
         if(dialog.exec_()):
-            Mainframe.model.cur()['twins'] = dialog.getTwins()
+            new_twins = dialog.getTwins()
+            if len(new_twins):
+                Mainframe.model.cur()['twins'] = new_twins
+            elif Mainframe.model.cur().has_key('twins'):
+                del Mainframe.model.cur()['twins']
             self.skip_model_changed = True
             Mainframe.model.markDirty()
             Mainframe.sigWrapper.sigModelChanged.emit()
@@ -1652,11 +1739,9 @@ class PopeyeView(QtGui.QSplitter):
     def toggleCompact(self):
         self.raw_mode = not self.raw_mode
         self.output.setText([self.solutionOutput.solution, self.raw_output][self.raw_mode])
-        
-    def startPopeye(self):
-        
-        self.actions['stop'].setEnabled(True)
-        self.actions['start'].setEnabled(False)        
+    
+    def runPopeyeInGui(self, input):
+        self.setActionEnabled(False)        
 
         self.reset()
         self.entry_copy = copy.deepcopy(Mainframe.model.cur())
@@ -1665,7 +1750,7 @@ class PopeyeView(QtGui.QSplitter):
         
         # writing input to temporary file
         handle, self.temp_filename = tempfile.mkstemp()
-        os.write(handle, str(self.input.toPlainText()))
+        os.write(handle, input)
         os.close(handle)
         
         self.process = QtCore.QProcess()
@@ -1680,13 +1765,15 @@ class PopeyeView(QtGui.QSplitter):
         self.process.error.connect(self.onFailed)
         self.process.start(py_exe[0], params)
     
+    def startPopeye(self):
+        self.runPopeyeInGui(str(self.input.toPlainText()))
+    
     def onFailed(self):
         try:
             os.unlink(self.temp_filename)
         except:
             pass
-        self.actions['stop'].setEnabled(False)
-        self.actions['start'].setEnabled(True)
+        self.setActionEnabled(True)
         if not self.stop_requested:
             msgBox(Lang.value('MSG_Popeye_failed') % Conf.value('popeye-executable')[os.name])
         
@@ -1707,12 +1794,18 @@ class PopeyeView(QtGui.QSplitter):
             os.unlink(self.temp_filename)
         except:
             pass
-        self.actions['stop'].setEnabled(False)
-        self.actions['start'].setEnabled(True)
+        self.setActionEnabled(True)
         try:
             self.compact_possible = True
         except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as e:
             self.compact_possible = False
+    
+    def setActionEnabled(self, status):
+        self.actions['stop'].setEnabled(not status)
+        self.actions['start'].setEnabled(status)
+        self.actions['legalb'].setEnabled(status)
+        self.actions['legalw'].setEnabled(status)
+    
 
     def setLegacyNotation(self,  notation):
         legacy_notation = {}
@@ -1775,6 +1868,161 @@ class PopeyeView(QtGui.QSplitter):
             self.solutionOutput.create_output(self.solution, b)
             self.output.setText(self.solutionOutput.solution)    
         return callable
+
+class PublishingView(QtGui.QSplitter):
+
+    def loadFontInfo(self, filename):
+        fontinfo = {}
+        f = open(filename)
+        for entry in map(lambda x: x.strip().split("\t"), f.readlines()):
+            fontinfo[entry[0]] = {'postfix':entry[1], 'chars':[chr(int(entry[2])), chr(int(entry[3]))]}
+        f.close()
+        return fontinfo
+
+    def solution2Html(self, s, config):
+        s = string.replace(s, "\n", "<br/>")
+        s = string.replace(s, "x", ":")
+        s = string.replace(s, "*", ":")
+        if config.has_key('kqrbsp'):
+            for i in xrange(len('kqrbsp')):
+                s = string.replace(s, 'kqrbsp'[i].upper(), '</b><font face="' + config['prefix'] + '">' + str(chr(config['kqrbsp'][i])) + '</font><b>')
+        return '<b>' + s + '</b>'
+        
+    def board2Html(self, board, config): # mostly copypaste from pdf.py  :( real clumsy
+        # important assumption: empty squares and board edges reside in one font file/face
+        # (poorly designated 'aux-postfix') in case of most chess fonts there's only one file/face
+        # and there's nothing to worry about, in case of GC2004 this is true (they are in GC2004d)
+        # in other fonts - who knows
+        lines = []
+        spans, fonts, prevfont = [], [], config['prefix'] + config['aux-postfix']
+        # top edge
+        fonts.append(prevfont)
+        spans.append([chr(int(config['edges']['NW'])) + \
+            8*chr(int(config['edges']['N'])) + 
+            chr(int(config['edges']['NE'])) + 
+            "<br/>"])
+        for i in xrange(64):
+            # left edge
+            if i%8 == 0:
+                font = config['prefix'] + config['aux-postfix']
+                char = chr(int(config['edges']['W']))
+                if font != prevfont:
+                    fonts.append(font)
+                    spans.append([char])
+                    prevfont = font
+                else:
+                    spans[-1].append(char)
+            # board square
+            font = config['prefix'] + config['aux-postfix']
+            char = [chr(int(config['empty-squares']['light'])), chr(int(config['empty-squares']['dark']))][((i>>3) + (i%8))%2]
+            if not board.board[i] is None:
+                glyph = board.board[i].toFen()
+                if len(glyph) > 1: # removing brackets
+                    glyph = glyph[1:-1]
+                if config['fontinfo'].has_key(glyph):
+                    font = config['prefix'] + config['fontinfo'][glyph]['postfix']
+                    char = config['fontinfo'][glyph]['chars'][((i>>3) + (i%8))%2]
+            if font != prevfont:
+                fonts.append(font)
+                spans.append([char])
+                prevfont = font
+            else:
+                spans[-1].append(char)
+            # right edge
+            if i%8 == 7:
+                font = config['prefix'] + config['aux-postfix']
+                char = chr(int(config['edges']['E']))
+                if font != prevfont:
+                    fonts.append(font)
+                    spans.append([char])
+                    prevfont = font
+                else:
+                    spans[-1].append(char)
+                spans[-1].append("<br/>")
+        # bottom edge
+        font = config['prefix'] + config['aux-postfix']
+        edge = chr(int(config['edges']['SW'])) + 8*chr(int(config['edges']['S'])) + chr(int(config['edges']['SE'])) + "<br/>"
+        if font != prevfont:
+            fonts.append(font)
+            spans.append(edge)
+        else:
+            spans[-1].append(edge)
+        html = ''.join([\
+            '<font face="%s">%s</font>' % (fonts[i], ''.join(spans[i])) 
+            for i in xrange(len(fonts))
+            ])
+        return ('<font size="%s">%s</font>') % (config['size'], html)
+        #return html
+        
+    def __init__(self):
+        super(PublishingView, self).__init__(QtCore.Qt.Horizontal)
+        
+        f = open('conf/chessfonts.yaml', 'r')
+        self.config = yaml.load(f)
+        f.close()
+        for family in self.config['diagram-fonts']:
+            self.config['config'][family]['fontinfo'] = self.loadFontInfo(self.config['config'][family]['glyphs-tab'])
+        
+        self.richText = QtGui.QTextEdit()
+        self.richText.setReadOnly(True)
+
+        w = QtGui.QWidget()        
+        vbox = QtGui.QVBoxLayout()
+        
+        self.labelDiaFont = QtGui.QLabel()
+        vbox.addWidget(self.labelDiaFont)
+        self.diaFontSelect = QtGui.QComboBox()
+        self.diaFontSelect.addItems([self.config['config'][x]['display-name'] for x in self.config['diagram-fonts']])
+        self.diaFontSelect.setCurrentIndex(self.config['diagram-fonts'].index(self.config['defaults']['diagram']))
+        vbox.addWidget(self.diaFontSelect)
+        self.labelSolFont = QtGui.QLabel()
+        vbox.addWidget(self.labelSolFont)
+        self.solFontSelect = QtGui.QComboBox()
+        self.solFontSelect.addItems([self.config['config'][x]['display-name'] for x in self.config['inline-fonts']])
+        self.solFontSelect.setCurrentIndex(self.config['inline-fonts'].index(self.config['defaults']['inline']))
+        vbox.addWidget(self.solFontSelect)
+        self.labelMemo = QtGui.QLabel()
+        vbox.addWidget(self.labelMemo)
+        vbox.addStretch(1)
+
+        w.setLayout(vbox)
+        self.addWidget(self.richText)
+        self.addWidget(w)
+        self.setStretchFactor(0, 1)
+        
+        
+        self.diaFontSelect.currentIndexChanged.connect(self.onModelChanged)
+        self.solFontSelect.currentIndexChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
+        
+        self.onLangChanged()
+    
+    def onModelChanged(self):
+        self.richText.setText("")
+        self.richText.setFontPointSize(12)
+        
+        self.richText.insertHtml(pdf.ExportDocument.header(Mainframe.model.cur()) + "<br/>\n")
+               
+        inline_font = self.config['inline-fonts'][self.solFontSelect.currentIndex()]
+        diagram_font = self.config['diagram-fonts'][self.diaFontSelect.currentIndex()]
+
+        self.richText.insertHtml(self.board2Html(Mainframe.model.board, self.config['config'][diagram_font]))
+
+        self.richText.insertHtml(Mainframe.model.cur()['stipulation'] + ' ' + Mainframe.model.board.getPiecesCount() + "<br/>\n")
+        self.richText.insertHtml(pdf.ExportDocument.solver(Mainframe.model.cur(), Lang) + "<br/>\n")
+        self.richText.insertHtml(pdf.ExportDocument.legend(Mainframe.model.board) + "<br/><br/>\n")
+        
+        if Mainframe.model.cur().has_key('solution'):
+            self.richText.insertHtml(self.solution2Html(Mainframe.model.cur()['solution'], self.config['config'][inline_font]))
+
+
+        
+    def onLangChanged(self):
+        self.labelDiaFont.setText(Lang.value('PU_Diagram_font') + ':')
+        self.labelSolFont.setText(Lang.value('PU_Inline_font') + ':')
+        self.labelMemo.setText(Lang.value('PU_Memo'))
+        self.onModelChanged()
         
 class PopeyeOutputWidget(QtGui.QTextEdit):
     def __init__(self,  parentView):

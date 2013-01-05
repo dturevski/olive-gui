@@ -249,8 +249,14 @@ class Board:
             new_x, new_y = func((square%8, square >> 3))
             if new_x < 0 or new_y < 0 or new_x > 7 or new_y > 7: continue
             self.add(Piece(piece.name, piece.color, piece.specs), new_x + 8*new_y)
-    
-        
+            
+    def invertColors(self):
+        b = copy.deepcopy(self)
+        self.clear()
+        colors_map = {'white':'black', 'black':'white', 'neutral':'neutral'}
+        for square, piece in Pieces(b):
+            self.add(Piece(piece.name, colors_map[piece.color], piece.specs), square)
+                 
     def fromFen(self, fen):
         self.clear()
         fen = str(fen)
@@ -495,6 +501,15 @@ class Model:
             f.write(unicode(yaml.dump(self.defaultEntry, encoding=None, allow_unicode=True)).encode('utf8'))
         finally:
             f.close()
+            
+    def toggleOption(self, option):
+        if not self.entries[self.current].has_key('options'):
+            self.entries[self.current]['options'] = []
+        if option in self.entries[self.current]['options']:
+            self.entries[self.current]['options'].remove(option)
+        else:
+            self.entries[self.current]['options'].append(option)
+        self.markDirty()
             
 def createPrettyTwinsText(e):
     if not e.has_key('twins'):

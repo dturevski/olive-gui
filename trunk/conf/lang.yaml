@@ -1,327 +1,498 @@
 # common
 CO_OK:
   en: OK
+  rs: OK
   ru: OK
 CO_Cancel:
   en: Cancel
+  rs: Одустани
   ru: Отмена
 CO_Yes:
   en: "Yes"
+  rs: Да
   ru: Да
 CO_No:
   en: "No"
+  rs: Нe
   ru: Нет
 
 # tab captions
 TC_Info:
   en: Info
+  rs: Инфо 
   ru: О композиции
 TC_Pieces:
   en: Pieces
+  rs: Фигуре
   ru: Фигуры
 TC_Pieces_Ortho:
   en: Orthodox
+  rs: Обичне
   ru: Обычные
 TC_Pieces_Fairy:
   en: Fairy
+  rs: Вилиње
   ru: Сказочные
 TC_Edit:
   en: Metadata
+  rs: Мета-подаци
   ru: Метаданные
 TC_Solution:
   en: Solution
+  rs: Решење
   ru: Решение
 TC_Popeye:
   en: Popeye
+  rs: Попај
   ru: Popeye
 TC_YAML:
   en: YAML
+  rs: YAML
   ru: YAML
 
 # window titles
 WT_New_Collection:
   en: New collection
+  rs: Нова збирка
   ru: Новая коллекция
 WT_Saved:
   en: Saved
+  rs: Сачувано
   ru: Сохранено
 WT_Not_saved:
   en: Not saved
+  rs: Није сачувано
   ru: Не сохранено
 
 # menu items
 MI_File:
   en: File
+  rs: Фајл
   ru: Файл
 MI_New:
   en: New collection
+  rs: Нова збирка
   ru: Новая коллекция
 MI_Open:
   en: Open collection
+  rs: Отвори збирку
   ru: Открыть коллекцию
 MI_Save:
   en: Save collection
+  rs: Сачувај збирку
   ru: Сохранить коллекцию
 MI_Save_as:
   en: Save collection as
+  rs: Сачувај збирку као
   ru: Сохранить коллекцию как
 MI_Save_template:
   en: Save template
+  rs: Сачувај шаблон
   ru: Сохранить шаблон
 MI_Language:
   en: Change language
+  rs: Промена језика
   ru: Сменить язык
 MI_Exit:
   en: Exit
+  rs: Излаз
   ru: Выйти
 MI_Edit:
   en: Edit
+  rs: Едит
   ru: Правка
 MI_Add_entry:
   en: Add new entry
+  rs: Додај нови проблем
   ru: Добавить новую композицию
 MI_Delete_entry:
   en: Delete current entry
+  rs: Уклони овај проблем
   ru: Удалить текущую композицию
 MI_Fairy_pieces:
   en: Fairy pieces
+  rs: Вилиње фигуре
   ru: Сказочные фигуры
 MI_Delete_piece:
   en: Delete piece
+  rs: Уклони фигуру
   ru: Удалить фигуру
 MI_Delete_all_pieces:
   en: Delete all pieces
+  rs: Уклони све фигуре
   ru: Удалить все фигуры
 MI_Add_piece:
   en: Add piece
+  rs: Додај фигуру
   ru: Добавить фигуру
 MI_Run_Popeye:
   en: Run Popeye
+  rs: Покрени Попаја
   ru: Запустить Popeye
 MI_Stop_Popeye:
   en: Terminate Popeye
+  rs: Заустави Попаја
   ru: Остановить Popeye
 MI_Options:
   en: Options and conditions
+  rs: Опције и вилињи услови
   ru: Опции и сказочные условия
 MI_Twins:
   en: Twins
+  rs: Близанци
   ru: Близнецы
 MI_Shift_up:
   en: Shift position up
+  rs: Помери позицију нагоре
   ru: Сдвинуть позицию вверх
 MI_Shift_down:
   en: Shift position down
+  rs: Помери позицију надоле
   ru: Сдвинуть позицию вниз
 MI_Shift_left:
   en: Shift position left
+  rs: Помери позицију улево
   ru: Сдвинуть позицию влево
 MI_Shift_right:
   en: Shift position right
+  rs: Помери позицију удесно
   ru: Сдвинуть позицию вправо
 MI_Rotate_CCW:
   en: Rotate position 90° counterclockwise
+  rs: Ротирај позицију за +90°
   ru: Повернуть позицию на 90° против часовой стрелки
 MI_Rotate_CW:
   en: Rotate position 90° clockwise
+  rs: Ротирај позицију за  -90°
   ru: Повернуть позицию на 90° по часовой стрелке
 MI_Mirror_vertical:
   en: Mirror position vertically
+  rs: Вертикална ротација 180°
   ru: Отразить позицию относительно вертикальной оси
 MI_Mirror_horizontal:
   en: Mirror position horizontally
+  rs: Хоризонтална ротација 180°
   ru: Отразить позицию относительно горизонтальной оси
 MI_Clear:
   en: Clear board
+  rs: Очисти таблу
   ru: Очистить доску
 MI_Popeye:
   en: Popeye
+  rs: Попај
   ru: Popeye
 MI_Help:
   en: Help
+  rs: Помоћ
   ru: Справка
 MI_About:
   en: About
+  rs: О програму
   ru: О программе
 MI_Add_keyword:
   en: Add keyword
+  rs: Додај кључну реч
   ru: Добавить ключевое слово
 MI_Import:
   en: Import
+  rs: Увези
   ru: Импорт
 MI_Export:
   en: Export
+  rs: Извези
   ru: Экспорт
 MI_Import_PBM:
   en: Problemist(e) .PBM
+  rs: Problemist(e) .PBM
   ru: Problemist(e) .PBM
 MI_Import_CCV:
   en: Fancy .CCV
+  rs: Fancy .CCV
   ru: Fancy .CCV
 MI_Export_HTML:
   en: HTML
+  rs: HTML
   ru: HTML
 MI_Export_PDF:
   en: Collection to PDF
+  rs: Збирку у PDF
   ru: Коллекцию в PDF
 MI_Export_Image:
-  en: Diagram to image file 
+  en: Diagram to image file
+  rs: Дијаграм у имиџ фајл
   ru: Диаграмму в файл изображения
 MI_Cut:
-  en: Cut 
+  en: Cut
+  rs: Исеци
   ru: Вырезать
 MI_Copy:
-  en: Copy 
+  en: Copy
+  rs: Копирај
   ru: Копировать
 MI_Paste:
-  en: Paste 
+  en: Paste
+  rs: Стави
   ru: Вставить
 MI_Save_selection_as:
   en: Save selection as
+  rs: Сачувај одабрано као
   ru: Сохранить выбранное как
 
 # Piece properties
 PP_Color:
   en: "Color:"
+  rs: "Боја:"
   ru: "Цвет:"
 PP_Type:
   en: "Type:"
+  rs: "Тип:"
   ru: "Тип:"
 PP_Fairy_properties:
   en: "Fairy properties:"
+  rs: "Вилиња својства:"
   ru: "Сказочные свойства:"
 
 
 # entry properties
 EP_Authors:
   en: Authors
+  rs: Аутори
   ru: Авторы
 EP_Source:
   en: Source
+  rs: Извор
   ru: Место публикации
 EP_Date:
   en: Date
+  rs: Датум
   ru: Дата
 EP_Distinction:
   en: Distinction
+  rs: Одликовање
   ru: Отличие
 EP_Stipulation:
   en: Stipulation
+  rs: Услов
   ru: Задание
 EP_Pieces_count:
   en: Pieces count
+  rs: Број фигура
   ru: Количество фигур
 EP_Intended_solutions:
   en: Intended solutions
+  rs: Број решења
   ru: Количество решений
 EP_Intended_solutions_shortened:
   en: Sol.
+  rs: Реш.
   ru: Реш.
 
 # EE labels
 EE_Authors_memo:
   en: <b>Lastname,&nbsp;Firstname</b><br/>each with a newline
+  rs: <b>Презиме,&nbsp;Име</b><br/>свако у новом реду
   ru: <b>Фамилия,&nbsp;Имя&nbsp;Отчество</b><br/>каждого с новой строки
 EE_Source_memo:
   en: "Tourney, Magazine / issue # / problem #"
+  rs: Турнир, Часопис / Бр. часописа / Бр.проблема
   ru: Конкурс, Журнал / № журнала / № задачи
 EE_Date_memo:
   en: Year / Month / Day
+  rs: Год / Месец / Дан
   ru: Год / Месяц / День
 EE_Popeye:
   en: Options
+  rs: Опције
   ru: Опции
 EE_Popeye_memo:
   en: Popeye <i>Options</i> and <i>Conditions</i> fields; each with a newline
+  rs: Директиве за Попаја <i>Options</i> и <i>Conditions</i>; сваку у новом реду
   ru: Директивы Popeye <i>Options</i> и <i>Conditions</i>; каждую с новой строки
 EE_Twins:
   en: Twins
+  rs: Близанци
   ru: Близнецы
 EE_Twins_memo:
   en: YACPDB format
+  rs: У формату YACPDB
   ru: В формате YACPDB
 
 # Popeye screen
 PS_SStipulation:
   en: SStipulation
+  rs: SStipulation
   ru: SStipulation
 PS_Compact:
   en: Make more compact
+  rs: Направи сажето
   ru: Сделать компактнее
 PS_Original_output:
   en: Original notation
+  rs: Оригинална нотација
   ru: Оригинальная нотация
 PS_Notation:
   en: Notation
+  rs: Нотација
   ru: Нотация
 PS_Tch:
   en: tch
+  rs: tch
   ru: tch
 PS_Tch_settings:
   en: tch settings
+  rs: Подешавања tch
   ru: Настройки tch
 PS_Options:
   en: Options
+  rs: Опције
   ru: Опции
 PS_Twins:
   en: Twins
+  rs: Близанци
   ru: Близнецы
 PS_Edit:
   en: Edit solution
+  rs: Корекција решења
   ru: Редактировать решение 
 
 # Solution screen
 SS_Solution:
   en: "Solution:"
+  rs: "Решење:"
   ru: "Решение:"
 SS_Keywords:
   en: "Keywords:"
+  rs: "Кључне речи:"
   ru: "Ключевые слова:"
 SS_Comments:
   en: "Comments:"
+  rs: "Коментари:"
   ru: "Комментарии:"
 
   
 # messages
 MSG_Terminated:
   en: Terminated
+  rs: Прекинуто
   ru: Остановлено
 MSG_Not_saved:
   en: Open collection contains unsaved changes. Would you like to save it?
+  rs: Збирка има измене које нису сачуване. Да ли да их сачувам?
   ru: Открытая коллекция содержит несохраненные изменения. Сохранить?
 MSG_Popeye_failed:
   en: Failed to run popeye executable (%s)
+  rs: Не могу да стартујем Попаја (%s)
   ru: Не удалось запустить исполняемый файл popeye (%s)
 MSG_YAML_failed:
   en: Failed to parse YAML data (%s)
+  rs: Грешка у парсингу  YAML података (%s)
   ru: Ошибка парсинга YAML (%s)
 MSG_IO_failed:
   en: I/O error
+  rs: I/O грешка
   ru: Ошибка ввода-вывода
 MSG_PBM_import_failed:
   en: Failed to read Problemiste format (known olive bug)
+  rs: Грешка код читања формата Problemist (Олива баг)
   ru: Ошибка при чтении формата Problemist (внутренняя ошибка, файл возможно в порядке)
 MSG_CCV_import_failed:
   en: Failed to read Fancy format
+  rs: Грешка код читања формата Fancy
   ru: Ошибка при чтении формата Fancy
 MSG_PDF_export_failed:
   en: |
     PDF export failed.
     Perhaps the collection contains records that can not be properly fitted into the template (e.g. extensively long solution)
+  rs: |
+    Грешка код извоза у PDF.
+    Могуће да постоје записи који се не улапају у одабрани шаблон (нпр. преширок испис решења).    
   ru: |
     Ошибка при экспорте PDF.
     Возможно коллекция содержит записи, которые не могут быть корректно отображены c использованием примененного шаблона (напр. слишком пространная запись решения).
 MSG_Image_export_failed:
   en: Image export failed. Unsupported format.
+  rs: Слика није извезена. Формат није подржан.
   ru: Не удалось экспортировать изображение. Формат не поддерживается.
 MSG_Confirm_delete_entry:
   en: Delete this entry?
+  rs: Уклонити овај проблем?
   ru: Удалить эту композицию?
 MSG_Not_supported:
   en: "Not supported: %s"
+  rs: "Није подржано: %s"
   ru: "Не поддерживается: %s"
 
  # MISC
 MISC_Encoding:
   en: "Character encoding:"
+  rs: "Кодна ознака:"
   ru: "Кодировка:"
+
+# Quick options
+QO_SetPlay:
+  en: Set play
+  rs: Set play
+  ru: Иллюзорная игра
+QO_Tries:
+  en: Tries
+  rs: Tries
+  ru: Попытки
+QO_IntelligentMode:
+  en: Intelligent mode
+  rs: Intelligent mode
+  ru: Режим Intelligent
+QO_PostKeyPlay:
+  en: PostKeyPlay
+  rs: PostKeyPlay
+  ru: PostKeyPlay
+MI_Invert_colors:
+  en: Invert colors of the pieces
+  rs: Invert colors of the pieces
+  ru: Инвертировать цвета фигур
+MI_Legal_black_moves:
+  en: Legal black moves
+  rs: Legal black moves
+  ru: Легальные ходы черных
+MI_Legal_white_moves:
+  en: Legal white moves
+  rs: Legal white moves
+  ru: Легальные ходы белых
+  
+# Publishing
+TC_Publishing:
+  en: RTF
+  rs: RTF
+  ru: RTF
+PU_Diagram_font:
+  en: Diagram font
+  rs: Diagram font
+  ru: Шрифт диаграммы
+PU_Inline_font:
+  en: Inline chess font
+  rs: Inline chess font
+  ru: Шрифт фигур в решении
+PU_Memo:
+  en: |
+    For proper functionality the
+    selected fonts have to be installed
+    first. You may select and copy
+    diagrams and solutions in Olive
+    and paste them into the
+    RTF-enabled text processor of your
+    choice.
+  rs: |
+    For proper functionality the
+    selected fonts have to be installed
+    first. You may select and copy
+    diagrams and solutions in Olive
+    and paste them into the
+    RTF-enabled text processor of your
+    choice.
+  ru: |
+    Для корректной работы выбранные
+    шрифты должны быть предварительно
+    установлены. Вы можете выделять и
+    копировать диаграммы и решения в
+    Olive и вставлять в текстовый
+    редактор с поддержкой RTF по
+    вашему выбору.

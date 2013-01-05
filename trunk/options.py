@@ -63,6 +63,8 @@ class Option(QtGui.QWidget):
          
     def set(self, options):
         for option in options:
+            if option == 'Intelligent':
+                option = 'Intelligent 0'
             parts = option.split(" ")
             if parts[0].lower() == self.command.lower():
                 for i, param_value in enumerate(parts[1:]):
@@ -74,6 +76,8 @@ class Option(QtGui.QWidget):
     def get(self):
         if not self.checkbox.isChecked():
             return ''
+        if self.command == 'Intelligent' and self.params[0].get() == '0':
+            return 'Intelligent'
         return (self.command + " " + " ".join([x.get() for x in self.params])).strip()
 
 class OkCancelDialog(QtGui.QDialog):                
@@ -119,15 +123,23 @@ class OptionsDialog(OkCancelDialog):
             grid.setRowStretch(rows, 1)
             grid.setColumnStretch(cols, 1)
             w.setLayout(grid)
-            self.mainWidget.addTab(w, caption +  ['', ' ('+str(i+1)+')'][i>0])
+            page_first, page_last = '', ''
             for col in xrange(cols):
                 for row in xrange(rows):
-                    self.options.append(Option(options[i*rows*cols+col*rows+row]))
+                    if planted == len(options):
+                        break
+                    optionWidget = Option(options[i*rows*cols+col*rows+row])
+                    self.options.append(optionWidget)
+                    if page_first == '':
+                        page_first = optionWidget.command
+                    page_last = optionWidget.command
                     self.options[-1].set(entry_options)
                     grid.addWidget(self.options[-1], row, col)
                     planted = planted + 1
-                    if planted == len(options):
-                        return
+            tab_caption = caption
+            if 'Conditions' == tab_caption:
+                tab_caption = ['Conditions: ', ''][i!=0]+ page_first[0:3].upper() + ' - ' + page_last[0:3].upper()
+            self.mainWidget.addTab(w, tab_caption)
     def getOptions(self):
         return [x.get() for x in self.options if x.get() != '']
 
