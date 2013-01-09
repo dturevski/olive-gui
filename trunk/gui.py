@@ -5,6 +5,7 @@ import os
 import tempfile
 import copy
 import string
+import re
 
 # 3rd party
 import yaml
@@ -1881,12 +1882,18 @@ class PublishingView(QtGui.QSplitter):
 
     def solution2Html(self, s, config):
         s = string.replace(s, "\n", "<br/>")
-        s = string.replace(s, "x", ":")
-        s = string.replace(s, "*", ":")
         if config.has_key('kqrbsp'):
-            for i in xrange(len('kqrbsp')):
-                s = string.replace(s, 'kqrbsp'[i].upper(), '</b><font face="' + config['prefix'] + '">' + str(chr(config['kqrbsp'][i])) + '</font><b>')
+            s = string.replace(s, "x", ":")
+            s = string.replace(s, "*", ":")
+            s = string.replace(s, " ", "  ") # so both pieces match RE in eg: '1.a1=Q Be5'
+            pattern = re.compile('([ \.\(\=\a-z18])([KQRBSP])([^\)\]A-Z])')
+            s = re.sub(pattern, lambda m: self.replaceSolutionChars(config, m), s)
+            s = string.replace(s, "  ", " ")
         return '<b>' + s + '</b>'
+
+    def replaceSolutionChars(self, config, m):
+        return m.group(1) + '</b><font face="' + config['prefix'] + '">' + \
+            str(chr(config['kqrbsp']['kqrbsp'.index(m.group(2).lower())])) + '</font><b>' + m.group(3)
         
     def board2Html(self, board, config): # mostly copypaste from pdf.py  :( real clumsy
         # important assumption: empty squares and board edges reside in one font file/face
@@ -2008,13 +2015,19 @@ class PublishingView(QtGui.QSplitter):
         diagram_font = self.config['diagram-fonts'][self.diaFontSelect.currentIndex()]
 
         self.richText.insertHtml(self.board2Html(Mainframe.model.board, self.config['config'][diagram_font]))
-
         self.richText.insertHtml(Mainframe.model.cur()['stipulation'] + ' ' + Mainframe.model.board.getPiecesCount() + "<br/>\n")
+        
         self.richText.insertHtml(pdf.ExportDocument.solver(Mainframe.model.cur(), Lang) + "<br/>\n")
         self.richText.insertHtml(pdf.ExportDocument.legend(Mainframe.model.board) + "<br/><br/>\n")
         
         if Mainframe.model.cur().has_key('solution'):
             self.richText.insertHtml(self.solution2Html(Mainframe.model.cur()['solution'], self.config['config'][inline_font]))
+        
+        if(Mainframe.model.cur().has_key('keywords')):
+            self.richText.insertHtml("<br/>\n" + ', '.join(Mainframe.model.cur()['keywords']) + "<br/>\n")
+
+        if(Mainframe.model.cur().has_key('comments')):
+            self.richText.insertHtml("<br/>\n" + "<br/>\n".join(Mainframe.model.cur()['comments']) + "<br/>\n")
 
 
         

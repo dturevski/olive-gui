@@ -1,15 +1,11 @@
 ---
 version: trunk
 todo: 
-  - prettify legend
   - yacpdb communication: check, add, sync down, sync up
-  - yacpdb bug: not escaping >| etc when dumping YAML
   - icons on model dialogs
-  - Clear Board -> Clear popeye output
+  - Clear Board -> Clear popeye output (why?..)
   - Memleaks in options dialog?
   - emit LangChanged on startup before paint and remove double entries of language-specific constants (in constructors)
-  - bug: Smarter replacements in RTF solution: PA->PawnA, EQ->EQueen, proper linebreaks
-  - More fonts for RTF?
   - More default glyphs in GC, + 45 rotations?
 ---
 version: 0.13.1
@@ -25,6 +21,7 @@ changes:
   - bug fixed: add twin -> remove twin -> run popeye -> compactify: unhandled exception
   - bug fixed: exit -> save? -> cancel: exits (should not)
   - bug fixed: file -> open -> success: problem list is rebuilt twice for no reason
+  - windows build: PyQt 2.7-4.9-1 --> 2.7-4.9.6-1 [latest version for Jan 2013]  - perhaps fixes memleaks?
 ---
 version: 0.12.2.4b
 changes:
