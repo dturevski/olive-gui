@@ -431,15 +431,15 @@ MISC_Encoding:
 # Quick options
 QO_SetPlay:
   en: Set play
-  rs: Set play
+  rs: Привидна игра
   ru: Иллюзорная игра
 QO_Tries:
   en: Tries
-  rs: Tries
+  rs: Варке
   ru: Попытки
 QO_IntelligentMode:
   en: Intelligent mode
-  rs: Intelligent mode
+  rs: Интелигентни мод
   ru: Режим Intelligent
 QO_PostKeyPlay:
   en: PostKeyPlay
@@ -447,15 +447,15 @@ QO_PostKeyPlay:
   ru: PostKeyPlay
 MI_Invert_colors:
   en: Invert colors of the pieces
-  rs: Invert colors of the pieces
+  rs: Обрни боје фигура
   ru: Инвертировать цвета фигур
 MI_Legal_black_moves:
   en: Legal black moves
-  rs: Legal black moves
+  rs: Легани потези црног
   ru: Легальные ходы черных
 MI_Legal_white_moves:
   en: Legal white moves
-  rs: Legal white moves
+  rs: Легални потези белог
   ru: Легальные ходы белых
   
 # Publishing
@@ -465,11 +465,11 @@ TC_Publishing:
   ru: RTF
 PU_Diagram_font:
   en: Diagram font
-  rs: Diagram font
+  rs: Дијаграм фонт
   ru: Шрифт диаграммы
 PU_Inline_font:
   en: Inline chess font
-  rs: Inline chess font
+  rs: Фонт фигура у тексту
   ru: Шрифт фигур в решении
 PU_Memo:
   en: |
@@ -481,13 +481,11 @@ PU_Memo:
     RTF-enabled text processor of your
     choice.
   rs: |
-    For proper functionality the
-    selected fonts have to be installed
-    first. You may select and copy
-    diagrams and solutions in Olive
-    and paste them into the
-    RTF-enabled text processor of your
-    choice.
+    За правилан рад, одабрани фонтови
+    морају се инсалисати први. Можетe
+    да селектујете дијаграме и решења у
+    Оливи и да их копирате у одабрани
+    текст процесор са подршком RTF.
   ru: |
     Для корректной работы выбранные
     шрифты должны быть предварительно
