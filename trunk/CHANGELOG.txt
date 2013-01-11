@@ -1,6 +1,13 @@
 ---
 version: trunk
+changes:
+  - save/restore overview geometry
+  - auto-compactify enabled
+  - More RTF fonts supported
+  - Serbian entries fixed
 todo: 
+  - override pieces glyphs
+  - check for latest version (separate thread)
   - yacpdb communication: check, add, sync down, sync up
   - icons on model dialogs
   - Clear Board -> Clear popeye output (why?..)

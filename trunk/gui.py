@@ -6,6 +6,8 @@ import tempfile
 import copy
 import string
 import re
+import struct
+import ctypes
 
 # 3rd party
 import yaml
@@ -250,9 +252,10 @@ class Mainframe(QtGui.QMainWindow):
         
         # restoring windows and toolbars geometry 
         settings = QtCore.QSettings()
-        if len(settings.value("geometry").toByteArray()):
+        if len(settings.value("overviewColumnWidths").toByteArray()):
             self.restoreGeometry(settings.value("geometry").toByteArray());
             self.restoreState(settings.value("windowState").toByteArray());
+            self.overview.setColumnWidths(settings.value("overviewColumnWidths").toByteArray());
         else:
             # first run
             self.setGeometry(32, 32, 32, 32)
@@ -596,6 +599,7 @@ class Mainframe(QtGui.QMainWindow):
         settings = QtCore.QSettings();
         settings.setValue("geometry", self.saveGeometry());
         settings.setValue("windowState", self.saveState());
+        settings.setValue("overviewColumnWidths", self.overview.getColumnWidths());
 
         self.chessBox.sync()
         Conf.write()
@@ -862,6 +866,17 @@ class OverviewList(QtGui.QTreeWidget):
     def init(self):
         self.setColumnCount(6)
         self.onLangChanged()
+        
+    def getColumnWidths(self):
+        retval = str()
+        for i in xrange(self.columnCount()):
+            retval += struct.pack("I", self.columnWidth(i))            
+        return QtCore.QByteArray.fromRawData(retval)
+    
+    def setColumnWidths(self, widths):
+        w = widths.data()
+        for i in xrange(self.columnCount()):
+            self.setColumnWidth(i, struct.unpack("I", w[i*4:(i+1)*4])[0])
     
     def onLangChanged(self):
         self.setHeaderLabels(['', Lang.value('EP_Authors'), \
@@ -1796,6 +1811,10 @@ class PopeyeView(QtGui.QSplitter):
         except:
             pass
         self.setActionEnabled(True)
+        
+        if Conf.value('auto-compactify'):
+            self.onCompact()
+            
         try:
             self.compact_possible = True
         except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as e:
