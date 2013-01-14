@@ -421,6 +421,10 @@ MSG_Not_supported:
   en: "Not supported: %s"
   rs: "Није подржано: %s"
   ru: "Не поддерживается: %s"
+MSG_New_version:
+  en: "New olive version is available (%s). Would you like to go to the download page?"
+  rs: "New olive version is available (%s). Would you like to go to the download page?"
+  ru: "Доступна новая версия olive (%s). Открыть страницу загрузки?"
 
  # MISC
 MISC_Encoding:
@@ -494,3 +498,17 @@ PU_Memo:
     Olive и вставлять в текстовый
     редактор с поддержкой RTF по
     вашему выбору.
+
+# Chest
+TC_Chest:
+  en: Chest
+  rs: Chest
+  ru: Chest
+CHEST_Run:
+  en: Run
+  rs: Run
+  ru: Запустить
+CHEST_Stop:
+  en: Stop
+  rs: Stop
+  ru: Прервать

@@ -8,6 +8,7 @@ import string
 import re
 import struct
 import ctypes
+import urllib
 
 # 3rd party
 import yaml
@@ -22,6 +23,7 @@ import pbm
 import pdf
 import xfen2img
 import fancy
+import chest
 
 
 class SigWrapper(QtCore.QObject):
@@ -31,6 +33,7 @@ class SigWrapper(QtCore.QObject):
     sigFocusOnPopeye = QtCore.pyqtSignal() 
     sigFocusOnStipulation = QtCore.pyqtSignal() 
     sigFocusOnSolution = QtCore.pyqtSignal() 
+    sigNewVersion = QtCore.pyqtSignal() 
 
 
 class Mainframe(QtGui.QMainWindow):
@@ -44,6 +47,28 @@ class Mainframe(QtGui.QMainWindow):
     transform_icons = ['up','down','left',\
         'right','rotate-clockwise','rotate-anticlockwise',\
         'left-right','up-down', 'switch','out']
+
+    class CheckNewVersion(QtCore.QThread): 
+        def __init__(self, parent):
+            QtCore.QThread.__init__(self)
+            self.parent = parent
+        def run(self):
+            try:
+                info = yaml.load(urllib.urlopen(Conf.value('latest-binary-version-info-url')))
+                print cmp(info['version'], Conf.value('version'))
+                if cmp(info['version'], Conf.value('version')) > 0:
+                    self.parent.infoNewVersion = info
+                    # All GUI must be in the main thread
+                    Mainframe.sigWrapper.sigNewVersion.emit()
+            except:
+                pass
+
+            self.terminate()
+
+    def onNewVersion(self):
+        dialog = YesNoDialog(Lang.value('MSG_New_version') % self.infoNewVersion['version'])
+        if dialog.exec_():
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.infoNewVersion['details']))
 
     def __init__(self):
         super(Mainframe, self).__init__()
@@ -60,6 +85,10 @@ class Mainframe(QtGui.QMainWindow):
         self.updateTitle()
         self.overview.rebuild()
         self.show()
+        
+        if Conf.value('check-for-latest-binary'):
+            self.checkNewVersion = Mainframe.CheckNewVersion(self)
+            self.checkNewVersion.start()
 
     def initLayout(self):
         # widgets
@@ -92,12 +121,14 @@ class Mainframe(QtGui.QMainWindow):
         self.popeyeView = PopeyeView()
         self.yamlView = YamlView()
         self.publishingView = PublishingView()
+        self.chestView = chest.ChestView(Conf, Lang, Mainframe)
         self.tabBar2 = QtGui.QTabWidget()
         self.tabBar2.addTab(self.popeyeView, Lang.value('TC_Popeye'))
         self.tabBar2.addTab(self.solutionView, Lang.value('TC_Solution'))
         self.tabBar2.addTab(self.easyEditView, Lang.value('TC_Edit'))
         self.tabBar2.addTab(self.yamlView, Lang.value('TC_YAML'))
         self.tabBar2.addTab(self.publishingView, Lang.value('TC_Publishing'))
+        self.tabBar2.addTab(self.chestView, Lang.value('TC_Chest'))
         splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
         self.overview = OverviewList()
         self.overview.init()
@@ -245,6 +276,7 @@ class Mainframe(QtGui.QMainWindow):
         Mainframe.sigWrapper.sigFocusOnStipulation.connect(self.onFocusOnStipulation)
         Mainframe.sigWrapper.sigFocusOnPopeye.connect(self.onFocusOnPopeye)
         Mainframe.sigWrapper.sigFocusOnSolution.connect(self.onFocusOnSolution)
+        Mainframe.sigWrapper.sigNewVersion.connect(self.onNewVersion)
 
     def initFrame(self):
         # window banner
@@ -295,6 +327,7 @@ class Mainframe(QtGui.QMainWindow):
         self.tabBar2.setTabText(2, Lang.value('TC_Edit'))
         self.tabBar2.setTabText(3, Lang.value('TC_YAML'))
         self.tabBar2.setTabText(4, Lang.value('TC_Publishing'))
+        self.tabBar2.setTabText(5, Lang.value('TC_Chest'))
         
         #actions
         self.exitAction.setText(Lang.value('MI_Exit'))
