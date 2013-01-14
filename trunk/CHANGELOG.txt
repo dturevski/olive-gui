@@ -5,9 +5,10 @@ changes:
   - auto-compactify enabled
   - More RTF fonts supported
   - Serbian entries fixed
+  - check for latest version (in separate thread)
 todo: 
+  - Chest
   - override pieces glyphs
-  - check for latest version (separate thread)
   - yacpdb communication: check, add, sync down, sync up
   - icons on model dialogs
   - Clear Board -> Clear popeye output (why?..)
