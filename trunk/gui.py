@@ -55,7 +55,6 @@ class Mainframe(QtGui.QMainWindow):
         def run(self):
             try:
                 info = yaml.load(urllib.urlopen(Conf.value('latest-binary-version-info-url')))
-                print cmp(info['version'], Conf.value('version'))
                 if cmp(info['version'], Conf.value('version')) > 0:
                     self.parent.infoNewVersion = info
                     # All GUI must be in the main thread
