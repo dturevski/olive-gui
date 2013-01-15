@@ -2,11 +2,14 @@
 
 # standard
 import os
+import tempfile
 
 # 3rd party
 from PyQt4 import QtGui, QtCore
 
 # local
+
+CHESTCONF = {"hash": 128, "in": "input.txt", "out": "output.txt"}
         
 class ChestView(QtGui.QSplitter):
     
@@ -52,13 +55,65 @@ class ChestView(QtGui.QSplitter):
         
     def onRun(self):
         self.setActionEnabled(False)
-        self.output.insertPlainText(QtCore.QString(self.Conf.value('chest-executable')[os.name] + "\n"))
+        self.output.clear()
+        
+        handle, self.temp_filename = tempfile.mkstemp()
+        
+        input = self.input.toPlainText().toAscii()
+        
+        os.write(handle, input)
+        os.close(handle)
+        
+        self.chestProc = QtCore.QProcess()
+        self.chestProc.readyReadStandardOutput.connect(self.onOut)
+        self.chestProc.readyReadStandardError.connect(self.onError)
+        self.chestProc.finished.connect(self.onFinished)
+        
+        chest_exe = self.Conf.value('chest-executable')[os.name]
+        params = ["-r", "-LS"]
+        params.append(self.temp_filename)
+        
+        self.chestProc.error.connect(self.onFailed)
+        self.chestProc.start(chest_exe, params)
+        
+    def onOut(self):
+        data = self.chestProc.readAllStandardOutput()
+        self.output.insertPlainText(QtCore.QString(data))
+        # add break for big output
+        
+    def onError(self):
+        self.output.setTextColor(QtGui.QColor(255,0,0))
+        self.output.insertPlainText(QtCore.QString(self.chestProc.readAllStandardError()))
+        self.output.setTextColor(QtGui.QColor(0,0,0))
+    
+    def onFailed(self):
+        try:
+            os.unlink(self.temp_filename)
+        except:
+            pass
+        self.setActionEnabled(True)
+        # if not self.stop_requested:
+        # msgBox("failed " + self.chestProc.error)
+        
+    def onFinished(self):
+        try:
+            os.unlink(self.temp_filename)
+        except:
+            pass
+        self.setActionEnabled(True)
         
     def onStop(self):
         self.setActionEnabled(True)
 
     def onModelChanged(self):
-        self.input.setText(self.Mainframe.model.board.toFen() + " " + self.Mainframe.model.cur()['stipulation'])
+        # self.input.setText(self.Mainframe.model.board.toFen() + " " + self.Mainframe.model.cur()['stipulation'])
+        input_str = "LE\nf " + self.Mainframe.model.board.toFen().replace("S", "N").replace("s", "n") + "\n"
+        stipulation = self.Mainframe.model.cur()['stipulation'].split('#')
+        if stipulation[0] != '':
+            input_str += "j" + stipulation[0] + "\n"
+        input_str += "z" + stipulation[1] + "w\n"
+        
+        self.input.setText(input_str)
     
     def onLangChanged(self):
         self.btnRun.setText(self.Lang.value('CHEST_Run'))
