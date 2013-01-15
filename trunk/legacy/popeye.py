@@ -158,6 +158,12 @@ def parse_ply(text, side_to_move):
 
     raise ParseError("Can't match next ply:\n%s" % "\n".join(text.split("\n")[:3]))
 
+def is_py_option(option):
+    for pattern in RE_PY_OPTIONS:
+        if pattern.match(option):
+            return True
+    return False
+    
 def create_input(problem, sstip, sticky, pieces_clause):
     lines = ["BeginProblem"]
     # stipulation
@@ -167,13 +173,11 @@ def create_input(problem, sstip, sticky, pieces_clause):
     options, conditions = sticky, []
     if problem.has_key('options'):
         for option in problem['options']:
-            for pattern in RE_PY_OPTIONS:
-                if pattern.match(option) :
-                    if not option in options:
-                        options.append(option)
-                        break
+            if not option in options and is_py_option(option):
+                options.append(option)
             else:
                 conditions.append(option)
+                
     lines.append("Option " + " ".join(options))
     if len(conditions) > 0:
         lines.append("Condition " + " ".join(conditions))

@@ -3,13 +3,16 @@
 # standard
 import os
 import tempfile
+import re
 
 # 3rd party
 from PyQt4 import QtGui, QtCore
 
 # local
+import model
 
 CHESTCONF = {"hash": 128, "in": "input.txt", "out": "output.txt"}
+CHESTSTIPULATION = re.compile('^([sh]?)([#=])(\d+)(\.5)?$', re.IGNORECASE)
         
 class ChestView(QtGui.QSplitter):
     
@@ -75,7 +78,7 @@ class ChestView(QtGui.QSplitter):
         
         self.chestProc.error.connect(self.onFailed)
         self.chestProc.start(chest_exe, params)
-        
+                
     def onOut(self):
         data = self.chestProc.readAllStandardOutput()
         self.output.insertPlainText(QtCore.QString(data))
@@ -114,6 +117,19 @@ class ChestView(QtGui.QSplitter):
         input_str += "z" + stipulation[1] + "w\n"
         
         self.input.setText(input_str)
+        
+    def checkCurrentEntry(self):
+        if model.hasFairyElements(self.Mainframe.model.cur()):
+            return None
+        m = CHESTSTIPULATION.match(self.Mainframe.model.cur()['stipulation'])
+        if not m:
+            return None
+        retval = {
+            'type-of-play':m.group(1), #                                                '', s or h
+            'goal':m.group(2), #                                                        # or =
+            'full-moves': int(m.group(3)) + [1, 0][m.group(4) is None], #               integer
+            'side-to-play':['b', 'w'][(m.group(1) == 'h') != (m.group(4) is None)]} #   w or b
+        return retval
     
     def onLangChanged(self):
         self.btnRun.setText(self.Lang.value('CHEST_Run'))

@@ -524,3 +524,24 @@ def createPrettyTwinsText(e):
             formatted.append(twin.as_text())
             prev_twin = twin
     return "<br/>".join(formatted)
+    
+def hasFairyConditions(e):
+    if not e.has_key('options'):
+        return False
+    for option in e['options']:
+        if not legacy.popeye.is_py_option(option):
+            return True
+    return False
+
+def hasFairyPieces(e):
+    if not e.has_key('algebraic'):
+        return False
+    board = Board()
+    board.fromAlgebraic(e['algebraic'])
+    for p in Pieces(board):
+        if (p.color not in ['white', 'black']) or (len(p.specs) != 0) or (p.name.lower() not in 'kqrbsp'):
+            return True
+    return False
+
+def hasFairyElements(e):
+    return hasFairyConditions(e) or hasFairyPieces(e)
