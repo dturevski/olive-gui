@@ -242,10 +242,18 @@ comments: [!!python/unicode 'en passant
     pass']
 date: '1987'
 distinction: !!python/unicode '2nd Prize'
-keywords: [!!python/unicode 'Retro', !!python/unicode 'En passant']
+keywords: [Retro, En passant]
 options: [EnPassant f6]
 solution: !!python/unicode "0...g7-g5\n\n1. g:f5? waiting\n1... e6 2. g:h6#\n1...\
   \ h:g5 2. B:g5#\n1... h2 2. R:h2#\nBut 1... h5! \n\n1.g:f6! waiting\n1...e6 2.f7#\n\
   1...h5 2.Bg5#\n1... h2 2. R:h2#"
 source: Приокская правда (Навашино)
 stipulation: '#2'
+---
+algebraic:
+  black: [Rh2, Ke3, Sd4, Sc4, Qc5]
+  white: [Rh1, Ke1, Ra1, Pg2, Sf2, Pb2, Sg3, Qh4]
+authors: [!!python/unicode 'Simple Test']
+comments: [!!python/unicode 'Castling']
+options: []
+stipulation: s#2

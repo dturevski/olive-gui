@@ -125,6 +125,7 @@ class ChestView(QtGui.QSplitter):
 
     def onModelChanged(self):
         e = self.Mainframe.model.cur()
+        brd = self.Mainframe.model.board
         # TODO #2: translate messages
         # self.input.setText(self.Mainframe.model.board.toFen() + " " + self.Mainframe.model.cur()['stipulation'])
         if not CHESTSTIPULATION.match(e['stipulation']):            
@@ -132,7 +133,7 @@ class ChestView(QtGui.QSplitter):
             self.btnRun.setEnabled(False)
             return
         
-        if isOrthodox(self.Mainframe.model.board.toFen()) == False:
+        if isOrthodox(brd.toFen()) == False:
             self.input.setText('Chest can solve only orthodox problems')
             self.btnRun.setEnabled(False)
             return
@@ -140,12 +141,21 @@ class ChestView(QtGui.QSplitter):
         if hasFairyElements(e):            
             self.input.setText('Chest dont support fairy conditions')
             self.btnRun.setEnabled(False)
-            return
-        
+            return        
         
         self.btnRun.setEnabled(True)
-        input_str = "LE\nf " + self.Mainframe.model.board.toFen().replace("S", "N").replace("s", "n") + "\n"
+        input_str = "LE\nf " + brd.toFen().replace("S", "N").replace("s", "n") + "\n"
         # input_str += "cws\ncwl\ncbs\ncbl\n" #castling
+        
+        # print brd.board[56], brd.board[60]
+        if str(brd.board[56]) == 'white rook' and str(brd.board[60]) == 'white king':
+            input_str += 'cwl\n'
+        if str(brd.board[63]) == 'white rook' and str(brd.board[60]) == 'white king':
+            input_str += 'cws\n'
+        if str(brd.board[0]) == 'black rook' and str(brd.board[4]) == 'black king':
+            input_str += 'cbl\n'
+        if str(brd.board[7]) == 'black rook' and str(brd.board[4]) == 'black king':
+            input_str += 'cbs\n'
         
         if e.has_key('options'):
             for option in e['options']:
