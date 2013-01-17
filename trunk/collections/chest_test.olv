@@ -1,0 +1,211 @@
+---
+algebraic:
+  black: [Ke4, Qe1, Rf5, Bd2, Sg8, Sf3, Ph4, Pf6, Pe2, Pd3]
+  white: [Kb7, Qb8, Rd1, Bh7, Bb6, Sf4, Sb5, Pg2, Pf2, Pe6, Pe3, Pc4, Pb3]
+authors: [!!python/unicode 'Shire, David J.']
+date: '2007'
+distinction: !!python/unicode '1st Prize'
+keywords: [Hannelius, Flight giving key, Pseudo Le Grand]
+solution: !!python/unicode "1...Ne5[a] 2.Nd6#[A]\n\n1.Qe5+??\n   1...fxe5/Nxe5[a]\
+  \ 2.Nd6#[A]\nbut 1...Kxe5!\n\n1.Ng6? (2.Nd6#[A])\n   1...Rd5[c]/Rxb5[c] 2.Qf4#[B]\n\
+  but 1...Bb4[b]!\n\n1.Nh3? (2.Qf4#[B])\n   1...Ne5[a] 2.Nd6#[A]\nbut 1...Bxe3[d]!\n\
+  \n1.Nh5? (2.Qf4#[B])\n   1...Ne5[a] 2.Nd6#[A]\nbut 1...Bxe3[d]!\n\n1.Nd5? (2.Qf4#[B])\n\
+  \   1...Ne5[a] 2.Nd6#[A]\nbut 1...Bxe3[d]!\n\n1.Nxd3! (2.Nc5#)\n   1...Bb4[b] 2.Qf4#[B]\n\
+  \   1...Bxe3[d] 2.Nd6#[A]\n   1...Kxd3 2.Bxf5#\n   1...Qxf2 2.Nxf2#"
+source: !!python/unicode 'The British Chess Magazine'
+stipulation: '#2'
+---
+algebraic:
+  black: [Ka5, Sb6, Pb2, Pa6, Pa4]
+  white: [Kd2, Pd7]
+authors: [!!python/unicode 'Lind, Carl Erik Israel']
+date: '1938'
+distinction: !!python/unicode 'Prize'
+intended-solutions: '2'
+keywords: [Allumwandlung]
+solution: !!python/unicode '1.Sc8 dxc8=Q  2.b1=B Qc5#
+
+  1.b1=R d8=S  2.Rb5 Sc6#'
+source: !!python/unicode 'Svenska Problemschackklubben 2nd TT'
+stipulation: h#2
+---
+algebraic:
+  black: [Ka6, Ra4, Pc4]
+  white: [Ke5, Re4]
+authors: ['Štúň, Jaroslav']
+date: '2007-05-05'
+distinction: !!python/unicode 'Commendation'
+intended-solutions: 2.1...
+options: [Madrasi RexInclusiv, ParrainCirce]
+solution: !!python/unicode 'I)
+
+  1.Rxc4 2.Kd5(b4) 3.Rxb4 4.Kc4(a3) 5.Kb3 6.Kxa4 7.Rb2(Ra2) 8.Ka5 axb2#
+
+
+  II)
+
+  1.Kd4 2.Kc3 3.Rxc4 4.Kb3(b4) 5.Rxb4 6.Kxa4(a5) 7.Kxa5 8.Rb6(a7)+ axb6#'
+source: !!python/unicode '21st TT Chess Composition Microweb'
+source-id: !!python/unicode 'No. 25'
+stipulation: ser-s#8
+---
+algebraic:
+  black: [Ke3, Rf2, Ba8, Sd4, Sc3, Pg6, Pg4, Pf3, Pd7, Lh8, Sig7]
+  white: [Ke5, Qc2, Ra3, Bg1, Bf1, Sd3, Sb1, Pd6]
+authors: [!!python/unicode 'Uitenbroek, Hans']
+date: '2007-11-11'
+distinction: !!python/unicode '4th HM'
+solution: !!python/unicode "1...SIe8#\n1...SIh5#\n\n1.Sf4! threat 2.Sg2+ fxg2 3.Qe2+\
+  \ Sdxe2#\n  1...SIe8+ 2.Qe4+ Bxe4 3.Sd5+ Bxd5#\n  1...SIh5+ 2.Sd5+ Bxd5 3.Qe4+ Bxe4#"
+source: !!python/unicode '22nd TT Chess Composition Microweb'
+source-id: !!python/unicode 'No. 9'
+stipulation: s#3
+---
+algebraic:
+  black: [Kc5, Qh8, Rg6, Rd8, Bg5, Bc8, Sg7, Sf7, Ph6, Pg3, Pe3, Pd7, Pc6, Pc3, Pb4]
+  white: [Ke1, Qh4, Rc7, Ra1, Be5, Bb3, Sf3, Sa8, Pe4, Pb5, Pa4]
+authors: [!!python/unicode 'Ehlers, Rainer']
+comments: [!!python/unicode 'visit http://www.dieschwalbe.de/schwalbe252.htm']
+date: '2009'
+distinction: !!python/unicode '1st Prize'
+keywords: [Logical problem, Active sacrifice, En passant, Castling, Finnish Plachutta]
+solution: 'Versucht Weiß, den \"erahnbaren\" Plachutta-Schnittpunkt auf d6 zu  nutzen
+  mit
+
+  1.Td1? (dr. 2.Td5#) d5 2.Ld6+?, so folgt einfach 2.- K:d6! Nach 2.e:d5!? (dr. 3.Dc4/Dd4#)
+
+  kann Schwarz nur mit Hilfe einer Unterverwandlung abwehren: 2.- L:h4! 3.d6 (dr.
+  4.T:c6# und
+
+  4.Td5#) g2+ 4.Ke2 g1S+! 5.S:g1 Tg2+! Eine starke Verführung ist auch 1.D:g3? (dr.
+  2.Ld4#),
+
+  da der Schnittpunkt mit Schachgebot besetzt werden kann und ein zweites Mal gedeckt
+  ist.
+
+  1.- Se6/Sh5? 2.Td1 Sf4 3.D:f4 Lh4+ 4.D:h4 Tg1+ 5.S:g1 D:e5 6.De7+! D:e7/d6/Sd6 7.Td5#/T:c6#/D:e5#.
+
+  Die Wirkungslinie der wD wird hier von g3-d6 wieder nach h4-e7 verlagert (weißer
+  Römer).
+
+
+  Schwarz hat aber einen Ausweg mit 1.- S:e5! 2.D:e5+ d5 3.T:c6+ T:c6
+
+  4.Td1 Lh4+ 5.Ke2 Dg8? 6.Td4 7.Tc4#, wenn er d5 deckt mittels 5.- Le6!
+
+  In der Lösung gibt Weiß die Deckung für d6 zuerst sogar auf und opfert mit Tempo
+  den wL,
+
+  der sich als hinderliche weiße Masse herausstellt:
+
+
+  1.Ld4+! Kd6 2.Lc5+ K:c5 3.e5 L:h4 4.\OOO\ d5 5.e:d6 e.p.!
+
+  und nun T8:d6/Tg:d6 6.T:c6+/Td5+ T:c6/T:d5 7.Td5#/T:c6#.
+
+
+  Erstmalig wird hier ein Plachutta-Schnittpunkt per en-passant-Schlag besetzt.
+
+  Paradenwechsel vor den weißen Mattzügen werden ebenso gezeigt wie ein maskierter
+
+  schwarzer Römer des sL (Wirkungslinie g5-c1 wird auf h4-e1 verlagert).
+
+  Unter Einschluß der schwarzen Parade 4.- g1S+ im Probespiel ist auch noch
+
+  ein Valladao-Task auszumachen. Neben dem Johandl-Turnier-Preisträger hielt
+
+  Rainer dies für seine beste Aufgabe'
+source: !!python/unicode 'Geburtstagsturnier Bo Lindgren 80 Jahre, Springaren'
+stipulation: '#7'
+---
+algebraic:
+  black: [Kc3, Rh1, Bg1, Ph2, Pe3, Pc5, Pc4, Pb3]
+  white: [Kd1, Qa3, Bh8, Be8, Pf5, Pe5, Pe4, Pe2]
+authors: ['Zentai, Dániel', 'Kasza-Tóth, Tünde']
+date: '2009'
+solution: '1.Bg6! blocus
+
+  1…Kd4 2.e6+ Kxe4 3.Qa8+ Kf4 4.Qf3+ Kg5 5.Qg3+ Kh6 6.Qxe3+ Bxe3#'
+source: Csák-Majoros
+stipulation: s#6
+---
+algebraic:
+  black: [Ke7, Pg2, Gc1, Ga1]
+  white: [Kh2, Rg5, Bd7, Pe6, Pb7, Pb6, Gg3, Gg1, Ga8]
+authors: [!!python/unicode 'Caillaud, Michel']
+date: '1980'
+distinction: !!python/unicode '3rd Prize'
+solution: !!python/unicode "1.b8G? threat 2.Gh1 gxh1Q#\n  1...Kd6! Gc7#\n\n1.b8Q?\
+  \ threat 2.Gh1 gxh1Q#\n  1...Kf6! Qd8#\n\n1.b8B? threat 2.Gh1 gxh1Q#\n  1...Kf8!\
+  \ Bd6#\n\n1.b8S? threat 2.Gh1 gxh1Q#\n  1...Kd8! Sc6#\n\n1.b8R! threat 2.Gh1 gxh1Q#"
+source: !!python/unicode 'diagrammes'
+stipulation: r#2
+---
+algebraic:
+  black: [Kc5, Rd6, Pe3, Pd4, Pc4, Pb3]
+  white: [Kf1, Rd1, Bg2, Sf3, Sd2, Pg4, Pd5, Pb2]
+authors: [!!python/unicode 'Onkoud, Abdelaziz']
+comments: [!!python/unicode 'visit http://www.onkoud.com/spip.php?article622', !!python/unicode 'P1099138',
+  !!python/unicode 'Check also P1072954']
+date: '2009'
+distinction: !!python/unicode '1st Prize'
+intended-solutions: '2'
+keywords: [Active sacrifice, Model mates]
+solution: !!python/unicode '1... S:d4!  2. K:d4  Sf3+   3. Ke4  Rd4#
+
+  1... S:c4!  2. K:c4  Sd2+   3. Kd3  Be4#'
+source: Lietuvai 1000, Šachmatija
+source-id: !!python/unicode '/1516'
+stipulation: h#2.5
+---
+algebraic:
+  black: [Kg6]
+  white: [Ke5, Rh1, Sd8]
+authors: [!!python/unicode 'Hernitz, Zvonimir']
+date: '1980'
+keywords: [Miniature]
+options: [Circe]
+solution: !!python/unicode "1.Rh7! Kg5 2.Sf7+\n  2...Kg4 3.Rh3 =\n  2...Kg6 3.Ke6\
+  \ ="
+source: !!python/unicode 'feenschach'
+stipulation: =3
+---
+algebraic:
+  black: [Kd8, Qh5, Re5, Bc2, Ph6, Pf6, Pe7, Pb7]
+  white: [Kh8, Rg8, Bd7, Bb8, Sh7, Sf8, Pf7, Pa6]
+authors: ['Лошинский, Лев Ильич']
+comments: [!!python/unicode 'BBc2 instead of d3 to prevent the cook 1 a7 Ra5 2 Bb5']
+date: '1966'
+solution: !!python/unicode '1. Bc6! bxc6 2. Ne6+ Kd7 3. Nc5+! Rxc5 4. Nf8+! (4. f8=N+?
+  Kc8! 5. Ne6+ Qe8!) 4... Kc8 5. Ne6+ Kd7 6. Nxc5+! Qxc5 7. f8=N+ Kc8 (7... Ke8 8.
+  Ne6+ Kf7 9. Nd8#) 8. Ne6+ Kd7 9. Nxc5#'
+source: !!python/unicode 'None'
+source-id: !!python/unicode 'version'
+stipulation: '#9'
+---
+algebraic:
+  black: [Ke5, Pf6, Pc7]
+  white: [Ke3, Bh8, Be4, Pf5, Pc5]
+authors: [!!python/unicode 'Staudte, Rainer']
+date: '2012-11-03'
+solution: !!python/unicode 'None'
+source: Sächsische Zeitung
+source-id: !!python/unicode '3952'
+stipulation: '#8'
+---
+algebraic:
+  black: [Kd1, Pg5, Pb2, Pa7]
+  white: [Kf1, Bb1, Pd2]
+authors: [!!python/unicode 'Kardos, Tivadar']
+date: '1984'
+options: []
+solution: !!python/unicode '1.a6 d4 2.a5 d5 3.a4 d6 4.a3 d7 5.a2 d8=B 6.a1=B Bxg5='
+source: !!python/unicode 'Die Schwalbe'
+stipulation: h=6
+---
+algebraic:
+  black: [Sb2, Kc2]
+  white: [Sb5, Ke4]
+authors: [!!python/unicode 'Simple Test']
+options: []
+stipulation: h=3
