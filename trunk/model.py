@@ -538,7 +538,7 @@ def hasFairyPieces(e):
         return False
     board = Board()
     board.fromAlgebraic(e['algebraic'])
-    for p in Pieces(board):
+    for s, p in Pieces(board):
         if (p.color not in ['white', 'black']) or (len(p.specs) != 0) or (p.name.lower() not in 'kqrbsp'):
             return True
     return False
