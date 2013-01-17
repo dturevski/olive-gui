@@ -71,11 +71,6 @@ class ChestView(QtGui.QSplitter):
         self.setStretchFactor(0, 1)    
         
     def onRun(self):
-        # long verification, simplify this
-        if not CHESTSTIPULATION.match(self.Mainframe.model.cur()['stipulation']) \
-        or not isOrthodox(self.Mainframe.model.board.toFen()) \
-        or hasFairyElements(self.Mainframe.model.cur()):
-            return
         self.setActionEnabled(False)
         self.output.clear()
         
@@ -131,19 +126,21 @@ class ChestView(QtGui.QSplitter):
     def onModelChanged(self):
         # TODO #2: translate messages
         # self.input.setText(self.Mainframe.model.board.toFen() + " " + self.Mainframe.model.cur()['stipulation'])
-        self.output.clear()
         if not CHESTSTIPULATION.match(self.Mainframe.model.cur()['stipulation']):            
-            self.output.insertPlainText('Stipulation is not suported by Chest')
+            self.input.setText('Stipulation is not suported by Chest')
+            self.btnRun.setEnabled(False)
             return
         
         if isOrthodox(self.Mainframe.model.board.toFen()) == False:
-            self.output.insertPlainText('Chest can solve only orthodox problems')
+            self.input.setText('Chest can solve only orthodox problems')
+            self.btnRun.setEnabled(False)
             return
         
         if hasFairyElements(self.Mainframe.model.cur()):            
-            self.output.insertPlainText('Chest dont support fairy conditions')
+            self.input.setText('Chest dont support fairy conditions')
+            self.btnRun.setEnabled(False)
             return
-        
+        self.btnRun.setEnabled(True)
         input_str = "LE\nf " + self.Mainframe.model.board.toFen().replace("S", "N").replace("s", "n") + "\n"
         
         # stip preparing
@@ -162,8 +159,7 @@ class ChestView(QtGui.QSplitter):
         
         if stipulation[0] == 'h' or stipulation[0] == 'H':
             if '.' in stipulation[1]:
-                # stipulation[1] = stipulation[1].split('.')[0]
-                self.output.insertPlainText('Chest cant solve helpmates with halfmoves')
+                self.input.setText('Chest cant solve helpmates with halfmoves')
                 return
             else:
                 move = 'b'
