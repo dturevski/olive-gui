@@ -9,7 +9,7 @@ import re
 from PyQt4 import QtGui, QtCore
 
 # local
-import model # really needs?
+import model
 
 CHESTCONF = {"hash": 128, "in": "input.txt", "out": "output.txt"}
 CHESTSTIPULATION = re.compile('^([sh]?)([#=])(\d+)(\.5)?$', re.IGNORECASE)
@@ -124,9 +124,10 @@ class ChestView(QtGui.QSplitter):
         self.setActionEnabled(True)
 
     def onModelChanged(self):
+        e = self.Mainframe.model.cur()
         # TODO #2: translate messages
         # self.input.setText(self.Mainframe.model.board.toFen() + " " + self.Mainframe.model.cur()['stipulation'])
-        if not CHESTSTIPULATION.match(self.Mainframe.model.cur()['stipulation']):            
+        if not CHESTSTIPULATION.match(e['stipulation']):            
             self.input.setText('Stipulation is not suported by Chest')
             self.btnRun.setEnabled(False)
             return
@@ -136,16 +137,27 @@ class ChestView(QtGui.QSplitter):
             self.btnRun.setEnabled(False)
             return
         
-        if hasFairyElements(self.Mainframe.model.cur()):            
+        if hasFairyElements(e):            
             self.input.setText('Chest dont support fairy conditions')
             self.btnRun.setEnabled(False)
             return
+        
+        
         self.btnRun.setEnabled(True)
         input_str = "LE\nf " + self.Mainframe.model.board.toFen().replace("S", "N").replace("s", "n") + "\n"
+        # input_str += "cws\ncwl\ncbs\ncbl\n" #castling
+        
+        if e.has_key('options'):
+            for option in e['options']:
+                if "EnPassant" in option:
+                    aux = option.replace('EnPassant ', '')
+                    enp = 'e' + aux[0] + ('4' if aux[1] == '3' else '5')
+                    # print enp
+                    input_str += enp + "\n"
         
         # stip preparing
         # better to wrap into a method?
-        stip, stipulation, move = self.Mainframe.model.cur()['stipulation'], {}, 'w'
+        stip, stipulation, move = e['stipulation'], {}, 'w'
         if '#' in stip:
             stipulation = stip.split('#')
             if stipulation[0] != '':

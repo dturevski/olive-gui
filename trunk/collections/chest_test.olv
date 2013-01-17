@@ -3,6 +3,9 @@ algebraic:
   black: [Ke4, Qe1, Rf5, Bd2, Sg8, Sf3, Ph4, Pf6, Pe2, Pd3]
   white: [Kb7, Qb8, Rd1, Bh7, Bb6, Sf4, Sb5, Pg2, Pf2, Pe6, Pe3, Pc4, Pb3]
 authors: [!!python/unicode 'Shire, David J.']
+comments: [!!python/unicode 'twomover
+
+    pass']
 date: '2007'
 distinction: !!python/unicode '1st Prize'
 keywords: [Hannelius, Flight giving key, Pseudo Le Grand]
@@ -19,6 +22,9 @@ algebraic:
   black: [Ka5, Sb6, Pb2, Pa6, Pa4]
   white: [Kd2, Pd7]
 authors: [!!python/unicode 'Lind, Carl Erik Israel']
+comments: [!!python/unicode 'helpmate
+
+    pass']
 date: '1938'
 distinction: !!python/unicode 'Prize'
 intended-solutions: '2'
@@ -33,6 +39,9 @@ algebraic:
   black: [Ka6, Ra4, Pc4]
   white: [Ke5, Re4]
 authors: ['Štúň, Jaroslav']
+comments: [!!python/unicode 'unrecognized condition
+
+    pass']
 date: '2007-05-05'
 distinction: !!python/unicode 'Commendation'
 intended-solutions: 2.1...
@@ -53,6 +62,9 @@ algebraic:
   black: [Ke3, Rf2, Ba8, Sd4, Sc3, Pg6, Pg4, Pf3, Pd7, Lh8, Sig7]
   white: [Ke5, Qc2, Ra3, Bg1, Bf1, Sd3, Sb1, Pd6]
 authors: [!!python/unicode 'Uitenbroek, Hans']
+comments: [!!python/unicode 'fairy pieces
+
+    pass']
 date: '2007-11-11'
 distinction: !!python/unicode '4th HM'
 solution: !!python/unicode "1...SIe8#\n1...SIh5#\n\n1.Sf4! threat 2.Sg2+ fxg2 3.Qe2+\
@@ -65,7 +77,11 @@ algebraic:
   black: [Kc5, Qh8, Rg6, Rd8, Bg5, Bc8, Sg7, Sf7, Ph6, Pg3, Pe3, Pd7, Pc6, Pc3, Pb4]
   white: [Ke1, Qh4, Rc7, Ra1, Be5, Bb3, Sf3, Sa8, Pe4, Pb5, Pa4]
 authors: [!!python/unicode 'Ehlers, Rainer']
-comments: [!!python/unicode 'visit http://www.dieschwalbe.de/schwalbe252.htm']
+comments: [!!python/unicode 'visit http://www.dieschwalbe.de/schwalbe252.htm
+
+    castling
+
+    failed']
 date: '2009'
 distinction: !!python/unicode '1st Prize'
 keywords: [Logical problem, Active sacrifice, En passant, Castling, Finnish Plachutta]
@@ -122,6 +138,9 @@ algebraic:
   black: [Kc3, Rh1, Bg1, Ph2, Pe3, Pc5, Pc4, Pb3]
   white: [Kd1, Qa3, Bh8, Be8, Pf5, Pe5, Pe4, Pe2]
 authors: ['Zentai, Dániel', 'Kasza-Tóth, Tünde']
+comments: [!!python/unicode 'selfmate
+
+    pass']
 date: '2009'
 solution: '1.Bg6! blocus
 
@@ -130,23 +149,15 @@ source: Csák-Majoros
 stipulation: s#6
 ---
 algebraic:
-  black: [Ke7, Pg2, Gc1, Ga1]
-  white: [Kh2, Rg5, Bd7, Pe6, Pb7, Pb6, Gg3, Gg1, Ga8]
-authors: [!!python/unicode 'Caillaud, Michel']
-date: '1980'
-distinction: !!python/unicode '3rd Prize'
-solution: !!python/unicode "1.b8G? threat 2.Gh1 gxh1Q#\n  1...Kd6! Gc7#\n\n1.b8Q?\
-  \ threat 2.Gh1 gxh1Q#\n  1...Kf6! Qd8#\n\n1.b8B? threat 2.Gh1 gxh1Q#\n  1...Kf8!\
-  \ Bd6#\n\n1.b8S? threat 2.Gh1 gxh1Q#\n  1...Kd8! Sc6#\n\n1.b8R! threat 2.Gh1 gxh1Q#"
-source: !!python/unicode 'diagrammes'
-stipulation: r#2
----
-algebraic:
   black: [Kc5, Rd6, Pe3, Pd4, Pc4, Pb3]
   white: [Kf1, Rd1, Bg2, Sf3, Sd2, Pg4, Pd5, Pb2]
 authors: [!!python/unicode 'Onkoud, Abdelaziz']
 comments: [!!python/unicode 'visit http://www.onkoud.com/spip.php?article622', !!python/unicode 'P1099138',
-  !!python/unicode 'Check also P1072954']
+  !!python/unicode 'Check also P1072954
+
+    halfmoves
+
+    pass']
 date: '2009'
 distinction: !!python/unicode '1st Prize'
 intended-solutions: '2'
@@ -162,6 +173,9 @@ algebraic:
   black: [Kg6]
   white: [Ke5, Rh1, Sd8]
 authors: [!!python/unicode 'Hernitz, Zvonimir']
+comments: [!!python/unicode 'stalemate
+
+    pass']
 date: '1980'
 keywords: [Miniature]
 options: [Circe]
@@ -174,7 +188,9 @@ algebraic:
   black: [Kd8, Qh5, Re5, Bc2, Ph6, Pf6, Pe7, Pb7]
   white: [Kh8, Rg8, Bd7, Bb8, Sh7, Sf8, Pf7, Pa6]
 authors: ['Лошинский, Лев Ильич']
-comments: [!!python/unicode 'BBc2 instead of d3 to prevent the cook 1 a7 Ra5 2 Bb5']
+comments: [!!python/unicode 'BBc2 instead of d3 to prevent the cook 1 a7 Ra5 2 Bb5
+
+    moremover']
 date: '1966'
 solution: !!python/unicode '1. Bc6! bxc6 2. Ne6+ Kd7 3. Nc5+! Rxc5 4. Nf8+! (4. f8=N+?
   Kc8! 5. Ne6+ Qe8!) 4... Kc8 5. Ne6+ Kd7 6. Nxc5+! Qxc5 7. f8=N+ Kc8 (7... Ke8 8.
@@ -187,6 +203,7 @@ algebraic:
   black: [Ke5, Pf6, Pc7]
   white: [Ke3, Bh8, Be4, Pf5, Pc5]
 authors: [!!python/unicode 'Staudte, Rainer']
+comments: [!!python/unicode 'moremover']
 date: '2012-11-03'
 solution: !!python/unicode 'None'
 source: Sächsische Zeitung
@@ -197,6 +214,9 @@ algebraic:
   black: [Kd1, Pg5, Pb2, Pa7]
   white: [Kf1, Bb1, Pd2]
 authors: [!!python/unicode 'Kardos, Tivadar']
+comments: [!!python/unicode 'helpstalemate
+
+    pass']
 date: '1984'
 options: []
 solution: !!python/unicode '1.a6 d4 2.a5 d5 3.a4 d6 4.a3 d7 5.a2 d8=B 6.a1=B Bxg5='
@@ -207,5 +227,25 @@ algebraic:
   black: [Sb2, Kc2]
   white: [Sb5, Ke4]
 authors: [!!python/unicode 'Simple Test']
+comments: [!!python/unicode 'helpstalemate
+
+    pass']
 options: []
 stipulation: h=3
+---
+algebraic:
+  black: [Kh4, Ph6, Ph3, Pf5, Pe7]
+  white: [Ke5, Qd8, Rh1, Bf3, Bc1, Sh7, Pg6, Pg5, Pg4, Pf2, Pe4, Pe2, Pd7, Pd5]
+authors: ['Мочалкін, Олександр Вікторович']
+comments: [!!python/unicode 'en passant
+
+    pass']
+date: '1987'
+distinction: !!python/unicode '2nd Prize'
+keywords: [!!python/unicode 'Retro', !!python/unicode 'En passant']
+options: [EnPassant f6]
+solution: !!python/unicode "0...g7-g5\n\n1. g:f5? waiting\n1... e6 2. g:h6#\n1...\
+  \ h:g5 2. B:g5#\n1... h2 2. R:h2#\nBut 1... h5! \n\n1.g:f6! waiting\n1...e6 2.f7#\n\
+  1...h5 2.Bg5#\n1... h2 2. R:h2#"
+source: Приокская правда (Навашино)
+stipulation: '#2'
