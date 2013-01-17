@@ -9,10 +9,24 @@ import re
 from PyQt4 import QtGui, QtCore
 
 # local
-import model
+import model # really needs?
 
 CHESTCONF = {"hash": 128, "in": "input.txt", "out": "output.txt"}
 CHESTSTIPULATION = re.compile('^([sh]?)([#=])(\d+)(\.5)?$', re.IGNORECASE)
+
+def isOrthodox(fen):
+    result = True
+    for chr in fen:
+        if chr.lower() not in 'kqrbsp12345678/':
+            result = False
+    # print result, fen
+    return result
+
+def hasOptions(current):
+    if current.has_key('options') and current['options'] != []:
+        # print current['options']
+        return True
+    return False
         
 class ChestView(QtGui.QSplitter):
     
@@ -57,6 +71,11 @@ class ChestView(QtGui.QSplitter):
         self.setStretchFactor(0, 1)    
         
     def onRun(self):
+        # long verification, simplify this
+        if not CHESTSTIPULATION.match(self.Mainframe.model.cur()['stipulation']) \
+        or not isOrthodox(self.Mainframe.model.board.toFen()) \
+        or hasOptions(self.Mainframe.model.cur()):
+            return
         self.setActionEnabled(False)
         self.output.clear()
         
@@ -73,7 +92,7 @@ class ChestView(QtGui.QSplitter):
         self.chestProc.finished.connect(self.onFinished)
         
         chest_exe = self.Conf.value('chest-executable')[os.name]
-        params = ["-r", "-LS"]
+        params = ["-r", "-LS", "-M " + str(CHESTCONF['hash'])]
         params.append(self.temp_filename)
         
         self.chestProc.error.connect(self.onFailed)
@@ -82,7 +101,7 @@ class ChestView(QtGui.QSplitter):
     def onOut(self):
         data = self.chestProc.readAllStandardOutput()
         self.output.insertPlainText(QtCore.QString(data))
-        # add break for big output
+        # TODO #1: add break for big output
         
     def onError(self):
         self.output.setTextColor(QtGui.QColor(255,0,0))
@@ -106,18 +125,52 @@ class ChestView(QtGui.QSplitter):
         self.setActionEnabled(True)
         
     def onStop(self):
+        self.chestProc.kill()
         self.setActionEnabled(True)
 
     def onModelChanged(self):
+        # TODO #2: translate messages
         # self.input.setText(self.Mainframe.model.board.toFen() + " " + self.Mainframe.model.cur()['stipulation'])
+        self.output.clear()
+        if not CHESTSTIPULATION.match(self.Mainframe.model.cur()['stipulation']):            
+            self.output.insertPlainText('Stipulation is not suported by Chest')
+            return
+        
+        if isOrthodox(self.Mainframe.model.board.toFen()) == False:
+            self.output.insertPlainText('Chest can solve only orthodox problems')
+            return
+        
+        if hasOptions(self.Mainframe.model.cur()):            
+            self.output.insertPlainText('Chest dont support fairy conditions')
+            return
+        
         input_str = "LE\nf " + self.Mainframe.model.board.toFen().replace("S", "N").replace("s", "n") + "\n"
-        stipulation = self.Mainframe.model.cur()['stipulation'].split('#')
-        if stipulation[0] != '':
-            input_str += "j" + stipulation[0] + "\n"
-        input_str += "z" + stipulation[1] + "w\n"
+        
+        # stip preparing
+        # better to wrap into a method?
+        stip, stipulation, move = self.Mainframe.model.cur()['stipulation'], {}, 'w'
+        if '#' in stip:
+            stipulation = stip.split('#')
+            if stipulation[0] != '':
+                input_str += "j" + stipulation[0] + "\n"
+        elif '=' in stip:
+            stipulation = stip.split('=')
+            if stipulation[0] != '':
+                input_str += "j" + stipulation[0].upper() + "\n"
+            else:
+                stipulation[0] = 'O'
+        
+        if stipulation[0] == 'h' or stipulation[0] == 'H':
+            if '.' in stipulation[1]:
+                # stipulation[1] = stipulation[1].split('.')[0]
+                self.output.insertPlainText('Chest cant solve helpmates with halfmoves')
+                return
+            else:
+                move = 'b'
+        input_str += "z" + stipulation[1] + move + "\n"
         
         self.input.setText(input_str)
-        
+          
     def checkCurrentEntry(self):
         if model.hasFairyElements(self.Mainframe.model.cur()):
             return None
