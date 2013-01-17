@@ -22,8 +22,8 @@ def isOrthodox(fen):
     # print result, fen
     return result
 
-def hasOptions(current):
-    if current.has_key('options') and current['options'] != []:
+def hasFairyElements(current):
+    if model.hasFairyElements(current):
         # print current['options']
         return True
     return False
@@ -74,7 +74,7 @@ class ChestView(QtGui.QSplitter):
         # long verification, simplify this
         if not CHESTSTIPULATION.match(self.Mainframe.model.cur()['stipulation']) \
         or not isOrthodox(self.Mainframe.model.board.toFen()) \
-        or hasOptions(self.Mainframe.model.cur()):
+        or hasFairyElements(self.Mainframe.model.cur()):
             return
         self.setActionEnabled(False)
         self.output.clear()
@@ -140,7 +140,7 @@ class ChestView(QtGui.QSplitter):
             self.output.insertPlainText('Chest can solve only orthodox problems')
             return
         
-        if hasOptions(self.Mainframe.model.cur()):            
+        if hasFairyElements(self.Mainframe.model.cur()):            
             self.output.insertPlainText('Chest dont support fairy conditions')
             return
         
