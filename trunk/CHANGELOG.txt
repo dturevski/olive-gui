@@ -15,6 +15,7 @@ todo:
   - Memleaks in options dialog?
   - emit LangChanged on startup before paint and remove double entries of language-specific constants (in constructors)
   - More default glyphs in GC, + 45 rotations?
+  - bug fixed: options -> + "Take&MakeChess" -> Export PDF
 ---
 version: 0.13.1
 changes:

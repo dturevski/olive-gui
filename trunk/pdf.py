@@ -193,7 +193,7 @@ class ExportDocument:
             parts.append(s)
         if(model.notEmpty(e, 'distinction')):
             parts.append(e['distinction'])
-        return "<br/>".join(parts)
+        return ExportDocument.escapeHtml("<br/>".join(parts))
     header = staticmethod(header)
     
     def solver(e, Lang):
@@ -207,15 +207,21 @@ class ExportDocument:
             parts.append("<b>" + "<br/>".join(e['options']) + "</b>")
         if(e.has_key('twins')):
             parts.append(model.createPrettyTwinsText(e))
-        return "<br/>".join(parts)
+        return ExportDocument.escapeHtml("<br/>".join(parts))
     solver = staticmethod(solver)
     
     def legend(board):
         legend = board.getLegend()
         if len(legend) == 0:
             return ''
-        return "<br/>".join([", ".join(legend[k]) + ': ' + k for k in legend.keys()])
+        return ExportDocument.escapeHtml("<br/>".join([", ".join(legend[k]) + ': ' + k for k in legend.keys()]))
     legend = staticmethod(legend)
+
+    def escapeHtml(str):
+        str = str.replace('&', '&amp;');
+        # todo: more replacements
+        return str 
+    escapeHtml = staticmethod(escapeHtml)
         
     def board2Html(self,  board):
         lines = []
