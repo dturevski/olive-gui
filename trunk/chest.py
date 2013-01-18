@@ -128,7 +128,7 @@ class ChestView(QtGui.QSplitter):
         brd = self.Mainframe.model.board
         # TODO #2: translate messages
         # self.input.setText(self.Mainframe.model.board.toFen() + " " + self.Mainframe.model.cur()['stipulation'])
-        if not CHESTSTIPULATION.match(e['stipulation']):            
+        if not CHESTSTIPULATION.match(e['stipulation'].lower()):            
             self.input.setText('Stipulation is not suported by Chest')
             self.btnRun.setEnabled(False)
             return
@@ -167,7 +167,7 @@ class ChestView(QtGui.QSplitter):
         
         # stip preparing
         # better to wrap into a method?
-        stip, stipulation, move = e['stipulation'], {}, 'w'
+        stip, stipulation, move = e['stipulation'].lower(), {}, 'w'
         if '#' in stip:
             stipulation = stip.split('#')
             if stipulation[0] != '':
