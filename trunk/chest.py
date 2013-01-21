@@ -27,6 +27,14 @@ def hasFairyElements(current):
         # print current['options']
         return True
     return False
+
+def checkOption(pbm, option):
+    if not pbm.has_key('options'):
+        return False
+    for opt in pbm['options']:
+        if option in opt:
+            return opt
+    return False
         
 class ChestView(QtGui.QSplitter):
     
@@ -44,6 +52,9 @@ class ChestView(QtGui.QSplitter):
         self.btnStop = QtGui.QPushButton('')
         self.btnStop.clicked.connect(self.onStop)
         
+        self.btnCompact = QtGui.QPushButton('')
+        self.btnCompact.clicked.connect(self.onCompact)
+        
         self.initLayout()
         
         self.Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
@@ -59,6 +70,8 @@ class ChestView(QtGui.QSplitter):
         
         grid.addWidget(self.btnRun, 1, 0)
         grid.addWidget(self.btnStop, 1, 1)
+        
+        grid.addWidget(self.btnCompact, 2, 0)
         
         # stretcher
         grid.addWidget(QtGui.QWidget(), 2, 2)
@@ -147,23 +160,27 @@ class ChestView(QtGui.QSplitter):
         input_str = "LE\nf " + brd.toFen().replace("S", "N").replace("s", "n") + "\n"
         # input_str += "cws\ncwl\ncbs\ncbl\n" #castling
         
-        # print brd.board[56], brd.board[60]
+        option = checkOption(e, 'NoCastling')
         if str(brd.board[56]) == 'white rook' and str(brd.board[60]) == 'white king':
-            input_str += 'cwl\n'
+            if option == False or not 'a1' in option: 
+                input_str += 'cwl\n'
         if str(brd.board[63]) == 'white rook' and str(brd.board[60]) == 'white king':
-            input_str += 'cws\n'
+            if option == False or not 'h1' in option:
+                input_str += 'cws\n'
         if str(brd.board[0]) == 'black rook' and str(brd.board[4]) == 'black king':
-            input_str += 'cbl\n'
+            if option == False or not 'a8' in option:
+                input_str += 'cbl\n'
         if str(brd.board[7]) == 'black rook' and str(brd.board[4]) == 'black king':
-            input_str += 'cbs\n'
+            if option == False or not 'h8' in option:
+                input_str += 'cbs\n'
+            
+        option = checkOption(e, 'EnPassant')
         
-        if e.has_key('options'):
-            for option in e['options']:
-                if "EnPassant" in option:
-                    aux = option.replace('EnPassant ', '')
-                    enp = 'e' + aux[0] + ('4' if aux[1] == '3' else '5')
-                    # print enp
-                    input_str += enp + "\n"
+        if option != False:
+            aux = option.replace('EnPassant ', '')
+            enp = 'e' + aux[0] + ('4' if aux[1] == '3' else '5')
+            # print enp
+            input_str += enp + "\n"
         
         # stip preparing
         # better to wrap into a method?
@@ -205,6 +222,15 @@ class ChestView(QtGui.QSplitter):
     def onLangChanged(self):
         self.btnRun.setText(self.Lang.value('CHEST_Run'))
         self.btnStop.setText(self.Lang.value('CHEST_Stop'))
+        self.btnCompact.setText('compact') # (self.Lang.value('CHEST_Stop'))
+        
+    def onCompact(self):
+        out = str(self.output.toPlainText())
+        out = out.replace("=*=", str("~"))
+        aux = out.split('\n')[8:-3]
+        # print aux
+        self.output.setText('\n'.join(aux))
+        pass
         
     def setActionEnabled(self, status):
         self.btnRun.setEnabled(status)
