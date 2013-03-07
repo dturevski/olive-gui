@@ -10,7 +10,7 @@ fairy-zoo:
 horsehead-glyph: N
 import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
 import-post-decode-default: ISO-8859-1
-languages: {en: English, rs: Српски, ru: Русский}
+languages: {en: English, rs: Српски, ru: Русский, de: Deutsch}
 latest-binary-version-info-url: http://olive-gui.googlecode.com/svn/trunk/conf/latest-binary-version.yaml
 notations:
   en: [K, Q, R, B, S, P]
