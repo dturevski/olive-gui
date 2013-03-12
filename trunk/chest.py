@@ -134,6 +134,11 @@ class ChestView(QtGui.QSplitter):
         
     def onStop(self):
         self.chestProc.kill()
+        try:
+            os.unlink(self.temp_filename)
+        except:
+            pass
+        self.output.insertPlainText(self.Lang.value('MSG_Terminated'))
         self.setActionEnabled(True)
 
     def onModelChanged(self):
@@ -152,7 +157,7 @@ class ChestView(QtGui.QSplitter):
             return
         
         if hasFairyElements(e):            
-            self.input.setText('Chest dont support fairy conditions')
+            self.input.setText("Chest doesn't support fairy conditions")
             self.btnRun.setEnabled(False)
             return        
         

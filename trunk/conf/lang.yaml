@@ -633,3 +633,30 @@ CHEST_Stop:
   rs: Stop
   ru: Прервать
   de: Anhalten
+
+# Distinctions
+DSTN_Prize:
+  en: Prize
+  rs: награда
+  ru: приз
+  de: Preis
+DSTN_Place:
+  en: Place
+  rs: место
+  ru: место
+  de: Platz
+DSTN_HM:
+  en: HM
+  rs: почасно признање
+  ru: почётный отзыв
+  de: ehrende Erwähnung
+DSTN_Comm:
+  en: Сomm.
+  rs: похвала
+  ru: похв. отзыв
+  de: Lob
+DSTN_Special:
+  en: Special
+  rs: сп.
+  ru: спец.
+  de: sp.

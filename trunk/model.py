@@ -1,3 +1,5 @@
+﻿# -*- coding: utf-8 -*-
+
 # standard
 import re
 import exceptions
@@ -85,6 +87,7 @@ class Distinction:
     suffixes = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th']
     pattern = re.compile('^(?P<special>special )?((?P<lo>\d+)[stnrdh]{2}-)?((?P<hi>\d+)[stnrdh]{2} )?(?P<name>(prize)|(place)|(hm)|(honorable mention)|(commendation)|(comm\.)|(cm))(, (?P<comment>.*))?$')
     names = {'prize':'Prize', 'place':'Place', 'hm':'HM', 'honorable mention':'HM', 'commendation':'Comm.', 'comm.':'Comm.', 'cm':'Comm.'}
+    lang_entries = {'Prize':'DSTN_Prize', 'Place':'DSTN_Place', 'HM':'DSTN_HM', 'Comm.':'DSTN_Comm'}
     
     def __init__(self):
         self.special = False
@@ -106,6 +109,27 @@ class Distinction:
         if self.comment.strip() != '':
             retval = retval + ', ' + self.comment.strip()
         return retval
+    def toStringInLang(self, Lang):
+        if self.name == '': return ''
+        retval = Lang.value(Distinction.lang_entries[self.name])
+        lo, hi = self.lo, self.hi
+        if(self.hi < 1) and (self.lo > 0):
+            lo, hi = hi, lo
+        if hi > 0:
+            retval = unicode(hi) + Distinction.pluralSuffixInLang(hi, Lang) + ' ' + retval
+            if lo > 0:
+                retval = unicode(lo) + Distinction.pluralSuffixInLang(lo, Lang) + '-' +retval
+        if self.special:
+            retval = Lang.value('DSTN_Special') + ' ' + retval
+        if self.comment.strip() != '':
+            retval = retval + ', ' + self.comment.strip()
+        return retval
+    def pluralSuffixInLang(integer, Lang):
+        if Lang.current == 'en':
+            return Distinction.pluralSuffix(integer)
+        else:
+            return ''
+    pluralSuffixInLang = staticmethod(pluralSuffixInLang)
     def pluralSuffix(integer):
         integer = [integer, -integer][integer < 0]
         integer = integer % 100

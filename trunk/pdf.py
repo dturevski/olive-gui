@@ -1,5 +1,8 @@
 ﻿# -*- coding: utf-8 -*-
 
+# local
+import model
+
 # 3rd party
 import reportlab.rl_config
 reportlab.rl_config.warnOnMissingFontGlyphs = 0
@@ -135,7 +138,7 @@ class ExportDocument:
             return ''
         return reportlab.platypus.Paragraph(\
             '<font face="%s" size=%d>%s</font><br/>' %
-                (FONT_FAMILY, FONT_SIZE['header'], ExportDocument.header(e)),
+                (FONT_FAMILY, FONT_SIZE['header'], ExportDocument.header(e, self.Lang)),
                 self.style
             )
     def leftBottom(self, e):
@@ -180,7 +183,7 @@ class ExportDocument:
             ))
         return story
         
-    def header(e): 
+    def header(e, Lang): 
         parts = []
         if(e.has_key('authors')):
             parts.append("<b>" + "<br/>".join(e['authors']) + "</b>")
@@ -192,7 +195,8 @@ class ExportDocument:
                 s = s + "<i>, " + e['date'] + "</i>"
             parts.append(s)
         if(model.notEmpty(e, 'distinction')):
-            parts.append(e['distinction'])
+            d = model.Distinction.fromString(e['distinction'])
+            parts.append(d.toStringInLang(Lang))
         return ExportDocument.escapeHtml("<br/>".join(parts))
     header = staticmethod(header)
     

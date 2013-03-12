@@ -6,18 +6,18 @@ changes:
   - More RTF fonts supported
   - Serbian entries fixed
   - check for latest version (in separate thread)
-  - bug fixed: options -> + "Take&MakeChess" -> Export PDF
   - Deutsch version by Torsten Linss
+  - language dependant distinction 
+  - bug fixed: options -> + "Take&MakeChess" -> Export PDF
+  - bug fixed(?): Memleaks in options dialog? Doesn't reproduce in 0.13.1 with PyQt 2.7-4.9.6-1
 todo: 
   - Chest
   - override pieces glyphs
   - yacpdb communication: check, add, sync down, sync up
   - icons on modal dialogs
   - Clear Board -> Clear popeye output (why?..)
-  - Memleaks in options dialog?
   - emit LangChanged on startup before paint and remove double entries of language-specific constants (in constructors)
   - More default glyphs in GC, + 45 rotations?
-  - language dependant distinction 
 ---
 version: 0.13.1
 changes:

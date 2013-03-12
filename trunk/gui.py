@@ -915,6 +915,10 @@ class OverviewList(QtGui.QTreeWidget):
             Lang.value('EP_Source'), Lang.value('EP_Date'), \
             Lang.value('EP_Distinction'), Lang.value('EP_Stipulation'), \
             Lang.value('EP_Pieces_count')])
+        for i in xrange(len(Mainframe.model.entries)):
+            if Mainframe.model.entries[i].has_key('distinction'):
+                d = model.Distinction.fromString(Mainframe.model.entries[i]['distinction'])
+                self.topLevelItem(i).setText(4, d.toStringInLang(Lang)) # 4 is the index of the distinction column
     
     def removeDirtyMarks(self):
         for i in xrange(len(Mainframe.model.entries)):
@@ -958,7 +962,11 @@ class OverviewList(QtGui.QTreeWidget):
         
         for key in ['source',  'date',  'distinction',  'stipulation']:
             if Mainframe.model.entries[idx].has_key(key):
-                item.append(unicode(Mainframe.model.entries[idx][key]))
+                if key == 'distinction':
+                    d = model.Distinction.fromString(Mainframe.model.entries[idx][key])
+                    item.append(d.toStringInLang(Lang))
+                else:
+                    item.append(unicode(Mainframe.model.entries[idx][key]))
             else:
                 item.append('')
         
@@ -1202,7 +1210,7 @@ class InfoView(QtGui.QTextEdit):
         self.setText("<br/><br/>".join([x for x in chunks if x != '']))
         
     def meta(self):
-        return pdf.ExportDocument.header(Mainframe.model.cur())
+        return pdf.ExportDocument.header(Mainframe.model.cur(), Lang)
         
     def solver(self):
         return pdf.ExportDocument.solver(Mainframe.model.cur(), Lang)
@@ -1454,17 +1462,18 @@ class EasyEditView(QtGui.QWidget):
         
 class DistinctionWidget(QtGui.QWidget):
     names = ['', 'Place', 'Prize', 'HM', 'Comm.']
+    lang_entries = ['', 'DSTN_Place', 'DSTN_Prize', 'DSTN_HM', 'DSTN_Comm']
     def __init__(self):
         super(DistinctionWidget, self).__init__()
         hbox = QtGui.QHBoxLayout()
-        self.special = QtGui.QCheckBox("Special")
+        self.special = QtGui.QCheckBox(Lang.value('DSTN_Special'))
         hbox.addWidget(self.special)
         self.lo = QtGui.QSpinBox()
         hbox.addWidget(self.lo)
         self.hi = QtGui.QSpinBox()
         hbox.addWidget(self.hi)
         self.name = QtGui.QComboBox()
-        self.name.addItems(DistinctionWidget.names)
+        self.name.addItems(['X'*15 for i in DistinctionWidget.names]) # spacers
         hbox.addWidget(self.name)
         self.comment = QtGui.QLineEdit()
         hbox.addWidget(self.comment)
@@ -1478,7 +1487,9 @@ class DistinctionWidget(QtGui.QWidget):
         self.comment.textChanged.connect(self.onChanged)
         
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
         self.skip_model_changed = False
+        self.onLangChanged()
     
     def onChanged(self):
         if self.skip_model_changed:
@@ -1521,6 +1532,15 @@ class DistinctionWidget(QtGui.QWidget):
         self.skip_model_changed = True
         self.set(distinction)
         self.skip_model_changed = False
+
+    def onLangChanged(self):
+        self.special.setText(Lang.value('DSTN_Special'))
+        for i, le in enumerate(DistinctionWidget.lang_entries):
+            if le != '':
+                self.name.setItemText(i, Lang.value(le))
+            else:
+                self.name.setItemText(i, '')
+                
 
 class KeywordsInputWidget(QtGui.QTextEdit):
     def __init__(self):
@@ -2060,7 +2080,7 @@ class PublishingView(QtGui.QSplitter):
         self.richText.setText("")
         self.richText.setFontPointSize(12)
         
-        self.richText.insertHtml(pdf.ExportDocument.header(Mainframe.model.cur()) + "<br/>\n")
+        self.richText.insertHtml(pdf.ExportDocument.header(Mainframe.model.cur(), Lang) + "<br/>\n")
                
         inline_font = self.config['inline-fonts'][self.solFontSelect.currentIndex()]
         diagram_font = self.config['diagram-fonts'][self.diaFontSelect.currentIndex()]
