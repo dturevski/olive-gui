@@ -1,5 +1,14 @@
 ---
 version: trunk
+todo: 
+  - override pieces glyphs
+  - yacpdb communication: check, add, sync down, sync up
+  - icons on modal dialogs
+  - Clear Board -> Clear popeye output (why?..)
+  - emit LangChanged on startup before paint and remove double entries of language-specific constants (in constructors)
+  - More default glyphs in GC, + 45 rotations?
+---
+version: 0.13.6
 changes:
   - save/restore overview geometry
   - auto-compactify enabled
@@ -8,16 +17,12 @@ changes:
   - check for latest version (in separate thread)
   - Deutsch version by Torsten Linss
   - language dependant distinction 
+  - zoos.yaml
+  - 4.63 pieces and conditions
+  - Paste FEN -> non-stardard glyphs are first looked up in the chess box, then in fairy-pices.txt/defaults
+  - Chest
   - bug fixed: options -> + "Take&MakeChess" -> Export PDF
   - bug fixed(?): Memleaks in options dialog? Doesn't reproduce in 0.13.1 with PyQt 2.7-4.9.6-1
-todo: 
-  - Chest
-  - override pieces glyphs
-  - yacpdb communication: check, add, sync down, sync up
-  - icons on modal dialogs
-  - Clear Board -> Clear popeye output (why?..)
-  - emit LangChanged on startup before paint and remove double entries of language-specific constants (in constructors)
-  - More default glyphs in GC, + 45 rotations?
 ---
 version: 0.13.1
 changes:

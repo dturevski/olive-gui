@@ -1,0 +1,48 @@
+---
+name: Chameleons
+pieces:
+  - [white Chameleon Q, white Chameleon R, white Chameleon B, white Chameleon S, white Chameleon P, '', '']
+  - [black Chameleon Q, black Chameleon R, black Chameleon B, black Chameleon S, black Chameleon P, '', '']
+  - [neutral Chameleon Q, neutral Chameleon R, neutral Chameleon B, neutral Chameleon S, neutral Chameleon P, '', '']
+---
+name: Chinese
+pieces:
+  - [white LE, white PA, white VA, white NA, white MO, white MA, white CP]
+  - [black LE, black PA, black VA, black NA, black MO, black MA, black CP]
+  - [neutral LE, neutral PA, neutral VA, neutral NA, neutral MO, neutral MA, neutral CP]
+---
+name: Marine
+pieces:
+  - [white PO, white SI, white TR, white ND, white MS, white MP, white SK]
+  - [black PO, black SI, black TR, black ND, black MS, black MP, black SK]
+  - [neutral PO, neutral SI, neutral TR, neutral ND, neutral MS, neutral MP, neutral SK]
+---
+name: Common hoppers
+pieces:
+  - [white G, white RH, white BH, white NH, white NE, white RP, white CH]
+  - [black G, black RH, black BH, black NH, black NE, black RP, black CH]
+  - [neutral G, neutral RH, neutral BH, neutral NH, neutral NE, neutral RP, neutral CH]
+---
+name: Common leapers
+pieces:
+  - [white WE, white DA, white FE, white AL, white CA, white Z, white UU]
+  - [black WE, black DA, black FE, black AL, black CA, black Z, black UU]
+  - [neutral WE, neutral DA, neutral FE, neutral AL, neutral CA, neutral Z, neutral UU]
+---
+name: Common lions
+pieces:
+  - [white LI, white RL, white BL, white NL, white RN, white KL, '']
+  - [black LI, black RL, black BL, black NL, black RN, black KL, '']
+  - [neutral LI, neutral RL, neutral BL, neutral NL, neutral RN, neutral KL, '']
+---
+name: Some twohurdlers
+pieces:
+  - [white DG, white DK, white DB, white KA, white KL, white RT, '']
+  - [black DG, black DK, black DB, black KA, black KL, black RT, '']
+  - [neutral DG, neutral DK, neutral DB, neutral KA, neutral KL, neutral RT, '']
+---
+name: Old olive default
+pieces:
+  - [white LE, white PA, white VA, white NA, black DU, white G, white N]
+  - [black LE, black PA, black VA, black NA, '', black G, black N]
+  - ['', '', '', '', '', neutral G, neutral N]

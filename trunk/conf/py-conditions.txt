@@ -30,7 +30,7 @@ BlackMaximummer <select{|Ultra}>
 WhiteMaximummer <select{|Ultra}>
 BlackMinimummer <select{|Ultra}>
 WhiteMinimummer <select{|Ultra}>
-MagicSquares <str>
+MagicSquares <select{|type+2}> <str>
 DiagramCirce
 Tibet
 DoubleTibet
@@ -173,4 +173,11 @@ LosingChess
 GhostChess
 CageCirce
 Football
+WhiteAlphabeticChess
+BlackAlphabeticChess
 KoBulKings
+CirceTake&Make
+MarineChess
+UltramarineChess
+SuperGuards
+Wormholes

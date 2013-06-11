@@ -36,7 +36,7 @@ class ParamSelect(QtGui.QComboBox):
 class Option(QtGui.QWidget):
     def __init__(self, pattern):
         super(Option, self).__init__()
-        parts = pattern.split(" ")
+        parts = [p.replace('+', ' ') for p in pattern.split(" ")]
 
         self.command = parts[0]
         self.params = []

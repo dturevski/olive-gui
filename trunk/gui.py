@@ -98,7 +98,7 @@ class Mainframe(QtGui.QMainWindow):
         vboxLeftPane = QtGui.QVBoxLayout()
         vboxLeftPane.setSpacing(0)
         vboxLeftPane.setContentsMargins(0, 0, 0, 0)
-        self.fenView = FenView()
+        self.fenView = FenView(self)
         self.boardView = BoardView()
         self.infoView = InfoView()
         self.chessBox = ChessBox()
@@ -697,8 +697,11 @@ class AboutDialog(QtGui.QDialog):
         vbox.addWidget(lblLogo, QtCore.Qt.AlignCenter)
         vbox.addWidget(ClickableLabel('olive v'+Conf.value('version') + ' is free software licensed under GNU GPL'))
         vbox.addWidget(ClickableLabel(u'© 2011-2013'))
-        vbox.addWidget(ClickableLabel(u'<b>Dmitri Turevski</b> &lt;<a href="mailto:dmitri.turevski@gmail.com">dmitri.turevski@gmail.com</a>&gt; - coding'))
-        vbox.addWidget(ClickableLabel(u'<b>Борислав Гађански</b> &lt;<a href="mailto:borislav.gadjanski@gmail.com">borislav.gadjanski@gmail.com</a>&gt; - serbian language'))
+        vbox.addWidget(ClickableLabel(u'Project contributors:'))
+        vbox.addWidget(ClickableLabel(u'<b>Mihail Croitor</b> - Moldova'))
+        vbox.addWidget(ClickableLabel(u'<b>Борислав Гађански</b> - Serbia'))
+        vbox.addWidget(ClickableLabel(u'<b>Torsten Linß</b> - Germany'))
+        vbox.addWidget(ClickableLabel(u'<b>Дмитрий Туревский</b> - Russia'))
         vbox.addWidget(ClickableLabel('For more information please visit <a href="http://code.google.com/p/olive-gui/">http://code.google.com/p/olive-gui/</a>'))
 
         vbox.addStretch(1)
@@ -765,8 +768,9 @@ class YesNoCancelDialog(QtGui.QDialog):
         
         
 class FenView(QtGui.QLineEdit):
-    def __init__(self):
+    def __init__(self, mainframe):
         super(FenView, self).__init__()
+        self.parent = mainframe
         self.skip_model_changed = False
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         self.textChanged.connect(self.onTextChanged)
@@ -784,6 +788,7 @@ class FenView(QtGui.QLineEdit):
     def onTextChanged(self, text):
         if self.skip_model_changed:
             return
+        self.parent.chessBox.updateXFenOverrides()
         Mainframe.model.board.fromFen(text)
         self.skip_model_changed = True
         Mainframe.model.onBoardChanged()
@@ -1041,20 +1046,26 @@ class ChessBoxItem(QtGui.QLabel):
     def __init__(self, piece):
         super(ChessBoxItem, self).__init__()
         self.changePiece(piece)
-        
+    
+    def getShortGlyph(piece):
+        glyph = piece.toFen()
+        if len(glyph) > 1:
+            glyph = glyph[1:-1]
+        return glyph
+    getShortGlyph = staticmethod(getShortGlyph)
+    
     def changePiece(self, piece):
-        self.piece = piece
-        if self.piece is None:
+        if piece is None:
             self.setFont(Mainframe.fonts['d'])
             self.setText("\xA3")
-            self.setToolTip(str(self.piece))
+            self.setToolTip('')
         else:
-            glyph = piece.toFen()
-            if len(glyph) > 1:
-                glyph = glyph[1:-1]
+            glyph = ChessBoxItem.getShortGlyph(piece)
             self.setFont(Mainframe.fonts[model.FairyHelper.fontinfo[glyph]['family']])
             self.setText(model.FairyHelper.fontinfo[glyph]['chars'][0])
-            self.setToolTip(str(self.piece))
+            self.setToolTip(str(piece))
+
+        self.piece = piece
 
     def mousePressEvent(self, e): # mouseMoveEvent works as well but with slightly different mechanics
         if self.piece is None:
@@ -1093,6 +1104,12 @@ class ChessBoxItemManagable(ChessBoxItem):
         deleteAllAction = QtGui.QAction(Lang.value('MI_Delete_all_pieces'), self)
         deleteAllAction.triggered.connect(self.manager.deleteAll)
         menu.addAction(deleteAllAction)
+        
+        menu.addSeparator()
+        for i in xrange(len(Conf.zoos)):
+            action = QtGui.QAction(Conf.zoos[i]['name'], self)
+            action.triggered.connect(self.manager.makeChangeZooCallable(i))
+            menu.addAction(action)
         
         menu.exec_(e.globalPos())
         
@@ -1268,6 +1285,26 @@ class ChessBox(QtGui.QWidget):
         for item in self.items:
             if not item.piece is None:
                 item.changePiece(None)
+    
+    def updateXFenOverrides(self):
+        model.FairyHelper.overrides = {}
+        for item in self.items:
+            if not item.piece is None:
+                glyph = ChessBoxItem.getShortGlyph(item.piece).lower()
+                model.FairyHelper.overrides[glyph] = {'name':item.piece.name, 'specs':item.piece.specs}
+
+    def makeChangeZooCallable(self, zoo_idx):
+        def callable():
+            self.changeZoo(Conf.zoos[zoo_idx]['pieces'])
+        return callable
+        
+    def changeZoo(self, zoo):
+        for i in xrange(ChessBox.rows):
+            for j in xrange(ChessBox.cols):
+                piece = None
+                if zoo[i][j] != '':
+                    piece = model.Piece.fromAlgebraic(zoo[i][j])
+                self.items[i*ChessBox.cols + j].changePiece(piece)
                 
     def sync(self):
         zoo = Conf.value('fairy-zoo')
@@ -2142,11 +2179,20 @@ class YamlView(QtGui.QTextEdit):
 class Conf:
     file = 'conf/main.yaml'
     keywords_file = 'conf/keywords.yaml'
+    zoo_file = 'conf/zoos.yaml'
     
     def read():
         f = open(Conf.file, 'r')
         try:
             Conf.values = yaml.load(f)
+        finally:
+            f.close()
+
+        Conf.zoos = []
+        f = open(Conf.zoo_file, 'r')
+        try:
+            for zoo in yaml.load_all(f):
+                Conf.zoos.append(zoo)
         finally:
             f.close()
 

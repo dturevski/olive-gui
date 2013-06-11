@@ -16,7 +16,7 @@ import legacy.chess
 COLORS = ['black', 'white',  'neutral']
 FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing', \
     'Royal', 'Volage', 'Functionary', 'HalfNeutral', \
-    'HurdleColourChanging', 'Protean', 'Magic']
+    'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
 
 def algebraicToIdx(a1):
     return ord(a1[0]) - ord('a') + 8*(7 + ord('1') - ord(a1[1]))
@@ -41,6 +41,7 @@ def notEmpty(hash, key):
     return len(unicode(hash[key])) != 0
 
 def makePieceFromXfen(fen):
+    specs = []
     color = 'white'
     if '!' in fen:
         color = 'neutral'
@@ -48,12 +49,15 @@ def makePieceFromXfen(fen):
         color = 'black'
     name = 'P'
     base_glyph = fen.replace('!', '').lower()
-    if FairyHelper.defaults.has_key(base_glyph):
+    if FairyHelper.overrides.has_key(base_glyph):
+        name = FairyHelper.overrides[base_glyph]['name'].upper()
+        specs = FairyHelper.overrides[base_glyph]['specs']
+    elif FairyHelper.defaults.has_key(base_glyph):
         name = FairyHelper.defaults[base_glyph].upper()
-    return Piece(name, color, [])
+    return Piece(name, color, specs)
     
 class FairyHelper:
-    defaults, glyphs, fontinfo = {}, {}, {}
+    defaults, overrides, glyphs, fontinfo = {}, {}, {}, {}
     options, conditions = [], []
     f = open('conf/fairy-pieces.txt')
     for entry in map(lambda x: x.strip().split("\t"), f.readlines()):
