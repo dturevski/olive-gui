@@ -1,16 +1,12 @@
 import ply.lex as lex
-
-import sys
-import os
-
-from .. import model
+import model
 
 # A string containing ignored characters
-t_ignore = ' \t\r\n'
+t_ignore = " \t\r\n"
 
 # List of token names.
 tokens = (
-    'INT',
+    'IMITATOR_MOVEMENT_OPENING_BRACKET',
     'LEFT_SQUARE_BRACKET',
     'RIGHT_SQUARE_BRACKET',
     'COMMENT',
@@ -18,11 +14,10 @@ tokens = (
     'ASTERISK',
     'PLUS',
     'EQUALS',
-    'OTHER_CHECK_SIGN',
     'ANNOTATION',
-    'FAIRY_PROPERTIES',
     'PIECE_NAME',
     'MOVE_NUMBER',
+    'INT',
     'SQUARE',
     'COLOR_NEUTRAL',
     'COLOR_WHITE',
@@ -32,6 +27,7 @@ tokens = (
     'KINGSIDE_CASTLING',
     'QUEENSIDE_CASTLING',
     'EN_PASSANT',
+    'THREAT',
     'BUT',
     'ZUGZWANG',
     'TWIN_ID',
@@ -44,17 +40,14 @@ tokens = (
     'SHIFT',
     'POLISH_TYPE',
     'IMITATOR',
-    'IMITATOR_MOVEMENT_OPENING_BRACKET',
+    'FAIRY_PROPERTIES',
     'COMMA',
+    'OTHER_CHECK_SIGN',
 )
 
 # tokens
 
 
-def t_INT(t):
-    r'[0-9]+'
-    t.value = int(t.value)
-    return t
 
 t_LEFT_SQUARE_BRACKET = r'\['
 t_RIGHT_SQUARE_BRACKET = r'\]'
@@ -69,15 +62,22 @@ t_DASH = r'\-'
 t_ASTERISK = r'\*'
 t_PLUS = r'\+'
 t_EQUALS = r'='
-t_OTHER_CHECK_SIGN = r'[#=]'
+t_OTHER_CHECK_SIGN = r'[#]'
 t_ANNOTATION = r'[!\?][!\?]?'
 t_FAIRY_PROPERTIES = r'[cjkprvfhmu]+'
 t_PIECE_NAME = r'[A-Z]|([0-9A-Z][0-9A-Z])'
 
 
+# before INT
 def t_MOVE_NUMBER(t):
     r'[0-9]+\.'
     t.value = 2 * int(t.value[:-1])
+    return t
+
+
+def t_INT(t):
+    r'[0-9]+'
+    t.value = int(t.value)
     return t
 
 
@@ -115,3 +115,10 @@ t_POLISH_TYPE = r'PolishType'
 t_IMITATOR = r'Imitator'
 t_IMITATOR_MOVEMENT_OPENING_BRACKET = r'\[I'
 t_COMMA = r','
+
+
+def t_error(t):
+    raise Exception("Illegal character '%s'" % t.value[0])
+
+# Build the lexer
+lexer = lex.lex()
