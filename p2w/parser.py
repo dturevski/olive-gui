@@ -7,9 +7,9 @@ import ply.yacc as yacc
 
 def p_BuildTree(t):
     'BuildTree : Solution'
-    t[0] = t[1]
-    t[0][0].unflatten(t[0], 1)
-    t[0][0].linkContinuedTwins()
+    t[1][0].unflatten(t[1], 1)
+    t[1][0].linkContinuedTwins()
+    t[0] = t[1][0]
 
 
 def p_Solution_Movelist(t):

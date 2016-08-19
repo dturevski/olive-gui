@@ -62,6 +62,40 @@ class Node(object):
     def unmake(self, board):
         board.flip()
 
+    def __str__(self):
+        return "***"
+
+    def shortPrefix(self):
+        return "" if self.depth % 2 != 0 else "%d." % (self.depth >> 1)
+
+    def fullPrefix(self):
+        r, d = "", self.depth
+        r += "\n" if d < 3 else " " * (d - 2)
+        r += str(d >> 1)
+        r += "..." if d%2 != 0 else "."
+        return r;
+
+    def dump(self, acc = ""):
+        acc += str(self)
+        for ch in self.children:
+            if(self.depth < 2):
+                acc += ch.fullPrefix()
+            else:
+                acc += ch.shortPrefix() if len(self.children) == 1 else "\n" + ch.fullPrefix()
+            acc = ch.dump(acc)
+        return acc
+
+    def validate(self, board):
+        self.assertSemantics(board)
+        self.make(board)
+        for ch in self.children:
+            ch.validate(board)
+        self.unmake(board)
+
+    def assertSemantics(self, b):
+        pass
+
+
 
 class NullNode(Node):
 
@@ -69,6 +103,10 @@ class NullNode(Node):
         super(NullNode, self).__init__()
         self.depth = depth
         self.isThreat = isThreat
+
+    def __str__(self): return "~ " if self.isThreat else ""
+
+    def fullPrefix(self): return ""
 
 
 class TwinNode(Node):
@@ -97,11 +135,20 @@ class TwinNode(Node):
     def unmake(self, board):
         board = board.fromAlgebraic(self.oldBoard)
 
+    def __str__(self): return self.twinId + ')'
+
+    def fullPrefix(self): return "\n\n"
 
 class VirtualTwinNode(TwinNode):
 
     def __init__(self):
         super(VirtualTwinNode, self).__init__("a", False)
+
+    def __str__(self): return ''
+
+    def fullPrefix(self): return ''
+
+    def shortPrefix(self): return ''
 
 
 class TwinCommand:
@@ -231,7 +278,7 @@ class MoveNode(Node):
             raise Exception("Semantic error at depth %d: %s" % (self.depth, err))
 
     def __str__(self):
-        return "%s-%s" % (model.idxToAlgebraic(self.departure, self.arrival))
+        return "%s%s-%s " % (self.departant.name, model.idxToAlgebraic(self.departure), model.idxToAlgebraic(self.arrival))
 
 class CastlingNode(MoveNode):
 

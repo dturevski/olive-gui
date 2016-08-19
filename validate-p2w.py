@@ -1,21 +1,45 @@
-import base
-import yaml
-
-
+# -*- coding: utf-8 -*-
+import sys
+import json
+import base, model
 from p2w.parser import parser
 
-s = """
-a) 1.h2*g1=Q[+wBd8] Ra4-c4 2.Bc5-f8 Bd8*b6[+bPc1=Q] # b) bPg7-->g4 1.Sb2*a4[+wRg8] Bg1-e3 2.Re4-e7 Rg8*g4[+bPh1=S] #"""
-x = parser.parse(s, debug=1)
-
-# todo: print formatted
-# todo: tests
-# todo: git!
-# todo Node.validate
-# todo: validate script
-# yacpdb
-print yaml.dump(x)
+def main():
+    try:
+        with open(sys.argv[1], 'r') as f:
+            entry = json.load(f)
+            print json.dump(validate(entry))
+    except:
+        die()
 
 
+def die():
+    print "{success: false}"
+    sys.exit(-1)
 
 
+def validate(entry):
+
+    r = {'success': False, "errors": []}
+
+    if not "solution" in entry or entry["solution"].strip() == "":
+        r["errors"].append("No solution")
+        return r
+
+    if not "algebraic" in entry:
+        r["errors"].append("No position")
+        return r
+
+    try:
+        solution = parser.parse(entry["solution"], debug=0)
+        b = model.Board()
+        b.fromAlgebraic(entry["algebraic"])
+        solution.validate(b)
+    except e:
+        r["errors"].append(unicode(e).encode("utf8"))
+        return r
+
+    return {'success': True}
+
+if __name__ == '__main__':
+    main()
