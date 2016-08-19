@@ -261,9 +261,22 @@ class Board:
         self.board[at] = None
 
     def clear(self):
-        self.head, self.board = -1, []
+        self.head, self.board, self.stm = -1, [], 'black'
         for i in xrange(64):
             self.board.append(None)
+
+    def flip(self):
+        self.stm = 'black' if self.stm == 'white' else 'white'
+
+    def move(self, dep, arr):
+        self.board[arr] = self.board[dep]
+        if(self.board[arr].next != -1):
+            self.board[self.board[arr].next].prev = arr
+        if(self.board[arr].prev != -1):
+            self.board[self.board[arr].prev].next = arr
+        else:
+            self.head = arr
+        self.board[dep] = None
 
     def fromAlgebraic(self, algebraic):
         self.clear()

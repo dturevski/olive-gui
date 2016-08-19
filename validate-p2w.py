@@ -8,7 +8,7 @@ def main():
     try:
         with open(sys.argv[1], 'r') as f:
             entry = json.load(f)
-            print json.dump(validate(entry))
+            print json.dumps(validate(entry))
     except:
         die()
 
@@ -35,7 +35,7 @@ def validate(entry):
         b = model.Board()
         b.fromAlgebraic(entry["algebraic"])
         solution.validate(b)
-    except e:
+    except Exception as e:
         r["errors"].append(unicode(e).encode("utf8"))
         return r
 
