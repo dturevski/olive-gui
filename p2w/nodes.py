@@ -288,7 +288,7 @@ class CastlingNode(MoveNode):
     def make(self, b):
         self.oldboard = b.toAlgebraic()
 
-        shift = 0 if b.btm else 56
+        shift = 0 if b.stm == 'black' else 56
 
         a8, c8, d8, e8, f8, g8, h8 = 0, 2, 3, 4, 5, 6, 7
         if self.kingside:
@@ -298,3 +298,16 @@ class CastlingNode(MoveNode):
             b.move(e8 + shift, c8 + shift)
             b.move(a8 + shift, d8 + shift)
 
+        b.flip()
+
+    def assertSemantics(self, b):
+
+        shift = 0 if b.stm == 'black' else 56
+
+        a8, c8, d8, e8, f8, g8, h8 = 0, 2, 3, 4, 5, 6, 7
+        if b.board[e8+shift] is None:
+            raise Exception("Can't castle - the king square is empty")
+        if self.kingside and b.board[h8+shift] is None:
+            raise Exception("Can't castle - the kingside rook square is empty")
+        if not self.kingside and b.board[a8+shift] is None:
+            raise Exception("Can't castle - the queenside rook square is empty")

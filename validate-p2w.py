@@ -9,13 +9,10 @@ def main():
         with open(sys.argv[1], 'r') as f:
             entry = json.load(f)
             print json.dumps(validate(entry))
-    except:
-        die()
+    except Exception as e:
+        print json.dumps({'success': False, "errors": [str(e)]})
+        sys.exit(-1)
 
-
-def die():
-    print "{success: false}"
-    sys.exit(-1)
 
 
 def validate(entry):

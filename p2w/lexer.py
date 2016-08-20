@@ -17,15 +17,15 @@ tokens = (
     'ANNOTATION',
     'PIECE_NAME',
     'MOVE_NUMBER',
+    'KINGSIDE_CASTLING',
+    'QUEENSIDE_CASTLING',
     'INT',
     'SQUARE',
     'COLOR_NEUTRAL',
     'COLOR_WHITE',
     'COLOR_BLACK',
-    'HALF_ELLIPSIS',
     'ELLIPSIS',
-    'KINGSIDE_CASTLING',
-    'QUEENSIDE_CASTLING',
+    'HALF_ELLIPSIS',
     'EN_PASSANT',
     'THREAT',
     'BUT',
@@ -74,9 +74,11 @@ def t_MOVE_NUMBER(t):
     t.value = 2 * int(t.value[:-1])
     return t
 
+t_KINGSIDE_CASTLING = r'0\-0'
+t_QUEENSIDE_CASTLING = r'0\-0\-0'
 
 def t_INT(t):
-    r'[0-9]+'
+    r'[1-9][0-9]*'
     t.value = int(t.value)
     return t
 
@@ -89,10 +91,8 @@ def t_SQUARE(t):
 t_COLOR_NEUTRAL = r'n'
 t_COLOR_WHITE = r'w'
 t_COLOR_BLACK = r'b'
-t_HALF_ELLIPSIS = r'\.\.'
 t_ELLIPSIS = r'\.\.\.'
-t_KINGSIDE_CASTLING = r'0\-0'
-t_QUEENSIDE_CASTLING = r'0\-0\-0'
+t_HALF_ELLIPSIS = r'\.\.'
 t_EN_PASSANT = r'ep\.'
 t_THREAT = r'threat:'
 t_BUT = r'but'
