@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 
 # standard
+import json
 import re
 import exceptions
 import copy
@@ -436,6 +437,16 @@ class Board:
                     ' '.join([name + ''.join(c[color][specs][name]) for name in c[color][specs].keys()])
                 lines.append(line)
         return "\n".join(lines)
+
+    def serialize(self):
+        return {'algebraic':self.toAlgebraic(), 'stm':self.stm }
+
+    def unserialize(self, s):
+        self.fromAlgebraic(s['algebraic'])
+        self.stm = s['stm']
+
+    def __str__(self):
+        return json.dumps(self.serialize())
 
 
 class Pieces:

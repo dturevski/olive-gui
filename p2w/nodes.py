@@ -122,7 +122,7 @@ class TwinNode(Node):
 
     def make(self, board):
 
-        self.oldBoard = board.toAlgebraic()
+        self.oldBoard = board.serialize()
 
         board.flip()
 
@@ -133,7 +133,7 @@ class TwinNode(Node):
             command.execute(board)
 
     def unmake(self, board):
-        board = board.fromAlgebraic(self.oldBoard)
+        board.unserialize(self.oldBoard)
 
     def __str__(self): return self.twinId + ')'
 
@@ -210,7 +210,7 @@ class MoveNode(Node):
     def make(self, b):
 
         self.assertSemantics(b)
-        self.oldboard = b.toAlgebraic()
+        self.oldBoard = b.serialize()
 
         if self.promotion == None:
             self.promotion = b.board[self.departure]
@@ -258,7 +258,8 @@ class MoveNode(Node):
         # removals
         for rm in self.removals: b.drop(rm)
 
-    def unmake(self, b): b.fromAlgebraic(self.oldboard)
+    def unmake(self, b):
+        b.unserialize(self.oldBoard)
 
     def assertSemantics(self, b):
         err = None
@@ -286,7 +287,7 @@ class CastlingNode(MoveNode):
         self.kingside = kingside
 
     def make(self, b):
-        self.oldboard = b.toAlgebraic()
+        self.oldBoard = b.serialize()
 
         shift = 0 if b.stm == 'black' else 56
 

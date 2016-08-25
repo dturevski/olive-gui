@@ -182,7 +182,7 @@ def p_Move(t):
             | MOVE_NUMBER HalfMove'''
 
     if t[1] == "but":
-        t[0] = [t[4].setv("depth", t[2])]
+        t[0] = [t[4].setv("depth", t[2] + 1)]
     elif t[2] == ".." and t[3] == "...":
         t[0] = [NullNode(t[1], False)]
     elif t[2] == "..":
