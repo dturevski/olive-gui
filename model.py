@@ -15,6 +15,7 @@ import legacy.popeye
 import legacy.chess
 
 COLORS = ['black', 'white', 'neutral']
+COLORS_SHORT = {'b': 'black', 'w': 'white', 'n': 'neutral'}
 FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
               'Royal', 'Volage', 'Functionary', 'HalfNeutral',
               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
@@ -198,6 +199,8 @@ class Distinction:
 class Piece:
 
     def __init__(self, name, color, specs):
+        if color in COLORS_SHORT:
+            color = COLORS_SHORT[color]
         self.name, self.color, self.specs = name, color, sorted(specs)
         self.next, self.prev = -1, -1
 
