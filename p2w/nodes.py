@@ -190,7 +190,7 @@ class MoveNode(Node):
         self.departant = None
         self.promotion = None
         self.capture = cap
-        self.recolorings = {"w":[], "b":[], "n":[]}
+        self.recolorings = {"white":[], "black":[], "neutral":[]}
         self.rebirths = []
         self.antirebirths = []
         self.promotions = []

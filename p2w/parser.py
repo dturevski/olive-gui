@@ -282,7 +282,7 @@ def p_Ply_Remote_Promotion(t):
 
 def p_Ply_Recoloring(t):
     'Ply : Ply LEFT_SQUARE_BRACKET SQUARE EQUALS ColorPrefix RIGHT_SQUARE_BRACKET'
-    t[1].recolorings[t[5]].append(t[3])
+    t[1].recolorings[model.COLORS_SHORT[t[5]]].append(t[3])
     t[0] = t[1]
 
 
