@@ -161,11 +161,9 @@ class TwinCommand:
         if 'Move' == self.name:
             b.move(self.args[0], self.args[1])
         elif 'Exchange' == self.name:
-            b.board[
-                self.args[0]], b.board[
-                self.args[1]] = b.board[
-                self.args[1]], b.board[
-                self.args[0]]
+            p = b.board[self.args[1]]
+            b.move(self.args[0], self.args[1])
+            b.add(p, self.args[0])
         elif 'Remove' == self.name:
             b.drop(self.args[0])
         elif 'Add' == self.name:
