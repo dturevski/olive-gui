@@ -273,6 +273,8 @@ class Board:
         self.stm = 'black' if self.stm == 'white' else 'white'
 
     def move(self, dep, arr):
+        if(self.board[arr] is not None):
+            self.drop(arr)
         self.board[arr] = self.board[dep]
         if(self.board[arr].next != -1):
             self.board[self.board[arr].next].prev = arr
