@@ -217,7 +217,7 @@ class MoveNode(Node):
             if b.board[self.departure].color != 'u':
                 self.promotion.color = b.board[self.departure].color
             else:
-                self.promotion.color = b.getStm()
+                self.promotion.color = b.stm
 
         # capturing
         if self.capture != -1: b.drop(self.capture)

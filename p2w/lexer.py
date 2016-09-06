@@ -65,7 +65,7 @@ t_EQUALS = r'='
 t_OTHER_CHECK_SIGN = r'[#]'
 t_ANNOTATION = r'[!\?][!\?]?'
 t_FAIRY_PROPERTIES = r'[cjkprvfhmu]+'
-t_PIECE_NAME = r'[A-Z]|([0-9A-Z][0-9A-Z])'
+t_PIECE_NAME = r'([0-9A-Z][0-9A-Z])|[A-Z]'
 
 
 # before INT
