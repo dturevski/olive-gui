@@ -96,7 +96,8 @@ def p_Command(t):
             | MIRROR SQUARE DOUBLE_POINTED_ARROW SQUARE
             | SHIFT SQUARE LONG_DOUBLE_ARROW SQUARE
             | POLISH_TYPE
-            | IMITATOR SquareList'''
+            | IMITATOR SquareList
+            | LongPieceDecl SQUARE'''
     if len(t) == 5 and t[3] == '-->':
         t[0] = TwinCommand("Move", [t[2], t[4]])
     elif len(t) == 6 and t[3] == '<-->':
@@ -115,6 +116,9 @@ def p_Command(t):
         t[0] = TwinCommand("PolishType", [])
     elif t[1] == 'Imitator':
         t[0] = TwinCommand("Imitator", t[2])
+    elif len(t) == 3:
+        t[0] = TwinCommand("Add", [t[1], t[2]])
+
 
 def p_LongPieceDecl(t):
     '''LongPieceDecl : ColorPrefix PIECE_NAME
