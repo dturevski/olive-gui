@@ -57,10 +57,10 @@ class Node(object):
                 self.children[i].anticipator = self.children[i - 1]
 
     def make(self, board):
-        board.flip()
+        pass
 
     def unmake(self, board):
-        board.flip()
+        pass
 
     def __str__(self):
         return "***"
@@ -283,6 +283,7 @@ class CastlingNode(MoveNode):
 
     def __init__ (self, kingside):
         self.kingside = kingside
+        super(CastlingNode, self).__init__(-1, -1, -1)
 
     def make(self, b):
         self.oldBoard = b.serialize()
