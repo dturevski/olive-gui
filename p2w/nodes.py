@@ -108,6 +108,12 @@ class NullNode(Node):
 
     def fullPrefix(self): return ""
 
+    def make(self, board):
+        board.flip()
+
+    def unmake(self, board):
+        board.flip()
+
 
 class TwinNode(Node):
 
@@ -123,8 +129,6 @@ class TwinNode(Node):
     def make(self, board):
 
         self.oldBoard = board.serialize()
-
-        board.flip()
 
         if not self.anticipator is None:
             self.anticipator.make(board)

@@ -240,8 +240,12 @@ def p_Ply_ColorPrefix(t):
 
 def p_Ply_Promotion(t):
     ''' Ply : Ply EQUALS PieceDecl
-        | Ply EQUALS LongPieceDecl'''
-    t[0] = t[1].setv('promotion', t[3])
+        | Ply EQUALS LongPieceDecl
+        | Ply EQUALS'''
+    if len(t) != 3:
+        t[0] = t[1].setv('promotion', t[3])
+    else:
+        t[0] = t[1].setv("checksign", t[2])
 
 
 def p_Ply_Rebirth_Promotion(t):
@@ -345,7 +349,11 @@ def p_Castling(t):
 
 
 def p_error(t):
-    raise Exception("Syntax error at '%s', line %d, char %d" % (t.value, t.lineno, t.lexpos))
+    if not t is None:
+        raise Exception("Syntax error at '%s', line %d, char %d" % (t.value, t.lineno, t.lexpos))
+    else:
+        raise Exception("Terminating syntax error")
+
 
 from lexer import *
 parser = yacc.yacc()
