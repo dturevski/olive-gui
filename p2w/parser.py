@@ -233,7 +233,8 @@ def p_Ply_Body(t):
 
 def p_Ply_ColorPrefix(t):
     'Ply : Ply EQUALS ColorPrefix'
-    t[1].recolorings[t[3]].apend(t[1].arrival)
+    color = model.COLORS_SHORT[t[3]]
+    t[1].recolorings[color].append(t[1].arrival)
     t[0] = t[1]
 
 
