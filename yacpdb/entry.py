@@ -4,16 +4,28 @@ import hashlib
 import yaml
 import re
 
+def unquote(str):
+    str = str.strip()
+    if len(str) < 2:
+        return str
+    if str[0] == '"' and str[-1] == '"':
+        return unquote(str[1:-1])
+    elif str[0] == "'" and str[-1] == "'":
+        return unquote(str[1:-1])
+    else:
+        return str
+
 
 # ASH = Algebraic + Solution/Stipulation Hash
 def ash(e):
     if "solution" not in e or "stipulation" not in e or "algebraic" not in e:
         return ""
-    m = hashlib.md5(e["stipulation"].lower())
+    message = e["stipulation"]
     for color in ["white", "black", "neutral"]:
         if color in e["algebraic"]:
-            m.update("".join(sorted([x.lower() for x in e["algebraic"][color]])))
-    m.update("".join(e["solution"].lower().split()))
+            message += "".join(sorted([x for x in e["algebraic"][color]]))
+    message += "".join(unquote(e["solution"]).split())
+    m = hashlib.md5(message.lower())
     return m.hexdigest()
 
 

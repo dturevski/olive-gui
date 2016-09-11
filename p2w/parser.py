@@ -308,7 +308,7 @@ def p_Ply_Imitators(t):
 
 def p_Body_Normal(t):
     'Body : PieceDecl Squares'
-    t[0] = t[2].setv("promotion", t[1]).setv("departant", t[1])
+    t[0] = t[2].setv("departant", t[1])
 
 
 def p_Body_Castling(t):
@@ -325,7 +325,7 @@ def p_PawnMove(t):
     '''PawnMove : Squares
         | PawnMove EN_PASSANT'''
     if len(t) == 2:
-        t[0] = t[1].setv("promotion", model.Piece("P", "u", "")).setv("departant", model.Piece("P", "u", ""))
+        t[0] = t[1].setv("departant", model.Piece("P", "u", ""))
     else:
         t[0] = t[1].setEnPassant()
 

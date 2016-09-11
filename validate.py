@@ -6,7 +6,6 @@ from p2w.parser import parser
 import re
 import yacpdb.storage
 
-RE_COMMON_STIPULATION = re.compile('^(?P<intro>[0-9]+->)?(?P<serial>ser-)?(?P<play>h|s|r|hs|pg|)(?P<aim>[#=])(?P<length>[0-9\.]+)$', re.IGNORECASE)
 LIST_COMMON_STIPULATIONS = ["=", "+", "= black to move", "+ black to move", "see text"]
 
 def main():
@@ -20,11 +19,27 @@ def main():
 
 def validateStipulation(stip, r):
     stip = stip.lower()
-    matches = RE_COMMON_STIPULATION.match(stip)
+    matches = model.RE_COMMON_STIPULATION.match(stip)
     if not matches and not stip in LIST_COMMON_STIPULATIONS:
         r['errors'].append("Unrecognized stipulation. Accepted are: simple popeye stipulations, PG, '+/= [Black to move]' and 'See text'")
         return False
     return True
+
+
+class SemanticValidationVisitor:
+
+    def __init__(self): pass
+
+    def visit(self, node, board): node.assertSemantics(board)
+
+
+class DummyVisitor:
+
+    def __init__(self): pass
+
+    def visit(self, node, board): pass
+
+
 
 def validate(entry):
 
@@ -48,23 +63,12 @@ def validate(entry):
     solution = parser.parse(entry["solution"], debug=0)
     b = model.Board()
     b.fromAlgebraic(entry["algebraic"])
-    b.stm = stm(entry["stipulation"])
-    solution.validate(b)
+    b.stm = b.getStmByStipulation(entry["stipulation"])
+    solution.traverse(b, SemanticValidationVisitor())
 
     return {'success': True}
 
-def stm(stipulation):
-    if stipulation.lower in ["= black to move", "+ black to move"]:
-        return "black"
-    matches = RE_COMMON_STIPULATION.match(stipulation.lower())
-    if not matches:
-        return 'white'
-    if matches.group('serial') == 'ser-' and matches.group("play") == "hs":
-        return "black" # it even has some sense :)
-    if matches.group('play') == "h":
-        return "black"
-    else:
-        return "white"
+
 
 def validateAll(iterator):
     for id, ash, e in iterator:

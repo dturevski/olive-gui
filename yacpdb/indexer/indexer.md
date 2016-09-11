@@ -1,41 +1,35 @@
-# Common definitions
+# Preface
+  * The goals
+  * Predicate naming
+  * Predicate arity and design. Priorities.
+  * What's not covered
 
-* To **visit** a square: to occupy the square in question in initial position,
-  after a completed move or after a twinning action.
+# Definitions
 
-  *Examples:* Circe-rebirth is visiting.
-  The "Take" part of the Take&Make move is not visiting.
+* **Board configuration**
+* **Board alteration**
+* **Solution tree** is a directed rooted
+  [tree](https://en.wikipedia.org/wiki/Tree_(graph_theory)), whose vertices are
+  board configurations and edges are board alterations. The diagram position of the
+  chess composition is the root of the tree. The final positions are the leaves of the tree.
 
-# Trajectories
+* The **line of play** is a path from the root to the one of the leaves in the solution
+  tree.
 
-* `Star(PIECE visitor)`
+* A piece **visits** a square if it occupies the square in question
+  1) in the initial position,
+  2) after a completed move
+  3) after a twinning.
 
-  The **visitor** visits each square from the set (related to visitor's prior position). [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+  In other words, the visiting occurs in the position that is a vertex in the
+  solution tree.
 
+  *Examples:* Circe-reborn piece visits the rebirth square. Anti-Circe-reborn piece did not
+  visit the capture square.
 
-* `BigStar(PIECE visitor)`
+# Predicates
 
-  [(2, 2), (2, -2), (-2, 2), (-2, -2)]
-
-* `Cross(PIECE visitor)`
-
-  [(0, 1), (0, -1), (-1, 0), (1, 0)]
-
-* `BigCross(PIECE visitor)`
-
-  [(0, 2), (0, -2), (-2, 0), (2, 0)]
-
-* `Wheel(PIECE visitor)`
-
-  [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)]
-
-* `Albino(PIECE visitor)`
-
-  [(-1, -1), (1, -1), (0, -1), (0, -2)]
-
-* `Pickaninny(PIECE visitor)`
-
-  [(-1, 1), (1, 1), (0, 1), (0, 2)]
+## Trajectories predicates
 
 * `RoundTrip(PIECE visitor, INTEGER count)`
 
@@ -48,7 +42,11 @@
 
 * `SwitchBack(PIECE visitor, INTEGER count)`
 
-  The **visitor** visits **count** (>0) more different squares and returns back via the same route.
+  Same as `RoundTrip` but **visitor** visits just one more square and returns, or some of the
+  visited squares are repeated
+
+  *Example*: wQa1->c3->h3->c7->c3->a1 is `RoundTrip(wQ, 3)` and `SwitchBack(wQ, 5)`
+   *Example:* [SwitchBack(wR, 2)](http://yacpdb.org/#83447)
 
 * `Exchange(INTEGER count)`
 
@@ -57,3 +55,52 @@
 * `ExchangeBy(PIECE participant)`
 
   The **participant** takes part in the `Exchange`.
+
+* `Star(PIECE visitor)`
+
+  The **visitor** visits each square from the set (related to the visitor's prior
+  position). The set is [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+   *Example:* [Star(bK)](http://yacpdb.org/#49265)
+
+
+* `BigStar(PIECE visitor)`
+
+  Same as `Star`, the set is [(2, 2), (2, -2), (-2, 2), (-2, -2)]
+
+* `Cross(PIECE visitor)`
+
+  Same as `Star`, the set is [(0, 1), (0, -1), (-1, 0), (1, 0)]
+
+* `BigCross(PIECE visitor)`
+
+  Same as `Star`, the set is [(0, 2), (0, -2), (-2, 0), (2, 0)]
+
+* `Wheel(PIECE visitor)`
+
+  Same as `Star`, the set is [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)]
+
+* `Albino(PIECE visitor)`
+
+  *Example*: [Albino(wP)](http://yacpdb.org/#44165)
+
+  Same as `Star`, the set is [(-1, -1), (1, -1), (0, -1), (0, -2)]
+
+* `Pickaninny(PIECE visitor)`
+
+  Same as `Star`, the set is [(-1, 1), (1, 1), (0, 1), (0, 2)]
+
+* `CornerToCorner(PIECE visitor)`
+
+   The **visitor** visits two different corner squares in a single line of play.
+
+  *Example*: [CornerToCorner(wK)](http://yacpdb.org/#341021)
+
+* `FourCorners(PIECE visitor)`
+
+  The **visitor** visits (not necessarily in a single line of play) the squares a1, a8, h1 and
+  h8
+
+  *Example*: [FourCorners(wQ)](http://yacpdb.org/#297)
+
+

@@ -123,8 +123,7 @@ class TrajectoriesBuilder():
                 chess.NullMove):
             # looking for the piece in the result
             for tnode in self.result:
-                if tnode.id == solution_node.move.departing_piece_id and tnode.piece == solution_node.move.dep[
-                        0]:
+                if tnode.id == solution_node.move.departing_piece_id and tnode.piece == solution_node.move.dep[0]:
                     # if it is not in level
                     for tnode2 in level:
                         if tnode2.id == tnode.id and tnode2.piece == tnode.piece:
@@ -141,8 +140,7 @@ class TrajectoriesBuilder():
                 level.append(new_tnode)
             # looking for the piece in the level
             for i in xrange(len(level)):
-                if level[i].id == solution_node.move.departing_piece_id and level[
-                        i].piece == solution_node.move.dep[0]:
+                if level[i].id == solution_node.move.departing_piece_id and level[i].piece == solution_node.move.dep[0]:
                     new_tnode = TNode(
                         solution_node.move.arr[1],
                         level[i].id,

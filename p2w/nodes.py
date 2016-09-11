@@ -21,6 +21,7 @@ class Node(object):
         self.depth = 0
         self.childIsThreat = False
         self.comments = []
+        self.displacements = []
 
     def setv(self, k, v):
         setattr(self, k, v)
@@ -85,16 +86,19 @@ class Node(object):
             acc = ch.dump(acc)
         return acc
 
-    def validate(self, board):
-        self.assertSemantics(board)
+    def traverse(self, board, visitor):
+
+        if self.depth == 0: # root node
+            for square, piece in model.Pieces(board):
+                piece.origin = str(square) + "/0"
+
+        visitor.visit(self, board)
         self.make(board)
         for ch in self.children:
-            ch.validate(board)
+            ch.traverse(board, visitor)
         self.unmake(board)
 
-    def assertSemantics(self, b):
-        pass
-
+    def assertSemantics(self, b): pass
 
 
 class NullNode(Node):
@@ -171,6 +175,7 @@ class TwinCommand:
         elif 'Remove' == self.name:
             b.drop(self.args[0])
         elif 'Add' == self.name:
+            self.args[0].origin = str(self.args[1]) + "/1"
             b.add(self.args[0], self.args[1])
         elif 'Rotate' == self.name:
             b.rotate(self.args[0])
@@ -216,6 +221,8 @@ class MoveNode(Node):
 
         if self.promotion == None:
             self.promotion = b.board[self.departure]
+        else:
+            self.promotion.origin = b.board[self.departure].origin
 
         if self.promotion.color == 'u':
             if b.board[self.departure].color != 'u':
@@ -224,7 +231,10 @@ class MoveNode(Node):
                 self.promotion.color = b.stm
 
         # capturing
-        if self.capture != -1: b.drop(self.capture)
+        captureOrigin = -1
+        if self.capture != -1:
+            captureOrigin = b.board[self.capture].origin
+            b.drop(self.capture)
 
         # moving and promoting
         b.drop(self.departure)
@@ -246,7 +256,12 @@ class MoveNode(Node):
 
         # rebirths
         for rb in self.rebirths:
-            b.add(rb["unit"] if rb["prom"] is None else rb["prom"], rb["at"])
+            piece = rb["unit"] if rb["prom"] is None else rb["prom"]
+            if captureOrigin != -1:
+                piece.origin = captureOrigin
+            else: # sentinels, etc
+                piece.origin = "%d/%d" % (rb["at"], self.depth)
+            b.add(piece, rb["at"])
 
         # promotions
         for prom in self.promotions:
@@ -282,6 +297,7 @@ class MoveNode(Node):
 
     def __str__(self):
         return "%s%s-%s " % (self.departant.name, model.idxToAlgebraic(self.departure), model.idxToAlgebraic(self.arrival))
+
 
 class CastlingNode(MoveNode):
 

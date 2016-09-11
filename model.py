@@ -20,6 +20,7 @@ FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
               'Royal', 'Volage', 'Functionary', 'HalfNeutral',
               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
 
+RE_COMMON_STIPULATION = re.compile('^(?P<intro>[0-9]+->)?(?P<serial>ser-)?(?P<play>h|s|r|hs|pg|)(?P<aim>[#=])(?P<length>[0-9\.]+)$', re.IGNORECASE)
 
 def algebraicToIdx(a1):
     return ord(a1[0]) - ord('a') + 8 * (7 + ord('1') - ord(a1[1]))
@@ -28,6 +29,14 @@ def algebraicToIdx(a1):
 def idxToAlgebraic(idx):
     return 'abcdefgh'[idx % 8] + '87654321'[idx >> 3]
 
+def to_xy(square):
+    return (square % 8, int(square / 8))
+
+def from_xy(x, y):
+    return y * 8 + x
+
+def oob(x, y):
+    return (x < 0) or (x > 7) or (y < 0) or (y > 7)
 
 def myint(string):
     f, s = False, []
@@ -203,6 +212,7 @@ class Piece:
             color = COLORS_SHORT[color]
         self.name, self.color, self.specs = name, color, sorted(specs)
         self.next, self.prev = -1, -1
+        self.origin = "-1/-1"
 
     def fromAlgebraic(algebraic):
         parts = algebraic.split(' ')
@@ -227,6 +237,9 @@ class Piece:
             retval = ' '.join(sorted(self.specs)) + ' ' + retval
         return retval
 
+    def toPredicatePieceDomain(self):
+        return self.color[0] + self.name.upper()
+
     def __str__(self):
         retval = FairyHelper.glyphs[self.name.lower()]['name']
         if len(self.specs) > 0:
@@ -236,6 +249,15 @@ class Piece:
     def serialize(self):
         return self.color + ' ' + self.toAlgebraic()
 
+    def serialize2(self):
+        return self.toAlgebraic() + "@" + self.origin
+
+    def unserialize2(serialized):
+        ps = serialized.split("@")
+        p = Piece.fromAlgebraic(ps[0])
+        p.origin = ps[1]
+        return p
+    unserialize2 = staticmethod(unserialize2)
 
 class Board:
 
@@ -284,25 +306,29 @@ class Board:
             self.head = arr
         self.board[dep] = None
 
-    def fromAlgebraic(self, algebraic):
+    def fromAlgebraic(self, algebraic, withOrigins=False):
         self.clear()
         for color in COLORS:
             if color not in algebraic:
                 continue
             for piecedecl in algebraic[color]:
-                parts = [x.strip() for x in piecedecl.split(' ')]
-                self.add(Piece(parts[-1][:-2], color, parts[:-1]),
-                         algebraicToIdx(parts[-1][-2:]))
+                if withOrigins:
+                    square = algebraicToIdx(piecedecl[-2:])
+                    piece = Piece.unserialize2(piecedecl[:-2]) if withOrigins else piece.fromAlgebraic(piecedecl[:-2])
+                    piece.color = color
+                    self.add(piece, square)
+                else:
+                    parts = [x.strip() for x in piecedecl.split(' ')]
+                    self.add(Piece(parts[-1][:-2], color, parts[:-1]),
+                             algebraicToIdx(parts[-1][-2:]))
 
-    def toAlgebraic(self):
+    def toAlgebraic(self, withOrigins = False):
         retval = {}
         for square, piece in Pieces(self):
             if piece.color not in retval:
                 retval[piece.color] = []
-            retval[
-                piece.color].append(
-                piece.toAlgebraic() +
-                idxToAlgebraic(square))
+            s = piece.serialize2() if withOrigins else piece.toAlgebraic()
+            retval[piece.color].append(s + idxToAlgebraic(square))
         return retval
 
     def getPiecesCount(self):
@@ -444,14 +470,27 @@ class Board:
         return "\n".join(lines)
 
     def serialize(self):
-        return {'algebraic':self.toAlgebraic(), 'stm':self.stm }
+        return {'algebraic':self.toAlgebraic(withOrigins=True), 'stm':self.stm }
 
     def unserialize(self, s):
-        self.fromAlgebraic(s['algebraic'])
+        self.fromAlgebraic(s['algebraic'], withOrigins=True)
         self.stm = s['stm']
 
     def __str__(self):
         return json.dumps(self.serialize())
+
+    def getStmByStipulation(self, stipulation):
+        if stipulation.lower in ["= black to move", "+ black to move"]:
+            return "black"
+        matches = RE_COMMON_STIPULATION.match(stipulation.lower())
+        if not matches:
+            return 'white'
+        if matches.group('serial') == 'ser-' and matches.group("play") == "hs":
+            return "black" # it even has some sense :)
+        if matches.group('play') == "h":
+            return "black"
+        else:
+            return "white"
 
 
 class Pieces:
