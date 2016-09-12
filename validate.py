@@ -14,7 +14,7 @@ def main():
             entry = json.load(f)
             print json.dumps(validate(entry))
     except Exception as e:
-        print json.dumps({'success': False, "errors": [str(e)]})
+        print json.dumps({'success': False, "errors": [unicode(e)]})
         sys.exit(-1)
 
 def validateStipulation(stip, r):
