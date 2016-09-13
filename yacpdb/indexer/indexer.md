@@ -6,8 +6,18 @@
 
 # Definitions
 
-* **Board configuration**
-* **Board alteration**
+* **Board configuration** is an explicit description of the chess board, including:
+  * Board size and shape
+  * Pieces nature and placement
+  * Side to play
+  * Castling and en passant rights
+  * Fairy conditions in effect
+
+* **Board alteration** is any action that alters the board configuration. Alterations include:
+  * Chess moves, played by the rules in effect
+  * Twinning actions
+  * Null moves (which only alter the side to play)
+
 * **Solution tree** is a directed rooted
   [tree](https://en.wikipedia.org/wiki/Tree_(graph_theory)), whose vertices are
   board configurations and edges are board alterations. The diagram position of the
@@ -34,19 +44,21 @@
 * `RoundTrip(PIECE visitor, INTEGER count)`
 
     The **visitor** visits **count** (>2) different squares, and returns to the first square.
-    The squares geometrically *do not* all belong to the same line.
+    The squares geometrically *do not* all belong to the same
+    [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
 
 * `LinearRoundTrip(PIECE visitor, INTEGER count)`
 
-    Same as `RoundTrip`, but the squares *do* all belong to the same line.
+    Same as `RoundTrip`, but the squares *do* all belong to the same straight line.
 
 * `SwitchBack(PIECE visitor, INTEGER count)`
 
   Same as `RoundTrip` but **visitor** visits just one more square and returns, or some of the
-  visited squares are repeated
+  visited squares are repeated.
 
   *Example*: wQa1->c3->h3->c7->c3->a1 is `RoundTrip(wQ, 3)` and `SwitchBack(wQ, 5)`
-   *Example:* [SwitchBack(wR, 2)](http://yacpdb.org/#83447)
+
+  *Example:* [SwitchBack(wR, 2)](http://yacpdb.org/#83447)
 
 * `Exchange(INTEGER count)`
 
@@ -59,7 +71,8 @@
 * `Star(PIECE visitor)`
 
   The **visitor** visits each square from the set (related to the visitor's prior
-  position). The set is [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+  position) in different lines of play. The set is [(1, 1), (1, -1), (-1, 1), (-1, -1)].
+  The visitor starting position does not have be its diagram position.
 
    *Example:* [Star(bK)](http://yacpdb.org/#49265)
 
@@ -82,13 +95,15 @@
 
 * `Albino(PIECE visitor)`
 
-  *Example*: [Albino(wP)](http://yacpdb.org/#44165)
+  Same as `Star`, the set is [(-1, -1), (1, -1), (0, -1), (0, -2)]. The visitor does not
+  necessarily start from the 2nd rank.
 
-  Same as `Star`, the set is [(-1, -1), (1, -1), (0, -1), (0, -2)]
+  *Example*: [Albino(wP)](http://yacpdb.org/#44165)
 
 * `Pickaninny(PIECE visitor)`
 
-  Same as `Star`, the set is [(-1, 1), (1, 1), (0, 1), (0, 2)]
+  Same as `Star`, the set is [(-1, 1), (1, 1), (0, 1), (0, 2)]. The visitor does not
+  necessarily start from the 7th rank.
 
 * `CornerToCorner(PIECE visitor)`
 
