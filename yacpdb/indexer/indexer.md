@@ -6,7 +6,7 @@
 
 # Definitions
 
-* **Board configuration** is an explicit description of the chess board, including:
+* **Board configuration** is an explicit description of the game state, including:
   * Board size and shape
   * Pieces nature and placement
   * Side to play
@@ -41,30 +41,43 @@
 
 ## Trajectories predicates
 
-* `RoundTrip(PIECE visitor, INTEGER count)`
-
-    The **visitor** visits **count** (>2) different squares, and returns to the first square.
-    The squares geometrically *do not* all belong to the same
-    [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
-
-* `LinearRoundTrip(PIECE visitor, INTEGER count)`
-
-    Same as `RoundTrip`, but the squares *do* all belong to the same straight line.
-
 * `SwitchBack(PIECE visitor, INTEGER count)`
 
-  Same as `RoundTrip` but **visitor** visits just one more square and returns, or some of the
-  visited squares are repeated.
+    In the single line of play the **visitor** visits **count** (>0) more squares
+    (may be repeated) and returns to the starting square via the exact reverse route.
 
-  *Example*: wQa1->c3->h3->c7->c3->a1 is `RoundTrip(wQ, 3)` and `SwitchBack(wQ, 5)`
+  *Example:*
+  [SwitchBack(wR, 1)](http://yacpdb.org/#83447),
+  [SwitchBack(wB, 3)](http://www.yacpdb.org/#412960)
 
-  *Example:* [SwitchBack(wR, 2)](http://yacpdb.org/#83447)
+* `RoundTrip(PIECE visitor, INTEGER count)`
 
-* `Exchange(INTEGER count)`
+    In the single line of play the **visitor** visits **count** (>2) different squares,
+    and returns to the first square.
+    The unsigned area encompassed by the path is non-zero.
+
+    Equivalent definition: the circuit contains a sub-circuit that satisfies 2 criteria:
+    1) All squares are different
+    2) Squares geometrically do not all belong to the same
+    [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
+
+  *Example:*
+  [RoundTrip(wB, 7)](http://www.yacpdb.org/#412003)
+
+  Note that the *signed* area of the 8-shaped poligon in the example is zero,
+  while the unsigned area is 4.
+
+
+* `LinearClosedPath(PIECE visitor, INTEGER count)`
+
+    The **visitor** performs  a closed path of length **count** in the single line of play
+    that is neither `SwitchBack` nor `RoundTrip`.
+
+* `PlaceExchange(INTEGER count)`
 
   **count** (>1) pieces cyclically exchange their places.
 
-* `ExchangeBy(PIECE participant)`
+* `PlaceExchangeBy(PIECE participant)`
 
   The **participant** takes part in the `Exchange`.
 
@@ -93,14 +106,14 @@
 
   Same as `Star`, the set is [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)]
 
-* `Albino(PIECE visitor)`
+* `PseudoAlbino(PIECE visitor)`
 
   Same as `Star`, the set is [(-1, -1), (1, -1), (0, -1), (0, -2)]. The visitor does not
   necessarily start from the 2nd rank.
 
   *Example*: [Albino(wP)](http://yacpdb.org/#44165)
 
-* `Pickaninny(PIECE visitor)`
+* `PseudoPickaninny(PIECE visitor)`
 
   Same as `Star`, the set is [(-1, 1), (1, 1), (0, 1), (0, 2)]. The visitor does not
   necessarily start from the 7th rank.
