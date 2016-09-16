@@ -1,8 +1,25 @@
 # Preface
-  * The goals
-  * Predicate naming
-  * Predicate arity and design. Priorities.
-  * What's not covered
+## The goals
+The main goal is to design and document a set of [predicates]()
+that partially describe the content of the chess compositions.
+
+Key features to achieve:
+* The predicates desing should be as clear and unambigous as possible
+* The predicates desing should facilitate the database search
+
+What this project is **not**:
+* This project is not a tool for *extensive* description of the content of the chess composition
+* This project does not have any relation to artistic or aestetic evaluation of the chess compositions
+* This project is not intended to substitute (or have any major impact on) the existing
+  chess problem terminology.
+
+
+## Predicate naming, arity and design. Priorities.
+
+When there is no consensus in the community regarding the exact definition of a certain
+term ("switchback" is one good example) it is preferred to choose a new name for predicate
+that was not used before in chess composition.
+
 
 # Definitions
 
@@ -37,41 +54,55 @@
   *Examples:* Circe-reborn piece visits the rebirth square. Anti-Circe-reborn piece did not
   visit the capture square.
 
+# Predicate parameters domains
+(ordered alphabetically)
+* **CAPTUREFLAG**: "WithCaptures" or "Captureless"
+* **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
+* **INTEGER**: any integer number
+* **PIECE**: concatenation of COLOR and PIECENAME
+* **PIECENAME**: one- or two-letter piece code, as defined by the
+  [Popeye](https://github.com/thomas-maeder/popeye)
+  solving software (english input)
+
 # Predicates
 
 ## Trajectories predicates
 
-* `SwitchBack(PIECE visitor, INTEGER count)`
 
-    In the single line of play the **visitor** visits **count** (>0) more squares
-    (may be repeated) and returns to the starting square via the exact reverse route.
+* `ClosedWalk(PIECE visitor, INTEGER length, CAPTUREFLAG cflag)`
 
-  *Example:*
-  [SwitchBack(wR, 1)](http://yacpdb.org/#83447),
-  [SwitchBack(wB, 3)](http://www.yacpdb.org/#412960)
+    In the single line of play the **visitor** changes the visited square **length**
+    (>1) times (squares may be repeated) and returns to the starting square.
 
-* `RoundTrip(PIECE visitor, INTEGER count)`
+* `TraceBack(PIECE visitor, INTEGER count, CAPTUREFLAG cflag)`
 
-    In the single line of play the **visitor** visits **count** (>2) different squares,
-    and returns to the first square.
-    The unsigned area encompassed by the path is non-zero.
+    Is a special case of `ClosedWalk` where visitor returns to the starting square via the
+    exact reverse route. The **count** is half the length of the walk.
 
-    Equivalent definition: the circuit contains a sub-circuit that satisfies 2 criteria:
-    1) All squares are different
-    2) Squares geometrically do not all belong to the same
+  *Example:* [TraceBack(wR, 1, WithCaptures)](http://yacpdb.org/#83447)
+
+  *Example:* [TraceBack(wB, 3, WithCaptures)](http://www.yacpdb.org/#412960)
+
+* `ArealCycle(PIECE visitor, INTEGER length, CAPTUREFLAG cflag)`
+
+    Is a special case of `ClosedWalk` where visited squares:
+    1) Are all different
+    2) Do not all belong to the same
     [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
 
-  *Example:*
-  [RoundTrip(wB, 7)](http://www.yacpdb.org/#412003)
+    *Example:*
+    [ArealCycle(wB, 7, WithCaptures)](http://www.yacpdb.org/#412003)
 
-  Note that the *signed* area of the 8-shaped poligon in the example is zero,
-  while the unsigned area is 4.
+    Note that the *signed* area of the 8-shaped poligon in the example is zero,
+    while the unsigned area is 4.
 
 
-* `LinearClosedPath(PIECE visitor, INTEGER count)`
+* `LinearCycle(PIECE visitor, INTEGER length, CAPTUREFLAG cflag)`
 
-    The **visitor** performs  a closed path of length **count** in the single line of play
-    that is neither `SwitchBack` nor `RoundTrip`.
+    Same as `ArealCycle`, but the squares all lie on the same straight line.
+
+    *Example*: [ClosedWalk(wB, 7, CaptureLess) +
+    LinearCycle(wB, 3, CaptureLess)](http://www.yacpdb.org/#86606)
 
 * `PlaceExchange(INTEGER count)`
 
