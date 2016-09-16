@@ -1,6 +1,7 @@
 # Preface
 ## The goals
-The main goal is to design and document a set of [predicates]()
+The main goal is to design and document a set of
+[predicates](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic))
 that partially describe the content of the chess compositions.
 
 Key features to achieve:
