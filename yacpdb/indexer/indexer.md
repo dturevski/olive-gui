@@ -5,8 +5,8 @@ The main goal is to design and document a set of
 that partially describe the content of the chess compositions.
 
 Key features to achieve:
-* The predicates desing should be as clear and unambigous as possible
-* The predicates desing should facilitate the database search
+* The predicates design should be as clear and unambigous as possible
+* The predicates design should facilitate the database search
 
 What this project is **not**:
 * This project is not a tool for *extensive* description of the content of the chess composition
