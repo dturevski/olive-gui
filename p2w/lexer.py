@@ -6,6 +6,7 @@ t_ignore = " \t\r\n"
 
 # List of token names.
 tokens = (
+    'ROTATE',
     'IMITATOR_MOVEMENT_OPENING_BRACKET',
     'LEFT_SQUARE_BRACKET',
     'RIGHT_SQUARE_BRACKET',
@@ -15,7 +16,10 @@ tokens = (
     'PLUS',
     'EQUALS',
     'ANNOTATION',
-    'PIECE_NAME',
+    'MIRROR',
+    'SHIFT',
+    'POLISH_TYPE',
+    'IMITATOR',
     'MOVE_NUMBER',
     'KINGSIDE_CASTLING',
     'QUEENSIDE_CASTLING',
@@ -35,14 +39,10 @@ tokens = (
     'LONG_ARROW',
     'LONG_DOUBLE_ARROW',
     'DOUBLE_POINTED_ARROW',
-    'ROTATE',
-    'MIRROR',
-    'SHIFT',
-    'POLISH_TYPE',
-    'IMITATOR',
     'FAIRY_PROPERTIES',
     'COMMA',
     'OTHER_CHECK_SIGN',
+    'PIECE_NAME',
 )
 
 # tokens
@@ -64,8 +64,6 @@ t_PLUS = r'\+'
 t_EQUALS = r'='
 t_OTHER_CHECK_SIGN = r'[#]'
 t_ANNOTATION = r'[!\?][!\?]?'
-t_FAIRY_PROPERTIES = r'[cjkprvfhmu]+'
-t_PIECE_NAME = r'([0-9A-Z][0-9A-Z])|[A-Z]'
 
 
 # before INT
@@ -108,13 +106,20 @@ t_ARROW = r'\->'
 t_LONG_ARROW = r'\-\->'
 t_LONG_DOUBLE_ARROW = r'==>'
 t_DOUBLE_POINTED_ARROW = r'<\-\->'
-t_ROTATE = r'rotate'
+
+def t_ROTATE(t):
+    r'rotate'
+    return t
+
 t_MIRROR = r'mirror'
 t_SHIFT = r'shift'
 t_POLISH_TYPE = r'PolishType'
 t_IMITATOR = r'Imitator'
 t_IMITATOR_MOVEMENT_OPENING_BRACKET = r'\[I'
 t_COMMA = r','
+
+t_FAIRY_PROPERTIES = r'[cjkprvfhmu]+'
+t_PIECE_NAME = r'([0-9A-Z][0-9A-Z])|[A-Z]'
 
 
 def t_error(t):
