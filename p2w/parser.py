@@ -88,15 +88,15 @@ def p_CommandList(t):
 
 
 def p_Command(t):
-    '''Command : LongPieceDecl SQUARE LONG_ARROW SQUARE
-            | LongPieceDecl SQUARE DOUBLE_POINTED_ARROW LongPieceDecl SQUARE
-            | DASH LongPieceDecl SQUARE
-            | PLUS LongPieceDecl SQUARE
-            | ROTATE INT
+    '''Command : ROTATE INT
             | MIRROR SQUARE DOUBLE_POINTED_ARROW SQUARE
             | SHIFT SQUARE LONG_DOUBLE_ARROW SQUARE
             | POLISH_TYPE
             | IMITATOR SquareList
+            | LongPieceDecl SQUARE LONG_ARROW SQUARE
+            | LongPieceDecl SQUARE DOUBLE_POINTED_ARROW LongPieceDecl SQUARE
+            | DASH LongPieceDecl SQUARE
+            | PLUS LongPieceDecl SQUARE
             | LongPieceDecl SQUARE'''
     if len(t) == 5 and t[3] == '-->':
         t[0] = TwinCommand("Move", [t[2], t[4]])
