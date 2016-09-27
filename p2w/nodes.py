@@ -138,7 +138,7 @@ class TwinNode(Node):
             self.anticipator.make(board)
 
         for command in self.commands:
-            command.execute(board)
+            command.execute(board, self.twinId)
 
     def unmake(self, board):
         board.unserialize(self.oldBoard)
@@ -165,7 +165,7 @@ class TwinCommand:
         self.name = name
         self.args = args
 
-    def execute(self, b):
+    def execute(self, b, twinId):
         if 'Move' == self.name:
             b.move(self.args[0], self.args[1])
         elif 'Exchange' == self.name:
@@ -175,10 +175,10 @@ class TwinCommand:
         elif 'Remove' == self.name:
             b.drop(self.args[0])
         elif 'Add' == self.name:
-            self.args[0].origin = str(self.args[1]) + "/1"
+            self.args[0].origin = str(self.args[1]) + "/" + twinId
             b.add(self.args[0], self.args[1])
         elif 'Rotate' == self.name:
-            b.rotate(self.args[0])
+            b.rotate(str(self.args[0]))
         elif 'Mirror' == self.name:
             b.mirror(self.args[0], self.args[1])
         elif 'Shift' == self.name:
