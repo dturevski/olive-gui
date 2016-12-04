@@ -59,6 +59,8 @@ var oliveJS = function($, Module) {
                         board.add(selectedPiece, i);
                         $(this).addClass(selectedPiece.toClass());
                     }
+                } else {
+                    board.drop(i);
                 }
                 updateInput();
             });
@@ -115,7 +117,6 @@ var oliveJS = function($, Module) {
 
         $(".solve").click(function() {
             $(".output").text("");
-            save();
 
             openScreen(2, true, function() {
                 FS.writeFile(popeyeInputFile, "BeginProblem\n" +  $(".input textarea").val() + "\nEndProblem");

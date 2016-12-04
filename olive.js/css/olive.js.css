@@ -33,8 +33,8 @@ body {
     padding: 0;
     margin: 0;
     border: 0;
-    background-color: #e4f5fc;
-    color: #000;
+    background-color: #000;
+    color: #fff;
 }
 
 .input {
@@ -49,7 +49,7 @@ body {
     padding: 0;
     margin: 0;
     border: 0;
-    background-color: seashell;
+    background-color: #e4f5fc;
 }
 
 .square {
