@@ -14,6 +14,9 @@ class Square:
         else:
             raise Exception("Wrong count of arguments")
 
+    def __str__(self):
+        return "abcdefgh"[self.x] + "87654321"[self.y]
+
 
 class Node(object):
 
@@ -143,7 +146,11 @@ class TwinNode(Node):
     def unmake(self, board):
         board.unserialize(self.oldBoard)
 
-    def __str__(self): return self.twinId + ')'
+    def __str__(self):
+        retval = self.twinId + ')'
+        for command in self.commands:
+            retval += " " + str(command)
+        return retval
 
     def fullPrefix(self): return "\n\n"
 
@@ -165,6 +172,10 @@ class TwinCommand:
         self.name = name
         self.args = args
 
+    def __str__(self):
+        return ""
+        #return self.name  + " " + " ".join([str(Square(x)) for x in self.args])
+
     def execute(self, b, twinId):
         if 'Move' == self.name:
             b.move(self.args[0], self.args[1])
@@ -182,7 +193,8 @@ class TwinCommand:
         elif 'Mirror' == self.name:
             b.mirror(self.args[0], self.args[1])
         elif 'Shift' == self.name:
-            b.shift(self.args[0], self.args[1])
+            p, q = Square(self.args[0]), Square(self.args[1])
+            b.shift(q.x-p.x, q.y-p.y)
         elif 'PolishType' == self.name:
             b.polishTwin()
         elif 'Imitator' == self.name:
