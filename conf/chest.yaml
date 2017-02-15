@@ -1,2 +1,1 @@
-options: '-r -LS -M 128'
-path: 'C:/Users/Дима/Downloads/olive-0.13.6/ChestUCI-v5.2/WinChest.exe'
+{options: -r -LS -M 128, path: 'C:/Users/Дима/Downloads/olive-0.13.6/ChestUCI-v5.2/WinChest.exe'}

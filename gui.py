@@ -21,6 +21,7 @@ import options
 import model
 import pbm
 import pdf
+import rtf
 import xfen2img
 import fancy
 import chest
@@ -212,6 +213,12 @@ class Mainframe(QtGui.QMainWindow):
         self.exportImgAction = QtGui.QAction(
             Lang.value('MI_Export_Image'), self)
         self.exportImgAction.triggered.connect(self.onExportImg)
+        # rtf
+        self.exportRtfAction = QtGui.QAction(
+            QtGui.QIcon('resources/icons/printer.png'),
+            Lang.value('MI_Export_RTF'),
+            self)
+        self.exportRtfAction.triggered.connect(self.onExportRtf)
         self.exportHtmlAction.setEnabled(False)
 
         self.addEntryAction = QtGui.QAction(
@@ -310,6 +317,8 @@ class Mainframe(QtGui.QMainWindow):
         # self.exportMenu.addAction(self.exportHtmlAction)
         self.exportMenu.addAction(self.exportPdfAction)
         self.exportMenu.addAction(self.exportImgAction)
+        # add for export into rtf
+        self.exportMenu.addAction(self.exportRtfAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
 
@@ -451,7 +460,8 @@ class Mainframe(QtGui.QMainWindow):
         self.exportHtmlAction.setText(Lang.value('MI_Export_HTML'))
         self.exportPdfAction.setText(Lang.value('MI_Export_PDF'))
         self.exportImgAction.setText(Lang.value('MI_Export_Image'))
-
+        self.exportRtfAction.setText(Lang.value('MI_Export_RTF'))
+        
         for i, k in enumerate(Mainframe.transform_names):
             self.transforms[i].setText(Lang.value('MI_' + k))
 
@@ -676,6 +686,23 @@ class Mainframe(QtGui.QMainWindow):
             msgBox(Lang.value('MSG_IO_failed'))
         except:
             msgBox(Lang.value('MSG_Image_export_failed'))
+            
+    # try to export into rtf
+    def onExportRtf(self):
+        default_dir = './collections/'
+        fileName = QtGui.QFileDialog.getSaveFileName(self, 
+            Lang.value('MI_Export') + ' ' + Lang.value('MI_Export_RTF'),
+            default_dir, 
+            "(*.rtf)")
+        if not fileName:
+            return
+        try:
+            ed = rtf.ExportDocument(Mainframe.model.entries, Lang)
+            ed.do_export(unicode(fileName))
+        except IOError:
+            msgBox(Lang.value('MSG_IO_failed'))
+        except:
+            msgBox(Lang.value('MSG_RTF_export_failed'))
 
     def onAddEntry(self):
         idx = Mainframe.model.current + 1
