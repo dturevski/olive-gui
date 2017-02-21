@@ -215,7 +215,7 @@ class Mainframe(QtGui.QMainWindow):
         self.exportImgAction.triggered.connect(self.onExportImg)
         # rtf
         self.exportRtfAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/printer.png'),
+            QtGui.QIcon('resources/icons/rtf32.png'),
             Lang.value('MI_Export_RTF'),
             self)
         self.exportRtfAction.triggered.connect(self.onExportRtf)
@@ -701,8 +701,8 @@ class Mainframe(QtGui.QMainWindow):
             ed.do_export(unicode(fileName))
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
-        except:
-            msgBox(Lang.value('MSG_RTF_export_failed'))
+        except RuntimeError:
+            msgBox(Lang.value('MSG_RTF_export_failed') % Error)
 
     def onAddEntry(self):
         idx = Mainframe.model.current + 1
