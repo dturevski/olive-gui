@@ -1,8 +1,7 @@
-﻿# -*- coding: utf-8 -*-
-
-import model
+# -*- coding: utf-8 -*-
 
 from PyRTF import *
+import model
 
 columns = 2
 rows = 3
@@ -11,43 +10,38 @@ class ExportDocument:
     
     def __init__(self, records, Lang):
         self.records, self.Lang = records, Lang
-        f = open('conf/chessfonts.yaml', 'r')
-        self.config = yaml.load(f)
-        f.close()
-        for family in self.config['diagram-fonts']:
-            self.config['config'][family]['fontinfo'] = self.loadFontInfo(
-                self.config['config'][family]['glyphs-tab'])
         
     def do_export(self, filename):
         doc = Document()
-        ss = doc.StyleSheet
-	section = Section()
-	doc.Sections.append( section )
+	
+        diagrams = Section()
+	diagrams.Header.append('Problems')
         
-        diagrams = ""
-        solutions = ""
+        solutions = Section()
+        solutions.Header.append('Solutions')
         
-
-        inline_font = self.config[
-            'inline-fonts'][self.solFontSelect.currentIndex()]
-        diagram_font = self.config[
-            'diagram-fonts'][self.diaFontSelect.currentIndex()]
+        for i, problem in enumerate(self.records):
+            p_diag = Paragraph()
+            p_diag.append(str(i+1) + str('. '))
+            p_diag.append(self.prepare_diagram(problem))
+            diagrams.append(p_diag)
+            
+            p_sol = Paragraph()
+            p_sol.append(str(i+1) + str('. '))
+            p_sol.append(self.prepare_solution(problem))
+            solutions.append(p_sol)
         
-        for record in self.records:
-            # populate all diagrams
-            diagrams += self.build_diagram(record)
-            # populate all solutions
-            solutions += self.build_solution(record)
-        # concat diagrams with solutions
-        section.append(diagrams + solutions)
+#        print str(self.records[0]['solution'])
         
-        Renderer().Write(doc, file( '%s' % filename, 'w' ))
+        doc.Sections.append(diagrams)        
+        doc.Sections.append(solutions)        
+        Renderer().Write(doc, file('%s' % filename, 'w'))
         
-    def build_diagram(self, problem):
-        return problem.toAlgebraic()
+    def prepare_diagram(self, problem):
+        return 'diagram'
     
-    def build_solution(self, problem):
-        result = ""
-        if "solution" in problem.entries:
-            result = problem.entries["solution"]
-        return result
+    def prepare_solution(self, problem):
+        if 'solution' in problem:
+            return str(problem['solution'])
+        return ''
+            
