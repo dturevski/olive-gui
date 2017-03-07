@@ -1,0 +1,205 @@
+body {
+    margin: 0px;
+}
+
+.screen {
+    width: 384px;
+    height: 528px;
+    float: left;
+    overflow: hidden;
+}
+
+.toolbar {
+    width: 384px;
+}
+
+.pieces {
+    height: 96px;
+    width: 288px;
+    float: left;
+    background-color: white;
+}
+
+.board {
+    clear: both;
+    height: 384px;
+    width: 384px;
+}
+
+.output {
+    width: 384px;
+    height: 528px;
+    display: block;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background-color: #000;
+    color: #fff;
+}
+
+.input {
+    width: 384px;
+    height: 528px;
+}
+
+.input textarea {
+    width: 384px;
+    height: 480px;
+    display: block;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background-color: #e4f5fc;
+}
+
+.square {
+    display: block;
+    float:left;
+    height: 48px;
+    width: 48px;
+    color: #000;
+    font-size: 24px;
+    cursor: pointer;
+    font-family: cglyphsregular;
+}
+
+.square.light {
+    background-color: #fff2cc;
+}
+
+.square.dark {
+    background-color: #ffd9b3;
+}
+
+.toolbar .square.selected {
+    background-color: #cc3300;
+    color: white;
+}
+
+
+.toolbar button {
+    border: 0 none;
+    background: #0099cc;
+    color: #ffffff;
+    box-shadow: 0 3px 0 0 #007299;
+
+    width: 48px;
+    height: 47px;
+    display: block;
+    float: left;
+}
+
+.toolbar button.solve {
+    width: 144px;
+}
+
+.toolbar button:active {
+    background: #33a6cc;
+    box-shadow: none;
+    margin-bottom: -3px;
+    margin-top: 3px;
+}
+
+.square:after {
+    /*position: relative;*/
+    /*top: 20px; */
+    /* vertical-align: bottom; */
+    line-height: 68px;
+}
+
+
+@font-face {
+    font-family: 'cglyphsregular';
+    src: url('cglyphs-webfont.woff2') format('woff2'),
+    url('cglyphs-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.square.black-king:after {
+    content: "g";
+}
+
+.square.black-queen:after {
+    content: "h";
+}
+
+.square.black-rook:after {
+    content: "i";
+}
+
+.square.black-bishop:after {
+    content: "j";
+}
+
+.square.black-knight:after {
+    content: "k";
+}
+
+.square.black-pawn:after {
+    content: "l";
+}
+
+.square.white-king:after {
+    content: "a";
+}
+
+.square.white-queen:after {
+    content: "b";
+}
+
+.square.white-rook:after {
+    content: "c";
+}
+
+.square.white-bishop:after {
+    content: "d";
+}
+
+.square.white-knight:after {
+    content: "e";
+}
+
+.square.white-pawn:after {
+    content: "f";
+}
+
+
+.toolbar .icon:after {
+    font-family: cglyphsregular;
+    font-size: 14px;
+    line-height: 52px;
+}
+
+.left:after {
+    content: "p";
+}
+
+.right:after {
+    content: "n";
+}
+
+.up:after {
+    content: "m";
+}
+
+.down:after {
+    content: "o";
+}
+
+.mirror-h:after {
+    content: "t";
+}
+
+.mirror-v:after {
+    content: "s";
+}
+
+.rotate-90:after {
+    content: "r";
+}
+
+.rotate-270:after {
+    content: "q";
+}
+

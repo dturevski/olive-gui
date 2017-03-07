@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>olive.js</title>
+
+    <meta name="viewport" content="width=384">
+    <link rel="stylesheet" href="css/olive.js.css">
+
+</head>
+<body>
+<div class="screen screen0">
+    <div class="toolbar">
+        <div class="pieces"></div>
+        <button class="icon left"></button>
+        <button class="icon right"></button>
+        <button class="icon up"></button>
+        <button class="icon down"></button>
+    </div>
+
+
+    <div class="board"></div>
+
+    <div class="toolbar">
+        <button class="solve">Run popeye</button>
+        <button class="icon mirror-h"></button>
+        <button class="icon mirror-v"></button>
+        <button class="icon rotate-270"></button>
+        <button class="icon rotate-90"></button>
+        <button class="icon clear-board">Clear</button>
+    </div>
+</div>
+
+
+<div class="screen screen1" style="display: none;">
+    <div class="input toolbar">
+        <textarea>Stipulation #2
+Option Variation NoBoard</textarea>
+        <button class="solve">Run popeye</button>
+    </div>
+</div>
+
+<div class="screen screen2" style="display: none;">
+    <textarea class="output"></textarea>
+</div>
+
+<script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="js/py2web.js"></script>
+<script type="text/javascript" src="js/olive.js"></script>
+<script type="text/javascript" src="js/py.js"></script>
+
+
+</body>
+</html>
