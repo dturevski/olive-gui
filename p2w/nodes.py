@@ -1,19 +1,6 @@
 
 import model
-
-class Square:
-
-    def __init__(self, *args, **kwargs):
-        if len(args) == 1:
-            self.value = args[0]
-            self.x = self.value % 8
-            self.y = self.value >> 3
-        elif len(args) == 2:
-            self.x, self.y = args[0], args[1]
-            self.value = 8*self.y + self.x
-        else:
-            raise Exception("Wrong count of arguments")
-
+from board import Square
 
 class Node(object):
 
@@ -180,9 +167,10 @@ class TwinCommand:
         elif 'Rotate' == self.name:
             b.rotate(self.args[0])
         elif 'Mirror' == self.name:
-            b.mirror(self.args[0], self.args[1])
+            b.mirror("%s<-->%s" % (Square(self.args[0]).alg(), Square(self.args[1]).alg()))
         elif 'Shift' == self.name:
-            b.shift(self.args[0], self.args[1])
+            p, q = Square(self.args[0]), Square(self.args[1])
+            b.shift(q.x-p.x, q.y-p.y)
         elif 'PolishType' == self.name:
             b.polishTwin()
         elif 'Imitator' == self.name:

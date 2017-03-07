@@ -6,6 +6,7 @@ t_ignore = " \t\r\n"
 
 # List of token names.
 tokens = (
+    'MIRROR',
     'IMITATOR_MOVEMENT_OPENING_BRACKET',
     'LEFT_SQUARE_BRACKET',
     'RIGHT_SQUARE_BRACKET',
@@ -15,6 +16,10 @@ tokens = (
     'PLUS',
     'EQUALS',
     'ANNOTATION',
+    'ROTATE',
+    'SHIFT',
+    'POLISH_TYPE',
+    'IMITATOR',
     'PIECE_NAME',
     'MOVE_NUMBER',
     'KINGSIDE_CASTLING',
@@ -35,11 +40,6 @@ tokens = (
     'LONG_ARROW',
     'LONG_DOUBLE_ARROW',
     'DOUBLE_POINTED_ARROW',
-    'ROTATE',
-    'MIRROR',
-    'SHIFT',
-    'POLISH_TYPE',
-    'IMITATOR',
     'FAIRY_PROPERTIES',
     'COMMA',
     'OTHER_CHECK_SIGN',
@@ -47,6 +47,29 @@ tokens = (
 
 # tokens
 
+
+# these must be functions because lexer always tries functions first
+# so they preceed t_PIECE_NAME
+
+def t_MIRROR(t):
+    r'mirror'
+    return t
+
+def t_ROTATE(t):
+    r'rotate'
+    return t
+
+def t_SHIFT(t):
+    r'shift'
+    return t
+
+def t_POLISH_TYPE(t):
+    r'PolishType'
+    return t
+
+def t_IMITATOR(t):
+    r'Imitator'
+    return t
 
 
 t_LEFT_SQUARE_BRACKET = r'\['
@@ -108,11 +131,6 @@ t_ARROW = r'\->'
 t_LONG_ARROW = r'\-\->'
 t_LONG_DOUBLE_ARROW = r'==>'
 t_DOUBLE_POINTED_ARROW = r'<\-\->'
-t_ROTATE = r'rotate'
-t_MIRROR = r'mirror'
-t_SHIFT = r'shift'
-t_POLISH_TYPE = r'PolishType'
-t_IMITATOR = r'Imitator'
 t_IMITATOR_MOVEMENT_OPENING_BRACKET = r'\[I'
 t_COMMA = r','
 
