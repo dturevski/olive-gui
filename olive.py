@@ -16,7 +16,7 @@ from PyQt4 import QtGui, QtCore
 
 # local
 import base
-import gui
+import gui, demo
 
 
 def main():
@@ -48,7 +48,10 @@ def main():
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004x_.ttf')
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004y_.ttf')
 
-    mainframe = gui.Mainframe()
+    if "--demo-board" in sys.argv:
+        mainframe = demo.Demoframe()
+    else:
+        mainframe = gui.Mainframe()
 
     # if invoked with "olive.py filename.olv" - read filename.olv
     if len(sys.argv) and sys.argv[-1][-4:] == '.olv':
