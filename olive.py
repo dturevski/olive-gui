@@ -49,7 +49,7 @@ def main():
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004y_.ttf')
 
     if "--demo-board" in sys.argv:
-        mainframe = demo.Demoframe()
+        mainframe = demo.Demoframe(app)
     else:
         mainframe = gui.Mainframe()
 

@@ -2,11 +2,13 @@ from gui import *
 
 class Demoframe(QtGui.QMainWindow):
 
-    def __init__(self):
+
+    def __init__(self, app):
         super(Demoframe, self).__init__()
         Mainframe.model = model.Model()
 
-        fontSize = 72
+        fontSize = (app.desktop().screenGeometry().height() - 256) >> 3
+
         Mainframe.fonts = { 'd': QtGui.QFont(
                 'GC2004D', fontSize), 'y': QtGui.QFont(
                 'GC2004Y', fontSize), 'x': QtGui.QFont(
