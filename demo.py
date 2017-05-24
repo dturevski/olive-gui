@@ -2,16 +2,16 @@ from gui import *
 
 class Demoframe(QtGui.QMainWindow):
 
-    fontSize = 72
-    Mainframe.fonts = {
-        'd': QtGui.QFont(
+    def __init__(self):
+        super(Demoframe, self).__init__()
+        Mainframe.model = model.Model()
+
+        fontSize = 72
+        Mainframe.fonts = { 'd': QtGui.QFont(
                 'GC2004D', fontSize), 'y': QtGui.QFont(
                 'GC2004Y', fontSize), 'x': QtGui.QFont(
                 'GC2004X', fontSize)}
 
-    def __init__(self):
-        super(Demoframe, self).__init__()
-        Mainframe.model = model.Model()
         self.initLayout()
         self.initFrame()
         self.showFullScreen()
