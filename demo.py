@@ -7,7 +7,7 @@ class Demoframe(QtGui.QMainWindow):
         super(Demoframe, self).__init__()
         Mainframe.model = model.Model()
 
-        fontSize = (app.desktop().screenGeometry().height() - 256) >> 3
+        fontSize = (app.desktop().screenGeometry().height() - 400) >> 3
 
         Mainframe.fonts = { 'd': QtGui.QFont(
                 'GC2004D', fontSize), 'y': QtGui.QFont(
