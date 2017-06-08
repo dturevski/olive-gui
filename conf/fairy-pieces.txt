@@ -5,6 +5,7 @@
 35	3,5-leaper	s3			
 36	3,6-leaper	s3			
 37	3,7-leaper	s3			
+ad	eagle	q3			
 ah	maohopper	s3		
 al	alfil	b3			2,2 leaper
 am	amazon	a	d		queen + knight
