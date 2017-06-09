@@ -449,6 +449,12 @@ PS_Hashtables:
   rs: Hashtables (Mb)
   ru: Таблицы транспозиций (Мб)
   de: Hashtables (Mb)
+PS_AXR:
+  en: Auto Indexer
+  rs: Auto Indexer
+  ru: Auto Indexer
+  de: Auto Indexer
+
 
 # Solution screen
 SS_Solution:

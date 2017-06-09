@@ -1,6 +1,6 @@
 import copy
 
-import model
+import board
 from legacy.common import all_different
 
 PATTERNS = {
@@ -9,8 +9,8 @@ PATTERNS = {
     'Cross': [(0, 1), (0, -1), (-1, 0), (1, 0)],
     'Big cross': [(0, 2), (0, -2), (-2, 0), (2, 0)],
     'Wheel': [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)],
-    'Albino': [(-1, -1), (1, -1), (0, -1), (0, -2)],
-    'Pickaninny': [(-1, 1), (1, 1), (0, 1), (0, 2)],
+    'PseudoAlbino': [(-1, -1), (1, -1), (0, -1), (0, -2)],
+    'PseudoPickaninny': [(-1, 1), (1, 1), (0, 1), (0, 2)],
 }
 
 CORNERS = [0, 7, 56, 63]
@@ -51,8 +51,8 @@ class TrajectoriesBuilder:
 
         node.unmake(board)
 
-    def displacements(self, board, front):
-        for square, piece in model.Pieces(board):
+    def displacements(self, b, front):
+        for square, piece in board.Pieces(b):
             if piece.origin not in front:
                 yield piece.origin, -1, square
             elif front[piece.origin].square != square:
@@ -77,14 +77,14 @@ class TNode:
 
 
 def patternize(square):
-    x, y = model.to_xy(square)
+    square = board.Square(square)
     for (name, vecs) in PATTERNS.items():
         squares = []
         for (a, b) in vecs:
-            x_, y_ = x + a, y + b
-            if model.oob(x_, y_):
+            s = board.Square(square.x + a, square.y + b)
+            if s.oob():
                 break
-            squares.append(model.from_xy(x_, y_))
+            squares.append(s)
         else:
             yield name, squares
 
@@ -126,13 +126,51 @@ def search(head, tail, retval):
 def oneline(squares):
     if len(squares) < 3:
         return True
-    squares = [model.to_xy(square) for square in squares]
-    x, y = squares[1][0] - squares[0][0], squares[1][1] - squares[0][1]
+    squares = map(lambda x: board.Square(x), squares)
+    x, y = squares[1].x - squares[0].x, squares[1].y - squares[0].y
     for i in xrange(2, len(squares)):
-        x_, y_ = squares[i][0] - squares[0][0], squares[i][1] - squares[0][1]
+        x_, y_ = squares[i].x - squares[0].x, squares[i].y - squares[0].y
         if x*y_ != x_*y:
             return False
     return True
+
+
+def findLast(squares, elem, start):
+    for i in xrange(len(squares) - 1, start, -1):
+        if elem == seq[i]:
+            return i
+    return -1
+
+
+# iterate simple subcycles
+def cycles(cwalk):
+    for i, square in enumerate(cwalk):
+        j = findLast(cwalk, square, i)
+        if j > i:
+            cycles(cwalk[:i] + cwalk[j:])
+            cycles(cwalk[i:j])
+            break
+    else:
+        yield cycle
+
+
+def cwalk(seq):
+    i = 0
+    while i < len(seq):
+        j = findLast(cwalk, seq[i], i)
+        if j > i:
+            maxlen = 0
+            for cycle in cycles(seq[i:j]):
+                maxlen = max(len(cycle), maxlen)
+                if len(cycle) > 2:
+                    ## Linear/Areal Cycle
+                    pass
+            if maxlen < j - i:
+                pass # ClosedWalk
+            elif maxlen == 2:
+                pass # TraceBack
+            i = j
+        i += 1
 
 
 def corners(trajs, retval, tnode = None, result = {}):

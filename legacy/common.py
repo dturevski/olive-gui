@@ -26,3 +26,8 @@ def retval(provides):
     for k in provides():
         r[k] = False
     return r
+
+
+def find(seq, elem):
+    try: return seq.index(elem)
+    except: return -1

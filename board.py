@@ -16,6 +16,9 @@ class Square:
     def alg(self):
         return idxToAlgebraic(self.value)
 
+    def oob(self):
+        return self.x < 0 or self.x > 7 or self.y < 0 or self.y > 7
+
 
 COLORS = ['black', 'white', 'neutral']
 COLORS_SHORT = {'b': 'black', 'w': 'white', 'n': 'neutral'}
