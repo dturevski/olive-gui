@@ -1,4 +1,7 @@
+import re
+
 from predicate import *
+from board import *
 
 titleCase = '([A-Z][a-z0-9]*)+'
 
@@ -46,10 +49,74 @@ class PredicateStorage:
                     raise ValueError("%s in '%s'" % (str(e), line.strip()))
 
     def createInstance(self, name, params):
-        if name in globals():
-            return globals()[name](name, params)
-        else:
-            return Predicate(name, params)
+        return (globals()[name] if name in globals() else Predicate)(name, params)
+
+
+
+class Matrix(Predicate):
+
+    transformations = [
+        ((1, 0), (0, 1)),
+        ((0, 1), (-1, 0)),
+        ((-1, 0), (0, -1)),
+        ((0, -1), (1, 0)),
+        ((1, 0), (0, -1)),
+        ((-1, 0), (0, 1)),
+        ((0, 1), (1, 0)),
+        ((0, 1), (1, 0))
+    ]
+
+    rePieceDeclaration = re.compile(r'^([wnb][a-z0-9][a-z0-9]?)([a-h][1-8])$')
+
+    # select piece, count(*) c from coords group by piece order by c;
+    frequency = ['bq', 'wq', 'br', 'bs', 'bb', 'wr', 'wk', 'bk', 'wb', 'ws', 'wp', 'bp']
+
+    class Placement:
+
+        def __init__(self, name, square):
+            self.name, self.square = name, square
+
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+        self.placements = []
+
+    def validate(self, params):
+        Predicate.validate(self, params)
+        self.placements = [self.parse(spec.strip().lower()) for spec in params[0].split(" ") if spec != ""]
+
+    def parse(self, spec):
+        match = Matrix.rePieceDeclaration.match(spec)
+        if not match:
+            raise ValueError("'%s' is not a valid piece specification in Matrix(piecelist)" % spec)
+        return Matrix.Placement(match.group(1), Square(algebraicToIdx(match.group(2))))
+
+    def compare(self, a, b):
+        ia, ib = len(Matrix.frequency), len(Matrix.frequency)
+        try: ia, ib = Matrix.frequency.index(a.name), Matrix.frequency.index(b.name)
+        except: pass
+        return ia - ib
+
+    def transform(self, cs, T):
+        return [Matrix.Placement(c.name, Square(
+                T[0][0]*c.square.x + T[0][1]*c.square.y,
+                T[1][0]*c.square.x + T[1][1]*c.square.y,
+                )) for c in cs]
+
+    def sql(self, params, cmp, ord):
+        cs = sorted(self.placements, cmp=self.compare)
+        for i, p in enumerate(cs):
+            if i > 0: p.square = Square(p.square.x - cs[0].square.x, p.square.y - cs[0].square.y)
+        ps, qs = [], []
+        for T in Matrix.transformations:
+            cs_, q = self.transform(cs, T), ""
+            for i in xrange(1, len(cs_)):
+                q += "join coords c{i} on (c{i}.piece='{n}' and c{i}.problem_id = c0.problem_id and " \
+                     "c{i}.x = c0.x + ({x}) and c{i}.y = c0.y + ({y}))\n" \
+                    .format(i=i, n=cs_[i].name, x=cs_[i].square.x, y=cs_[i].square.y)
+            q = "select c0.problem_id from coords c0\n %s where c0.piece='%s'" % (q,  cs_[0].name)
+            qs.append(q)
+        return Query(" or \n".join(["(p2.id in (%s))" % q for q in qs]), [], [])
 
 
 class Id(Predicate):
@@ -59,6 +126,54 @@ class Id(Predicate):
 
     def sql(self, params, cmp, ord):
         return Query("p2.id " + cmp + " %d", [ord], [])
+
+class Author(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query(
+            "au.name like %s", [params[0]],
+            ['authorship aus on (p2.id = aus.problem_id) join authors au on (aus.author_id = au.id)']
+        )
+
+
+class Source(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query("s.name like %s", [params[0]], ['sources s on (p2.source_id = s.id)'])
+
+
+class IssueId(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query("p2.issue_id = %s", [params[0]], [])
+
+
+class SourceId(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query("p2.local_id = %s", [params[0]], [])
+
+
+class DateAfter(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query("p2.published > %s", [params[0]], [])
+
 
 
 class Stip(Predicate):
@@ -70,38 +185,41 @@ class Stip(Predicate):
         return Query("p2.stipulation  rlike %s'", ["^" + params[0] + "$"], [])
 
 
-class Author(Predicate):
+class Option(Predicate):
 
     def __init__(self, name, params):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query(
-            "au.name like %s", [params[0]],
-            ['authorship aus on (p2.id = aus.problem_id)', 'authors au on (aus.author_id = au.id)']
-        )
+        if params[0] == Domain.wildcard:
+            return self.wildcard(cmp, ord)
+        return Query("p2.id in (select problem_id from options where o=%s)", [params[0]], [])
+
+    def wildcard(self, cmp, ord):
+        return Query("p2.id in (select id from problems2 p2 where "
+                     "(select count(*) from options o where o.problem_id=p2) " + cmp + " %d", [ord], [])
 
 
-class Source(Predicate):
-
-    def __init__(self, name, params):
-        Predicate.__init__(self, name, params)
-
-    def sql(self, params, cmp, ord):
-        return Query(
-            "s.name like %s", [params[0]],
-            ['sources s on (p2.source_id = s.id)']
-        )
-
-
-
-
-
-class DateAfter(Predicate):
+class Keyword(Predicate):
 
     def __init__(self, name, params):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("p2.published > %s", [params[0]], [])
+        return Query("p2.id in (select problem_id from "
+                     "tags_to_problems tp join "
+                     "tags t on tp.tag_id=t.id "
+                     "where t.name like %s)", [params[0]], [])
+
+
+class With(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        raise NotImplementedError()
+        if params[0] == Domain.wildcard:
+            return self.wildcard(cmp, ord)
+        return Query("p2.id in (select problem_id from options where o=%s)", [params[0]], [])
 
