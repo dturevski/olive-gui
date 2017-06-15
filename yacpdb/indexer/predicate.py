@@ -28,12 +28,6 @@ class Param:
 
 class Query:
 
-    def __init__(self):
-        self.q, self.ps, self.ts = "", [], []
-
-    def __init__(self, q, ps):
-        self.q, self.ps, self.ts = q, ps, []
-
     def __init__(self, q, ps, ts):
         self.q, self.ps, self.ts = q, ps, ts
 

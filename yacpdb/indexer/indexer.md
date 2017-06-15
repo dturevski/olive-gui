@@ -1,5 +1,7 @@
-[TOC]
+# The YACPDB query language guide
 
+[TOC]
+## Synopsis
 ## Preface
 ### The goals
 The main goal is to design and document a set of [predicates](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic) that partially describe the content of the chess compositions.
@@ -18,6 +20,36 @@ What this project is **not**:
 
 When there is no consensus in the community regarding the exact definition of a certain term ("switchback" is one good example) it is preferred to choose a new name for predicate that was not used before in chess composition.
 
+## Query language
+
+### Informal definition
+
+### Formal definition
+
+#### Tokens
+* INT - decimal non-negative integer literal
+* TCS - alphanumeric string in TitleCase
+* STR - utf8 string literal
+* CMP - comparison operator: '>', '<', '='
+
+#### Rules
+
+The query language grammar defined in [Backus–Naur form](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form):
+
+* Param := INT | STR
+* ParamList := Param | Param, ParamList
+* Predicate := TCS | TCS(ParamList)
+* Expression := Predicate | Predicate CMP INT
+* Expression := (Expression)
+* Expression := NOT Expression
+* Expression := Expression AND Expression
+* Expression := Expression OR Expression
+
+### YACPDB implementation notes
+* Wildcard character is `*` (asteriks)
+* `Predicate` is a shorthand for `Predicate > 0`
+* String literals may be 'single quoted' or "double quoted", they may not include a single or a double quote character respectively. String literals that include both single and double quote are not supported. In simple cases a string literal may be accepted without quotes.
+* For a 0-nary predicate the only supported syntax is `PredicateName`, using `PredicateName()` would yield an error
 
 ## Definitions
 
@@ -49,7 +81,7 @@ When there is no consensus in the community regarding the exact definition of a 
   *Examples:* Circe-reborn piece visits the rebirth square. Anti-Circe-reborn piece did not
   visit the capture square.
 
-## Predicate parameters domains
+## Predicate parameter domains
 (ordered alphabetically)
 * **CAPTUREFLAG**: "WithCaptures" or "Captureless"
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
@@ -60,6 +92,41 @@ When there is no consensus in the community regarding the exact definition of a 
 * **STRING**: unicode character string
 
 ## Predicates
+
+### Metadata predicates
+
+Same meaning as in the YACPDB search form.
+
+* `Matrix(STRING piecelist)`
+
+	The relative position of the pieces matches that of the **piecelist**
+    Fairy pieces are ok, e.g. `Matrix("wKa1 nNHh8")` (nNH = neutral nightrider-hopper)
+
+* `Id`
+
+    YACPDB problem id satisfies (is equal, less or greater than) the constraint.
+    Use `Id=X or Id=Y or Id=Z` to hotlink to an arbitrary set of problems.
+
+* `Author(STRING name)`
+
+	Meaning that at least one of the authors matches **name**
+
+* `Source(STRING name)`
+* `SourceId(STRING sourceid)`
+* `IssueId(STRING issueid)`
+* `DateAfter(DATE date)`
+* `Stip(STRING regex)`
+* `Option(STRING option)`
+
+	`Option(*) = 0` for no options / fairy conditions
+
+* `Keyword(STRING keyword)`
+* `PCount(COLOR color)`
+
+    Number of pieces of the specified **color** matches the constraint
+    Use `PCount(*)` to constraint the total number of pieces.
+
+* `With(STRING pieces)`
 
 ### Trajectories predicates
 
@@ -82,8 +149,7 @@ When there is no consensus in the community regarding the exact definition of a 
 
     Is a special case of `ClosedWalk` where visited squares:
     1) Are all different
-    2) Do not all belong to the same
-    [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
+    2) Do not all belong to the same [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
 
     *Example:*
     [ArealCycle(wB, 7, WithCaptures)](http://www.yacpdb.org/#412003)
@@ -157,40 +223,7 @@ When there is no consensus in the community regarding the exact definition of a 
 
   *Example*: [FourCorners(wQ)](http://yacpdb.org/#297)
 
-### Metadata predicates
 
-Same meaning as in the YACPDB search form.
-
-* `Matrix(STRING fen)`
-* `Id`
-* `Author(STRING name)`
-* `Source(STRING name)`
-* `SourceId(STRING sourceid)`
-* `IssueId(STRING issueid)`
-* `DateAfter(DATE date)`
-* `Stip(STRING regex)`
-* `PCount(COLOR color)`
-* `With(STRING pieces)`
 
 ### Helpmate Analyzer predicates
 
-## Query language
-
-### Tokens
-* INT - decimal non-negative integer literal
-* TCS - alphanumeric string in TitleCase
-* STR - utf8 string literal
-* CMP - comparison operator: '>', '<', '='
-
-### Rules
-
-* Param := INT | STR
-* ParamList := Param | ParamList, Param
-* Predicate := TCS | TCS(ParamList)
-* Expression := Predicate | Predicate CMP INT
-* Expression := (Expression)
-* Expression := NOT Expression
-* Expression := Expression AND Expression
-* Expression := Expression OR Expression
-
-Note: `Predicate` is a short form of `Predicate > 0`
