@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+
 from gui import *
 
-class Demoframe(QtGui.QMainWindow):
+class Demoframe(Commonframe):
 
 
     def __init__(self, app):
@@ -33,12 +35,17 @@ class Demoframe(QtGui.QMainWindow):
         widgetLeftPane.setLayout(vboxLeftPane)
 
         # right pane
+        vboxRightPane = QtGui.QVBoxLayout()
         self.chessBox = ChessBox()
+        vboxRightPane.addWidget(self.chessBox)
+        vboxRightPane.addWidget(Toolbar())
+        widgetRightPane = QtGui.QWidget()
+        widgetRightPane.setLayout(vboxRightPane)
 
         # putting panes together
         hbox = QtGui.QHBoxLayout()
         hbox.addWidget(widgetLeftPane)
-        hbox.addWidget(self.chessBox)
+        hbox.addWidget(widgetRightPane)
 
         cw = QtGui.QWidget()
         self.setCentralWidget(cw)
@@ -47,3 +54,37 @@ class Demoframe(QtGui.QMainWindow):
     def initFrame(self):
         self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/olive.png')))
         self.setWindowTitle("Demo board")
+
+class Toolbar(QtGui.QWidget):
+
+    def __init__(self):
+        super(Toolbar, self).__init__()
+
+        hl =  QtGui.QHBoxLayout()
+        self.setLayout(hl)
+
+        btnClear = QtGui.QPushButton(Lang.value('MI_Clear'))
+        btnClear.clicked.connect(self.onClear)
+        hl.addWidget(btnClear)
+
+        btnPrev = QtGui.QPushButton("<<<")
+        btnPrev.clicked.connect(self.onPrev)
+        hl.addWidget(btnPrev)
+
+        btnNext = QtGui.QPushButton(">>>")
+        btnNext.clicked.connect(self.onNext)
+        hl.addWidget(btnNext)
+
+    def onClear(self):
+        Mainframe.model.board.clear()
+        Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def onNext(self):
+        c = len(Mainframe.model.entries)
+        Mainframe.model.setNewCurrent((Mainframe.model.current+1)%c)
+        Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def onPrev(self):
+        c = len(Mainframe.model.entries)
+        Mainframe.model.setNewCurrent((Mainframe.model.current+c-1)%c)
+        Mainframe.sigWrapper.sigModelChanged.emit()

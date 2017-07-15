@@ -36,7 +36,36 @@ class SigWrapper(QtCore.QObject):
     sigNewVersion = QtCore.pyqtSignal()
 
 
-class Mainframe(QtGui.QMainWindow):
+class Commonframe(QtGui.QMainWindow):
+
+    def __init__(self):
+        super(Commonframe, self).__init__()
+
+    def openCollection(self, fileName):
+
+        try:
+            f = open(unicode(fileName), 'r')
+            Mainframe.model = model.Model()
+            Mainframe.model.delete(0)
+            for data in yaml.load_all(f):
+                Mainframe.model.add(model.makeSafe(data), False)
+            f.close()
+            Mainframe.model.is_dirty = False
+        except IOError:
+            msgBox(Lang.value('MSG_IO_failed'))
+            Mainframe.model = model.Model()
+        except yaml.YAMLError as e:
+            msgBox(Lang.value('MSG_YAML_failed') % e)
+            Mainframe.model = model.Model()
+        else:
+            if len(Mainframe.model.entries) == 0:
+                Mainframe.model = model.Model()
+            Mainframe.model.filename = unicode(fileName)
+        finally:
+            Mainframe.sigWrapper.sigModelChanged.emit()
+
+
+class Mainframe(Commonframe):
     sigWrapper = SigWrapper()
     fontSize = 24
     fonts = {
@@ -488,27 +517,8 @@ class Mainframe(QtGui.QMainWindow):
         self.openCollection(fileName)
 
     def openCollection(self, fileName):
-        try:
-            f = open(unicode(fileName), 'r')
-            Mainframe.model = model.Model()
-            Mainframe.model.delete(0)
-            for data in yaml.load_all(f):
-                Mainframe.model.add(model.makeSafe(data), False)
-            f.close()
-            Mainframe.model.is_dirty = False
-        except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
-            Mainframe.model = model.Model()
-        except yaml.YAMLError as e:
-            msgBox(Lang.value('MSG_YAML_failed') % e)
-            Mainframe.model = model.Model()
-        else:
-            if len(Mainframe.model.entries) == 0:
-                Mainframe.model = model.Model()
-            Mainframe.model.filename = unicode(fileName)
-        finally:
-            self.overview.rebuild()
-            Mainframe.sigWrapper.sigModelChanged.emit()
+        super(Mainframe, self).openCollection(fileName)
+        self.overview.rebuild()
 
     def onSaveFile(self):
         if Mainframe.model.filename != '':
