@@ -300,6 +300,12 @@ class Mainframe(Commonframe):
             self)
         self.twinsAction.triggered.connect(self.popeyeView.onTwins)
 
+        self.runAxr = QtGui.QAction(
+                QtGui.QIcon('resources/icons/axr.png'),
+                Lang.value('PS_AXR'),
+                self)
+        #self.runAxr.triggered.connect(pass)
+
         self.popeyeView.setActions(
             {
                 'start': self.startPopeyeAction,
@@ -383,7 +389,8 @@ class Mainframe(Commonframe):
              self.listLegalBlackMoves,
              self.listLegalWhiteMoves,
              self.optionsAction,
-             self.twinsAction])
+             self.twinsAction,
+             self.runAxr])
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
@@ -1113,7 +1120,8 @@ class OverviewList(QtGui.QTreeWidget):
                 d = model.Distinction.fromString(
                     Mainframe.model.entries[i]['distinction'])
                 # 4 is the index of the distinction column
-                self.topLevelItem(i).setText(4, d.toStringInLang(Lang))
+                if self.topLevelItem(i) is not None:
+                    self.topLevelItem(i).setText(4, d.toStringInLang(Lang))
 
     def removeDirtyMarks(self):
         for i in xrange(len(Mainframe.model.entries)):

@@ -1,8 +1,10 @@
-# Preface
-## The goals
-The main goal is to design and document a set of
-[predicates](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic))
-that partially describe the content of the chess compositions.
+# The YACPDB query language guide
+
+[TOC]
+## Synopsis
+## Preface
+### The goals
+The main goal is to design and document a set of [predicates](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic) that partially describe the content of the chess compositions.
 
 Key features to achieve:
 * The predicates design should be as clear and unambigous as possible
@@ -11,18 +13,45 @@ Key features to achieve:
 What this project is **not**:
 * This project is not a tool for *extensive* description of the content of the chess composition
 * This project does not have any relation to artistic or aestetic evaluation of the chess compositions
-* This project is not intended to substitute (or have any major impact on) the existing
-  chess problem terminology.
+* This project is not not a revisiting of the existing chess problem terminology.
 
 
-## Predicate naming, arity and design. Priorities.
+### Predicate naming, arity and design. Priorities.
 
-When there is no consensus in the community regarding the exact definition of a certain
-term ("switchback" is one good example) it is preferred to choose a new name for predicate
-that was not used before in chess composition.
+When there is no consensus in the community regarding the exact definition of a certain term ("switchback" is one good example) it is preferred to choose a new name for predicate that was not used before in chess composition.
 
+## Query language
 
-# Definitions
+### Informal definition
+
+### Formal definition
+
+#### Tokens
+* INT - decimal non-negative integer literal
+* TCS - alphanumeric string in TitleCase
+* STR - utf8 string literal
+* CMP - comparison operator: '>', '<', '='
+
+#### Rules
+
+The query language grammar defined in [Backus–Naur form](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form):
+
+* Param := INT | STR
+* ParamList := Param | Param, ParamList
+* Predicate := TCS | TCS(ParamList)
+* Expression := Predicate | Predicate CMP INT
+* Expression := (Expression)
+* Expression := NOT Expression
+* Expression := Expression AND Expression
+* Expression := Expression OR Expression
+
+### YACPDB implementation notes
+* Wildcard character is `*` (asteriks)
+* `Predicate` is a shorthand for `Predicate > 0`
+* String literals may be 'single quoted' or "double quoted", they may not include a single or a double quote character respectively. String literals that include both single and double quote are not supported. In simple cases a string literal may be accepted without quotes.
+* For a 0-nary predicate the only supported syntax is `PredicateName`, using `PredicateName()` would yield an error
+
+## Definitions
 
 * **Board configuration** is an explicit description of the game state, including:
   * Board size and shape
@@ -36,38 +65,70 @@ that was not used before in chess composition.
   * Twinning actions
   * Null moves (which only alter the side to play)
 
-* **Solution tree** is a directed rooted
-  [tree](https://en.wikipedia.org/wiki/Tree_(graph_theory)), whose vertices are
-  board configurations and edges are board alterations. The diagram position of the
-  chess composition is the root of the tree. The final positions are the leaves of the tree.
+* **Solution tree** is a directed rooted [tree](https://en.wikipedia.org/wiki/Tree_(graph_theory)), whose vertices are board configurations and edges are board alterations. The diagram position of the chess composition (except for retros) is the root of the tree. The final positions are the leaves of the tree.
 
-* The **line of play** is a path from the root to the one of the leaves in the solution
-  tree.
+  *TODO: Retros*
+
+* The **line of play** is a path from the root to the one of the leaves in the solution tree.
 
 * A piece **visits** a square if it occupies the square in question
   1) in the initial position,
   2) after a completed move
   3) after a twinning.
 
-  In other words, the visiting occurs in the position that is a vertex in the
-  solution tree.
+  In other words, the visiting occurs in the position that is a vertex in the solution tree.
 
   *Examples:* Circe-reborn piece visits the rebirth square. Anti-Circe-reborn piece did not
   visit the capture square.
 
-# Predicate parameters domains
+## Predicate parameter domains
 (ordered alphabetically)
 * **CAPTUREFLAG**: "WithCaptures" or "Captureless"
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
+* **DATE**: a date in YYYY[-MM[-DD]] format
 * **INTEGER**: any integer number
 * **PIECE**: concatenation of COLOR and PIECENAME
-* **PIECENAME**: one- or two-letter piece code, as defined by the
-  [Popeye](https://github.com/thomas-maeder/popeye)
-  solving software (english input)
+* **PIECENAME**: one- or two-letter piece code, as defined by the [Popeye](https://github.com/thomas-maeder/popeye) solving software (english input)
+* **STRING**: unicode character string
 
-# Predicates
+## Predicates
 
-## Trajectories predicates
+### Metadata predicates
+
+Same meaning as in the YACPDB search form.
+
+* `Matrix(STRING piecelist)`
+
+	The relative position of the pieces matches that of the **piecelist**
+    Fairy pieces are ok, e.g. `Matrix("wKa1 nNHh8")` (nNH = neutral nightrider-hopper)
+
+* `Id`
+
+    YACPDB problem id satisfies (is equal, less or greater than) the constraint.
+    Use `Id=X or Id=Y or Id=Z` to hotlink to an arbitrary set of problems.
+
+* `Author(STRING name)`
+
+	Meaning that at least one of the authors matches **name**
+
+* `Source(STRING name)`
+* `SourceId(STRING sourceid)`
+* `IssueId(STRING issueid)`
+* `DateAfter(DATE date)`
+* `Stip(STRING regex)`
+* `Option(STRING option)`
+
+	`Option(*) = 0` for no options / fairy conditions
+
+* `Keyword(STRING keyword)`
+* `PCount(COLOR color)`
+
+    Number of pieces of the specified **color** matches the constraint
+    Use `PCount(*)` to constraint the total number of pieces.
+
+* `With(STRING pieces)`
+
+### Trajectories predicates
 
 
 * `ClosedWalk(PIECE visitor, INTEGER length, CAPTUREFLAG cflag)`
@@ -88,13 +149,12 @@ that was not used before in chess composition.
 
     Is a special case of `ClosedWalk` where visited squares:
     1) Are all different
-    2) Do not all belong to the same
-    [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
+    2) Do not all belong to the same [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
 
     *Example:*
     [ArealCycle(wB, 7, WithCaptures)](http://www.yacpdb.org/#412003)
 
-    Note that the *signed* area of the 8-shaped poligon in the example is zero,
+    Note that the *signed* area of the 8-shaped polygon in the example is zero,
     while the unsigned area is 4.
 
 
@@ -111,7 +171,7 @@ that was not used before in chess composition.
 
 * `PlaceExchangeBy(PIECE participant)`
 
-  The **participant** takes part in the `Exchange`.
+  The **participant** takes part in the `PlaceExchange`.
 
 * `Star(PIECE visitor)`
 
@@ -143,7 +203,7 @@ that was not used before in chess composition.
   Same as `Star`, the set is [(-1, -1), (1, -1), (0, -1), (0, -2)]. The visitor does not
   necessarily start from the 2nd rank.
 
-  *Example*: [Albino(wP)](http://yacpdb.org/#44165)
+  *Example*: [PseudoAlbino(wP)](http://yacpdb.org/#44165)
 
 * `PseudoPickaninny(PIECE visitor)`
 
@@ -163,4 +223,7 @@ that was not used before in chess composition.
 
   *Example*: [FourCorners(wQ)](http://yacpdb.org/#297)
 
+
+
+### Helpmate Analyzer predicates
 

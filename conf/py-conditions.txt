@@ -1,5 +1,5 @@
 RexInclusiv
-Circe <select{|RexInclusiv}>
+Circe <select{|RexInclusiv|Volcanic}>
 MirrorCirce 
 Madrasi <select{|RexInclusiv}>
 Volage
@@ -182,3 +182,4 @@ UltramarineChess
 SuperGuards
 Wormholes
 ArgentinianChess
+LostPieces

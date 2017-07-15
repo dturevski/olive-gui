@@ -4,18 +4,18 @@ import json
 import base, model
 from p2w.parser import parser
 import re
-import yacpdb.storage
+#import yacpdb.storage
 
 LIST_COMMON_STIPULATIONS = ["=", "+", "= black to move", "+ black to move", "see text"]
 
 def main():
-    try:
+    #try:
         with open(sys.argv[1], 'r') as f:
             entry = json.load(f)
             print json.dumps(validate(entry))
-    except Exception as e:
-        print json.dumps({'success': False, "errors": [unicode(e)]})
-        sys.exit(-1)
+    #except Exception as e:
+    #    print json.dumps({'success': False, "errors": [unicode(e)]})
+    #    sys.exit(-1)
 
 def validateStipulation(stip, r):
     stip = stip.lower()

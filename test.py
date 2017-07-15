@@ -2,12 +2,18 @@
 import sys
 import yaml
 import base, model
-from p2w.parser import parser
+import p2w.parser
+import p2w.lexer
 import re
-import yacpdb.storage
+#import yacpdb.storage
 
 import yacpdb.indexer.trajectories
 import validate
+import yacpdb.indexer.predicate
+import yacpdb.indexer.ql
+import yacpdb.indexer.metadata
+
+from board import *
 
 e = model.makeSafe(yaml.load("""---
 algebraic:
@@ -33,10 +39,24 @@ solution: |
                     3.Qc2-d3 #"
 """))
 
-solution = parser.parse(e["solution"], debug=0)
+solution = p2w.parser.parser.parse(e["solution"], debug=0, lexer=p2w.lexer.lexer)
 b = model.Board()
 b.fromAlgebraic(e["algebraic"])
 b.stm = b.getStmByStipulation(e["stipulation"])
 solution.traverse(b, validate.DummyVisitor()) # to assign origins
 
 print yacpdb.indexer.trajectories.run(e, solution, b)
+
+stor = yacpdb.indexer.metadata.PredicateStorage()
+
+s = "Source(diagrammes) and Author(Туревский%) and DateAfter(1990) and (not DateAfter('1990-12-31')) and Id"
+s = "Matrix('wKa1 bRb33')"
+s = "Author('Bakcsi%') and not Author('Bakcsi%')"
+x = yacpdb.indexer.ql.parser.parse(s, lexer=yacpdb.indexer.ql.lexer)
+
+x.validate(stor)
+
+query = x.sql(stor)
+print query
+print query.ps
+
