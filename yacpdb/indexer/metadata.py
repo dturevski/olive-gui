@@ -1,7 +1,11 @@
 import re
 
 from predicate import *
-from board import *
+try:
+    from board import *
+except ImportError as e:
+    from olive.board import *
+
 
 titleCase = '([A-Z][a-z0-9]*)+'
 
