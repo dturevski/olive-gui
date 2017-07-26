@@ -64,6 +64,9 @@ class Commonframe(QtGui.QMainWindow):
         finally:
             Mainframe.sigWrapper.sigModelChanged.emit()
 
+    def factoryDraggableLabel(self, id):
+        return DraggableLabel(id)
+
 
 class Mainframe(Commonframe):
     sigWrapper = SigWrapper()
@@ -148,7 +151,7 @@ class Mainframe(Commonframe):
         vboxLeftPane.setSpacing(0)
         vboxLeftPane.setContentsMargins(0, 0, 0, 0)
         self.fenView = FenView(self)
-        self.boardView = BoardView()
+        self.boardView = BoardView(self)
         self.infoView = InfoView()
         self.chessBox = ChessBox()
 
@@ -1369,8 +1372,9 @@ class ChessBoxItemManagable(ChessBoxItem):
 
 class BoardView(QtGui.QWidget):
 
-    def __init__(self):
+    def __init__(self, parent):
         super(BoardView, self).__init__()
+        self.parent = parent
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         self.skip_model_changed = False
 
@@ -1400,7 +1404,7 @@ class BoardView(QtGui.QWidget):
         self.labels = []
         for i in xrange(8):
             for j in xrange(8):
-                lbl = DraggableLabel(j + i * 8)
+                lbl = self.parent.factoryDraggableLabel(j + i * 8)
                 lbl.setTextAndFont(["\xA3", "\xA4"][(i + j) % 2], 'd')
                 # lbl.setDragEnabled(True)
                 lbl.setAcceptDrops(True)

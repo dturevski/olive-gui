@@ -5,7 +5,7 @@ var oliveJS = function($, Module) {
     var selectedPiece = null;
     var board = new Py2Web.Board();
     var popeyeInputFile = "/test.inp";
-    var popeyeMaxMem = "128M"
+    var popeyeMaxMem = "128M";
     var args = ["py", "-maxmem", popeyeMaxMem, popeyeInputFile];
 
 

@@ -28,7 +28,7 @@ class Demoframe(Commonframe):
         vboxLeftPane.setSpacing(0)
         vboxLeftPane.setContentsMargins(0, 0, 0, 0)
         self.fenView = FenView(self)
-        self.boardView = BoardView()
+        self.boardView = BoardView(self)
 
         vboxLeftPane.addWidget(self.fenView)
         vboxLeftPane.addWidget(self.boardView)
@@ -54,6 +54,27 @@ class Demoframe(Commonframe):
     def initFrame(self):
         self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/olive.png')))
         self.setWindowTitle("Demo board")
+
+    def factoryDraggableLabel(self, id):
+        return DraggableLabelWithHoverEffect(id)
+
+
+class DraggableLabelWithHoverEffect(DraggableLabel):
+
+    color1 = QtGui.QColor('#112233')
+    color2 = QtGui.QColor('#332211')
+
+
+    def __init__(self, id):
+        super(DraggableLabelWithHoverEffect, self).__init__(id)
+        self.setMouseTracking(True)
+
+    def enterEvent(self,event):
+        self.setStyleSheet('QLabel { background-color: #42bff4; }')
+
+    def leaveEvent(self,event):
+        self.setStyleSheet('QLabel { background-color: #ffffff; }')
+
 
 class Toolbar(QtGui.QWidget):
 
