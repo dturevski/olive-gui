@@ -1,4 +1,5 @@
 import re
+from .. import storage
 
 class Domain:
 
@@ -28,12 +29,19 @@ class Param:
 
 class Query:
 
+    # q, ps, ts = query, parameters, tables
     def __init__(self, q, ps, ts):
         self.q, self.ps, self.ts = q, ps, ts
+        self.preExecute = []
 
     def __str__(self):
-        ts = ["problems2 p2"] + sorted(set(self.ts))
-        return "select * from\n" + " join\n".join(ts) + "\nwhere " + self.q
+        ts = ["problems2 p2 join yaml y on p2.id=y.problem_id"] + sorted(set(self.ts))
+        return "select SQL_CALC_FOUND_ROWS y.* from\n" + " join\n".join(ts) + "\nwhere " + self.q
+
+    def execute(self, page):
+        for (q, ps) in self.preExecute:
+            storage.commit(q, ps)
+        return storage.search(str(self), tuple(self.ps), page)
 
 
 class Predicate:

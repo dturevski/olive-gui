@@ -47,7 +47,7 @@ solution.traverse(b, validate.DummyVisitor()) # to assign origins
 
 print yacpdb.indexer.trajectories.run(e, solution, b)
 
-stor = yacpdb.indexer.metadata.PredicateStorage()
+stor = yacpdb.indexer.metadata.PredicateStorage('./')
 
 s = "Source(diagrammes) and Author(Туревский%) and DateAfter(1990) and (not DateAfter('1990-12-31')) and Id"
 s = "Matrix('wKa1 bRb33')"

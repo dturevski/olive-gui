@@ -4,6 +4,8 @@ import hashlib
 import yaml
 import re
 
+from .. import board
+
 def unquote(str):
     str = str.strip()
     if len(str) < 2:
@@ -35,8 +37,12 @@ def entry(yamltext):
     yamltext = yamltext.replace("stipulation: =", 'stipulation: "="')
     e = yaml.load(yamltext)
     if "solution" in e:
-        e["solution"] = unicode(e["solution"]).encode("utf8")
+        e["solution"] = unquote(unicode(e["solution"]).encode("utf8"))
     if "stipulation" in e:
         e["stipulation"] = unicode(e["stipulation"]).encode("utf8")
+    if 'algebraic' in e:
+        b = board.Board()
+        b.fromAlgebraic(e["algebraic"])
+        e["legend"] = b.getLegend()
     return e
 

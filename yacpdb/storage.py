@@ -90,5 +90,18 @@ def insertAuto(ash, valid, message):
           (%s, %s, %s, now())""", (ash, valid, message))
 
 
+def search(query, params, page, pageSize=100):
+    limits = " limit %d, %d" % ((page-1)*pageSize, pageSize)
+    c, matches = database.cursor(), []
+    c.execute(query + limits, params)
+    lastExecuted = c._last_executed
+    for row in c:
+        e = entry.entry(row["yaml"])
+        e["id"] = row['problem_id']
+        matches.append(e)
+    c.execute("select FOUND_ROWS() fr")
+    return {'entries':matches, 'count': c.fetchone()["fr"], 'q':lastExecuted}
+
+
 
 

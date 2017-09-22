@@ -11,7 +11,7 @@ titleCase = '([A-Z][a-z0-9]*)+'
 
 class PredicateStorage:
 
-    def __init__(self):
+    def __init__(self, dir):
         self.ds = {
             'CAPTUREFLAG': Domain('CAPTUREFLAG', '(WithCaptures)|(Captureless)'),
             'COLOR': Domain('COLOR', '[wbn]'),
@@ -22,7 +22,7 @@ class PredicateStorage:
             'STRING': Domain('STRING', '.*'),
         }
         self.ps = {}
-        self.load('./yacpdb/indexer/indexer.md')
+        self.load(dir + 'yacpdb/indexer/indexer.md')
 
     fmt1 = re.compile('^\* `(' + titleCase + ')\((.*)\)`$') # non-zero arity
     fmt2 = re.compile('^\* `(' + titleCase + ')`$') # zero arity
@@ -80,6 +80,7 @@ class Matrix(Predicate):
         def __init__(self, name, square):
             self.name, self.square = name, square
 
+    temporaryTableIndex = 0
 
     def __init__(self, name, params):
         Predicate.__init__(self, name, params)
@@ -115,12 +116,19 @@ class Matrix(Predicate):
         for T in Matrix.transformations:
             cs_, q = self.transform(cs, T), ""
             for i in xrange(1, len(cs_)):
-                q += "join coords c{i} on (c{i}.piece='{n}' and c{i}.problem_id = c0.problem_id and " \
+                q += "join coords c{i} on (c{i}.piece={n} and c{i}.problem_id = c0.problem_id and " \
                      "c{i}.x = c0.x + ({x}) and c{i}.y = c0.y + ({y}))\n" \
-                    .format(i=i, n=cs_[i].name, x=cs_[i].square.x, y=cs_[i].square.y)
-            q = "select c0.problem_id from coords c0\n %s where c0.piece='%s'" % (q,  cs_[0].name)
+                    .format(i=i, n=Matrix.pieceCode(cs_[i].name), x=cs_[i].square.x, y=cs_[i].square.y)
+            q = "select c0.problem_id from coords c0\n %s where c0.piece=%d" % (q,  Matrix.pieceCode(cs_[0].name))
             qs.append(q)
         return Query(" or \n".join(["(p2.id in (%s))" % q for q in qs]), [], [])
+
+    def pieceCode(piece):
+        code = 0
+        for char in piece.lower():
+            code = code*256 + ord(char)
+        return code
+    pieceCode = staticmethod(pieceCode)
 
 
 class Id(Predicate):
