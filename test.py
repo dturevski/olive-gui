@@ -45,18 +45,20 @@ b.fromAlgebraic(e["algebraic"])
 b.stm = b.getStmByStipulation(e["stipulation"])
 solution.traverse(b, validate.DummyVisitor()) # to assign origins
 
-print yacpdb.indexer.trajectories.run(e, solution, b)
+#print yacpdb.indexer.trajectories.run(e, solution, b)
 
 stor = yacpdb.indexer.metadata.PredicateStorage('./')
 
 s = "Source(diagrammes) and Author(Туревский%) and DateAfter(1990) and (not DateAfter('1990-12-31')) and Id"
 s = "Matrix('wKa1 bRb33')"
 s = "Author('Bakcsi%') and not Author('Bakcsi%')"
+s = "Matrix('wKa1 bQh8')"
+
 x = yacpdb.indexer.ql.parser.parse(s, lexer=yacpdb.indexer.ql.lexer)
 
 x.validate(stor)
 
 query = x.sql(stor)
 print query
-print query.ps
+#print query.ps
 

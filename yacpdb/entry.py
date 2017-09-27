@@ -4,7 +4,9 @@ import hashlib
 import yaml
 import re
 
-from .. import board
+try: from .. import board
+except ImportError as e: import board
+except ValueError as e: import board
 
 def unquote(str):
     str = str.strip()

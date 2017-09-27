@@ -109,19 +109,28 @@ class Matrix(Predicate):
                 )) for c in cs]
 
     def sql(self, params, cmp, ord):
+
+        table, alias = "matrix%d" % Matrix.temporaryTableIndex, "tmpMatrix%d" % Matrix.temporaryTableIndex
+        Matrix.temporaryTableIndex += 1
+        query = Query("1", [], ["%s %s on p2.id=%s.id" % (table, alias, alias)])
+        query.preExecute.append(("create temporary table %s (id "
+                                 "integer not null, primary key(id)) "
+                                 "engine=memory" % table, []))
+
         cs = sorted(self.placements, cmp=self.compare)
         for i, p in enumerate(cs):
             if i > 0: p.square = Square(p.square.x - cs[0].square.x, p.square.y - cs[0].square.y)
-        ps, qs = [], []
         for T in Matrix.transformations:
             cs_, q = self.transform(cs, T), ""
             for i in xrange(1, len(cs_)):
                 q += "join coords c{i} on (c{i}.piece={n} and c{i}.problem_id = c0.problem_id and " \
                      "c{i}.x = c0.x + ({x}) and c{i}.y = c0.y + ({y}))\n" \
                     .format(i=i, n=Matrix.pieceCode(cs_[i].name), x=cs_[i].square.x, y=cs_[i].square.y)
-            q = "select c0.problem_id from coords c0\n %s where c0.piece=%d" % (q,  Matrix.pieceCode(cs_[0].name))
-            qs.append(q)
-        return Query(" or \n".join(["(p2.id in (%s))" % q for q in qs]), [], [])
+            q = "insert ignore into %s (id) select c0.problem_id from coords c0\n %s where c0.piece=%d" %\
+                (table, q,  Matrix.pieceCode(cs_[0].name))
+            query.preExecute.append((q, []))
+
+        return query
 
     def pieceCode(piece):
         code = 0
