@@ -23,6 +23,9 @@ def validateStipulation(stip, r):
     if not matches and not stip in LIST_COMMON_STIPULATIONS:
         r['errors'].append("Unrecognized stipulation. Accepted are: simple popeye stipulations, PG, '+/= [Black to move]' and 'See text'")
         return False
+    if matches.group("aim") == "" and matches.group("play").lower() != "pg":
+        r['errors'].append("Incorrect stipulation, no aim specified, but play type is not ProofGame")
+        return False
     return True
 
 
