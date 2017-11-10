@@ -19,8 +19,10 @@ def main():
 
 def validateStipulation(stip, r):
     stip = stip.lower()
+    if stip in LIST_COMMON_STIPULATIONS:
+        return True
     matches = model.RE_COMMON_STIPULATION.match(stip)
-    if not matches and not stip in LIST_COMMON_STIPULATIONS:
+    if not matches:
         r['errors'].append("Unrecognized stipulation. Accepted are: simple popeye stipulations, PG, '+/= [Black to move]' and 'See text'")
         return False
     if matches.group("aim") == "" and matches.group("play").lower() != "pg":
