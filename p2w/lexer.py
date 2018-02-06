@@ -123,7 +123,7 @@ t_ZUGZWANG = r'zugzwang\.'
 
 
 def t_TWIN_ID(t):
-    r'[a-z]\)'
+    r'([a-z]|(z[0-9]+))\)'
     t.value = str(t.value[0])
     return t
 
