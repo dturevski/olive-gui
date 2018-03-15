@@ -19,6 +19,9 @@ class Square:
     def oob(self):
         return self.x < 0 or self.x > 7 or self.y < 0 or self.y > 7
 
+    def __str__(self):
+        return self.alg()
+
 
 COLORS = ['black', 'white', 'neutral']
 COLORS_SHORT = {'b': 'black', 'w': 'white', 'n': 'neutral'}
