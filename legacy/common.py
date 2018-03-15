@@ -15,10 +15,7 @@ def tuples(seq, n, with_permutations):
 
 
 def all_different(seq):
-    for i in xrange(len(seq)):
-        if seq[i] in seq[i + 1:]:
-            return False
-    return True
+    return len(set(seq)) == len(seq)
 
 
 def retval(provides):
