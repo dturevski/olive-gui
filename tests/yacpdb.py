@@ -29,7 +29,7 @@ class TestQl(unittest.TestCase):
 
     def test_Unicode(self):
         rs = self.runYacpdbQuery("Id=26026", 1)
-        self.assertTrue(rs['entries'][0]['authors'][0] == u"Туревский, Дмитрий Евгеньевич")
+        self.assertEqual(rs['entries'][0]['authors'][0], u"Туревский, Дмитрий Евгеньевич")
 
     def test_Matrix(self):
         rs = self.runYacpdbQuery("Matrix('wKg3 bEQg1 bGg4')", 1)
@@ -51,6 +51,6 @@ class TestQl(unittest.TestCase):
         print "Got %d results" % len(results['entries'])
 
         if expected_match_count >= 0:
-            self.assertTrue(len(results['entries']) == expected_match_count)
+            self.assertEqual(len(results['entries']), expected_match_count)
 
         return results
