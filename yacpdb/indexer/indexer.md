@@ -4,7 +4,7 @@
 ## Synopsis
 ## Preface
 ### The goals
-The main goal is to design and document a set of [predicates](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic) that partially describe the content of the chess compositions.
+The main goal is to design and document a set of [predicates](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) that partially describe the content of the chess compositions.
 
 Key features to achieve:
 * The predicates design should be as clear and unambigous as possible
@@ -162,8 +162,8 @@ Same meaning as in the YACPDB search form.
 
     Same as `ArealCycle`, but the squares all lie on the same straight line.
 
-    *Example*: [ClosedWalk(wB, 7, CaptureLess) +
-    LinearCycle(wB, 3, CaptureLess)](http://www.yacpdb.org/#86606)
+    *Example*: [ClosedWalk(wB, 7, Captureless) +
+    LinearCycle(wB, 3, Captureless)](http://www.yacpdb.org/#86606)
 
 * `PlaceExchange(INTEGER count)`
 
@@ -227,3 +227,10 @@ Same meaning as in the YACPDB search form.
 
 ### Helpmate Analyzer predicates
 
+These are only applicable to orthodox helpmates
+
+* `HundredDollar`
+
+    HMA: _100-Dollar theme_
+    
+    A solution in 5 moves contains a white Excelsior and a black Excelsior with Knight promotions.

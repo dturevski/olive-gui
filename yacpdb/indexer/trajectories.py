@@ -2,6 +2,7 @@ import copy
 
 import board, model
 from legacy.common import all_different
+import p2w.nodes
 
 PATTERNS = {
     'Star': [(1, 1), (1, -1), (-1, 1), (-1, -1)],
@@ -21,6 +22,7 @@ class Analyzer:
 
     def analyze(self, entry, solution, board, acc):
         trajs = TrajectoriesBuilder.build(solution, board)
+        #for t in trajs: print t
         search([], trajs, acc)
         corners(trajs, acc)
 
@@ -30,12 +32,15 @@ class TrajectoriesBuilder:
     def __init__(self):
         self.result = {}
 
-    def visit(self, board, node, front={}):
+    def visit(self, board, node, front):
 
         node.make(board)
 
         for origin, departure, arrival in self.displacements(board, front):
-            tnode = TNode(arrival, origin, board.board[arrival].toPredicatePieceDomain())
+            is_capture = (isinstance(node, p2w.nodes.MoveNode)) and \
+                         (departure == node.departure) and \
+                         (node.capture != -1)
+            tnode = TNode(arrival, origin, board.board[arrival].toPredicatePieceDomain(), is_capture)
             if departure == -1:
                 self.result[origin] = tnode
                 front[origin] = tnode
@@ -60,15 +65,16 @@ class TrajectoriesBuilder:
 
     def build(solution, board):
         tb = TrajectoriesBuilder()
-        tb.visit(board, solution)
+        tb.visit(board, solution, {})
         return [tb.result[k] for k in tb.result.iterkeys() if len(tb.result[k].branches) > 0]
     build = staticmethod(build)
 
 
 class TNode:
 
-    def __init__(self, square, origin, piece):
-        self.square, self.origin, self.piece, self.branches = square, origin, piece, []
+    def __init__(self, square, origin, piece, is_capture):
+        self.square, self.origin, self.piece, self.branches, self.is_capture = \
+            square, origin, piece, [], is_capture
 
     def dump(self, level):
         s = " " * level + '->' + self.piece + model.idxToAlgebraic(self.square) + "\n"
@@ -94,25 +100,16 @@ def patternize(square):
 
 
 def search(head, tail, acc):
+
+    # cycles
+    if len(tail) == 0:
+        cwalk(head, acc, True)
+
     # patterns
     if len(head) > 0 and len(head[-1].branches) > 3:
         for name, squares in patternize(head[-1].square):
-            if len(squares) == len([y for y in squares if y in [x.square for x in head[-1].branches]]):
+            if len(squares) == len([y for y in squares if y.value in [x.square for x in head[-1].branches]]):
                 acc.push("%s(%s)" % (name, head[-1].piece))
-
-    # cycles
-    if len(head) > 2:
-        # search the head backwards to find its last element
-        for i in xrange(len(head) - 2, -1, -1):
-            if head[i].square == head[-1].square:
-                squares = [x.square for x in head[i + 1:]]
-                if len(squares) > 2 and all_different(squares):  # cycle length > 2
-                    if not oneline(squares):
-                        acc.push("RoundTrip(%s, %d)" % (head[i].piece, len(squares)))
-                    else:
-                        acc.push("LinearRoundTrip(%s, %d)" % (head[i].piece, len(squares)))
-                else:
-                    acc.push("SwitchBack(%s, %d)" % (head[i].piece, len(squares)))
 
     # c2c
     if len(head) > 1 and head[-1].square in CORNERS:
@@ -147,34 +144,50 @@ def findLast(squares, elem, start):
 
 
 # iterate simple subcycles
-def cycles(cwalk):
-    for i, square in enumerate(cwalk):
-        j = findLast(cwalk, square, i)
+def cycles(seq):
+    for i, square in enumerate(seq):
+        j = findLast(seq, square, i)
         if j > i:
-            cycles(cwalk[:i] + cwalk[j:])
-            cycles(cwalk[i:j])
+            cycles(seq[:i] + seq[j:])
+            cycles(seq[i:j])
             break
     else:
-        yield cwalk
+        yield seq
 
-
-def cwalk(seq):
+# Generic cwalk = cwalk that is neither Traceback nor Linear/Areal Cycle
+def cwalk(nodes, acc, with_generics):
+    seq = [node.square for node in nodes]
     i = 0
     while i < len(seq):
-        j = findLast(cwalk, seq[i], i)
+        j = findLast(seq, seq[i], i)
         if j > i:
-            maxlen = 0
-            for cycle in cycles(seq[i:j]):
-                maxlen = max(len(cycle), maxlen)
-                if len(cycle) > 2:
-                    ## Linear/Areal Cycle
-                    pass
-            if maxlen < j - i:
-                pass # ClosedWalk
-            elif maxlen == 2:
-                pass # TraceBack
+            if symmetrical(seq[i:j+1]):
+                acc.push("TraceBack(%s, %d, %s)" % (nodes[i].piece, (j - i) / 2, captureflag(nodes[i:j+1])))
+            elif all_different(seq[i:j]):
+                linearity = "LinearCycle" if oneline(seq[i:j]) else "ArealCycle"
+                acc.push("%s(%s, %d, %s)" % (linearity, nodes[i].piece, j - i, captureflag(nodes[i:j+1])))
+            else:
+                if with_generics:
+                    acc.push("ClosedWalk(%s, %d, %s)" % (nodes[i].piece, j - i, captureflag(nodes[i:j+1])))
+                cwalk(nodes[i:j], acc, False) # look for non-generic subcycles (they must be there)
             i = j
         i += 1
+
+
+def symmetrical(seq):
+    i, j = 0, len(seq) - 1
+    while i < j:
+        if seq[i] != seq[j]:
+            return False
+        i, j = i+1, j-1
+    return True
+
+
+def captureflag(nodes):
+    if True in [node.is_capture for node in nodes]:
+        return "WithCaptures"
+    else:
+        return "Captureless"
 
 
 def corners(trajs, acc, tnode = None, result = {}):
