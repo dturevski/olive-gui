@@ -1,6 +1,6 @@
 import copy
 
-import board
+import board, model
 from legacy.common import all_different
 
 PATTERNS = {
@@ -15,14 +15,14 @@ PATTERNS = {
 
 CORNERS = [0, 7, 56, 63]
 
+class Analyzer:
 
-def run(entry, solution, board):
-    retval = []
-    trajs = TrajectoriesBuilder.build(solution, board)
-    search([], trajs, retval)
-    corners(trajs, retval)
+    def __init__(self): pass
 
-    return retval
+    def analyze(self, entry, solution, board, acc):
+        trajs = TrajectoriesBuilder.build(solution, board)
+        search([], trajs, acc)
+        corners(trajs, acc)
 
 
 class TrajectoriesBuilder:
@@ -71,9 +71,13 @@ class TNode:
         self.square, self.origin, self.piece, self.branches = square, origin, piece, []
 
     def dump(self, level):
-        print " " * level, '->', self.piece + model.idxToAlgebraic(self.square)
+        s = " " * level + '->' + self.piece + model.idxToAlgebraic(self.square) + "\n"
         for tn in self.branches:
-            tn.dump(level + 1)
+            s += tn.dump(level + 1)
+        return s
+
+    def __str__(self):
+        return self.dump(0)
 
 
 def patternize(square):
@@ -89,12 +93,12 @@ def patternize(square):
             yield name, squares
 
 
-def search(head, tail, retval):
+def search(head, tail, acc):
     # patterns
     if len(head) > 0 and len(head[-1].branches) > 3:
         for name, squares in patternize(head[-1].square):
             if len(squares) == len([y for y in squares if y in [x.square for x in head[-1].branches]]):
-                retval.append("%s(%s)" % (name, head[-1].piece))
+                acc.push("%s(%s)" % (name, head[-1].piece))
 
     # cycles
     if len(head) > 2:
@@ -104,23 +108,23 @@ def search(head, tail, retval):
                 squares = [x.square for x in head[i + 1:]]
                 if len(squares) > 2 and all_different(squares):  # cycle length > 2
                     if not oneline(squares):
-                        retval.append("RoundTrip(%s, %d)" % (head[i].piece, len(squares)))
+                        acc.push("RoundTrip(%s, %d)" % (head[i].piece, len(squares)))
                     else:
-                        retval.append("LinearRoundTrip(%s, %d)" % (head[i].piece, len(squares)))
+                        acc.push("LinearRoundTrip(%s, %d)" % (head[i].piece, len(squares)))
                 else:
-                    retval.append("SwitchBack(%s, %d)" % (head[i].piece, len(squares)))
+                    acc.push("SwitchBack(%s, %d)" % (head[i].piece, len(squares)))
 
     # c2c
     if len(head) > 1 and head[-1].square in CORNERS:
         for i in xrange(len(head) - 2, -1, -1):
             if head[i].square != head[-1].square and head[i].square in CORNERS:
-                retval.append("CornerToCorner(%s)" % head[i].piece)
+                acc.push("CornerToCorner(%s)" % head[i].piece)
                 break
 
     for tnode in tail:
         new_head = copy.copy(head)
         new_head.append(tnode)
-        search(new_head, tnode.branches, retval)
+        search(new_head, tnode.branches, acc)
 
 
 def oneline(squares):
@@ -137,7 +141,7 @@ def oneline(squares):
 
 def findLast(squares, elem, start):
     for i in xrange(len(squares) - 1, start, -1):
-        if elem == seq[i]:
+        if elem == squares[i]:
             return i
     return -1
 
@@ -151,7 +155,7 @@ def cycles(cwalk):
             cycles(cwalk[i:j])
             break
     else:
-        yield cycle
+        yield cwalk
 
 
 def cwalk(seq):
@@ -173,20 +177,20 @@ def cwalk(seq):
         i += 1
 
 
-def corners(trajs, retval, tnode = None, result = {}):
+def corners(trajs, acc, tnode = None, result = {}):
     if tnode != None:
         if tnode.square in CORNERS:
             if tnode.origin not in result:
                 result[tnode.origin] = {}
             result[tnode.origin][tnode.square] = True
         for branch in tnode.branches:
-            corners(None, retval, branch, result)
+            corners(None, acc, branch, result)
     else:
         for tnode in trajs:
-            corners(None, retval, tnode, result)
+            corners(None, acc, tnode, result)
         for tnode in trajs:
             if tnode.origin in result and len(result[tnode.origin]) == len(CORNERS):
-                retval.append("FourCorners(%s)" % tnode.piece)
+                acc.push("FourCorners(%s)" % tnode.piece)
 
 
 

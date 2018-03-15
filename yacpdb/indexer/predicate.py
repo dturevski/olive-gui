@@ -1,5 +1,8 @@
 import re
 from .. import storage
+import logging
+
+titleCase = '([A-Z][a-z0-9]*)+'
 
 class Domain:
 
@@ -41,7 +44,7 @@ class Query:
     def execute(self, page):
         for (q, ps) in self.preExecute:
             storage.commit(q, ps)
-        return storage.search(str(self), tuple(self.ps), page)
+        return storage.dao.search(str(self), tuple(self.ps), page)
 
 
 class Predicate:
@@ -60,11 +63,11 @@ class Predicate:
         ps = [self.name]
         for i, val in enumerate(params):
             if val != Domain.wildcard:
-                cs.append("exists (select * from predicate_params where pid=pd.id and pos=%d and val=%s)\n")
-                ps.append(i)
+                cs.append("exists (select * from predicate_params where pid=pd.id and pos=%s and val=%s)\n")
+                ps.append(str(i))
                 ps.append(val)
         return Query("(select count(*) from predicates pd where (%s)) %s %d\n" % (") and\n(".join(cs), cmp, ord),
-                     ps)
+                     ps, [])
 
 
 class ExprPredicate:
@@ -111,23 +114,43 @@ class ExprJunction:
             )
 
 
-"""
-create table predicates (
-  id INTEGER not NULL AUTO_INCEREMENT,
-  name VARCHAR (255) not null,
-  problem_id INTEGER not NULL,
+class AnalyzisResult:
 
-  PRIMARY key(id),
-  key(problem_id, name)
-)
+    RE_NO_PARAMS = re.compile('^' + titleCase + '$')
+    RE_HAS_PARAMS = re.compile('^(?P<name>' + titleCase + ')\((?P<params>.*)\)$')
 
-create table predicate_params (
-  pid INTEGER not NULL,
-  pos INTEGER not NULL,
-  val VARCHAR (255) not null,
+    def __init__(self, name, params):
+        self.name, self.params = name, params
 
-  UNIQUE key(pid, pos),
-  key(pid, pos, val)
-)
+    def __str__(self):
+        if len(self.params) == 0:
+            return self.name
+        else:
+            return "%s(%s)" % (self.name, ", ".join(self.params))
 
-"""
+    def fromString(s):
+        if AnalyzisResult.RE_NO_PARAMS.match(s):
+            return AnalyzisResult(s, [])
+        matches = AnalyzisResult.RE_HAS_PARAMS.match(s)
+        if matches:
+            return AnalyzisResult(matches.group("name"), matches.group("params").split(", "))
+        raise NameError("%s is not a valid AnalyzisResult identificator")
+    fromString=staticmethod(fromString)
+
+
+class AnalyzisResultAccumulator:
+
+    def __init__(self, predicateStorage):
+        self.counts, self.predicates, self.predicateStorage = {}, {}, predicateStorage
+
+    def push(self, s):
+        ar = AnalyzisResult.fromString(s)
+        self.predicateStorage.validate(ar)
+        self.predicates[s] = ar;
+        if s in self.counts:
+            self.counts[s] += 1
+        else:
+            self.counts[s] = 1
+
+    def __str__(self):
+        return "\n".join(["%s: %d" % (k, self.counts[k]) for k in sorted(self.counts.keys())])

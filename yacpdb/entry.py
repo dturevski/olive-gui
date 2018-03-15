@@ -21,6 +21,7 @@ def unquote(str):
 
 
 # ASH = Algebraic + Solution/Stipulation Hash
+# ASH only make sense if the problem passes validation
 def ash(e):
     if "solution" not in e or "stipulation" not in e or "algebraic" not in e:
         return ""

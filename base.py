@@ -1,6 +1,6 @@
 import os
 import sys
-
+import logging
 
 def we_are_frozen():
     """Returns whether we are frozen via py2exe.
@@ -18,5 +18,6 @@ def module_path():
 
     return os.path.dirname(unicode(__file__, sys.getfilesystemencoding( )))
 
-
-os.chdir(module_path())
+basedir = module_path()
+os.chdir(basedir)
+logging.basicConfig(filename=basedir+'olive.log', level=logging.DEBUG)

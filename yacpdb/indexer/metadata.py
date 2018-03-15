@@ -1,4 +1,3 @@
-import re
 
 from predicate import *
 try:
@@ -6,8 +5,6 @@ try:
 except ImportError as e:
     from olive.board import *
 
-
-titleCase = '([A-Z][a-z0-9]*)+'
 
 class PredicateStorage:
 
@@ -55,6 +52,12 @@ class PredicateStorage:
     def createInstance(self, name, params):
         return (globals()[name] if name in globals() else Predicate)(name, params)
 
+    def validate(self, analysisResult):
+        arity = len(analysisResult.params)
+        if (arity not in self.ps) or (analysisResult.name not in self.ps[arity]):
+            raise ValueError("Predicate %s with arity %d is not in the predicate storage"
+                             % (analysisResult.name, arity))
+        self.ps[arity][analysisResult.name].validate(analysisResult.params)
 
 
 class Matrix(Predicate):
@@ -146,7 +149,7 @@ class Id(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("p2.id " + cmp + " %d", [ord], [])
+        return Query("p2.id " + cmp + " %s", [str(ord)], [])
 
 class Author(Predicate):
 

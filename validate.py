@@ -46,7 +46,7 @@ class DummyVisitor:
 
 
 
-def validate(entry):
+def validate(entry, propagate_exceptions=True):
 
     r = {'success': False, "errors": []}
 
@@ -65,31 +65,19 @@ def validate(entry):
     if not validateStipulation(entry["stipulation"], r):
         return r
 
-    solution = parser.parse(entry["solution"], debug=0)
-    b = model.Board()
-    b.fromAlgebraic(entry["algebraic"])
-    b.stm = b.getStmByStipulation(entry["stipulation"])
-    solution.traverse(b, SemanticValidationVisitor())
+    try:
+        solution = parser.parse(entry["solution"], debug=0)
+        b = model.Board()
+        b.fromAlgebraic(entry["algebraic"])
+        b.stm = b.getStmByStipulation(entry["stipulation"])
+        solution.traverse(b, SemanticValidationVisitor())
+    except Exception as ex:
+        if propagate_exceptions:
+            raise ex
+        r["errors"].append(str(ex))
+        return r
 
     return {'success': True}
-
-
-
-def validateAll(iterator):
-    for id, ash, e in iterator:
-        print id,
-        e = model.makeSafe(e)
-        valid, message = 0, ""
-        try:
-            r = validate(e)
-            if r["success"]:
-                valid = 1
-            else:
-                message = r["errors"][0][:15]
-        except Exception as e:
-            message = str(e)
-        print ash, valid, message
-        yacpdb.storage.insertAuto(ash, valid, message)
 
 
 if __name__ == '__main__':
