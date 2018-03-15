@@ -206,7 +206,7 @@ class Stip(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("p2.stipulation  rlike %s'", ["^" + params[0] + "$"], [])
+        return Query("p2.stipulation rlike %s", ["^" + params[0] + "$"], [])
 
 
 class Option(Predicate):

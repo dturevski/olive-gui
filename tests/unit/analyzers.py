@@ -1,9 +1,12 @@
-import base, unittest
-import data, model, validate
+import unittest
+
+import model
 import p2w.parser
-import yacpdb.indexer.trajectories
+import tests.unit.data
+import validate
 import yacpdb.indexer.metadata
 import yacpdb.indexer.predicate
+import yacpdb.indexer.trajectories
 
 predicateStorage = yacpdb.indexer.metadata.PredicateStorage('./')
 
@@ -11,28 +14,28 @@ class TestTrajectories(unittest.TestCase):
 
     def test_C2C(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
-        e = data.problems['c2c']
+        e = tests.unit.data.problems['c2c']
         solution, b = self.prepare(e)
         yacpdb.indexer.trajectories.Analyzer().analyze(e, solution, b, resultsAccumulator)
         self.assertIn('CornerToCorner(wK)', str(resultsAccumulator.counts))
 
     def test_Pattern(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
-        e = data.problems['doublealbino']
+        e = tests.unit.data.problems['doublealbino']
         solution, b = self.prepare(e)
         yacpdb.indexer.trajectories.Analyzer().analyze(e, solution, b, resultsAccumulator)
         self.assertEqual(resultsAccumulator.counts['PseudoAlbino(wP)'], 2)
 
     def test_TraceBack(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
-        e = data.problems['longtraceback']
+        e = tests.unit.data.problems['longtraceback']
         solution, b = self.prepare(e)
         yacpdb.indexer.trajectories.Analyzer().analyze(e, solution, b, resultsAccumulator)
         self.assertIn("TraceBack(wB, 3, WithCaptures)", resultsAccumulator.counts)
 
     def test_CWalkAndCycle(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
-        e = data.problems['caillaudtempobishop']
+        e = tests.unit.data.problems['caillaudtempobishop']
         solution, b = self.prepare(e)
         yacpdb.indexer.trajectories.Analyzer().analyze(e, solution, b, resultsAccumulator)
         self.assertIn("ClosedWalk(wB, 7, Captureless)", resultsAccumulator.counts)

@@ -1,10 +1,15 @@
-import base, unittest
-import data, model, p2w, validate
+import unittest
+
+import model
+import p2w
+import tests.unit.data
+import validate
+
 
 class TestParser(unittest.TestCase):
 
     def test_CanParseOrthodox(self):
-        e = data.problems['orthodox']
+        e = tests.unit.data.problems['orthodox']
         solution = p2w.parser.parser.parse(e["solution"], debug=0, lexer=p2w.lexer.lexer)
         b = model.Board()
         b.fromAlgebraic(e["algebraic"])

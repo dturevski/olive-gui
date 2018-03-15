@@ -34,6 +34,9 @@ class TestQl(unittest.TestCase):
     def test_Matrix(self):
         rs = self.runYacpdbQuery("Matrix('wKg3 bEQg1 bGg4')", 1)
 
+    def test_Stip(self):
+        rs = self.runYacpdbQuery("Stip('hs=8')", 1)
+
 
     def runYacpdbQuery(self, query, expected_match_count):
 

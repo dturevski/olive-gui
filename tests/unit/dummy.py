@@ -1,5 +1,6 @@
 import base, unittest
-import data, model, p2w, validate
+import model, p2w, validate
+import tests.unit.data
 
 class TestDummy(unittest.TestCase):
 
