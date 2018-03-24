@@ -45,6 +45,11 @@ The query language grammar defined in [Backus–Naur form](https://en.wikipedia.
 * Expression := Expression AND Expression
 * Expression := Expression OR Expression
 
+Logical operators precenence is NOT > AND > OR, i.e.:
+* NOT A AND B = (NOT A) AND B
+* A OR B AND C = A OR (B AND C)
+
+
 ### YACPDB implementation notes
 * Wildcard character is `*` (asteriks)
 * `Predicate` is a shorthand for `Predicate > 0`
@@ -83,6 +88,7 @@ The query language grammar defined in [Backus–Naur form](https://en.wikipedia.
 
 ## Predicate parameter domains
 (ordered alphabetically)
+* **ACTIVITYFLAG**: "Active" or "Passive"
 * **CAPTUREFLAG**: "WithCaptures" or "Captureless"
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
 * **DATE**: a date in YYYY[-MM[-DD]] format
@@ -95,7 +101,7 @@ The query language grammar defined in [Backus–Naur form](https://en.wikipedia.
 
 ### Metadata predicates
 
-Same meaning as in the YACPDB search form.
+Same meaning as in the YACPDB search form. Metadata predicates do not involve analysis of the solution.
 
 * `Matrix(STRING piecelist)`
 
@@ -114,11 +120,11 @@ Same meaning as in the YACPDB search form.
 * `Source(STRING name)`
 * `SourceId(STRING sourceid)`
 * `IssueId(STRING issueid)`
-* `DateAfter(DATE date)`
+* `PublishedAfter(DATE date)`
 * `Stip(STRING regex)`
 * `Option(STRING option)`
 
-	`Option(*) = 0` for no options / fairy conditions
+	`Option(*) = 0` for no options / fairy conditions.
 
 * `Keyword(STRING keyword)`
 * `PCount(COLOR color)`
@@ -127,6 +133,15 @@ Same meaning as in the YACPDB search form.
     Use `PCount(*)` to constraint the total number of pieces.
 
 * `With(STRING pieces)`
+    
+    The diagram position contains the listed pieces.
+    
+    *Example:* [With("wR wR wR")](http://yacpdb.org/#36411) - three or or more white rooks on board.
+
+* `Fairy`
+
+    There are fairy pieces or conditions in the titular (diagram) twin. No constraint on
+    stipulation and non-titular twins.
 
 ### Trajectories predicates
 
@@ -223,6 +238,51 @@ Same meaning as in the YACPDB search form.
 
   *Example*: [FourCorners(wQ)](http://yacpdb.org/#297)
 
+* `Excelsior(PIECE promotion, INTEGER length)`
+  
+    A black or white pawn-like piece (pawn, berolina, superpawn) makes **length** moves and promotes into **promotion**.
+
+
+### Miscellaneous predicates with fairy support
+
+
+* `Phases`
+
+   How many there are distinct first moves in the solution (actual or null-moves for setplay, but not twins).
+   
+* `Twins`
+
+   How many there are twins (a problem without twins has `Twins = 1`).
+   
+   *Example*: [Twins = 27](http://yacpdb.org/#435307)
+
+* `ZilahiPiece(PIECE actor, ACTIVITYFLAG flag)`
+
+   In one line of play **actor** is making the final move. In another line of play this piece
+   is captured. Depending on whether it is captured on its initial square or elsewhere, activity **flag**
+   is either Passive or Active.
+   
+   *Example*: [ZilahiPiece(wR, Passive)](http://yacpdb.org/#88498)
+
+* `Zilahi(INTEGER folds)`
+
+   **folds** (>1) lines of play are connected in a circular way with `ZilahiPiece`s.
+
+   *Example*: [Zilahi(5)](http://yacpdb.org/#45243)
+
+* `Valladao(PIECE promotion, INTEGER length)`
+
+### Twomover change patterns
+
+Applicable to direct/self/reflex/semi-reflex play problems in two moves. In this section the two moves are considered
+the same and labeled with one letter if they have identical
+* Departure/arrival squares
+* Departure/arrival piece types
+* Departing piece origin square (including twin id, if the piece originated in twin by replacing another piece)
+
+Other properties of the move are ignored (capture, rebirths, imitator moves etc).
+
+### Orthodox
 
 
 ### Helpmate Analyzer predicates
@@ -231,6 +291,6 @@ These are only applicable to orthodox helpmates
 
 * `HundredDollar`
 
-    HMA: _100-Dollar theme_
+   HMA: _100-Dollar theme_
     
-    A solution in 5 moves contains a white Excelsior and a black Excelsior with Knight promotions.
+   A solution in 5 moves contains a white Excelsior and a black Excelsior with Knight promotions.
