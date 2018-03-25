@@ -3,6 +3,8 @@ import logging
 import os
 import sys
 
+sys.path.insert(0, os.getcwd())
+
 import model
 import validate
 import yacpdb.entry
