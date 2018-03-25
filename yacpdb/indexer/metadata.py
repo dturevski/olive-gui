@@ -10,11 +10,11 @@ class PredicateStorage:
 
     markdownFilename = '/yacpdb/indexer/indexer.md'
     domains = {
-        'CAPTUREFLAG': Domain('CAPTUREFLAG', '(WithCaptures)|(Captureless)'),
-        'ACTIVITYFLAG': Domain('ACTIVITYFLAG', '(Active)|(Passive)'),
+        'BOOLEAN': Domain('BOOLEAN', 'true|false'),
         'COLOR': Domain('COLOR', '[wbn]'),
         'DATE': Domain('DATE', r'[0-9]{4}(\-[0-9]{2}(\-[0-9]{2})?)?'),
         'INTEGER': Domain('INTEGER', '[0-9]+'),
+        'TRANSFORMATIONS': Domain('TRANSFORMATIONS', 'All|Mirror|None'),
         'PIECENAME': Domain('PIECENAME', '[0-9A-Z][0-9A-Z]?'),
         'PIECE': Domain('PIECE', '[wbn][0-9A-Z][0-9A-Z]?'),
         'STRING': Domain('STRING', '.*'),
@@ -73,16 +73,25 @@ class PredicateStorage:
 
 class Matrix(Predicate):
 
-    transformations = [
-        ((1, 0), (0, 1)),
-        ((0, 1), (-1, 0)),
-        ((-1, 0), (0, -1)),
-        ((0, -1), (1, 0)),
-        ((1, 0), (0, -1)),
-        ((-1, 0), (0, 1)),
-        ((0, 1), (1, 0)),
-        ((0, 1), (1, 0))
-    ]
+    transformations = {
+        "All": [
+            ((1, 0), (0, 1)),
+            ((0, 1), (-1, 0)),
+            ((-1, 0), (0, -1)),
+            ((0, -1), (1, 0)),
+            ((1, 0), (0, -1)),
+            ((-1, 0), (0, 1)),
+            ((0, 1), (1, 0)),
+            ((0, 1), (1, 0))
+        ],
+
+        "Mirror": [
+            ((1, 0), (0, 1)),
+            ((-1, 0), (0, 1)),
+        ],
+
+        "None": [((1, 0), (0, 1))]
+    }
 
     rePieceDeclaration = re.compile(r'^([wnb][a-z0-9][a-z0-9]?)([a-h][1-8])$')
 
@@ -99,10 +108,11 @@ class Matrix(Predicate):
     def __init__(self, name, params):
         Predicate.__init__(self, name, params)
         self.placements = []
+        self.xshift, self.yshift, self.transformation = True, True, "All"
 
     def validate(self, params):
         Predicate.validate(self, params)
-        self.placements = [self.parse(spec.strip().lower()) for spec in params[0].split(" ") if spec != ""]
+        self.placements = [self.parse(spec.strip().lower()) for spec in params[0].split() if spec != ""]
 
     def parse(self, spec):
         match = Matrix.rePieceDeclaration.match(spec)
@@ -134,14 +144,16 @@ class Matrix(Predicate):
         cs = sorted(self.placements, cmp=self.compare)
         for i, p in enumerate(cs):
             if i > 0: p.square = Square(p.square.x - cs[0].square.x, p.square.y - cs[0].square.y)
-        for T in Matrix.transformations:
+        for T in Matrix.transformations[self.transformation]:
             cs_, q = self.transform(cs, T), ""
             for i in xrange(1, len(cs_)):
                 q += "join coords c{i} on (c{i}.piece={n} and c{i}.problem_id = c0.problem_id and " \
                      "c{i}.x = c0.x + ({x}) and c{i}.y = c0.y + ({y}))\n" \
                     .format(i=i, n=Matrix.pieceCode(cs_[i].name), x=cs_[i].square.x, y=cs_[i].square.y)
-            q = "insert ignore into %s (id) select c0.problem_id from coords c0\n %s where c0.piece=%d" %\
-                (table, q,  Matrix.pieceCode(cs_[0].name))
+            shifts = " and c0.x=%d" % cs[0].square.x if not self.xshift else ""
+            shifts += " and c0.y=%d" % cs[0].square.y if not self.xshift else ""
+            q = "insert ignore into %s (id) select c0.problem_id from coords c0\n %s where c0.piece=%d %s" %\
+                (table, q,  Matrix.pieceCode(cs_[0].name), shifts)
             query.preExecute.append((q, []))
 
         return query
@@ -152,6 +164,25 @@ class Matrix(Predicate):
             code = code*256 + ord(char)
         return code
     pieceCode = staticmethod(pieceCode)
+
+
+
+class MatrixExtended(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+        self.wparams = [params[0]]
+        self.wrapped = Matrix("Matrix", self.wparams)
+
+    def validate(self, params):
+        Predicate.validate(self, params)
+        self.wrapped.validate([params[0]])
+
+    def sql(self, params, cmp, ord):
+        self.wrapped.xshift = True if params[1] == Domain.wildcard else params[1] == "true"
+        self.wrapped.yshift = True if params[2] == Domain.wildcard else params[2] == "true"
+        self.wrapped.transformation = "All" if params[3] == Domain.wildcard else params[3]
+        return self.wrapped.sql(self.wparams, cmp, ord)
 
 
 class Id(Predicate):

@@ -95,12 +95,11 @@ Logical operators precedence is NOT > AND > OR, i.e.:
 
 ## Predicate parameter domains
 (ordered alphabetically)
-* **ACTIVITYFLAG**: "Active" or "Passive"
-* **BOOLEAN**: "true" or "false"
-* **CAPTUREFLAG**: "WithCaptures" or "Captureless"
+* **BOOLEAN**: true or false
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
 * **DATE**: a date in YYYY[-MM[-DD]] format
 * **INTEGER**: any integer number
+* **TRANSFORMATIONS**: "All", "Mirror" or "None"
 * **PIECE**: concatenation of COLOR and PIECENAME
 * **PIECENAME**: one- or two-letter piece code, as defined by the [Popeye](https://github.com/thomas-maeder/popeye) solving software (english input)
 * **STRING**: unicode character string
@@ -115,6 +114,11 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
 	The relative position of the pieces matches that of the **piecelist**.
     Fairy pieces are ok, e.g. `Matrix("wKa1 nNHh8")` (nNH = neutral nightrider-hopper)
+
+* `MatrixExtended(STRING piecelist, BOOLEAN xshift, BOOLEAN yshift, TRANSFORMATIONS transformations)`
+
+	More control over the matrix searches. Additional parameters identify which translations and
+	transformations of the search pattern are to be enabled. Wildcards * default to "true" and "All".
 
 * `Id`
 
@@ -154,39 +158,39 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 ### Trajectories predicates
 
 
-* `ClosedWalk(PIECE visitor, INTEGER length, CAPTUREFLAG cflag)`
+* `ClosedWalk(PIECE visitor, INTEGER length, BOOLEAN withCaptures)`
 
     In a single line of play the **visitor** changes the visited square **length**
     (>1) times (squares may be repeated) and returns to the starting square.
 
-* `TraceBack(PIECE visitor, INTEGER count, CAPTUREFLAG cflag)`
+* `TraceBack(PIECE visitor, INTEGER count, BOOLEAN withCaptures)`
 
     Is a special case of `ClosedWalk` where visitor returns to the starting square via the
     exact reverse route. The **count** is half the length of the walk.
 
-  *Example:* [TraceBack(wR, 1, WithCaptures)](http://yacpdb.org/#83447)
+  *Example:* [TraceBack(wR, 1, true)](http://yacpdb.org/#83447)
 
-  *Example:* [TraceBack(wB, 3, WithCaptures)](http://www.yacpdb.org/#412960)
+  *Example:* [TraceBack(wB, 3, true)](http://www.yacpdb.org/#412960)
 
-* `ArealCycle(PIECE visitor, INTEGER length, CAPTUREFLAG cflag)`
+* `ArealCycle(PIECE visitor, INTEGER length, BOOLEAN withCaptures)`
 
     Is a special case of `ClosedWalk` where visited squares:
     1) Are all different
     2) Do not all belong to the same [straight line](https://en.wikipedia.org/wiki/Line_(geometry)).
 
     *Example:*
-    [ArealCycle(wB, 7, WithCaptures)](http://www.yacpdb.org/#412003)
+    [ArealCycle(wB, 7, true)](http://www.yacpdb.org/#412003)
 
     Note that the *signed* area of the 8-shaped polygon in the example is zero,
     while the unsigned area is 4.
 
 
-* `LinearCycle(PIECE visitor, INTEGER length, CAPTUREFLAG cflag)`
+* `LinearCycle(PIECE visitor, INTEGER length, BOOLEAN withCaptures)`
 
     Same as `ArealCycle`, but the squares all lie on the same straight line.
 
-    *Example*: [ClosedWalk(wB, 7, Captureless) +
-    LinearCycle(wB, 3, Captureless)](http://www.yacpdb.org/#86606)
+    *Example*: [ClosedWalk(wB, 7, false) +
+    LinearCycle(wB, 3, false)](http://www.yacpdb.org/#86606)
 
 * `PW(INTEGER count)`
 
@@ -273,13 +277,12 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
    
    *Example*: [Twins = 27](http://yacpdb.org/#435307)
 
-* `ZilahiPiece(PIECE actor, ACTIVITYFLAG flag)`
+* `ZilahiPiece(PIECE actor, BOOLEAN passive)`
 
    In one line of play **actor** is making the final move. In another line of play this piece
-   is captured. Depending on whether it is captured on its initial square or elsewhere, activity **flag**
-   is either Passive or Active.
+   is captured. **passive** flag is set true when it is captured on its initial square.
    
-   *Example*: [ZilahiPiece(wR, Passive)](http://yacpdb.org/#88498)
+   *Example*: [ZilahiPiece(wR, true)](http://yacpdb.org/#88498)
 
 * `Zilahi(INTEGER folds)`
 

@@ -9,10 +9,13 @@ stor = yacpdb.indexer.metadata.PredicateStorage('./')
 
 class TestQl(unittest.TestCase):
 
+    def test_MatrixEx(self):
+        self.runYacpdbQuery("MatrixExtended('bQa1 bKa2', true, true, 'Mirror')", 0)
+
+    """
     def test_OrthodoxRules(self):
         self.runYacpdbQuery("NOT Fairy AND Fairy", 0)
 
-    """
     def test_With(self):
         self.runYacpdbQuery("Id=36411 AND With('wR wR wR')", 1)
 

@@ -49,7 +49,7 @@ class Dao:
             p.id
           LIMIT %s
         """, (count,))
-        entries(c)
+        return entries(c)
 
     def ixr_updateEntryAsh(self, eid, ash):
         database.cursor().execute("update problems2 set ash=%s where id=%s", (ash, eid))
@@ -93,7 +93,7 @@ class Dao:
           ORDER BY p.id
           limit %s
           """, (str(maxcount), ))
-        entries(c)
+        return entries(c)
 
     def ixr_getNotCheckedSince(self, since, maxcount):
         c = database.cursor()
