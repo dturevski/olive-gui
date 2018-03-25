@@ -1,18 +1,16 @@
-import logging
-import sys
 import datetime
+import logging
 import os
-import argparse
+import sys
 
-from yacpdb.storage import dao
-import yacpdb.entry
-import validate
 import model
-from p2w.parser import parser
+import validate
+import yacpdb.entry
+import yacpdb.indexer.analyzers.hma
+import yacpdb.indexer.analyzers.trajectories
 import yacpdb.indexer.predicate
-
-import yacpdb.indexer.hma
-import yacpdb.indexer.trajectories
+from p2w.parser import parser
+from yacpdb.storage import dao
 
 
 def calculateAshGlobally():
@@ -31,11 +29,20 @@ def calculateAshGlobally():
     print "tried: %d, succeeded: %d" % (tried, succeded)
 
 
+def calculateOrthoGlobally():
+    i = 0
+    for e in dao.allEntries():
+        dao.ixr_updateEntryOrtho(e["id"], not model.hasFairyElements(e))
+        i += 1
+        if i % 10000 == 0:
+            print i
+
+
 class Analyzer0:
 
     def __init__(self):
         self.workers = [
-            yacpdb.indexer.trajectories.Analyzer(),
+            yacpdb.indexer.analyzers.trajectories.Analyzer(),
             #yacpdb.indexer.hma.Analyzer()
         ]
         self.version = datetime.datetime(2018, 3, 14)
@@ -73,21 +80,17 @@ class Analyzer0:
         for entry in dao.ixr_getNotCheckedSince(self.version, size - done):
             self.runOne(entry)
 
-def parseCla():
-    parser = argparse.ArgumentParser(description='Crunch yacpdb entries through analyzers, save results.')
-    parser.add_argument("-c", "--calculate-ash-globally")
-    parser.add_argument("-m", "--max-count", type=int, default=10)
-    return parser.parse_args(sys.argv)
 
 def main():
     logging.basicConfig(filename='~/logs/cruncher.log', level=logging.DEBUG)
     os.nice(19)
-    params = parseCla()
-    if params.c:
+    if "--calculate-ash-globally" in sys.argv:
         calculateAshGlobally()
-    else:
+    elif "--calculate-ortho-globally" in sys.argv:
+        calculateOrthoGlobally()
+    elif False:
         a0 = Analyzer0();
-        a0.runBatch(params.m)
+        a0.runBatch(1)
 
 if __name__ == '__main__':
     main()

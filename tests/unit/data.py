@@ -75,4 +75,24 @@ problems = {
             9.h4-h3 Be1*f2 #"
     """)),
 
+    'pw':  model.makeSafe(yaml.load("""
+        {algebraic: {neutral: ["Qa8", "Qa7", "Qb7"]}, stipulation: "ser-h~4",
+        solution: "1.nQa7-b8 nQa8-a7 2.nQb7-a8 nQb8-b7" }
+    """)),
+
+    'pw2':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Kh8, Rg8, Bc6, Pe5]
+          black: [Ke7, Pe6, Pc7]
+        stipulation: "#4"
+        solution: |
+          "1.Kh8-h7 ! zugzwang.
+                1...Ke7-f7 
+                    2.Rg8-h8 zugzwang.
+                        2...Kf7-e7 
+                            3.Kh7-g8 zugzwang.
+                                3...Ke7-d8 
+                                    4.Kg8-f7 #"
+    """)),
+
 }

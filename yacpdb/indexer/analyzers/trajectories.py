@@ -21,22 +21,52 @@ class Analyzer:
     def __init__(self): pass
 
     def analyze(self, entry, solution, board, acc):
-        trajs = TrajectoriesBuilder.build(solution, board)
+        trajs = TrajectoriesBuilderAndPlatzwechselAnalyzer.build(solution, board, acc)
         #for t in trajs: print t
         search([], trajs, acc)
         corners(trajs, acc)
 
 
-class TrajectoriesBuilder:
+# speed is more important than memory economy, so store anything usable
+# additionaly to storing the position itself, we also store who just arrived and who's about to leave
 
-    def __init__(self):
+class PlatzwechselSnapshot:
+
+    def __init__(self, brd):
+        self.displacements = [], [] # displacements
+        self.os, self.so = {}, {} # square-to-origin & origin-to square
+        self.os_postmove = {}
+        for s, p in board.Pieces(brd):
+            self.os[p.origin], self.so[s] = s, p.origin
+
+    def onMoveCompleted(self, brd, displacements):
+        self.displacements = displacements
+        for s, p in board.Pieces(brd):
+            self.os_postmove[p.origin] = s
+
+
+
+# solution tree is structure that, by design, holds moves
+# when analyzing trajectories we need structures that hold squares (TNodes) or positions (Snapshots)
+# TrajectoriesBuilder builds TNode trees + iterates Snapshots (for PlaceExchange/Platzwechsel)
+# analysis. We do not really need snapshot trees for that.
+
+class TrajectoriesBuilderAndPlatzwechselAnalyzer:
+
+    def __init__(self, acc):
         self.result = {}
+        self.acc = acc
 
-    def visit(self, board, node, front):
+    def visit(self, board, node, front, snaps):
 
+        snap = PlatzwechselSnapshot(board) # take board snapshot before making move
         node.make(board)
+        displacements = [d for d in self.displacements(board, front)]
+        snap.onMoveCompleted(board, displacements)
+        movelike = len(displacements) > 0 and node.depth > 0
 
-        for origin, departure, arrival in self.displacements(board, front):
+        # building TNodes tree
+        for origin, departure, arrival in displacements:
             is_capture = (isinstance(node, p2w.nodes.MoveNode)) and \
                          (departure == node.departure) and \
                          (node.capture != -1)
@@ -51,10 +81,21 @@ class TrajectoriesBuilder:
                     front_[o] = front[o] if o != origin else tnode
                 front = front_
 
-        for ch in node.children:
-            self.visit(board, ch, front)
 
+        # looking for Platzwechsel in snaps
+        if movelike > 0:
+            self.searchPlatzWs(snap, snaps, board)
+            snaps.append(snap)
+
+        # recurse tree-walk
+        for ch in node.children:
+            self.visit(board, ch, front, snaps)
+
+        # undo changes before returning
+        if movelike > 0:
+            snaps.pop()
         node.unmake(board)
+
 
     def displacements(self, b, front):
         for square, piece in board.Pieces(b):
@@ -63,12 +104,57 @@ class TrajectoriesBuilder:
             elif front[piece.origin].square != square:
                 yield piece.origin, front[piece.origin].square, square
 
-    def build(solution, board):
-        tb = TrajectoriesBuilder()
-        tb.visit(board, solution, {})
+    def build(solution, board, acc):
+        tb = TrajectoriesBuilderAndPlatzwechselAnalyzer(acc)
+        tb.visit(board, solution, {}, [])
         return [tb.result[k] for k in tb.result.iterkeys() if len(tb.result[k].branches) > 0]
     build = staticmethod(build)
 
+    def searchPlatzWs(self, snap, snaps, board):
+        for snap_ in snaps:
+            cs = self.compareSnaps(snap, snap_)
+            for c in cs:
+                self.acc.push("PW(%d)" % len(c))
+                for origin in c:
+                    self.acc.push("PWPiece(%s)" % board.board[snap.os_postmove[origin]].toPredicatePieceDomain())
+
+    def compareSnaps(self, snap, snap2):
+        cs = []
+        # new cycle can only be the result of displacement(s) in snap
+        for origin, _, arrival in snap.displacements:
+            cycle_completed, current_square, current_origin, square_cycle_completes, length = \
+                False, arrival, origin, snap2.os[origin], 1
+            cycle = [current_origin]
+            while not cycle_completed:
+                if current_square not in snap2.so:
+                    break # nobody left the arrival square
+                if current_square == square_cycle_completes:
+                    cycle_completed = True # returned to arrival
+                    break
+                current_origin = snap2.so[current_square]
+                if current_origin not in snap.os_postmove:
+                    break # cycle participant captured
+                current_square = snap.os_postmove[current_origin]
+                length = length + 1
+                cycle.append(current_origin)
+            if cycle_completed and length > 1: # length == 1 means closed walk by single piece
+                # check at least one origin is in snap2.displacements, or we could count same cycle too many times
+                new_cycle = False
+                for cycle_origin in cycle:
+                    if cycle_origin in [d[0] for d in snap2.displacements]:
+                        new_cycle = True
+                        break
+                if new_cycle:
+                    cs.append(cycle)
+        return cs
+
+    # there should be a way to avoid this
+    def findByOrigin(self, origin, b):
+        for s, p in board.Pieces(b):
+            if p.origin == origin:
+                return s
+        else:
+            raise Exception("Something went badly wrong")
 
 class TNode:
 

@@ -9,6 +9,17 @@ stor = yacpdb.indexer.metadata.PredicateStorage('./')
 
 class TestQl(unittest.TestCase):
 
+    def test_OrthodoxRules(self):
+        self.runYacpdbQuery("NOT Fairy AND Fairy", 0)
+
+    """
+    def test_With(self):
+        self.runYacpdbQuery("Id=36411 AND With('wR wR wR')", 1)
+
+
+    def test_PCount(self):
+        self.runYacpdbQuery("PCount(w)=56", 1)
+
     def test_ExistingId(self):
         self.runYacpdbQuery("Id=26026", 1)
 
@@ -36,7 +47,7 @@ class TestQl(unittest.TestCase):
 
     def test_Stip(self):
         rs = self.runYacpdbQuery("Stip('hs=8')", 1)
-
+    """
 
     def runYacpdbQuery(self, query, expected_match_count):
 

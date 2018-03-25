@@ -8,18 +8,22 @@ except ImportError as e:
 
 class PredicateStorage:
 
+    markdownFilename = '/yacpdb/indexer/indexer.md'
+    domains = {
+        'CAPTUREFLAG': Domain('CAPTUREFLAG', '(WithCaptures)|(Captureless)'),
+        'ACTIVITYFLAG': Domain('ACTIVITYFLAG', '(Active)|(Passive)'),
+        'COLOR': Domain('COLOR', '[wbn]'),
+        'DATE': Domain('DATE', r'[0-9]{4}(\-[0-9]{2}(\-[0-9]{2})?)?'),
+        'INTEGER': Domain('INTEGER', '[0-9]+'),
+        'PIECENAME': Domain('PIECENAME', '[0-9A-Z][0-9A-Z]?'),
+        'PIECE': Domain('PIECE', '[wbn][0-9A-Z][0-9A-Z]?'),
+        'STRING': Domain('STRING', '.*'),
+    }
+
     def __init__(self, dir):
-        self.ds = {
-            'CAPTUREFLAG': Domain('CAPTUREFLAG', '(WithCaptures)|(Captureless)'),
-            'COLOR': Domain('COLOR', '[wbn]'),
-            'DATE': Domain('DATE', r'[0-9]{4}(\-[0-9]{2}(\-[0-9]{2})?)?'),
-            'INTEGER': Domain('INTEGER', '[0-9]+'),
-            'PIECENAME': Domain('PIECENAME', '[0-9A-Z][0-9A-Z]?'),
-            'PIECE': Domain('PIECE', '[wbn][0-9A-Z][0-9A-Z]?'),
-            'STRING': Domain('STRING', '.*'),
-        }
+        self.ds = PredicateStorage.domains
         self.ps = {}
-        self.load(dir + 'yacpdb/indexer/indexer.md')
+        self.load(dir + PredicateStorage.markdownFilename)
 
     fmt1 = re.compile('^\* `(' + titleCase + ')\((.*)\)`$') # non-zero arity
     fmt2 = re.compile('^\* `(' + titleCase + ')`$') # zero arity
@@ -58,6 +62,13 @@ class PredicateStorage:
             raise ValueError("Predicate %s with arity %d is not in the predicate storage"
                              % (analysisResult.name, arity))
         self.ps[arity][analysisResult.name].validate(analysisResult.params)
+
+    def getEditorTypeAheads(self):
+        ws = ["AND", "OR", "NOT"]
+        for arity in self.ps:
+            for predicate in self.ps[arity]:
+                ws.append(predicate + ("" if arity == 0 else "()"))
+        return sorted(ws)
 
 
 class Matrix(Predicate):
@@ -151,6 +162,7 @@ class Id(Predicate):
     def sql(self, params, cmp, ord):
         return Query("p2.id " + cmp + " %s", [str(ord)], [])
 
+
 class Author(Predicate):
 
     def __init__(self, name, params):
@@ -190,7 +202,7 @@ class SourceId(Predicate):
         return Query("p2.local_id = %s", [params[0]], [])
 
 
-class DateAfter(Predicate):
+class PublishedAfter(Predicate):
 
     def __init__(self, name, params):
         Predicate.__init__(self, name, params)
@@ -236,14 +248,73 @@ class Keyword(Predicate):
                      "where t.name like %s)", [params[0]], [])
 
 
-class With(Predicate):
+class PCount(Predicate):
 
     def __init__(self, name, params):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        raise NotImplementedError()
+        key = "(p2.pieces_w+p2.pieces_b+p2.pieces_n)" if params[0] == Domain.wildcard else "p2.pieces_" + params[0]
+        return Query(key + cmp + " %s", [str(ord)], [])
+
+
+class With(Predicate):
+
+    temporaryTableIndex = 0
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def validate(self, params):
+        Predicate.validate(self, params)
+        domain = PredicateStorage.domains["PIECE"]
+        for p in params[0].strip().split():
+            if not domain.test(p):
+                raise ValueError("'%s' is not a valid %s in %s(.. %s ..)" %
+                                 (p, domain.name, self.name, self.params[0].name))
+
+    def sql(self, params, cmp, ord):
         if params[0] == Domain.wildcard:
-            return self.wildcard(cmp, ord)
-        return Query("p2.id in (select problem_id from options where o=%s)", [params[0]], [])
+            return Query("1", [], [])
+        codes = {}
+        for p in params[0].strip().split():
+            code = Matrix.pieceCode(p)
+            if code not in codes:
+                codes[code] = 1
+            else:
+                codes[code] += 1
+        derived, conditions = ("pcount%d" % With.temporaryTableIndex), []
+        derived2 = "with%d" % With.temporaryTableIndex
+        With.temporaryTableIndex += 1
+        condition = " OR ".join(["(piece=%d AND total1 >= %d)" % (code, codes[code]) for code in codes])
+        query = """
+            SELECT
+                %s.problem_id, COUNT(*) AS total2
+            FROM
+                (SELECT
+                    problem_id, piece, COUNT(*) AS total1
+                FROM
+                    coords
+                GROUP BY
+                    piece, problem_id 
+                HAVING
+                    %s 
+                ) as %s
+            GROUP BY
+                %s.problem_id
+            HAVING
+                total2 = %d
+            """ % (derived, condition, derived, derived, len(codes))
+        query = "p2.id in (SELECT problem_id from (%s) AS %s)" % (query, derived2)
+
+        return Query(query, [], [])
+
+
+class Fairy(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query("(NOT p2.orthodox)", [], [])
 

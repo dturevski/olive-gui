@@ -54,6 +54,9 @@ class Dao:
     def ixr_updateEntryAsh(self, eid, ash):
         database.cursor().execute("update problems2 set ash=%s where id=%s", (ash, eid))
 
+    def ixr_updateEntryOrtho(self, eid, ortho):
+        database.cursor().execute("update problems2 set orthodox=%s where id=%s", ("1" if ortho else "0", eid))
+
     def allEntries(self):
         c = database.cursor()
         c.execute("""
@@ -65,7 +68,7 @@ class Dao:
           ORDER BY
             p.id
             """)
-        entries(c)
+        return entries(c)
 
     def ixr_updateCruncherLog(self, ash, error):
         commit("""
@@ -116,9 +119,12 @@ class Dao:
         c.execute(query + limits, params)
         lastExecuted = c._last_executed
         for row in c:
-            e = entry.entry(row["yaml"])
-            e["id"] = row['problem_id']
-            matches.append(e)
+            try:
+                e = entry.entry(row["yaml"])
+                e["id"] = row['problem_id']
+                matches.append(e)
+            except Exception as ex:
+                logging.error("Bad YAML: %d" % row['problem_id'])
         c.execute("select FOUND_ROWS() fr")
         return {'entries':matches, 'count': c.fetchone()["fr"], 'q':lastExecuted}
 

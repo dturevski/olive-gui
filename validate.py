@@ -77,7 +77,7 @@ def validate(entry, propagate_exceptions=True):
         r["errors"].append(str(ex))
         return r
 
-    return {'success': True}
+    return {'success': True, 'orthodox': not model.hasFairyElements(entry)}
 
 
 if __name__ == '__main__':

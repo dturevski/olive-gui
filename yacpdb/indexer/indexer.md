@@ -1,7 +1,11 @@
 # The YACPDB query language guide
 
 [TOC]
+
 ## Synopsis
+This document tries to be most accurate and up-to-date reference manual to the the query
+language supported by the YACPDB - an online database of chess problems.
+
 ## Preface
 ### The goals
 The main goal is to design and document a set of [predicates](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) that partially describe the content of the chess compositions.
@@ -13,7 +17,7 @@ Key features to achieve:
 What this project is **not**:
 * This project is not a tool for *extensive* description of the content of the chess composition
 * This project does not have any relation to artistic or aestetic evaluation of the chess compositions
-* This project is not not a revisiting of the existing chess problem terminology.
+* This project is not a revisiting of the existing chess problem terminology.
 
 
 ### Predicate naming, arity and design. Priorities.
@@ -23,6 +27,8 @@ When there is no consensus in the community regarding the exact definition of a 
 ## Query language
 
 ### Informal definition
+
+[Cheatsheet] (http://yacpdb.org/#static/ql-cheatsheet)
 
 ### Formal definition
 
@@ -45,7 +51,7 @@ The query language grammar defined in [Backus–Naur form](https://en.wikipedia.
 * Expression := Expression AND Expression
 * Expression := Expression OR Expression
 
-Logical operators precenence is NOT > AND > OR, i.e.:
+Logical operators precedence is NOT > AND > OR, i.e.:
 * NOT A AND B = (NOT A) AND B
 * A OR B AND C = A OR (B AND C)
 
@@ -84,11 +90,13 @@ Logical operators precenence is NOT > AND > OR, i.e.:
   In other words, the visiting occurs in the position that is a vertex in the solution tree.
 
   *Examples:* Circe-reborn piece visits the rebirth square. Anti-Circe-reborn piece did not
-  visit the capture square.
+  visit the capture square (this may seem counter-intuitive at first, but it is consistent: we do not care which
+  squares the piece *passed* while making a move, we only care where it has *arrived*).
 
 ## Predicate parameter domains
 (ordered alphabetically)
 * **ACTIVITYFLAG**: "Active" or "Passive"
+* **BOOLEAN**: "true" or "false"
 * **CAPTUREFLAG**: "WithCaptures" or "Captureless"
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
 * **DATE**: a date in YYYY[-MM[-DD]] format
@@ -105,7 +113,7 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
 * `Matrix(STRING piecelist)`
 
-	The relative position of the pieces matches that of the **piecelist**
+	The relative position of the pieces matches that of the **piecelist**.
     Fairy pieces are ok, e.g. `Matrix("wKa1 nNHh8")` (nNH = neutral nightrider-hopper)
 
 * `Id`
@@ -129,14 +137,14 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 * `Keyword(STRING keyword)`
 * `PCount(COLOR color)`
 
-    Number of pieces of the specified **color** matches the constraint
+    Number of pieces of the specified **color** matches the constraint.
     Use `PCount(*)` to constraint the total number of pieces.
 
 * `With(STRING pieces)`
     
     The diagram position contains the listed pieces.
     
-    *Example:* [With("wR wR wR")](http://yacpdb.org/#36411) - three or or more white rooks on board.
+    *Example:* [With("wR wR wR")](http://yacpdb.org/#36411) - three or more white rooks on board.
 
 * `Fairy`
 
@@ -148,7 +156,7 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
 * `ClosedWalk(PIECE visitor, INTEGER length, CAPTUREFLAG cflag)`
 
-    In the single line of play the **visitor** changes the visited square **length**
+    In a single line of play the **visitor** changes the visited square **length**
     (>1) times (squares may be repeated) and returns to the starting square.
 
 * `TraceBack(PIECE visitor, INTEGER count, CAPTUREFLAG cflag)`
@@ -180,13 +188,22 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
     *Example*: [ClosedWalk(wB, 7, Captureless) +
     LinearCycle(wB, 3, Captureless)](http://www.yacpdb.org/#86606)
 
-* `PlaceExchange(INTEGER count)`
+* `PW(INTEGER count)`
 
-  **count** (>1) pieces cyclically exchange their places.
+  PlatzWechsel: **count** (>1) pieces cyclically exchange their squares in one line of play.
 
-* `PlaceExchangeBy(PIECE participant)`
+* `PWPiece(PIECE participant)`
 
-  The **participant** takes part in the `PlaceExchange`.
+  The **participant** takes part in `PW`. To avoid ambiguity when pieces change their types
+  during the solution, **participant** is the type the piece has when the pattern has just completed. E.g. in:
+  
+  "1. a7-a8=B Rb7-a7 2.Ba8-b7"
+  
+  there is `PWPiece(wB)`, not `PWPiece(wP)`
+  
+  *Example*:
+  [PW(2) + PWPiece(wK) + PWPiece(wR)](http://yacpdb.org/#76735)
+  
 
 * `Star(PIECE visitor)`
 
@@ -248,7 +265,7 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
 * `Phases`
 
-   How many there are distinct first moves in the solution (actual or null-moves for setplay, but not twins).
+   How many there are distinct first moves (actual or null) in the solution, counted across all twins.
    
 * `Twins`
 
@@ -284,6 +301,9 @@ Other properties of the move are ignored (capture, rebirths, imitator moves etc)
 
 ### Orthodox
 
+* `Models`
+
+    Total count of model mate/stalemate positions among the leaves of the solution tree.
 
 ### Helpmate Analyzer predicates
 

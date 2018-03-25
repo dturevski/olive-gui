@@ -2,6 +2,7 @@
 import model
 from board import Square
 
+
 class Node(object):
 
     def __init__(self):
@@ -319,3 +320,8 @@ class CastlingNode(MoveNode):
             raise Exception("Can't castle - the kingside rook square is empty")
         if not self.kingside and b.board[a8+shift] is None:
             raise Exception("Can't castle - the queenside rook square is empty")
+
+MOVELIKE_NODE_TYPES = [MoveNode, TwinNode, CastlingNode]
+
+def isMovelikeNode(node):
+    return reduce(lambda x, y: x or isinstance(node, y), MOVELIKE_NODE_TYPES, False)

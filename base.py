@@ -20,4 +20,4 @@ def module_path():
 
 basedir = module_path()
 os.chdir(basedir)
-logging.basicConfig(filename=basedir+'olive.log', level=logging.DEBUG)
+logging.basicConfig(filename=basedir+'/olive.log', level=logging.DEBUG)

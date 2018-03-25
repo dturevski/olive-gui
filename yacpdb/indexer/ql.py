@@ -7,22 +7,26 @@ import predicate
 t_ignore = " \t\r\n"
 literals = "(,)"
 tokens = ('CMP', 'NOT', 'AND', 'OR', 'INT', 'TCS', 'SSTR', 'DSTR', 'USTR')
-
+precedence = (
+    ('left', 'OR'),
+    ('left', 'AND'),
+    ('right', 'NOT'),
+)
 t_CMP = r'[><=]'
 
 def t_AND(t):
     r'[Aa][Nn][Dd]'
-    t.value = t.value.upper()
+    t.value = t.value.strip().upper()
     return t
 
 def t_NOT(t):
     r'[Nn][Oo][Tt]'
-    t.value = t.value.upper()
+    t.value = t.value.strip().upper()
     return t
 
 def t_OR(t):
     r'[Oo][Rr]'
-    t.value = t.value.upper()
+    t.value = t.value.strip().upper()
     return t
 
 def t_INT(t):
