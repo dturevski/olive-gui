@@ -10,15 +10,13 @@ stor = yacpdb.indexer.metadata.PredicateStorage('./')
 class TestQl(unittest.TestCase):
 
     def test_MatrixEx(self):
-        self.runYacpdbQuery("MatrixExtended('bQa1 bKa2', true, true, 'Mirror')", 0)
+        self.runYacpdbQuery("MatrixExtended('bKg3 wKc2', false, false, 'Mirror') AND Stip('#20')", 1) # >>100282
 
-    """
     def test_OrthodoxRules(self):
         self.runYacpdbQuery("NOT Fairy AND Fairy", 0)
 
     def test_With(self):
         self.runYacpdbQuery("Id=36411 AND With('wR wR wR')", 1)
-
 
     def test_PCount(self):
         self.runYacpdbQuery("PCount(w)=56", 1)
@@ -39,7 +37,7 @@ class TestQl(unittest.TestCase):
         self.runYacpdbQuery("(Id=26026 or Id=4) and (not Id=4)", 1)
 
     def test_Date(self):
-        rs = self.runYacpdbQuery("DateAfter('2017-09-09') and not DateAfter('2017-09-10') ", 1)
+        rs = self.runYacpdbQuery("PublishedAfter('2017-09-11') and not PublishedAfter('2017-09-12') ", 1)
 
     def test_Unicode(self):
         rs = self.runYacpdbQuery("Id=26026", 1)
@@ -50,7 +48,6 @@ class TestQl(unittest.TestCase):
 
     def test_Stip(self):
         rs = self.runYacpdbQuery("Stip('hs=8')", 1)
-    """
 
     def runYacpdbQuery(self, query, expected_match_count):
 

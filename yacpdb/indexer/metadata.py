@@ -132,11 +132,19 @@ class Matrix(Predicate):
                 T[1][0]*c.square.x + T[1][1]*c.square.y,
                 )) for c in cs]
 
+    # transformation relative to the center of the board
+    def transformAffine(self, c, T):
+        x, y = c.square.x - 3.5, c.square.y - 3.5
+        return Matrix.Placement(c.name, Square(
+            T[0][0]*x + T[0][1]*y + 3.5,
+            T[1][0]*x + T[1][1]*y + 3.5,
+            ))
+
     def sql(self, params, cmp, ord):
 
         table, alias = "matrix%d" % Matrix.temporaryTableIndex, "tmpMatrix%d" % Matrix.temporaryTableIndex
         Matrix.temporaryTableIndex += 1
-        query = Query("1", [], ["%s %s on p2.id=%s.id" % (table, alias, alias)])
+        query = Query("p2.id in (select id from %s)" % table , [], [])
         query.preExecute.append(("create temporary table %s (id "
                                  "integer not null, primary key(id)) "
                                  "engine=memory" % table, []))
@@ -150,8 +158,11 @@ class Matrix(Predicate):
                 q += "join coords c{i} on (c{i}.piece={n} and c{i}.problem_id = c0.problem_id and " \
                      "c{i}.x = c0.x + ({x}) and c{i}.y = c0.y + ({y}))\n" \
                     .format(i=i, n=Matrix.pieceCode(cs_[i].name), x=cs_[i].square.x, y=cs_[i].square.y)
-            shifts = " and c0.x=%d" % cs[0].square.x if not self.xshift else ""
-            shifts += " and c0.y=%d" % cs[0].square.y if not self.xshift else ""
+
+            pivot = self.transformAffine(cs[0], T)
+            shifts = " and c0.x=%d" % pivot.square.x if not self.xshift else ""
+            shifts += " and c0.y=%d" % pivot.square.y if not self.xshift else ""
+
             q = "insert ignore into %s (id) select c0.problem_id from coords c0\n %s where c0.piece=%d %s" %\
                 (table, q,  Matrix.pieceCode(cs_[0].name), shifts)
             query.preExecute.append((q, []))

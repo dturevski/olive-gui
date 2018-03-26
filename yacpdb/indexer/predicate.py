@@ -59,7 +59,7 @@ class Predicate:
                                  (v, self.params[i].domain.name, self.name, self.params[i].name))
 
     def sql(self, params, cmp, ord):
-        cs = ["pd.problem_id=p2.id", "pd.name=%s"]
+        cs = ["pd.ash=p2.ash", "pd.name=%s"]
         ps = [self.name]
         for i, val in enumerate(params):
             if val != Domain.wildcard:
@@ -108,10 +108,12 @@ class ExprJunction:
     def sql(self, stor):
         qleft = self.left.sql(stor)
         qright = self.right.sql(stor)
-        return Query(
+        q = Query(
                 "(%s) %s\n(%s)" % (qleft.q, self.op, qright.q),
                 qleft.ps + qright.ps, qleft.ts + qright.ts
             )
+        q.preExecute = qleft.preExecute + qright.preExecute
+        return q
 
 
 class AnalyzisResult:
