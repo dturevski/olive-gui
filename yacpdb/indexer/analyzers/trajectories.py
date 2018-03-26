@@ -271,9 +271,9 @@ def symmetrical(seq):
 
 def captureflag(nodes):
     if True in [node.is_capture for node in nodes]:
-        return "WithCaptures"
+        return "true"
     else:
-        return "Captureless"
+        return "false"
 
 
 def corners(trajs, acc, tnode = None, result = {}):

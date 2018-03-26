@@ -65,15 +65,15 @@ class TestTrajectories(unittest.TestCase):
         e = tests.unit.data.problems['longtraceback']
         solution, b = self.prepare(e)
         yacpdb.indexer.analyzers.trajectories.Analyzer().analyze(e, solution, b, resultsAccumulator)
-        self.assertIn("TraceBack(wB, 3, WithCaptures)", resultsAccumulator.counts)
+        self.assertIn("TraceBack(wB, 3, true)", resultsAccumulator.counts)
 
     def test_CWalkAndCycle(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
         e = tests.unit.data.problems['caillaudtempobishop']
         solution, b = self.prepare(e)
         yacpdb.indexer.analyzers.trajectories.Analyzer().analyze(e, solution, b, resultsAccumulator)
-        self.assertIn("ClosedWalk(wB, 7, Captureless)", resultsAccumulator.counts)
-        self.assertIn("LinearCycle(wB, 3, Captureless)", resultsAccumulator.counts)
-        self.assertIn("TraceBack(bP, 1, Captureless)", resultsAccumulator.counts)
+        self.assertIn("ClosedWalk(wB, 7, false)", resultsAccumulator.counts)
+        self.assertIn("LinearCycle(wB, 3, false)", resultsAccumulator.counts)
+        self.assertIn("TraceBack(bP, 1, false)", resultsAccumulator.counts)
     """
     """

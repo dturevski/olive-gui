@@ -161,7 +161,7 @@ class Matrix(Predicate):
 
             pivot = self.transformAffine(cs[0], T)
             shifts = " and c0.x=%d" % pivot.square.x if not self.xshift else ""
-            shifts += " and c0.y=%d" % pivot.square.y if not self.xshift else ""
+            shifts += " and c0.y=%d" % pivot.square.y if not self.yshift else ""
 
             q = "insert ignore into %s (id) select c0.problem_id from coords c0\n %s where c0.piece=%d %s" %\
                 (table, q,  Matrix.pieceCode(cs_[0].name), shifts)
