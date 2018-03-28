@@ -1,4 +1,4 @@
-import re, exceptions, copy
+import re, exceptions, copy, json
 
 class Square:
 
@@ -87,6 +87,12 @@ class FairyHelper:
     conditions = map(lambda x: x.strip(), f.readlines())
     f.close()
 
+def twinId(twin_index):
+    if twin_index < 26:
+        return chr(ord("a") + twin_index)
+    else:
+        return "z%d" % (twin_index - 25)
+
 class Piece:
 
     def __init__(self, name, color, specs):
@@ -94,7 +100,7 @@ class Piece:
             color = COLORS_SHORT[color]
         self.name, self.color, self.specs = name, color, sorted(specs)
         self.next, self.prev = -1, -1
-        self.origin = "-1/-1"
+        self.assignOrigin(-1, 0)
 
     def fromAlgebraic(algebraic):
         parts = algebraic.split(' ')
@@ -140,6 +146,12 @@ class Piece:
         p.origin = ps[1]
         return p
     unserialize2 = staticmethod(unserialize2)
+
+    def assignOrigin(self, square, twin):
+        if isinstance(twin, int):
+            twin = twinId(twin)
+        alg = "a0" if square < 0 or square > 63 else idxToAlgebraic(square)
+        self.origin = twin.upper() + alg
 
 class Board:
 
@@ -370,6 +382,15 @@ class Board:
         if matches.group('serial') == 'ser-' and matches.group("play") == "hs":
             return "black" # it even has some sense :)
         if matches.group('play') == "h":
+            return "black"
+        else:
+            return "white"
+
+    def getSideToCompleteLineByStipulation(self, stipulation):
+        matches = RE_COMMON_STIPULATION.match(stipulation.lower())
+        if not matches:
+            return 'white'
+        if matches.group("play") in ["s", "r", "hs"]:
             return "black"
         else:
             return "white"

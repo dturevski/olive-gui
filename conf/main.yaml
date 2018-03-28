@@ -17,3 +17,4 @@ notations:
   fide: [K, D, T, L, S, B]
   ru: [Кр, Ф, Л, С, К, п]
 version: 0.16.6
+analyzers: [trajectories, miscellaneous, finals]

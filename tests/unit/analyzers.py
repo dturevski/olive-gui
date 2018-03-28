@@ -5,6 +5,7 @@ import p2w.parser
 import tests.unit.data
 import validate
 import yacpdb.indexer.analyzers.trajectories
+import yacpdb.indexer.analyzers.miscellaneous
 import yacpdb.indexer.metadata
 import yacpdb.indexer.predicate
 
@@ -75,5 +76,40 @@ class TestTrajectories(unittest.TestCase):
         self.assertIn("ClosedWalk(wB, 7, false)", resultsAccumulator.counts)
         self.assertIn("LinearCycle(wB, 3, false)", resultsAccumulator.counts)
         self.assertIn("TraceBack(bP, 1, false)", resultsAccumulator.counts)
+
+    def test_TwinsAndPhases(self):
+        resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
+        e = tests.unit.data.problems['twinssetplay']
+        solution, b = self.prepare(e)
+        yacpdb.indexer.analyzers.miscellaneous.Analyzer().analyze(e, solution, b, resultsAccumulator)
+        self.assertEqual(resultsAccumulator.counts['Twins'], 3)
+        self.assertEqual(resultsAccumulator.counts['Phases'], 4)
+
+    def test_Zilahi5(self):
+        resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
+        e = tests.unit.data.problems['z5x1']
+        solution, b = self.prepare(e)
+        yacpdb.indexer.analyzers.miscellaneous.Analyzer().analyze(e, solution, b, resultsAccumulator)
+        self.assertIn("Zilahi(5)", resultsAccumulator.counts)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wR, true)'], 1)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wB, true)'], 2)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wS, true)'], 2)
     """
     """
+
+    def test_Zilahi3x2(self):
+        resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
+        e = tests.unit.data.problems['z3x2']
+        solution, b = self.prepare(e)
+        yacpdb.indexer.analyzers.miscellaneous.Analyzer().analyze(e, solution, b, resultsAccumulator)
+        self.assertEqual(resultsAccumulator.counts['Zilahi(3)'], 2)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wR, false)'], 2)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wB, false)'], 2)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wS, false)'], 2)
+
+    def test_Fox(self):
+        resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
+        e = tests.unit.data.problems['fox']
+        solution, b = self.prepare(e)
+        yacpdb.indexer.analyzers.miscellaneous.Analyzer().analyze(e, solution, b, resultsAccumulator)
+        self.assertIn("ZilahiPiece(wR, true)", resultsAccumulator.counts)

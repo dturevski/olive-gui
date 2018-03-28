@@ -78,7 +78,7 @@ class Node(object):
 
         if self.depth == 0: # root node
             for square, piece in model.Pieces(board):
-                piece.origin = str(square) + "/0"
+                piece.assignOrigin(square, 0)
 
         visitor.visit(self, board)
         self.make(board)
@@ -163,7 +163,7 @@ class TwinCommand:
         elif 'Remove' == self.name:
             b.drop(self.args[0])
         elif 'Add' == self.name:
-            self.args[0].origin = str(self.args[1]) + "/" + twinId
+            self.args[0].assignOrigin(self.args[1], twinId)
             b.add(self.args[0], self.args[1])
         elif 'Rotate' == self.name:
             b.rotate(str(self.args[0]))

@@ -3,13 +3,14 @@ import copy
 import common
 
 
-sw, w, nw, n, ne, e, se, s = (-1, -1), (-1, 0), (-1,
-                                                 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1)
+sw, w, nw, n, ne, e, se, s = (-1, -1), (-1, 0), (-1, 1), (0, 1), \
+                             (1, 1), (1, 0), (1, -1), (0, -1)
 traversals = [
     [sw, w, nw, n, ne, e, se, s], [sw, s, se, e, ne, n, nw, w],
     [nw, n, ne, e, se, s, sw, w], [nw, w, sw, s, se, e, ne, n],
     [ne, e, se, s, sw, w, nw, n], [ne, n, nw, w, sw, s, se, e],
-    [se, s, sw, w, nw, n, ne, e], [se, e, ne, n, nw, w, sw, s]]
+    [se, s, sw, w, nw, n, ne, e], [se, e, ne, n, nw, w, sw, s]
+]
 
 
 def add(square, dir):

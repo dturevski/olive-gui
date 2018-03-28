@@ -28,6 +28,10 @@ When there is no consensus in the community regarding the exact definition of a 
 
 ### Informal definition
 
+Apart from providing basic logic operators to combine the predicates, the query language includes support for
+**pattern match counts**. While `Predicate(x, y, z)` means that pattern was found in entry, using
+`Predicate(x, y, z) > N` allows to constraint the number of times the pattern was found.
+
 [Cheatsheet] (http://yacpdb.org/#static/ql-cheatsheet)
 
 ### Formal definition
@@ -58,7 +62,7 @@ Logical operators precedence is NOT > AND > OR, i.e.:
 
 ### YACPDB implementation notes
 * Wildcard character is `*` (asteriks)
-* `Predicate` is a shorthand for `Predicate > 0`
+* `Predicate` is equivalent to `Predicate > 0`
 * String literals may be 'single quoted' or "double quoted", they may not include a single or a double quote character respectively. String literals that include both single and double quote are not supported. In simple cases a string literal may be accepted without quotes.
 * For a 0-nary predicate the only supported syntax is `PredicateName`, using `PredicateName()` would yield an error
 
@@ -120,11 +124,6 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 	More control over the matrix searches. Additional parameters identify which translations and
 	transformations of the search pattern are to be enabled. Wildcards * default to "true" and "All".
 
-* `Id`
-
-    YACPDB problem id satisfies (is equal, less or greater than) the constraint.
-    Use `Id=X or Id=Y or Id=Z` to hotlink to an arbitrary set of problems.
-
 * `Author(STRING name)`
 
 	Meaning that at least one of the authors matches **name**
@@ -154,6 +153,20 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
     There are fairy pieces or conditions in the titular (diagram) twin. No constraint on
     stipulation and non-titular twins.
+
+
+### Realization dependant metadata predicates
+
+* `Id(INTEGER id)`
+
+    Search by internal integer identifier.
+
+* `Text(STRING needle)`
+
+    Textual representation of the problem contains **needle**. In YACPDB the textual representation
+    is the entry's YAML (which includes solution, comments, etc).
+
+
 
 ### Trajectories predicates
 
@@ -280,7 +293,8 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 * `ZilahiPiece(PIECE actor, BOOLEAN passive)`
 
    In one line of play **actor** is making the final move. In another line of play this piece
-   is captured. **passive** flag is set true when it is captured on its initial square.
+   is captured. **passive** flag is set true when it is captured while not having made a move
+   (being circe-reborn and such is not considered active move).
    
    *Example*: [ZilahiPiece(wR, true)](http://yacpdb.org/#88498)
 
@@ -289,8 +303,6 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
    **folds** (>1) lines of play are connected in a circular way with `ZilahiPiece`s.
 
    *Example*: [Zilahi(5)](http://yacpdb.org/#45243)
-
-* `Valladao(PIECE promotion, INTEGER length)`
 
 ### Twomover change patterns
 
@@ -304,9 +316,10 @@ Other properties of the move are ignored (capture, rebirths, imitator moves etc)
 
 ### Orthodox
 
-* `Models`
+* `Models(INTEGER pins, BOOLEAN ideal)`
 
-    Total count of model mate/stalemate positions among the leaves of the solution tree.
+    Total count of different model or ideal mate/stalemate positions among the leaves of the solution tree.
+    Note: by definition, there is no such thing as an ideal finale with pin.
 
 ### Helpmate Analyzer predicates
 

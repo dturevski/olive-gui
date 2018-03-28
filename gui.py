@@ -1190,7 +1190,9 @@ class OverviewList(QtGui.QTreeWidget):
             return
 
         for i, text in enumerate(self.createItem(Mainframe.model.current)):
-            self.topLevelItem(Mainframe.model.current).setText(i, text)
+            try:
+                self.topLevelItem(Mainframe.model.current).setText(i, text)
+            except AttributeError: pass
 
     def onCurrentItemChanged(self, current, prev):
         if current is None:  # happens when deleting

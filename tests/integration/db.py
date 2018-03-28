@@ -16,31 +16,31 @@ class TestQl(unittest.TestCase):
         self.runYacpdbQuery("NOT Fairy AND Fairy", 0)
 
     def test_With(self):
-        self.runYacpdbQuery("Id=36411 AND With('wR wR wR')", 1)
+        self.runYacpdbQuery("Id(36411) AND With('wR wR wR')", 1)
 
     def test_PCount(self):
         self.runYacpdbQuery("PCount(w)=56", 1)
 
     def test_ExistingId(self):
-        self.runYacpdbQuery("Id=26026", 1)
+        self.runYacpdbQuery("Id(26026)", 1)
 
     def test_NonExistingId(self):
-        self.runYacpdbQuery("Id=1", 0) # there's no such id
+        self.runYacpdbQuery("Id(1)", 0) # there's no such id
 
     def test_Or(self):
-        self.runYacpdbQuery("Id=26026 or Id=4", 2)
+        self.runYacpdbQuery("Id(26026) or Id(4)", 2)
 
     def test_And(self):
-        self.runYacpdbQuery("Id>1 and Id<1", 0)
+        self.runYacpdbQuery("Id(26026) and not Id(26026)", 0)
 
     def test_Not(self):
-        self.runYacpdbQuery("(Id=26026 or Id=4) and (not Id=4)", 1)
+        self.runYacpdbQuery("(Id(26026) or Id(4)) and not Id(4)", 1)
 
     def test_Date(self):
         rs = self.runYacpdbQuery("PublishedAfter('2017-09-11') and not PublishedAfter('2017-09-12') ", 1)
 
     def test_Unicode(self):
-        rs = self.runYacpdbQuery("Id=26026", 1)
+        rs = self.runYacpdbQuery("Id(26026)", 1)
         self.assertEqual(rs['entries'][0]['authors'][0], u"Туревский, Дмитрий Евгеньевич")
 
     def test_Matrix(self):
@@ -48,6 +48,9 @@ class TestQl(unittest.TestCase):
 
     def test_Stip(self):
         rs = self.runYacpdbQuery("Stip('hs=8')", 1)
+
+    def test_Text(self):
+        rs = self.runYacpdbQuery("Text('%Предновогодняя%')", 1)
 
     def runYacpdbQuery(self, query, expected_match_count):
 

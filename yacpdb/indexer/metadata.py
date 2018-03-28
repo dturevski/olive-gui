@@ -202,7 +202,7 @@ class Id(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("p2.id " + cmp + " %s", [str(ord)], [])
+        return Query("(p2.id=" + str(params[0]) + ")" + cmp + " %s", [str(ord)], [])
 
 
 class Author(Predicate):
@@ -360,3 +360,10 @@ class Fairy(Predicate):
     def sql(self, params, cmp, ord):
         return Query("(NOT p2.orthodox)", [], [])
 
+class Text(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query("y.yaml like %s", [params[0]], [])

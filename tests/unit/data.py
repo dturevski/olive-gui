@@ -95,4 +95,68 @@ problems = {
                                     4.Kg8-f7 #"
     """)),
 
+    'twinssetplay':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Kh1, Rh4, Rc1]
+          black: [Kd2, Pe3, Pe2]
+        stipulation: "h#2"
+        options: 
+          - SetPlay
+        twins: 
+          b: Move h4 g1
+          c: Move h4 h3
+        solution: |
+          "a) 1...Rc1-c4   2.Kd2-d3 Rh4-d4 #          
+          1.e2-e1=S Rh4-c4   2.Se1-d3 Rc4-c2 #          
+          b) wRh4-->g1 1.e2-e1=R Rg1-f1   2.Re1-e2 Rf1-d1 #          
+          c) wRh4-->h3 1.e2-e1=B Rc1-c3   2.e3-e2 Rh3-d3 #"
+    """)),
+
+    'z2x1':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Ka6, Rh1, Re6, Bh7, Sh5, Pd3]
+          black: [Kg2, Qg1, Rh6, Ph2]
+        stipulation: "h#2"
+        solution: |
+          "1.Rh6*h5 Re6-e1   2.Kg2*h1 Bh7-e4 #
+          1.Rh6*h7 Re6-e2 +   2.Kg2-f1 Sh5-g3 #"
+    """)),
+
+    'z5x1':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Kb2, Rb7, Be5, Bb3, Sf3, Sd3]
+          black: [Kc6, Re3, Sa5, Pf6, Pe4, Pa6]
+        stipulation: "h#2"
+        solution: |
+          "1.Re3*f3 Bb3-d1   2.e4-e3 Bd1*f3 # 
+            1.e4*d3 Rb7-b6 +   2.Kc6-c5 Be5-d4 # 
+            1.Sa5*b3 Rb7-c7 +   2.Kc6-d5 Sd3-f4 # 
+            1.Sa5*b7 Be5-c7   2.Kc6-b5 Sf3-d4 # 
+            1.f6*e5 Sf3*e5 +   2.Kc6-d6 Rb7-d7 #"
+    """)),
+
+    'z3x2':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Ke3, Rb4, Ba6, Sa3, Ph3]
+          black: [Kf5, Rc4, Bb7, Bb2, Sa2, Ph4, Ph2, Pg7, Pg2, Pd7, Pc3]
+        stipulation: "h#2"
+        options: 
+          - Take&MakeChess
+        solution: |
+          "1.Sa2*b4-b5 Sa3*c4-e4   2.Kf5*e4-g3 Ba6*b5-d6 #
+          1.Bb2*a3-b1 Ba6*c4-f4   2.Kf5*f4-g3 Rb4*b1-g6 #
+          1.Bb7*a6-b5 Rb4*c4-g4   2.Kf5*g4-g3 Sa3*b5-e2 #"
+    """)),
+
+    'fox':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Ke1, Ra5, Bg5, Se2, Pf2]
+          black: [Ke4, Bd8, Sg4, Pg6, Pe6, Pb4]
+        stipulation: "h#2"
+        twins: 
+          b: Remove b4
+        solution: |
+          "a) 1.Bd8*a5 f2-f4   2.Ke4-f5 Se2-g3 #          
+          b) -bPb4 1.Bd8*g5 f2-f3 +   2.Ke4-e3 Ra5-a3 #"
+    """)),
 }
