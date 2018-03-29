@@ -51,10 +51,10 @@ class ZilahiTraverser:
             node.unmake(board)
 
     def zilahi(self, acc):
-        visited, self.cycles, incycles = frozenset(), set(), set()
+        accounted, visited, self.cycles, incycles = frozenset(), frozenset(), set(), set()
         # if we start from all phases, we will count each cycle as many times as there are phases in the cycle
         for i, info in enumerate(self.zinfo):
-            self.recurse(i, visited | set([i]), info.finalizer, [])
+            self.recurse(i, visited | set([i]), accounted | set([info.finalizer.origin]), info.finalizer, [])
         for cycle in self.cycles:
             #print cycle
             acc.push("Zilahi(%d)" % len(cycle))
@@ -74,14 +74,15 @@ class ZilahiTraverser:
 
 
 
-    def recurse(self, cycle_completes_at, visited_phases, finalizer, cycle):
+    def recurse(self, cycle_completes_at, visited_phases, accounted_origins, finalizer, cycle):
         for i, info in enumerate(self.zinfo):
             if finalizer.origin in info.captured:
                 c = cycle + [(finalizer.origin, finalizer.toPredicatePieceDomain(), info.captured[finalizer.origin])]
                 if i == cycle_completes_at:
-                    self.cycles.add(tuple(self.normalizeCycle(c)))
-                elif not i in visited_phases:
-                    self.recurse(cycle_completes_at, visited_phases | set([i]), info.finalizer, c)
+                    self.cycles.add(self.normalizeCycle(c))
+                elif not i in visited_phases and not info.finalizer.origin in accounted_origins:
+                    self.recurse(cycle_completes_at, visited_phases | set([i]),
+                                 accounted_origins | set([info.finalizer.origin]),  info.finalizer, c)
 
 
     def normalizeCycle(self, cycle): # make it start from alphanumerically first origin
