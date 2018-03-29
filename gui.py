@@ -25,6 +25,10 @@ import xfen2img
 import fancy
 import chest
 
+# indexer
+import yacpdb.indexer.metadata
+import yacpdb.indexer.cruncher
+
 
 class SigWrapper(QtCore.QObject):
     sigLangChanged = QtCore.pyqtSignal()
@@ -92,6 +96,8 @@ class Mainframe(Commonframe):
                        'right', 'rotate-clockwise', 'rotate-anticlockwise',
                        'left-right', 'up-down', 'switch', 'out']
     selectedPiece = None
+    predicateStorage = yacpdb.indexer.metadata.PredicateStorage('./')
+
 
     class CheckNewVersion(QtCore.QThread):
 
@@ -140,6 +146,8 @@ class Mainframe(Commonframe):
         if Conf.value('check-for-latest-binary'):
             self.checkNewVersion = Mainframe.CheckNewVersion(self)
             self.checkNewVersion.start()
+
+
 
     def initLayout(self):
         # widgets
@@ -307,7 +315,7 @@ class Mainframe(Commonframe):
                 QtGui.QIcon('resources/icons/axr.png'),
                 Lang.value('PS_AXR'),
                 self)
-        #self.runAxr.triggered.connect(pass)
+        self.runAxr.triggered.connect(self.onAxr)
 
         self.popeyeView.setActions(
             {
@@ -799,6 +807,24 @@ class Mainframe(Commonframe):
         Conf.write()
         event.accept()
 
+    def onAxr(self):
+        Mainframe.sigWrapper.sigFocusOnSolution.emit()
+        try:
+            a0 = yacpdb.indexer.cruncher.Analyzer0(Conf.value("analyzers"), Mainframe.predicateStorage)
+            e = Mainframe.model.cur()
+            rs = a0.runOne(e)
+            for k in rs.counts:
+                if rs.counts[k] > 1:
+                    k += " x %d" % rs.counts[k]
+                if "keywords" not in e:
+                    e["keywords"] = []
+                if k not in e["keywords"]:
+                    e["keywords"].append(k)
+            Mainframe.sigWrapper.sigModelChanged.emit()
+
+        except Exception as ex:
+            msgBox(unicode(ex))
+
 
 class ClickableLabel(QtGui.QLabel):
 
@@ -874,8 +900,8 @@ class AboutDialog(QtGui.QDialog):
                 'olive v' +
                 Conf.value('version') +
                 ' is free software licensed under GNU GPL'))
-        vbox.addWidget(ClickableLabel(u'© 2011-2016'))
-        vbox.addWidget(ClickableLabel(u'Project contributors:'))
+        vbox.addWidget(ClickableLabel(u'© 2011-2018'))
+        vbox.addWidget(ClickableLabel(u'Project contributors (alphabetically):'))
         vbox.addWidget(ClickableLabel(u'<b>Mihail Croitor (MDA), Борислав Гађански (SRB)</b>'))
         vbox.addWidget(ClickableLabel(u'<b>Torsten Linß (GER), Thomas Maeder (CHE)</b>'))
         vbox.addWidget(ClickableLabel(u'<b>Phil Sphicas (USA), Дмитрий Туревский (RUS)</b>'))

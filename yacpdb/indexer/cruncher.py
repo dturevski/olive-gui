@@ -10,6 +10,8 @@ import validate
 import yacpdb.entry
 import yacpdb.indexer.analyzers.hma
 import yacpdb.indexer.analyzers.trajectories
+import yacpdb.indexer.analyzers.miscellaneous
+import yacpdb.indexer.analyzers.hma
 import yacpdb.indexer.predicate
 from p2w.parser import parser
 from yacpdb.storage import dao
@@ -42,35 +44,33 @@ def calculateOrthoGlobally():
 
 class Analyzer0:
 
-    def __init__(self):
-        self.workers = [
-            yacpdb.indexer.analyzers.trajectories.Analyzer(),
-            #yacpdb.indexer.hma.Analyzer()
-        ]
+    def __init__(self, workernames, pstor):
+        self.workers, self.pstor = [], pstor
+        if "trajectories" in workernames:
+            self.workers.append(yacpdb.indexer.analyzers.trajectories.Analyzer())
+        if "miscellaneous" in workernames:
+            self.workers.append(yacpdb.indexer.analyzers.miscellaneous.Analyzer())
+        if "hma" in workernames:
+            self.workers.append(yacpdb.indexer.analyzers.hma.Analyzer())
+
         self.version = datetime.datetime(2018, 3, 14)
 
     def analyze(self, entry, solution, board, acc):
-        rs = {}
         for worker in self.workers:
-            for predicate in worker.analyze(entry, solution, board, acc):
-                rs[predicate] = True
-        return rs
+            worker.analyze(entry, solution, board, acc)
 
     def runOne(self, entry):
-        error = None
-        try:
-            predicateStorage = yacpdb.indexer.metadata.PredicateStorage('./')
-            resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
-
-            solution = parser.parse(entry["solution"], debug=0)
-            board = model.Board()
-            board.fromAlgebraic(entry["algebraic"])
-            board.stm = board.getStmByStipulation(entry["stipulation"])
-            rs = self.analyze(entry, solution, board, resultsAccumulator)
-        except Exception as ex:
-            error = str(ex)
-        finally:
-            dao.ixr_updateCruncherLog(entry["ash"], error)
+        resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(self.pstor)
+        for k in ["solution", "stipulation", "algebraic"]:
+            if k not in entry:
+                raise Exception("No %s" % k)
+        solution = parser.parse(entry["solution"], debug=0)
+        board = model.Board()
+        board.fromAlgebraic(entry["algebraic"])
+        board.stm = board.getStmByStipulation(entry["stipulation"])
+        solution.traverse(board, validate.DummyVisitor()) # assign origins
+        self.analyze(entry, solution, board, resultsAccumulator)
+        return resultsAccumulator
 
     def runBatch(self, size):
         done = 0

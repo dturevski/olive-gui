@@ -99,13 +99,14 @@ class TestTrajectories(unittest.TestCase):
 
     def test_Zilahi3x2(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)
-        e = tests.unit.data.problems['z3x2']
+        e = tests.unit.data.problems['z3x2-ortho']
         solution, b = self.prepare(e)
         yacpdb.indexer.analyzers.miscellaneous.Analyzer().analyze(e, solution, b, resultsAccumulator)
         self.assertEqual(resultsAccumulator.counts['Zilahi(3)'], 2)
-        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wR, false)'], 2)
-        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wB, false)'], 2)
-        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wS, false)'], 2)
+        self.assertEqual(resultsAccumulator.counts['Zilahi(2)'], 3)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wR, true)'], 4)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wB, true)'], 4)
+        self.assertEqual(resultsAccumulator.counts['ZilahiPiece(wS, true)'], 4)
 
     def test_Fox(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(predicateStorage)

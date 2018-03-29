@@ -1,12 +1,13 @@
+analyzers: [trajectories, miscellaneous]
 auto-compactify: 0
 check-for-latest-binary: 1
 chest-executable: {nt: ChestUCI-v5.2\WinChest.exe, posix: /home/dima/temp/chest/chest}
 default-lang: en
 default-notation: en
 fairy-zoo:
-- [white LE, white PA, white VA, white NA, black DU, white G, white N]
-- [black LE, black PA, black VA, black NA, '', black G, black N]
-- ['', '', '', '', '', neutral G, neutral N]
+- [white LE, black L, black LE, '', '', '', '']
+- ['', '', '', '', '', '', '']
+- ['', '', '', '', '', '', '']
 horsehead-glyph: N
 import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
 import-post-decode-default: ISO-8859-1
@@ -16,5 +17,4 @@ notations:
   en: [K, Q, R, B, S, P]
   fide: [K, D, T, L, S, B]
   ru: [Кр, Ф, Л, С, К, п]
-version: 0.16.6
-analyzers: [trajectories, miscellaneous, finals]
+version: 1.18.4

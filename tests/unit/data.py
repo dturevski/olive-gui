@@ -148,6 +148,18 @@ problems = {
           1.Bb7*a6-b5 Rb4*c4-g4   2.Kf5*g4-g3 Sa3*b5-e2 #"
     """)),
 
+    'z3x2-ortho':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Ka3, Rb7, Ra5, Bd2, Ba2, Sd4, Pg5, Pf4, Pd5, Pb5, Pa6]
+          black: [Kd6, Qc3, Rc2, Ra1, Sc1, Sb3, Pg6, Pf6, Pc5, Pa4]
+        stipulation: "h#2"
+        solution: |
+          "1.Qc3*d2 b5-b6 {(a7?)} 2.Sb3*a5 Sd4-b5 #
+          1.Qc3*d4 a6-a7 {(f5?)} 2.Sb3*d2 Ra5-a6 #
+          1.Qc3*a5 f4-f5 {(b6?)} 2.Sb3*d4 Bd2-f4 #"
+    """)),
+
+
     'fox':  model.makeSafe(yaml.load("""
         algebraic: 
           white: [Ke1, Ra5, Bg5, Se2, Pf2]
