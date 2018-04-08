@@ -300,12 +300,15 @@ class CastlingNode(MoveNode):
         shift = 0 if b.stm == 'black' else 56
 
         a8, c8, d8, e8, f8, g8, h8 = 0, 2, 3, 4, 5, 6, 7
+
         if self.kingside:
             b.move(e8 + shift, g8 + shift)
             b.move(h8 + shift, f8 + shift)
+            self.departure, self.arrival = e8 + shift, g8 + shift
         else:
             b.move(e8 + shift, c8 + shift)
             b.move(a8 + shift, d8 + shift)
+            self.departure, self.arrival = e8 + shift, c8 + shift
 
         b.flip()
 

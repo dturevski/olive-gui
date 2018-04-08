@@ -265,25 +265,18 @@ class Board:
             new_x, new_y = func((square % 8, square >> 3))
             if new_x < 0 or new_y < 0 or new_x > 7 or new_y > 7:
                 continue
-            self.add(
-                    Piece(
-                            piece.name,
-                            piece.color,
-                            piece.specs),
-                    new_x + 8 * new_y)
+            new_piece = Piece(piece.name, piece.color, piece.specs)
+            new_piece.origin = piece.origin
+            self.add(new_piece, new_x + 8 * new_y)
 
     def invertColors(self):
         b = copy.deepcopy(self)
         self.clear()
         colors_map = {'white': 'black', 'black': 'white', 'neutral': 'neutral'}
         for square, piece in Pieces(b):
-            self.add(
-                    Piece(
-                            piece.name,
-                            colors_map[
-                                piece.color],
-                            piece.specs),
-                    square)
+            new_piece = Piece(piece.name, colors_map[piece.color], piece.specs)
+            new_piece.origin = piece.origin
+            self.add(new_piece, square)
 
     def fromFen(self, fen):
         self.clear()

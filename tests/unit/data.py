@@ -159,6 +159,109 @@ problems = {
           1.Qc3*a5 f4-f5 {(b6?)} 2.Sb3*d4 Bd2-f4 #"
     """)),
 
+    '1234':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Ke2, Qh1, Sd5, Pe6]
+          black: [Ke8, Rh8, Sh7]
+        stipulation: "#2"
+        solution: |
+          "1...Sh7-g5
+                  2.Qh1*h8 #
+          
+           1.Qh1-a1 ! threat:
+                  2.Qa1-a8 #
+              1...Ke8-d8
+                  2.Qa1-a8 #
+              1...0-0
+                  2.Sd5-e7 #
+              1...Ke8-f8
+                  2.Qa1*h8 #"
+    """)),
+
+
+
+    'complextwin':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Kg1, Qc7, Rf5, Rf3, Bc8, Bc1, Sg5, Sd6, Pc5, Pb3, Pb2]
+          black: [Kd4, Rb8, Bh1, Bf4, Sg7, Sg6, Pg3, Pe7, Pd5, Pd3, Pa3]
+        stipulation: "#2"
+        twins: 
+          b: Move g1 a1 move e7 b4
+        solution: |
+          "a)
+              1.Bc8-e6 ! threat:
+                    2.Rf5*d5 # 
+                1...Sg6-e5  {(A)} 2.Rf5*f4 # 
+                1...Bh1*f3  {(B)} 2.Sg5*f3 # 
+                1...Sg7*f5  {(C)} 2.Sd6*f5 # 
+                1...a3*b2   {(D)} 2.Bc1*b2 # 
+                1...Bf4-e3 +{(E)} 2.Bc1*e3 # 
+          
+          b) wKg1-->a1  bPe7-->b4
+          
+            1.Bc8-a6 ! threat:
+                    2.Rf3*d3 # 
+                1...Sg6-e5  {(B)} 2.Rf5*f4 # 
+                1...Bh1*f3  {(C)} 2.Sg5*f3 # 
+                1...Sg7*f5  {(D)} 2.Sd6*f5 # 
+                1...a3*b2 + {(E)} 2.Bc1*b2 # 
+                1...Bf4-e3  {(A)} 2.Bc1*e3 #"
+    """)),
+
+    'valladao':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Ke1, Qc1, Rh8, Rh1, Bh3, Ba1, Sd1, Sb5, Pg7, Pg6, Pg5, Pd2, Pc7, Pc2]
+          black: [Ke7, Rh7, Be8, Ph4, Pf7, Pd5, Pb2, Pa3, Pa2]
+        stipulation: "#2"
+        options: 
+          - SetPlay
+        solution: |
+          "1...b2-b1=Q
+                 2.Ba1-f6 #
+             1...b2-b1=S
+                 2.Ba1-f6 #
+             1...b2-b1=R
+                 2.Ba1-f6 #
+             1...b2-b1=B
+                 2.Qc1*a3 #
+                 2.Ba1-f6 #
+             1...b2*c1=Q
+                 2.Ba1-f6 #
+             1...b2*c1=S
+                 2.Ba1-f6 #
+             1...b2*c1=R
+                 2.Ba1-f6 #
+             1...b2*c1=B
+                 2.Ba1-f6 #
+             1...b2*a1=Q
+                 2.Qc1*a3 #
+             1...b2*a1=S
+                 2.Qc1*a3 #
+             1...b2*a1=R
+                 2.Qc1*a3 #
+             1...b2*a1=B
+                 2.Qc1*a3 #
+             1...Be8*b5
+                 2.c7-c8=S #
+             1...Be8-c6
+                 2.c7-c8=S #
+          1.0-0 ! threat:
+                 2.Rf1-e1 #
+             1...b2*c1=S
+                 2.Ba1-f6 #
+             1...b2*a1=Q
+                 2.Qc1*a3 #
+             1...b2*a1=B
+                 2.Qc1*a3 #
+             1...f7-f5
+                 2.g5*f6 ep. #
+             1...f7*g6
+                 2.g7-g8=S #
+             1...Be8*b5
+                 2.c7-c8=S #
+             1...Be8-d7
+                 2.Rf1*f7 #"
+    """)),
 
     'fox':  model.makeSafe(yaml.load("""
         algebraic: 
@@ -170,5 +273,51 @@ problems = {
         solution: |
           "a) 1.Bd8*a5 f2-f4   2.Ke4-f5 Se2-g3 #          
           b) -bPb4 1.Bd8*g5 f2-f3 +   2.Ke4-e3 Ra5-a3 #"
+    """)),
+
+    '623':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Ke5, Ph7, Pb7]
+          black: [Ke8]
+        stipulation: "#2"
+        solution: |
+          "1.Ke5-e6 ! threat:
+                 2.h7-h8=Q #
+                 2.h7-h8=R #
+                 2.b7-b8=Q #
+                 2.b7-b8=R #
+             1...Ke8-d8
+                 2.b7-b8=Q #
+             1...Ke8-f8
+                 2.h7-h8=Q #"
+    """)),
+
+    'z22':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Ka2, Rh1, Bg8, Sf6, Sd4, Pe6]
+          black: [Ke5, Qc8, Re8, Bd6, Bb5, Sg7, Ph5, Pf5, Pf4, Pe4, Pd7, Pc3]
+        stipulation: "h#2"
+        intended-solutions: 2
+        twins: 
+          b: Move h1 a5
+        solution: |
+          "a) 
+          1.Sg7*e6 Rh1*h5   2.Se6*d4 Sf6-g4 # 
+          1.Re8*e6 Rh1-e1   2.Re6*f6 Sd4-f3 # 
+          
+          b) wRh1-->a5
+          1.Qc8-c5 e6-e7   2.Qc5*d4 Sf6*d7 # 
+          1.Qc8-d8 e6*d7   2.Qd8*f6 Sd4-c6 #"
+    """)),
+
+    'zpawns':  model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Kd8, Ph2, Pf2]
+          black: [Kd5, Rd2]
+        stipulation: "h#5.5"
+        intended-solutions: 2
+        solution: |
+          "1...f2-f4   2.Rd2*h2 f4-f5  3.Kd5-e4 f5-f6 4.Ke4-f3 f6-f7 5.Kf3-g2 f7-f8=Q   6.Kg2-h1 Qf8-f1 #
+          1...h2-h3   2.Rd2*f2 h3-h4   3.Kd5-e6 h4-h5   4.Ke6-f7 h5-h6   5.Kf7-f8 h6-h7   6.Rf2-f7 h7-h8=Q #"
     """)),
 }

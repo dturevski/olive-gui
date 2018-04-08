@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import sys
+import traceback
 
 sys.path.insert(0, os.getcwd())
 
@@ -13,6 +14,7 @@ import yacpdb.indexer.analyzers.trajectories
 import yacpdb.indexer.analyzers.miscellaneous
 import yacpdb.indexer.analyzers.hma
 import yacpdb.indexer.predicate
+import yacpdb.indexer.metadata
 from p2w.parser import parser
 from yacpdb.storage import dao
 
@@ -42,6 +44,12 @@ def calculateOrthoGlobally():
             print i
 
 
+def crunch(count):
+    predicateStorage = yacpdb.indexer.metadata.PredicateStorage('./')
+    a0 = Analyzer0(["trajectories", "miscellaneous"], predicateStorage)
+    a0.runBatch(count)
+
+
 class Analyzer0:
 
     def __init__(self, workernames, pstor):
@@ -53,40 +61,68 @@ class Analyzer0:
         if "hma" in workernames:
             self.workers.append(yacpdb.indexer.analyzers.hma.Analyzer())
 
-        self.version = datetime.datetime(2018, 3, 14)
+        self.version = datetime.datetime(2018, 4, 4)
 
     def analyze(self, entry, solution, board, acc):
         for worker in self.workers:
             worker.analyze(entry, solution, board, acc)
 
     def runOne(self, entry):
-        resultsAccumulator = yacpdb.indexer.predicate.AnalyzisResultAccumulator(self.pstor)
+        resultsAccumulator = yacpdb.indexer.predicate.AnalysisResultAccumulator(self.pstor)
         for k in ["solution", "stipulation", "algebraic"]:
             if k not in entry:
                 raise Exception("No %s" % k)
-        solution = parser.parse(entry["solution"], debug=0)
-        board = model.Board()
-        board.fromAlgebraic(entry["algebraic"])
-        board.stm = board.getStmByStipulation(entry["stipulation"])
-        solution.traverse(board, validate.DummyVisitor()) # assign origins
+        visitor = validate.DummyVisitor()
+        try:
+            solution = parser.parse(entry["solution"], debug=0)
+            board = model.Board()
+            board.fromAlgebraic(entry["algebraic"])
+            board.stm = board.getStmByStipulation(entry["stipulation"])
+            solution.traverse(board, visitor) # assign origins
+            solution.size = visitor.count
+        except Exception:
+            raise RuntimeError("invalid solution")
+
+        print entry["id"], solution.size
+
+        if solution.size > 140:
+            raise RuntimeError("solution too long")
+
         self.analyze(entry, solution, board, resultsAccumulator)
+
         return resultsAccumulator
+
+    def runOneAndSave(self, entry):
+        try:
+            analysisResults = self.runOne(entry)
+            dao.ixr_deleteAnalysisResults(entry["ash"])
+            dao.ixr_saveAnalysisResults(entry["ash"], analysisResults)
+            dao.ixr_updateCruncherLog(entry["ash"], None)
+        except RuntimeError as rerr:
+            dao.ixr_updateCruncherLog(entry["ash"], str(rerr))
+        except Exception as ex:
+            print traceback.format_exc(ex)
+            dao.ixr_updateCruncherLog(entry["ash"], str(ex))
 
     def runBatch(self, size):
         done = 0
         for entry in dao.ixr_getNeverChecked(size):
-            self.runOne(entry)
+            self.runOneAndSave(entry)
             done += 1
         if done == size:
             return
         for entry in dao.ixr_getNotCheckedSince(self.version, size - done):
-            self.runOne(entry)
+            self.runOneAndSave(entry)
 
 
 def main():
     logging.basicConfig(filename='~/logs/cruncher.log', level=logging.DEBUG)
     os.nice(19)
-    if "--calculate-ash-globally" in sys.argv:
+    if "--crunch" in sys.argv:
+        print "started", datetime.datetime.now()
+        crunch(1000)
+        print "finished", datetime.datetime.now()
+    elif "--calculate-ash-globally" in sys.argv:
         calculateAshGlobally()
     elif "--calculate-ortho-globally" in sys.argv:
         calculateOrthoGlobally()

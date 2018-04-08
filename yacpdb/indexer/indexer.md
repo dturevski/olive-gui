@@ -213,9 +213,7 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
   The **participant** takes part in `PW`. To avoid ambiguity when pieces change their types
   during the solution, **participant** is the type the piece has when the pattern has just completed. E.g. in:
-  
   "1. a7-a8=B Rb7-a7 2.Ba8-b7"
-  
   there is `PWPiece(wB)`, not `PWPiece(wP)`
   
   *Example*:
@@ -247,14 +245,14 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
   Same as `Star`, the set is [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)]
 
-* `PseudoAlbino(PIECE visitor)`
+* `Albino(PIECE visitor)`
 
   Same as `Star`, the set is [(-1, -1), (1, -1), (0, -1), (0, -2)]. The visitor does not
   necessarily start from the 2nd rank.
 
   *Example*: [PseudoAlbino(wP)](http://yacpdb.org/#44165)
 
-* `PseudoPickaninny(PIECE visitor)`
+* `Pickaninny(PIECE visitor)`
 
   Same as `Star`, the set is [(-1, 1), (1, 1), (0, 1), (0, 2)]. The visitor does not
   necessarily start from the 7th rank.
@@ -290,10 +288,11 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
    
    *Example*: [Twins = 27](http://yacpdb.org/#435307)
 
-* `ZilahiPiece(PIECE actor, BOOLEAN passive)`
+* `ZilahiPiece(PIECE actor, BOOLEAN unmoved)`
 
-   In one line of play **actor** is making the final move. In another line of play this piece
-   is captured. **passive** flag is set true when it is captured while not having made a move
+   In one line of play **actor** is making the final move for the side that is to complete the sipulation
+   (checkmates or stalemates, not refutes the try). In another line of play this piece
+   is captured. **unmoved** flag is set true when it is captured while not having made a move
    (being circe-reborn and such is not considered active move).
    
    *Example*: [ZilahiPiece(wR, true)](http://yacpdb.org/#88498)

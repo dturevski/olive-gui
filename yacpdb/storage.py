@@ -15,8 +15,10 @@ def commit(query, params):
         print ex
         print c._last_executed
 
+
 def mysqldt(dt):
     return dt.strftime('%Y-%m-%d %H:%M:%S')
+
 
 def entries(cursor):
     for row in cursor:
@@ -31,9 +33,42 @@ def entries(cursor):
             logging.error(traceback.format_exc(ex))
 
 
+def scalar(query, params):
+    c = database.cursor(MySQLdb.cursors.Cursor)
+    c.execute(query, params)
+    for row in c:
+        return row[0]
+    return None
+
+
 class Dao:
 
-    def __init__(self): pass
+    def __init__(self):
+        self.caches = None
+        pass
+
+    def ixr_getPredicateNameById(self, id_):
+        self.ixr_initCache()
+        return self.caches["in"][int(id_)]
+
+    def ixr_getPredicateIdByName(self, name):
+        self.ixr_initCache()
+        try:
+            return self.caches["ni"][name]
+        except KeyError:
+            database.cursor().execute("INSERT INTO predicate_names (name) VALUES (%s)", (name,))
+            self.caches["ni"][name] = database.insert_id()
+            return self.caches["ni"][name]
+
+    def ixr_initCache(self):
+        if self.caches != None:
+            return
+        self.caches = {"ni": {}, "in": {}}
+        c = database.cursor()
+        c.execute("SELECT id, name FROM predicate_names")
+        for row in c:
+            self.caches["ni"][row["name"]], self.caches["in"][row["id"]] = row["id"], row["name"]
+
 
     def ixr_getEntriesWithoutAsh(self, count):
         c = database.cursor()
@@ -79,6 +114,9 @@ class Dao:
             (%s, now(), %s)
           """, (ash, error))
 
+    def ixr_getLastRun(self, ash):
+        return scalar("SELECT checked from cruncher_timestamps WHERE ash=%s", (ash,))
+
     def ixr_getNeverChecked(self, maxcount):
         c = database.cursor()
         c.execute("""
@@ -91,8 +129,8 @@ class Dao:
           WHERE 
             p.ash IS NOT NULL and ct.ash IS NULL
           ORDER BY p.id
-          limit %s
-          """, (str(maxcount), ))
+          LIMIT %d
+          """ % maxcount)
         return entries(c)
 
     def ixr_getNotCheckedSince(self, since, maxcount):
@@ -108,8 +146,41 @@ class Dao:
             ct.checked < %s
           ORDER BY
             ct.checked
-          limit %s
-          """, (str(maxcount), mysqldt(since)))
+          limit 
+          """ + str(maxcount), (mysqldt(since),))
+        return entries(c)
+
+    def ixr_saveAnalysisResults(self, ash, analysisResults):
+        c = database.cursor()
+        for key, predicate in analysisResults.predicates.iteritems():
+            c.execute("INSERT INTO predicates (name_id, ash, matchcount) VALUES (%s, %s, %s)",
+                      (self.ixr_getPredicateIdByName(predicate.name), ash, str(analysisResults.counts[key])))
+            pid = database.insert_id()
+            for i, param in enumerate(predicate.params):
+                c.execute("INSERT INTO predicate_params (pid, pos, val) VALUES (%s, %s, %s)",
+                          (str(pid), str(i), param))
+
+    def ixr_deleteAnalysisResults(self, ash):
+        c, c2 = database.cursor(), database.cursor()
+        c.execute("SELECT id FROM predicates WHERE ash=%s", (ash,))
+        for row in c:
+            c2.execute("DELETE FROM predicate_params WHERE pid=%s", (row["id"],))
+        c.execute("DELETE FROM predicates WHERE ash=%s", (ash,))
+
+    def ixr_getPredicatesByAsh(self, ash):
+        c, c2, ps = database.cursor(), database.cursor(), {}
+        c.execute("""SELECT id, name_id, matchcount FROM  predicates WHERE ash = %s""", (ash,))
+        for row in c:
+            params = []
+            c2.execute("SELECT val FROM predicate_params where pid=%s ORDER BY pos", (row["id"],))
+            for row2 in c2:
+                params.append(row2["val"])
+            name = self.ixr_getPredicateNameById(row["name_id"])
+            if len(params) > 0:
+                name = "%s(%s)" % (name, ", ".join(params))
+            ps[name] = row["matchcount"]
+        return ps
+
 
     def search(self, query, params, page, pageSize=100):
         limits = " limit %d, %d" % ((page-1)*pageSize, pageSize)
@@ -122,11 +193,16 @@ class Dao:
             try:
                 e = entry.entry(row["yaml"])
                 e["id"] = row['problem_id']
+                e["ash"] = row['ash']
                 matches.append(e)
             except Exception as ex:
                 logging.error("Bad YAML: %d" % row['problem_id'])
         c.execute("select FOUND_ROWS() fr")
-        return {'entries':matches, 'count': c.fetchone()["fr"], 'q':lastExecuted}
+        return {
+            'entries':matches,
+            'count': c.fetchone()["fr"],
+            # 'q':lastExecuted
+        }
 
 dao = Dao()
 

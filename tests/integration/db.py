@@ -4,6 +4,7 @@ import base, unittest
 
 import yacpdb.indexer.ql
 import yacpdb.indexer.metadata
+from yacpdb.storage import dao
 
 stor = yacpdb.indexer.metadata.PredicateStorage('./')
 
@@ -51,6 +52,9 @@ class TestQl(unittest.TestCase):
 
     def test_Text(self):
         rs = self.runYacpdbQuery("Text('%Предновогодняя%')", 1)
+
+    def test_GetPredicatesByAsh(self):
+        dao.ixr_getPredicatesByAsh("3c4a9b80c8edec94e7f33fcd09960457")
 
     def runYacpdbQuery(self, query, expected_match_count):
 

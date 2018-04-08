@@ -40,9 +40,11 @@ class SemanticValidationVisitor:
 
 class DummyVisitor:
 
-    def __init__(self): pass
+    def __init__(self):
+        self.count = 0
 
-    def visit(self, node, board): pass
+    def visit(self, node, board):
+        self.count += 1
 
 
 

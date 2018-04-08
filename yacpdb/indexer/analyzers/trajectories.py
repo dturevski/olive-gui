@@ -6,12 +6,12 @@ import p2w.nodes
 
 PATTERNS = {
     'Star': [(1, 1), (1, -1), (-1, 1), (-1, -1)],
-    'Big star': [(2, 2), (2, -2), (-2, 2), (-2, -2)],
+    'BigStar': [(2, 2), (2, -2), (-2, 2), (-2, -2)],
     'Cross': [(0, 1), (0, -1), (-1, 0), (1, 0)],
-    'Big cross': [(0, 2), (0, -2), (-2, 0), (2, 0)],
+    'BigCross': [(0, 2), (0, -2), (-2, 0), (2, 0)],
     'Wheel': [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)],
-    'PseudoAlbino': [(-1, -1), (1, -1), (0, -1), (0, -2)],
-    'PseudoPickaninny': [(-1, 1), (1, 1), (0, 1), (0, 2)],
+    'Albino': [(-1, -1), (1, -1), (0, -1), (0, -2)],
+    'Pickaninny': [(-1, 1), (1, 1), (0, 1), (0, 2)],
 }
 
 CORNERS = [0, 7, 56, 63]
@@ -24,7 +24,7 @@ class Analyzer:
         trajs = TrajectoriesBuilderAndPlatzwechselAnalyzer.build(solution, board, acc)
         #for t in trajs: print t
         search([], trajs, acc)
-        corners(trajs, acc)
+        corners(trajs, acc, None, {})
 
 
 # speed is more important than memory economy, so store anything usable
@@ -122,6 +122,8 @@ class TrajectoriesBuilderAndPlatzwechselAnalyzer:
         cs = []
         # new cycle can only be the result of displacement(s) in snap
         for origin, _, arrival in snap.displacements:
+            if not origin in snap2.os:
+                continue
             cycle_completed, current_square, current_origin, square_cycle_completes, length = \
                 False, arrival, origin, snap2.os[origin], 1
             cycle = [current_origin]
@@ -276,7 +278,7 @@ def captureflag(nodes):
         return "false"
 
 
-def corners(trajs, acc, tnode = None, result = {}):
+def corners(trajs, acc, tnode, result):
     if tnode != None:
         if tnode.square in CORNERS:
             if tnode.origin not in result:

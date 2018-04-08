@@ -1,3 +1,4 @@
+import markdown
 
 from predicate import *
 try:
@@ -35,8 +36,15 @@ class PredicateStorage:
 
     def load(self, fname):
         with open(fname) as f:
+            blanks, waitfordoc, doc, lastpredicate = 0, False, "", None
             for line in f.readlines():
                 try:
+                    if len(line.strip()) == 0:
+                        blanks += 1
+                    if waitfordoc:
+                        doc += line
+                        if blanks == 2:
+                            lastpredicate.doc, waitfordoc, blanks = markdown.markdown(doc.strip()), False, 0
                     p = None
                     match = PredicateStorage.fmt1.match(line.strip())
                     if match:
@@ -50,6 +58,8 @@ class PredicateStorage:
                         arity = len(p.params)
                         if arity not in self.ps: self.ps[arity] = {}
                         self.ps[arity][p.name] = p
+                        lastpredicate, waitfordoc, blanks, doc = p, True, 0, ""
+
                 except ValueError as e:
                     raise ValueError("%s in '%s'" % (str(e), line.strip()))
 
@@ -70,6 +80,12 @@ class PredicateStorage:
                 ws.append(predicate + ("" if arity == 0 else "()"))
         return sorted(ws)
 
+    def getDocumentation(self):
+        docs = {}
+        for arity in self.ps:
+            for name, p in self.ps[arity].iteritems():
+                docs[name] = {"declaration": p.getDeclarationString(), "doc": p.doc }
+        return docs
 
 class Matrix(Predicate):
 
