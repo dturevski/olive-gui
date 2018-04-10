@@ -228,8 +228,8 @@ class Author(Predicate):
 
     def sql(self, params, cmp, ord):
         return Query(
-            "au.name like %s", [params[0]],
-            ['authorship aus on (p2.id = aus.problem_id) join authors au on (aus.author_id = au.id)']
+            "p2.id in (select problem_id from authorship aus join authors au on (aus.author_id = au.id) where au.name like %s) ",
+            [params[0]], []
         )
 
 
