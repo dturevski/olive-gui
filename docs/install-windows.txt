@@ -1,0 +1,4 @@
+1. Install Python3 (www.python.org) and Qt5 (www.qt.io)
+2. Add \Python and \Python\scripts to Windows PATH
+3. Install dependencies:
+  pip install python-qt5
