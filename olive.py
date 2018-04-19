@@ -12,11 +12,11 @@ import os
 import ctypes
 
 # 3rd party
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtCore, QtWidgets
 
 # local
-from . import base
-from . import gui, demo
+import base
+import gui, demo
 
 
 def main():
@@ -29,14 +29,13 @@ def main():
     if 'nt' == os.name:
         try:
             myappid = 'OrgYacpdb.Olive.CurrentVersion.' + gui.Conf.value('version')
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-                myappid)
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
         except:
             pass
 
 
     # Qt bootstrap
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
     # required for QSetting to work properly
     QtCore.QCoreApplication.setOrganizationName("OSS")

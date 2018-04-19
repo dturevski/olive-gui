@@ -17,7 +17,7 @@ import array
 import copy
 
 # local
-from . import model
+import model
 
 # may be altered from outside
 PBM_ENCODING = "ISO-8859-1"

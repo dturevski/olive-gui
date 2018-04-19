@@ -2,7 +2,7 @@
 import yaml
 
 # local
-from . import model
+import model
 
 # order matters, copied from the end of the binary fancy.exe (v2.9)
 FANCY_PIECES = [

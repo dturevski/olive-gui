@@ -1,9 +1,9 @@
 import os
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtWidgets
 
 
-class ParamInt(QtGui.QSpinBox):
+class ParamInt(QtWidgets.QSpinBox):
 
     def __init__(self):
         super(ParamInt, self).__init__()
@@ -16,7 +16,7 @@ class ParamInt(QtGui.QSpinBox):
         self.setValue(int(v))
 
 
-class ParamStr(QtGui.QLineEdit):
+class ParamStr(QtWidgets.QLineEdit):
 
     def __init__(self):
         super(ParamStr, self).__init__()
@@ -30,7 +30,7 @@ class ParamStr(QtGui.QLineEdit):
         self.setText(v)
 
 
-class ParamSelect(QtGui.QComboBox):
+class ParamSelect(QtWidgets.QComboBox):
 
     def __init__(self, params):
         super(ParamSelect, self).__init__()
@@ -48,7 +48,7 @@ class ParamSelect(QtGui.QComboBox):
             self.setCurrentIndex(0)
 
 
-class Option(QtGui.QWidget):
+class Option(QtWidgets.QWidget):
 
     def __init__(self, pattern):
         super(Option, self).__init__()
@@ -56,8 +56,8 @@ class Option(QtGui.QWidget):
 
         self.command = parts[0]
         self.params = []
-        hbox = QtGui.QHBoxLayout()
-        self.checkbox = QtGui.QCheckBox(self.command)
+        hbox = QtWidgets.QHBoxLayout()
+        self.checkbox = QtWidgets.QCheckBox(self.command)
         hbox.addWidget(self.checkbox)
         for part in parts[1:]:
             if '<int>' == part:
@@ -99,20 +99,20 @@ class Option(QtGui.QWidget):
                 " ".join([x.get() for x in self.params])).strip()
 
 
-class OkCancelDialog(QtGui.QDialog):
+class OkCancelDialog(QtWidgets.QDialog):
 
     def __init__(self, Lang):
         super(OkCancelDialog, self).__init__()
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(self.mainWidget)
         vbox.addStretch(1)
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.addStretch(1)
-        buttonOk = QtGui.QPushButton(Lang.value('CO_OK'), self)
+        buttonOk = QtWidgets.QPushButton(Lang.value('CO_OK'), self)
         buttonOk.clicked.connect(self.accept)
-        buttonCancel = QtGui.QPushButton(Lang.value('CO_Cancel'), self)
+        buttonCancel = QtWidgets.QPushButton(Lang.value('CO_Cancel'), self)
         buttonCancel.clicked.connect(self.reject)
 
         hbox.addWidget(buttonOk)
@@ -125,7 +125,7 @@ class OkCancelDialog(QtGui.QDialog):
 class OptionsDialog(OkCancelDialog):
 
     def __init__(self, options, conditions, rows, cols, entry_options, Lang):
-        self.mainWidget = QtGui.QTabWidget()
+        self.mainWidget = QtWidgets.QTabWidget()
         self.options = []
         self.createTabs('Options', options, rows, cols, entry_options)
         self.createTabs('Conditions', conditions, rows, cols, entry_options)
@@ -137,12 +137,12 @@ class OptionsDialog(OkCancelDialog):
             (len(options) % (rows * cols) != 0)
         planted = 0
         for i in range(count_tabs):
-            w = QtGui.QWidget()
-            grid = QtGui.QGridLayout()
+            w = QtWidgets.QWidget()
+            grid = QtWidgets.QGridLayout()
             grid.setVerticalSpacing(0)
             grid.setHorizontalSpacing(0)
             grid.setContentsMargins(0, 0, 0, 0)
-            stretcher = QtGui.QWidget()
+            stretcher = QtWidgets.QWidget()
             grid.addWidget(stretcher, rows, cols)
             grid.setRowStretch(rows, 1)
             grid.setColumnStretch(cols, 1)
@@ -177,7 +177,7 @@ class OptionsDialog(OkCancelDialog):
         return [x.get() for x in self.options if x.get() != '']
 
 
-class TwinsInputWidget(QtGui.QTextEdit):
+class TwinsInputWidget(QtWidgets.QTextEdit):
     twinsExamples = [
         "Stipulation ?",
         "Condition ?",
@@ -251,7 +251,7 @@ class TwinsDialog(OkCancelDialog):
         return self.mainWidget.getTwins()
 
 
-class SelectFileWidget(QtGui.QLineEdit):
+class SelectFileWidget(QtWidgets.QLineEdit):
 
     def __init__(self, title, value, onChanged):
         super(SelectFileWidget, self).__init__()
@@ -262,7 +262,7 @@ class SelectFileWidget(QtGui.QLineEdit):
         self.setReadOnly(True)
 
     def mousePressEvent(self, e):
-        fileName = QtGui.QFileDialog.getOpenFileName(self, self.title, os.path.dirname(self.value))
+        fileName = QtWidgets.QFileDialog.getOpenFileName(self, self.title, os.path.dirname(self.value))
         if not fileName:
             return
         self.value = str(fileName)
@@ -270,7 +270,7 @@ class SelectFileWidget(QtGui.QLineEdit):
         self.onChanged(self.value)
 
     def setText(self, text):
-        maxLen = 40
-        if len(text) > maxLen:
-            text = text[:maxLen/2] + ' ... ' + text[-maxLen/2:]
+        halfMaxLen = 20
+        if len(text) > 2*halfMaxLen:
+            text = text[:halfMaxLen] + ' ... ' + text[-halfMaxLen:]
         return super(SelectFileWidget, self).setText(text)

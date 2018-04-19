@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
 import json
-from . import base, model
-from .p2w.parser import parser
+import base, model
+from p2w.parser import parser
 import re
 #import yacpdb.storage
 

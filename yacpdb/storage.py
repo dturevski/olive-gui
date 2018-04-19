@@ -1,12 +1,19 @@
-import MySQLdb, MySQLdb.cursors
+import os
+import pymysql, pymysql.cursors
 import logging, traceback
 from . import entry
 
-database = MySQLdb.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb", cursorclass=MySQLdb.cursors.DictCursor)
-database.cursor().execute("SET NAMES utf8")
+
+database = None
+if 'nt' != os.name:
+    try:
+        database = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb", cursorclass=pymysql.cursors.DictCursor)
+        database.cursor().execute("SET NAMES utf8")
+    except pymysql.err.OperationalError:
+        pass
 
 def commit(query, params):
-    c = database.cursor(MySQLdb.cursors.Cursor)
+    c = database.cursor(pymysql.cursors.Cursor)
     try:
         c.execute(query, params)
         database.commit()
@@ -34,7 +41,7 @@ def entries(cursor):
 
 
 def scalar(query, params):
-    c = database.cursor(MySQLdb.cursors.Cursor)
+    c = database.cursor(pymysql.cursors.Cursor)
     c.execute(query, params)
     for row in c:
         return row[0]

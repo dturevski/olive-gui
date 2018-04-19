@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 
 # local
-from . import model
+import model
 
 # 3rd party
 import reportlab.rl_config
@@ -39,7 +39,7 @@ from reportlab.pdfbase import _fontdata_enc_macexpert
 
 
 # local
-from . import model
+import model
 
 A4_LANDSCAPE_H, A4_LANDSCAPE_W = A4
 A5_MARGIN_X, A5_MARGIN_Y = 24, 16

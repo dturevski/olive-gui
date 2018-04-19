@@ -3,7 +3,6 @@
 # standard
 import json
 import re
-import exceptions
 import copy
 import datetime
 
@@ -11,9 +10,9 @@ import datetime
 import yaml
 
 # local
-from . import legacy.popeye
-from . import legacy.chess
-from .board import *
+import legacy.popeye
+import legacy.chess
+from board import *
 
 
 def myint(string):

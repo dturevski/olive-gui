@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from .gui import *
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+from gui import *
 
 class Demoframe(Commonframe):
 
@@ -23,8 +25,8 @@ class Demoframe(Commonframe):
     def initLayout(self):
 
         # left pane
-        widgetLeftPane = QtGui.QWidget()
-        vboxLeftPane = QtGui.QVBoxLayout()
+        widgetLeftPane = QtWidgets.QWidget()
+        vboxLeftPane = QtWidgets.QVBoxLayout()
         vboxLeftPane.setSpacing(0)
         vboxLeftPane.setContentsMargins(0, 0, 0, 0)
         self.fenView = FenView(self)
@@ -35,19 +37,19 @@ class Demoframe(Commonframe):
         widgetLeftPane.setLayout(vboxLeftPane)
 
         # right pane
-        vboxRightPane = QtGui.QVBoxLayout()
+        vboxRightPane = QtWidgets.QVBoxLayout()
         self.chessBox = ChessBox()
         vboxRightPane.addWidget(self.chessBox)
         vboxRightPane.addWidget(Toolbar())
-        widgetRightPane = QtGui.QWidget()
+        widgetRightPane = QtWidgets.QWidget()
         widgetRightPane.setLayout(vboxRightPane)
 
         # putting panes together
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(widgetLeftPane)
         hbox.addWidget(widgetRightPane)
 
-        cw = QtGui.QWidget()
+        cw = QtWidgets.QWidget()
         self.setCentralWidget(cw)
         self.centralWidget().setLayout(hbox)
 
@@ -76,23 +78,23 @@ class DraggableLabelWithHoverEffect(DraggableLabel):
         self.setStyleSheet('QLabel { background-color: #ffffff; }')
 
 
-class Toolbar(QtGui.QWidget):
+class Toolbar(QtWidgets.QWidget):
 
     def __init__(self):
         super(Toolbar, self).__init__()
 
-        hl =  QtGui.QHBoxLayout()
+        hl =  QtWidgets.QHBoxLayout()
         self.setLayout(hl)
 
-        btnClear = QtGui.QPushButton(Lang.value('MI_Clear'))
+        btnClear = QtWidgets.QPushButton(Lang.value('MI_Clear'))
         btnClear.clicked.connect(self.onClear)
         hl.addWidget(btnClear)
 
-        btnPrev = QtGui.QPushButton("<<<")
+        btnPrev = QtWidgets.QPushButton("<<<")
         btnPrev.clicked.connect(self.onPrev)
         hl.addWidget(btnPrev)
 
-        btnNext = QtGui.QPushButton(">>>")
+        btnNext = QtWidgets.QPushButton(">>>")
         btnNext.clicked.connect(self.onNext)
         hl.addWidget(btnNext)
 

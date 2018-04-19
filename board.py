@@ -1,4 +1,4 @@
-import re, exceptions, copy, json
+import re, copy, json
 
 class Square:
 

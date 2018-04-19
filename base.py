@@ -14,9 +14,9 @@ def module_path():
     even if we are frozen using py2exe"""
 
     if we_are_frozen():
-        return os.path.dirname(str(sys.executable, sys.getfilesystemencoding( )))
+        return os.path.dirname(sys.executable)
 
-    return os.path.dirname(str(__file__, sys.getfilesystemencoding( )))
+    return os.path.dirname(__file__)
 
 basedir = module_path()
 os.chdir(basedir)
