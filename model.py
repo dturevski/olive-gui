@@ -11,9 +11,9 @@ import datetime
 import yaml
 
 # local
-import legacy.popeye
-import legacy.chess
-from board import *
+from . import legacy.popeye
+from . import legacy.chess
+from .board import *
 
 
 def myint(string):
@@ -33,7 +33,7 @@ def myint(string):
 def notEmpty(hash, key):
     if key not in hash:
         return False
-    return len(unicode(hash[key])) != 0
+    return len(str(hash[key])) != 0
 
 
 
@@ -87,10 +87,10 @@ class Distinction:
         if(self.hi < 1) and (self.lo > 0):
             lo, hi = hi, lo
         if hi > 0:
-            retval = unicode(
+            retval = str(
                 hi) + Distinction.pluralSuffixInLang(hi, Lang) + ' ' + retval
             if lo > 0:
-                retval = unicode(
+                retval = str(
                     lo) + Distinction.pluralSuffixInLang(lo, Lang) + '-' + retval
         if self.special:
             retval = Lang.value('DSTN_Special') + ' ' + retval
@@ -163,7 +163,7 @@ def makeSafe(e):
     for k in ['source', 'solution', 'source-id', 'distinction']:
         if k in e:
             try:
-                r[k] = unquote(unicode(e[k]))
+                r[k] = unquote(str(e[k]))
             except:
                 pass
 
@@ -182,7 +182,7 @@ def makeSafe(e):
             try:
                 r[k] = []
                 for element in e[k]:
-                    r[k].append(unquote(unicode(element)))
+                    r[k].append(unquote(str(element)))
             except:
                 del r[k]
     # date
@@ -268,7 +268,7 @@ class Model:
         issue_id, source_id = '', ''
         if 'source-id' not in self.entries[self.current]:
             return issue_id, source_id
-        parts = unicode(self.entries[self.current]['source-id']).split("/")
+        parts = str(self.entries[self.current]['source-id']).split("/")
         if len(parts) == 1:
             source_id = parts[0]
         else:
@@ -298,7 +298,7 @@ class Model:
         f = open(Model.file, 'w')
         try:
             f.write(
-                unicode(
+                str(
                     yaml.dump(
                         self.defaultEntry,
                         encoding=None,

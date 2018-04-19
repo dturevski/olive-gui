@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from gui import *
+from .gui import *
 
 class Demoframe(Commonframe):
 

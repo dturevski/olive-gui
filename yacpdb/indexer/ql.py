@@ -1,6 +1,6 @@
 import ply.yacc
 import ply.lex
-import predicate
+from . import predicate
 
 # tokens
 

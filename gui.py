@@ -8,26 +8,26 @@ import string
 import re
 import struct
 import ctypes
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 # 3rd party
 import yaml
 from PyQt4 import QtGui, QtCore
 
 # local
-import legacy.popeye
-import legacy.chess
-import options
-import model
-import pbm
-import pdf
-import xfen2img
-import fancy
-import chest
+from . import legacy.popeye
+from . import legacy.chess
+from . import options
+from . import model
+from . import pbm
+from . import pdf
+from . import xfen2img
+from . import fancy
+from . import chest
 
 # indexer
-import yacpdb.indexer.metadata
-import yacpdb.indexer.cruncher
+from . import yacpdb.indexer.metadata
+from . import yacpdb.indexer.cruncher
 
 
 class SigWrapper(QtCore.QObject):
@@ -48,7 +48,7 @@ class Commonframe(QtGui.QMainWindow):
     def openCollection(self, fileName):
 
         try:
-            f = open(unicode(fileName), 'r')
+            f = open(str(fileName), 'r')
             Mainframe.model = model.Model()
             Mainframe.model.delete(0)
             for data in yaml.load_all(f):
@@ -64,7 +64,7 @@ class Commonframe(QtGui.QMainWindow):
         else:
             if len(Mainframe.model.entries) == 0:
                 Mainframe.model = model.Model()
-            Mainframe.model.filename = unicode(fileName)
+            Mainframe.model.filename = str(fileName)
         finally:
             Mainframe.sigWrapper.sigModelChanged.emit()
 
@@ -108,7 +108,7 @@ class Mainframe(Commonframe):
         def run(self):
             try:
                 info = yaml.load(
-                    urllib.urlopen(
+                    urllib.request.urlopen(
                         Conf.value('latest-binary-version-info-url')))
                 if cmp(info['version'], Conf.value('version')) > 0:
                     self.parent.infoNewVersion = info
@@ -339,15 +339,15 @@ class Mainframe(Commonframe):
         menubar = self.menuBar()
         # File menu
         self.fileMenu = menubar.addMenu(Lang.value('MI_File'))
-        map(self.fileMenu.addAction,
+        list(map(self.fileMenu.addAction,
             [self.newAction,
              self.openAction,
              self.saveAction,
              self.saveAsAction,
-             self.saveTemplateAction])
+             self.saveTemplateAction]))
         self.fileMenu.addSeparator()
         self.langMenu = self.fileMenu.addMenu(Lang.value('MI_Language'))
-        map(self.langMenu.addAction, self.langActions)
+        list(map(self.langMenu.addAction, self.langActions))
         self.fileMenu.addSeparator()
         self.importMenu = self.fileMenu.addMenu(Lang.value('MI_Import'))
         self.importMenu.addAction(self.importPbmAction)
@@ -361,19 +361,19 @@ class Mainframe(Commonframe):
 
         # Entry menu
         self.editMenu = menubar.addMenu(Lang.value('MI_Edit'))
-        map(self.editMenu.addAction, [
-            self.addEntryAction, self.deleteEntryAction])
+        list(map(self.editMenu.addAction, [
+            self.addEntryAction, self.deleteEntryAction]))
         self.editMenu.addSeparator()
 
         # Popeye menu
         self.popeyeMenu = menubar.addMenu(Lang.value('MI_Popeye'))
-        map(self.popeyeMenu.addAction,
+        list(map(self.popeyeMenu.addAction,
             [self.startPopeyeAction,
              self.stopPopeyeAction,
              self.listLegalBlackMoves,
              self.listLegalWhiteMoves,
              self.optionsAction,
-             self.twinsAction])
+             self.twinsAction]))
 
         # help menu
         menubar.addSeparator()
@@ -388,20 +388,20 @@ class Mainframe(Commonframe):
     def initToolbar(self):
         self.toolbar = self.addToolBar('')
         self.toolbar.setObjectName('thetoolbar')
-        map(self.toolbar.addAction, [
-            self.newAction, self.openAction, self.saveAction])
+        list(map(self.toolbar.addAction, [
+            self.newAction, self.openAction, self.saveAction]))
         self.toolbar.addSeparator()
-        map(self.toolbar.addAction, [
-            self.addEntryAction, self.deleteEntryAction])
+        list(map(self.toolbar.addAction, [
+            self.addEntryAction, self.deleteEntryAction]))
         self.toolbar.addSeparator()
-        map(self.toolbar.addAction,
+        list(map(self.toolbar.addAction,
             [self.startPopeyeAction,
              self.stopPopeyeAction,
              self.listLegalBlackMoves,
              self.listLegalWhiteMoves,
              self.optionsAction,
              self.twinsAction,
-             self.runAxr])
+             self.runAxr]))
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
@@ -542,10 +542,10 @@ class Mainframe(Commonframe):
         if Mainframe.model.filename != '':
             f = open(Mainframe.model.filename, 'w')
             try:
-                for i in xrange(len(Mainframe.model.entries)):
+                for i in range(len(Mainframe.model.entries)):
                     f.write("---\n")
                     f.write(
-                        unicode(
+                        str(
                             yaml.dump(
                                 Mainframe.model.entries[i],
                                 encoding=None,
@@ -567,7 +567,7 @@ class Mainframe(Commonframe):
             self, Lang.value('MI_Save_as'), default_dir, "(*.olv)")
         if not fileName:
             return
-        Mainframe.model.filename = unicode(fileName)
+        Mainframe.model.filename = str(fileName)
         self.onSaveFile()
 
     def onSaveTemplate(self):
@@ -629,7 +629,7 @@ class Mainframe(Commonframe):
         try:
             Mainframe.model = model.Model()
             Mainframe.model.delete(0)
-            file = open(unicode(fileName))
+            file = open(str(fileName))
             pbm.PBM_ENCODING = encoding
             for data in pbm.PbmEntries(file):
                 Mainframe.model.add(model.makeSafe(data), False)
@@ -687,7 +687,7 @@ class Mainframe(Commonframe):
             return
         try:
             ed = pdf.ExportDocument(Mainframe.model.entries, Lang)
-            ed.doExport(unicode(fileName))
+            ed.doExport(str(fileName))
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
         except:
@@ -699,7 +699,7 @@ class Mainframe(Commonframe):
         if not fileName:
             return
         try:
-            xfen2img.convert(Mainframe.model.board.toFen(), unicode(fileName))
+            xfen2img.convert(Mainframe.model.board.toFen(), str(fileName))
         except IOError:
             msgBox(Lang.value('MSG_IO_failed'))
         except:
@@ -823,7 +823,7 @@ class Mainframe(Commonframe):
             Mainframe.sigWrapper.sigModelChanged.emit()
 
         except Exception as ex:
-            msgBox(unicode(ex))
+            msgBox(str(ex))
 
 
 class ClickableLabel(QtGui.QLabel):
@@ -875,12 +875,12 @@ class QuickOptionsView():  # for clarity this View is not a widget
     def onModelChanged(self):
         if self.skip_model_changed:
             return
-        for i in xrange(len(self.quickies)):
+        for i in range(len(self.quickies)):
             self.actions[i].setChecked('options' in Mainframe.model.cur() and self.quickies[
                                        i]['option'] in Mainframe.model.cur()['options'])
 
     def onLangChanged(self):
-        for i in xrange(len(self.quickies)):
+        for i in range(len(self.quickies)):
             self.actions[i].setText(Lang.value(self.quickies[i]['lang']))
 
 
@@ -900,11 +900,11 @@ class AboutDialog(QtGui.QDialog):
                 'olive v' +
                 Conf.value('version') +
                 ' is free software licensed under GNU GPL'))
-        vbox.addWidget(ClickableLabel(u'© 2011-2018'))
-        vbox.addWidget(ClickableLabel(u'Project contributors (alphabetically):'))
-        vbox.addWidget(ClickableLabel(u'<b>Mihail Croitor (MDA), Борислав Гађански (SRB)</b>'))
-        vbox.addWidget(ClickableLabel(u'<b>Torsten Linß (GER), Thomas Maeder (CHE)</b>'))
-        vbox.addWidget(ClickableLabel(u'<b>Phil Sphicas (USA), Дмитрий Туревский (RUS)</b>'))
+        vbox.addWidget(ClickableLabel('© 2011-2018'))
+        vbox.addWidget(ClickableLabel('Project contributors (alphabetically):'))
+        vbox.addWidget(ClickableLabel('<b>Mihail Croitor (MDA), Борислав Гађански (SRB)</b>'))
+        vbox.addWidget(ClickableLabel('<b>Torsten Linß (GER), Thomas Maeder (CHE)</b>'))
+        vbox.addWidget(ClickableLabel('<b>Phil Sphicas (USA), Дмитрий Туревский (RUS)</b>'))
         vbox.addWidget(ClickableLabel(
             'For more information please visit <a href="http://www.yacpdb.org/#static/olive">http://www.yacpdb.org/#static/olive</a>'))
 
@@ -1066,7 +1066,7 @@ class OverviewList(QtGui.QTreeWidget):
             self.onCut()
 
     def getSelectionAsYaml(self):
-        text = u''
+        text = ''
         for idx in sorted([x.row()
                            for x in self.selectionModel().selectedRows()]):
             text = text + "---\n"
@@ -1092,7 +1092,7 @@ class OverviewList(QtGui.QTreeWidget):
 
     def onPaste(self):
         try:
-            data = yaml.load_all(unicode(self.clipboard.text()))
+            data = yaml.load_all(str(self.clipboard.text()))
             if isinstance(data, dict):
                 data = [data]
         except yaml.YAMLError as e:
@@ -1113,7 +1113,7 @@ class OverviewList(QtGui.QTreeWidget):
         if not fileName:
             return
 
-        f = open(unicode(fileName), 'w')
+        f = open(str(fileName), 'w')
         try:
             f.write(self.getSelectionAsYaml().encode('utf8'))
         except IOError:
@@ -1126,7 +1126,7 @@ class OverviewList(QtGui.QTreeWidget):
         self.onLangChanged()
 
     def getColumnWidths(self):
-        return ";".join([str(self.columnWidth(i)) for i in xrange(self.columnCount())])
+        return ";".join([str(self.columnWidth(i)) for i in range(self.columnCount())])
 
     def setColumnWidthsFromString(self, widths):
         try:
@@ -1144,7 +1144,7 @@ class OverviewList(QtGui.QTreeWidget):
                               Lang.value('EP_Distinction'),
                               Lang.value('EP_Stipulation'),
                               Lang.value('EP_Pieces_count')])
-        for i in xrange(len(Mainframe.model.entries)):
+        for i in range(len(Mainframe.model.entries)):
             if 'distinction' in Mainframe.model.entries[i]:
                 d = model.Distinction.fromString(
                     Mainframe.model.entries[i]['distinction'])
@@ -1153,12 +1153,12 @@ class OverviewList(QtGui.QTreeWidget):
                     self.topLevelItem(i).setText(4, d.toStringInLang(Lang))
 
     def removeDirtyMarks(self):
-        for i in xrange(len(Mainframe.model.entries)):
+        for i in range(len(Mainframe.model.entries)):
             self.topLevelItem(i).setText(0, str(i + 1))
 
     def rebuild(self):
         self.clear()
-        for i in xrange(len(Mainframe.model.entries)):
+        for i in range(len(Mainframe.model.entries)):
             newItem = QtGui.QTreeWidgetItem()
             for j, text in enumerate(self.createItem(i)):
                 newItem.setText(j, text)
@@ -1172,7 +1172,7 @@ class OverviewList(QtGui.QTreeWidget):
             newItem.setText(j, text)
         self.insertTopLevelItem(idx, newItem)
 
-        for j in xrange(idx + 1, len(Mainframe.model.entries)):
+        for j in range(idx + 1, len(Mainframe.model.entries)):
             self.topLevelItem(j).setText(
                 0, str(j + 1) + ['', '*'][Mainframe.model.dirty_flags[j]])
         self.skip_model_changed = True
@@ -1180,7 +1180,7 @@ class OverviewList(QtGui.QTreeWidget):
 
     def deleteItem(self, idx):
         self.takeTopLevelItem(idx)
-        for j in xrange(idx, len(Mainframe.model.entries)):
+        for j in range(idx, len(Mainframe.model.entries)):
             self.topLevelItem(j).setText(
                 0, str(j + 1) + ['', '*'][Mainframe.model.dirty_flags[j]])
         # which item is current now depends and handled by the caller
@@ -1202,7 +1202,7 @@ class OverviewList(QtGui.QTreeWidget):
                         Mainframe.model.entries[idx][key])
                     item.append(d.toStringInLang(Lang))
                 else:
-                    item.append(unicode(Mainframe.model.entries[idx][key]))
+                    item.append(str(Mainframe.model.entries[idx][key]))
             else:
                 item.append('')
 
@@ -1382,7 +1382,7 @@ class ChessBoxItemManagable(ChessBoxItem):
         menu.addAction(deleteAllAction)
 
         menu.addSeparator()
-        for i in xrange(len(Conf.zoos)):
+        for i in range(len(Conf.zoos)):
             action = QtGui.QAction(Conf.zoos[i]['name'], self)
             action.triggered.connect(self.manager.makeChangeZooCallable(i))
             menu.addAction(action)
@@ -1430,8 +1430,8 @@ class BoardView(QtGui.QWidget):
         centerGrid.setContentsMargins(0, 0, 0, 0)
         centerWidget.setLayout(centerGrid)
         self.labels = []
-        for i in xrange(8):
-            for j in xrange(8):
+        for i in range(8):
+            for j in range(8):
                 lbl = self.parent.factoryDraggableLabel(j + i * 8)
                 lbl.setTextAndFont(["\xA3", "\xA4"][(i + j) % 2], 'd')
                 # lbl.setDragEnabled(True)
@@ -1441,7 +1441,7 @@ class BoardView(QtGui.QWidget):
 
         vboxEdgeRight = QtGui.QVBoxLayout()
         vboxEdgeRight.setSpacing(0)
-        for i in xrange(8):
+        for i in range(8):
             labelLeft = QtGui.QLabel(chr(110 - i))
             labelLeft.setFont(Mainframe.fonts['y'])
             vboxEdgeLeft.addWidget(labelLeft)
@@ -1538,8 +1538,8 @@ class ChessBox(QtGui.QWidget):
             for j, name in enumerate('KQRBSP'):
                 item = ChessBoxItem(model.Piece(name, color, []))
                 self.gridOrtho.addWidget(item, i, j)
-        for i in xrange(ChessBox.rows):
-            for j in xrange(ChessBox.cols):
+        for i in range(ChessBox.rows):
+            for j in range(ChessBox.cols):
                 x = i * ChessBox.cols + j
                 item = ChessBoxItemManagable(None, i * ChessBox.cols + j, self)
                 if '' != Conf.value('fairy-zoo')[i][j]:
@@ -1585,8 +1585,8 @@ class ChessBox(QtGui.QWidget):
         return callable
 
     def changeZoo(self, zoo):
-        for i in xrange(ChessBox.rows):
-            for j in xrange(ChessBox.cols):
+        for i in range(ChessBox.rows):
+            for j in range(ChessBox.cols):
                 piece = None
                 if zoo[i][j] != '':
                     piece = model.Piece.fromAlgebraic(zoo[i][j])
@@ -1594,8 +1594,8 @@ class ChessBox(QtGui.QWidget):
 
     def sync(self):
         zoo = Conf.value('fairy-zoo')
-        for i in xrange(ChessBox.rows):
-            for j in xrange(ChessBox.cols):
+        for i in range(ChessBox.rows):
+            for j in range(ChessBox.cols):
                 if not self.items[i * ChessBox.cols + j].piece is None:
                     zoo[i][j] = self.items[
                         i * ChessBox.cols + j].piece.serialize()
@@ -1621,7 +1621,7 @@ class AddFairyPieceDialog(options.OkCancelDialog):
         self.comboColor.addItems(model.COLORS)
         form.addRow(Lang.value('PP_Color'), self.comboColor)
 
-        self.piece_types = sorted(model.FairyHelper.glyphs.iterkeys())
+        self.piece_types = sorted(model.FairyHelper.glyphs.keys())
         self.comboType = QtGui.QComboBox()
         self.comboType.addItems(
             [x + ' (' + model.FairyHelper.glyphs[x]['name'] + ')' for x in self.piece_types])
@@ -1693,10 +1693,10 @@ class EasyEditView(QtGui.QWidget):
             self.inputDateYear.minimumSizeHint().width())
         self.inputDateMonth = QtGui.QComboBox()
         self.inputDateMonth.addItems([''])
-        self.inputDateMonth.addItems([str(x) for x in xrange(1, 13)])
+        self.inputDateMonth.addItems([str(x) for x in range(1, 13)])
         self.inputDateDay = QtGui.QComboBox()
         self.inputDateDay.addItems([''])
-        self.inputDateDay.addItems(["%02d" % x for x in xrange(1, 32)])
+        self.inputDateDay.addItems(["%02d" % x for x in range(1, 32)])
         tmpWidget = QtGui.QWidget()
         hbox = QtGui.QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
@@ -1765,12 +1765,12 @@ class EasyEditView(QtGui.QWidget):
         if self.skip_model_changed:
             return
 
-        Mainframe.model.cur()['authors'] = [x.strip() for x in unicode(
+        Mainframe.model.cur()['authors'] = [x.strip() for x in str(
             self.inputAuthors.toPlainText()).split("\n") if x.strip() != '']
-        Mainframe.model.cur()['source'] = unicode(
+        Mainframe.model.cur()['source'] = str(
             self.inputSource.text()).strip()
-        i_id, s_id = unicode(
-            self.inputIssueId.text()).strip(), unicode(
+        i_id, s_id = str(
+            self.inputIssueId.text()).strip(), str(
             self.inputSourceId.text()).strip()
         is_id = '/'.join([i_id, s_id])
         if is_id.startswith('/'):
@@ -1778,7 +1778,7 @@ class EasyEditView(QtGui.QWidget):
         Mainframe.model.cur()['source-id'] = is_id
 
         date = model.myint(
-            unicode(
+            str(
                 self.inputDateYear.text()).encode(
                 'ascii',
                 'replace'))
@@ -1883,8 +1883,8 @@ class DistinctionWidget(QtGui.QWidget):
         distinction.name = DistinctionWidget.names[self.name.currentIndex()]
         distinction.lo = self.lo.value()
         distinction.hi = self.hi.value()
-        distinction.comment = unicode(self.comment.text())
-        return unicode(distinction)
+        distinction.comment = str(self.comment.text())
+        return str(distinction)
 
     def onModelChanged(self):
         if self.skip_model_changed:
@@ -1912,7 +1912,7 @@ class KeywordsInputWidget(QtGui.QTextEdit):
         super(KeywordsInputWidget, self).__init__()
         self.kwdMenu = QtGui.QMenu(Lang.value('MI_Add_keyword'))
         # for section in sorted(Conf.keywords.keys()):
-        for section in Conf.keywords.keys():
+        for section in list(Conf.keywords.keys()):
             submenu = self.kwdMenu.addMenu(section)
             for keyword in sorted(Conf.keywords[section]):
                 action = QtGui.QAction(keyword, self)
@@ -1929,7 +1929,7 @@ class KeywordsInputWidget(QtGui.QTextEdit):
     def createCallable(self, keyword):
         def callable():
             keywords = [
-                x.strip() for x in unicode(
+                x.strip() for x in str(
                     self.toPlainText()).split("\n") if x.strip() != '']
             keywords.append(keyword)
             self.setText("\n".join(keywords))
@@ -1969,11 +1969,11 @@ class SolutionView(QtGui.QWidget):
     def onChanged(self):
         if self.skip_model_changed:
             return
-        Mainframe.model.cur()['solution'] = unicode(
+        Mainframe.model.cur()['solution'] = str(
             self.solution.toPlainText()).strip()
-        Mainframe.model.cur()['keywords'] = [x.strip() for x in unicode(
+        Mainframe.model.cur()['keywords'] = [x.strip() for x in str(
             self.keywords.toPlainText()).split("\n") if x.strip() != '']
-        Mainframe.model.cur()['comments'] = [x.strip() for x in unicode(
+        Mainframe.model.cur()['comments'] = [x.strip() for x in str(
             self.comments.toPlainText()).split("\n\n") if x.strip() != '']
 
         for k in ['solution']:
@@ -2154,10 +2154,10 @@ class PopeyeView(QtGui.QSplitter):
     def onChanged(self):
         if self.skip_model_changed:
             return
-        Mainframe.model.cur()['stipulation'] = unicode(
+        Mainframe.model.cur()['stipulation'] = str(
             self.inputStipulation.currentText()).encode(
             'ascii', 'ignore').strip()
-        Mainframe.model.cur()['intended-solutions'] = unicode(
+        Mainframe.model.cur()['intended-solutions'] = str(
             self.inputIntended.text()).encode(
             'ascii', 'ignore').strip()
         for k in ['stipulation', 'intended-solutions']:
@@ -2412,7 +2412,7 @@ class PublishingView(QtGui.QSplitter):
     def loadFontInfo(self, filename):
         fontinfo = {}
         f = open(filename)
-        for entry in map(lambda x: x.strip().split("\t"), f.readlines()):
+        for entry in [x.strip().split("\t") for x in f.readlines()]:
             fontinfo[entry[0]] = {'postfix': entry[1], 'chars': [
                 chr(int(entry[2])), chr(int(entry[3]))]}
         f.close()
@@ -2452,7 +2452,7 @@ class PublishingView(QtGui.QSplitter):
                       8 * chr(int(config['edges']['N'])) +
                       chr(int(config['edges']['NE'])) +
                       "<br/>"])
-        for i in xrange(64):
+        for i in range(64):
             # left edge
             if i % 8 == 0:
                 font = config['prefix'] + config['aux-postfix']
@@ -2504,7 +2504,7 @@ class PublishingView(QtGui.QSplitter):
             spans[-1].append(edge)
         html = ''.join([
             '<font face="%s">%s</font>' % (fonts[i], ''.join(spans[i]))
-            for i in xrange(len(fonts))
+            for i in range(len(fonts))
         ])
         return ('<font size="%s">%s</font>') % (config['size'], html)
         # return html
@@ -2634,7 +2634,7 @@ class PopeyeOutputWidget(QtGui.QTextEdit):
                     Lang.value('PS_Original_output'),
                     self.parentView.toggleCompact)
                 notations = Conf.value('notations')
-                for notation in notations.keys():
+                for notation in list(notations.keys()):
                     submenu.addAction(
                         ''.join(
                             notations[notation]),
@@ -2705,7 +2705,7 @@ class Conf:
     value = staticmethod(value)
 
     def dump(object):
-        return unicode(
+        return str(
                 yaml.dump(
                         object,
                         encoding=None,

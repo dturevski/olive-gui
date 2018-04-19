@@ -24,7 +24,7 @@ class ParamStr(QtGui.QLineEdit):
         self.setFixedWidth(50)
 
     def get(self):
-        return unicode(self.text()).encode('ascii', 'replace')
+        return str(self.text()).encode('ascii', 'replace')
 
     def set(self, v):
         self.setText(v)
@@ -136,7 +136,7 @@ class OptionsDialog(OkCancelDialog):
         count_tabs = len(options) // (rows * cols) + \
             (len(options) % (rows * cols) != 0)
         planted = 0
-        for i in xrange(count_tabs):
+        for i in range(count_tabs):
             w = QtGui.QWidget()
             grid = QtGui.QGridLayout()
             grid.setVerticalSpacing(0)
@@ -148,8 +148,8 @@ class OptionsDialog(OkCancelDialog):
             grid.setColumnStretch(cols, 1)
             w.setLayout(grid)
             page_first, page_last = '', ''
-            for col in xrange(cols):
-                for row in xrange(rows):
+            for col in range(cols):
+                for row in range(rows):
                     if planted == len(options):
                         break
                     optionWidget = Option(
@@ -218,7 +218,7 @@ class TwinsInputWidget(QtGui.QTextEdit):
     def getTwins(self):
         twins = {}
         for line in [
-            x.strip() for x in unicode(
+            x.strip() for x in str(
                 self.toPlainText()).encode(
                 'ascii',
                 'replace').split("\n") if x.strip() != '']:
@@ -231,7 +231,7 @@ class TwinsInputWidget(QtGui.QTextEdit):
     def createCallable(self, command):
         def callable():
             twins = [
-                x.strip() for x in unicode(
+                x.strip() for x in str(
                     self.toPlainText()).split("\n") if x.strip() != '']
             twins.append(command)
             self.setText("\n".join(twins))
@@ -265,7 +265,7 @@ class SelectFileWidget(QtGui.QLineEdit):
         fileName = QtGui.QFileDialog.getOpenFileName(self, self.title, os.path.dirname(self.value))
         if not fileName:
             return
-        self.value = unicode(fileName)
+        self.value = str(fileName)
         self.setText(self.value)
         self.onChanged(self.value)
 

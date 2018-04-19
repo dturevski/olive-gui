@@ -15,8 +15,8 @@ import ctypes
 from PyQt4 import QtGui, QtCore
 
 # local
-import base
-import gui, demo
+from . import base
+from . import gui, demo
 
 
 def main():
@@ -55,7 +55,7 @@ def main():
 
     # if invoked with "olive.py filename.olv" - read filename.olv
     if len(sys.argv) and sys.argv[-1][-4:] == '.olv':
-        mainframe.openCollection(unicode(sys.argv[-1], sys.getfilesystemencoding()))
+        mainframe.openCollection(str(sys.argv[-1], sys.getfilesystemencoding()))
 
     # entering main loop
     sys.exit(app.exec_())

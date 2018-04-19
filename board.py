@@ -59,7 +59,7 @@ class FairyHelper:
     defaults, overrides, glyphs, fontinfo = {}, {}, {}, {}
     options, conditions = [], []
     f = open('conf/fairy-pieces.txt')
-    for entry in map(lambda x: x.strip().split("\t"), f.readlines()):
+    for entry in [x.strip().split("\t") for x in f.readlines()]:
         glyphs[entry[0]] = {'name': entry[1]}
         if len(entry) > 2:
             if '' != entry[2].strip():
@@ -74,17 +74,17 @@ class FairyHelper:
     f.close()
 
     f = open('resources/fonts/xfen.txt')
-    for entry in map(lambda x: x.strip().split("\t"), f.readlines()):
+    for entry in [x.strip().split("\t") for x in f.readlines()]:
         fontinfo[entry[0]] = {'family': entry[1], 'chars': [
             chr(int(entry[2])), chr(int(entry[3]))]}
     f.close()
 
     f = open('conf/py-options.txt')
-    options = map(lambda x: x.strip(), f.readlines())
+    options = [x.strip() for x in f.readlines()]
     f.close()
 
     f = open('conf/py-conditions.txt')
-    conditions = map(lambda x: x.strip(), f.readlines())
+    conditions = [x.strip() for x in f.readlines()]
     f.close()
 
 def twinId(twin_index):
@@ -173,16 +173,16 @@ class Board:
         if((at > 63) or (at < 0)):
             return
         if(self.board[at].prev != -1):
-            self.board[self.board[at].prev].next = self.board[at].next
-        if(self.board[at].next != -1):
+            self.board[self.board[at].prev].next = self.board[at].__next__
+        if(self.board[at].__next__ != -1):
             self.board[self.board[at].next].prev = self.board[at].prev
         if(at == self.head):
-            self.head = self.board[at].next
+            self.head = self.board[at].__next__
         self.board[at] = None
 
     def clear(self):
         self.head, self.board, self.stm = -1, [], 'black'
-        for i in xrange(64):
+        for i in range(64):
             self.board.append(None)
 
     def flip(self):
@@ -192,7 +192,7 @@ class Board:
         if(self.board[arr] is not None):
             self.drop(arr)
         self.board[arr] = self.board[dep]
-        if(self.board[arr].next != -1):
+        if(self.board[arr].__next__ != -1):
             self.board[self.board[arr].next].prev = arr
         if(self.board[arr].prev != -1):
             self.board[self.board[arr].prev].next = arr
@@ -299,7 +299,7 @@ class Board:
 
     def toFen(self):
         fen, blanks = '', 0
-        for i in xrange(64):
+        for i in range(64):
             if((i > 0) and (i % 8 == 0)):  # new row
                 if(blanks > 0):
                     fen = fen + ("%d" % (blanks))
@@ -349,10 +349,10 @@ class Board:
             c[p.color][specs][p.name].append(idxToAlgebraic(s))
 
         lines = []
-        for color in c.keys():
+        for color in list(c.keys()):
             for specs in c[color]:
                 line = '  ' + color + ' ' + specs + ' ' + \
-                       ' '.join([name + ''.join(c[color][specs][name]) for name in c[color][specs].keys()])
+                       ' '.join([name + ''.join(c[color][specs][name]) for name in list(c[color][specs].keys())])
                 lines.append(line)
         return "\n".join(lines)
 
@@ -398,10 +398,10 @@ class Pieces:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.current == -1:
             raise StopIteration
         old_current = self.current
-        self.current = self.board.board[self.current].next
+        self.current = self.board.board[self.current].__next__
         return old_current, self.board.board[old_current]
 

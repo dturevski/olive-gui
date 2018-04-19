@@ -1,5 +1,5 @@
-import common
-import chess
+from . import common
+from . import chess
 
 
 def check(problem, board, solution):

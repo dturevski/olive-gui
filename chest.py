@@ -9,8 +9,8 @@ import re
 from PyQt4 import QtGui, QtCore
 
 # local
-import model
-import options
+from . import model
+from . import options
 
 CHESTSTIPULATION = re.compile('^([sh]?)([#=])(\d+)(\.5)?$', re.IGNORECASE)
 
@@ -279,9 +279,9 @@ class ChestView(QtGui.QSplitter):
 
     def onSettingsChanged(self):
         try:
-            self.Conf.chest['options'] = unicode(self.inputOptions.text())
+            self.Conf.chest['options'] = str(self.inputOptions.text())
         except Exception as e:
-            print e
+            print(e)
 
 class OutputWidget(QtGui.QTextEdit):
 

@@ -40,9 +40,9 @@ def entry(yamltext):
     yamltext = yamltext.replace("stipulation: =", 'stipulation: "="')
     e = yaml.load(yamltext)
     if "solution" in e:
-        e["solution"] = unquote(unicode(e["solution"]).encode("utf8"))
+        e["solution"] = unquote(str(e["solution"]).encode("utf8"))
     if "stipulation" in e:
-        e["stipulation"] = unicode(e["stipulation"]).encode("utf8")
+        e["stipulation"] = str(e["stipulation"]).encode("utf8")
     if 'algebraic' in e:
         b = board.Board()
         b.fromAlgebraic(e["algebraic"])

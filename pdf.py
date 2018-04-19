@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 
 # local
-import model
+from . import model
 
 # 3rd party
 import reportlab.rl_config
@@ -39,7 +39,7 @@ from reportlab.pdfbase import _fontdata_enc_macexpert
 
 
 # local
-import model
+from . import model
 
 A4_LANDSCAPE_H, A4_LANDSCAPE_W = A4
 A5_MARGIN_X, A5_MARGIN_Y = 24, 16
@@ -71,7 +71,7 @@ CHESS_FONTS = {
     'x': ('GC2004X', 'resources/fonts/gc2004x_.ttf'),
     'y': ('GC2004Y', 'resources/fonts/gc2004y_.ttf')
 }
-for variation in FONT_INFO.keys():
+for variation in list(FONT_INFO.keys()):
     pdfmetrics.registerFont(
         TTFont(
             FONT_INFO[variation][0],
@@ -83,7 +83,7 @@ pdfmetrics.registerFontFamily(
     bold=FONT_INFO['bold'][0],
     italic=FONT_INFO['italic'][0],
     boldItalic=FONT_INFO['boldItalic'][0])
-for key in CHESS_FONTS.keys():
+for key in list(CHESS_FONTS.keys()):
     pdfmetrics.registerFont(TTFont(CHESS_FONTS[key][0], CHESS_FONTS[key][1]))
     pdfmetrics.registerFontFamily(
         key,
@@ -131,7 +131,7 @@ class ExportDocument:
             _pageBreakQuick=1)
 
         story = []
-        for i in xrange(0, len(self.records), 2):
+        for i in range(0, len(self.records), 2):
             e = None
             if i + 1 < len(self.records):
                 e = self.records[i + 1]
@@ -187,7 +187,7 @@ class ExportDocument:
         b = model.Board()
         if 'algebraic' in e:
             b.fromAlgebraic(e['algebraic'])
-        x = unicode(self.board2Html(b).decode("ISO-8859-1"))
+        x = str(self.board2Html(b).decode("ISO-8859-1"))
         story.append(
             BorderedParagraph(
                 '<para autoLeading="max">' +
@@ -275,7 +275,7 @@ class ExportDocument:
         if len(legend) == 0:
             return ''
         return ExportDocument.escapeHtml(
-            "<br/>".join([", ".join(legend[k]) + ': ' + k for k in legend.keys()]))
+            "<br/>".join([", ".join(legend[k]) + ': ' + k for k in list(legend.keys())]))
     legend = staticmethod(legend)
 
     def escapeHtml(str):
@@ -287,7 +287,7 @@ class ExportDocument:
     def board2Html(self, board):
         lines = []
         spans, fonts, prevfont = [], [], 'z'
-        for i in xrange(64):
+        for i in range(64):
             font, char = 'd', ["\xA3", "\xA4"][((i >> 3) + (i % 8)) % 2]
             if not board.board[i] is None:
                 glyph = board.board[i].toFen()
@@ -311,7 +311,7 @@ class ExportDocument:
                     fonts[i]][0],
                     FONT_SIZE['chess'],
                     ''.join(
-                    spans[i])) for i in xrange(
+                    spans[i])) for i in range(
                     len(fonts))])
 
 
@@ -340,7 +340,7 @@ def wrapNice(line, w):
     words = line.split(' ')
     cur_line_words = []
     total = 0
-    for i in xrange(len(words)):
+    for i in range(len(words)):
         if total == 0:
             new_total = len(words[i])
         else:

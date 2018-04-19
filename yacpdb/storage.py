@@ -1,6 +1,6 @@
 import MySQLdb, MySQLdb.cursors
 import logging, traceback
-import entry
+from . import entry
 
 database = MySQLdb.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb", cursorclass=MySQLdb.cursors.DictCursor)
 database.cursor().execute("SET NAMES utf8")
@@ -12,8 +12,8 @@ def commit(query, params):
         database.commit()
     except Exception as ex:
         database.rollback()
-        print ex
-        print c._last_executed
+        print(ex)
+        print(c._last_executed)
 
 
 def mysqldt(dt):
@@ -152,7 +152,7 @@ class Dao:
 
     def ixr_saveAnalysisResults(self, ash, analysisResults):
         c = database.cursor()
-        for key, predicate in analysisResults.predicates.iteritems():
+        for key, predicate in analysisResults.predicates.items():
             c.execute("INSERT INTO predicates (name_id, ash, matchcount) VALUES (%s, %s, %s)",
                       (self.ixr_getPredicateIdByName(predicate.name), ash, str(analysisResults.counts[key])))
             pid = database.insert_id()

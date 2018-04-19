@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
 import json
-import base, model
-from p2w.parser import parser
+from . import base, model
+from .p2w.parser import parser
 import re
 #import yacpdb.storage
 
@@ -12,9 +12,9 @@ def main():
     try:
         with open(sys.argv[1], 'r') as f:
             entry = json.load(f)
-            print json.dumps(validate(entry))
+            print(json.dumps(validate(entry)))
     except Exception as e:
-        print json.dumps({'success': False, "errors": [unicode(e)]})
+        print(json.dumps({'success': False, "errors": [str(e)]}))
         sys.exit(-1)
 
 def validateStipulation(stip, r):

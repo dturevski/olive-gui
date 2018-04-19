@@ -15,9 +15,9 @@ class Analyzer:
             else 0
         visitor = ZilahiTraverser(parity)
         visitor.visit(solution, board, {}, frozenset())
-        for _ in xrange(visitor.phases):
+        for _ in range(visitor.phases):
             acc.push("Phases")
-        for _ in xrange(visitor.twins):
+        for _ in range(visitor.twins):
             acc.push("Twins")
 
         non_cyclical_zp = False
@@ -105,6 +105,6 @@ class ZilahiTraverser:
             if t[0] < o:
                 o = t[0]
                 ix = i
-        for i in xrange(len(cycle)):
+        for i in range(len(cycle)):
             c.append(cycle[(ix+i)%len(cycle)])
         return tuple(c) # tuple() because list is unhashable type, can't be added to set

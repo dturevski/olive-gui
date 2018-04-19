@@ -107,7 +107,7 @@ class TrajectoriesBuilderAndPlatzwechselAnalyzer:
     def build(solution, board, acc):
         tb = TrajectoriesBuilderAndPlatzwechselAnalyzer(acc)
         tb.visit(board, solution, {}, [])
-        return [tb.result[k] for k in tb.result.iterkeys() if len(tb.result[k].branches) > 0]
+        return [tb.result[k] for k in tb.result.keys() if len(tb.result[k].branches) > 0]
     build = staticmethod(build)
 
     def searchPlatzWs(self, snap, snaps, board):
@@ -176,7 +176,7 @@ class TNode:
 
 def patternize(square):
     square = board.Square(square)
-    for (name, vecs) in PATTERNS.items():
+    for (name, vecs) in list(PATTERNS.items()):
         squares = []
         for (a, b) in vecs:
             s = board.Square(square.x + a, square.y + b)
@@ -201,7 +201,7 @@ def search(head, tail, acc):
 
     # c2c
     if len(head) > 1 and head[-1].square in CORNERS:
-        for i in xrange(len(head) - 2, -1, -1):
+        for i in range(len(head) - 2, -1, -1):
             if head[i].square != head[-1].square and head[i].square in CORNERS:
                 acc.push("CornerToCorner(%s)" % head[i].piece)
                 break
@@ -215,9 +215,9 @@ def search(head, tail, acc):
 def oneline(squares):
     if len(squares) < 3:
         return True
-    squares = map(lambda x: board.Square(x), squares)
+    squares = [board.Square(x) for x in squares]
     x, y = squares[1].x - squares[0].x, squares[1].y - squares[0].y
-    for i in xrange(2, len(squares)):
+    for i in range(2, len(squares)):
         x_, y_ = squares[i].x - squares[0].x, squares[i].y - squares[0].y
         if x*y_ != x_*y:
             return False
@@ -225,7 +225,7 @@ def oneline(squares):
 
 
 def findLast(squares, elem, start):
-    for i in xrange(len(squares) - 1, start, -1):
+    for i in range(len(squares) - 1, start, -1):
         if elem == squares[i]:
             return i
     return -1

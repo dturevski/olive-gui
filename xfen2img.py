@@ -124,7 +124,7 @@ def convert(xfen, filename):
                      fill="#808080", outline="#808080")
 
     cells = parse_xfen(xfen)
-    for i in xrange(64):
+    for i in range(64):
         coords, with_border = token_to_sprite(cells[i], (i % 2) ^ (i >> 3) % 2)
         img_x = bs + cs * (i % 8)
         img_y = bs + cs * (i >> 3)

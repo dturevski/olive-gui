@@ -28,11 +28,11 @@ def calculateAshGlobally():
             ash = yacpdb.entry.ash(e)
             dao.ixr_updateEntryAsh(e["id"], ash)
             succeded += 1
-            print "%s: %s" % (e["id"], ash)
+            print("%s: %s" % (e["id"], ash))
         else:
             pass
             # print str(e["id"]) + ": failed - " + "; ".join(r['errors'])
-    print "tried: %d, succeeded: %d" % (tried, succeded)
+    print("tried: %d, succeeded: %d" % (tried, succeded))
 
 
 def calculateOrthoGlobally():
@@ -41,7 +41,7 @@ def calculateOrthoGlobally():
         dao.ixr_updateEntryOrtho(e["id"], not model.hasFairyElements(e))
         i += 1
         if i % 10000 == 0:
-            print i
+            print(i)
 
 
 def crunch(count):
@@ -83,7 +83,7 @@ class Analyzer0:
         except Exception:
             raise RuntimeError("invalid solution")
 
-        print entry["id"], solution.size
+        print(entry["id"], solution.size)
 
         if solution.size > 140:
             raise RuntimeError("solution too long")
@@ -101,7 +101,7 @@ class Analyzer0:
         except RuntimeError as rerr:
             dao.ixr_updateCruncherLog(entry["ash"], str(rerr))
         except Exception as ex:
-            print traceback.format_exc(ex)
+            print(traceback.format_exc(ex))
             dao.ixr_updateCruncherLog(entry["ash"], str(ex))
 
     def runBatch(self, size):
@@ -119,9 +119,9 @@ def main():
     logging.basicConfig(filename='~/logs/cruncher.log', level=logging.DEBUG)
     os.nice(19)
     if "--crunch" in sys.argv:
-        print "started", datetime.datetime.now()
+        print("started", datetime.datetime.now())
         crunch(1000)
-        print "finished", datetime.datetime.now()
+        print("finished", datetime.datetime.now())
     elif "--calculate-ash-globally" in sys.argv:
         calculateAshGlobally()
     elif "--calculate-ortho-globally" in sys.argv:
