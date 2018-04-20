@@ -2,12 +2,15 @@ analyzers: [trajectories, miscellaneous]
 auto-compactify: 0
 check-for-latest-binary: 1
 chest-executable: {nt: ChestUCI-v5.2\WinChest.exe, posix: /home/dima/temp/chest/chest}
-default-lang: en
+default-lang: ru
 default-notation: en
 fairy-zoo:
-- [white LE, black L, black LE, '', '', '', '']
-- ['', '', '', '', '', '', '']
-- ['', '', '', '', '', '', '']
+- [white Chameleon Q, white Chameleon R, white Chameleon B, white Chameleon S, white
+    Chameleon P, '', '']
+- [black Chameleon Q, black Chameleon R, black Chameleon B, black Chameleon S, black
+    Chameleon P, '', '']
+- [neutral Chameleon Q, neutral Chameleon R, neutral Chameleon B, neutral Chameleon
+    S, neutral Chameleon P, '', '']
 horsehead-glyph: N
 import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
 import-post-decode-default: ISO-8859-1

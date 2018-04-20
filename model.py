@@ -18,14 +18,14 @@ from board import *
 def myint(string):
     f, s = False, []
     for char in string:
-        if char in '0123456789':
+        if char in "0123456789":
             s.append(char)
             f = True
         elif f:
             break
     try:
         return int(''.join(s))
-    except exceptions.ValueError:
+    except ValueError:
         return 0
 
 
@@ -204,7 +204,7 @@ class Model:
     file = 'conf/default-entry.yaml'
 
     def __init__(self):
-        f = open(Model.file, 'r')
+        f = open(Model.file, 'r', encoding="utf8")
         try:
             self.defaultEntry = yaml.load(f)
         finally:
@@ -294,14 +294,9 @@ class Model:
                           for k in sorted(self.entries[self.current]['twins'].keys())])
 
     def saveDefaultEntry(self):
-        f = open(Model.file, 'w')
+        f = open(Model.file, 'wb')
         try:
-            f.write(
-                str(
-                    yaml.dump(
-                        self.defaultEntry,
-                        encoding=None,
-                        allow_unicode=True)).encode('utf8'))
+            f.write(yaml.dump(self.defaultEntry, encoding='utf8', allow_unicode=True))
         finally:
             f.close()
 

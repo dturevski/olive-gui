@@ -10,14 +10,21 @@ Usage:
 import sys
 import os
 import ctypes
+import logging
 
 # 3rd party
 from PyQt5 import QtGui, QtCore, QtWidgets
 
 # local
 import base
-import gui, demo
+import gui
 
+# logging uncaught exceptions
+def excepthook(exc_type, exc_value, exc_traceback):
+    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    sysexcepthook(exc_type, exc_value, exc_traceback)
+sysexcepthook = sys.excepthook
+sys.excepthook = excepthook
 
 def main():
 
@@ -35,7 +42,7 @@ def main():
 
 
     # Qt bootstrap
-    app = QtWidgets.QApplication(sys.argv)
+    gui.Mainframe.app = QtWidgets.QApplication(sys.argv)
 
     # required for QSetting to work properly
     QtCore.QCoreApplication.setOrganizationName("OSS")
@@ -47,17 +54,14 @@ def main():
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004x_.ttf')
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004y_.ttf')
 
-    if "--demo-board" in sys.argv:
-        mainframe = demo.Demoframe(app)
-    else:
-        mainframe = gui.Mainframe()
+    mainframe = gui.Mainframe()
 
     # if invoked with "olive.py filename.olv" - read filename.olv
     if len(sys.argv) and sys.argv[-1][-4:] == '.olv':
         mainframe.openCollection(str(sys.argv[-1], sys.getfilesystemencoding()))
 
     # entering main loop
-    sys.exit(app.exec_())
+    sys.exit(gui.Mainframe.app.exec_())
 
 if __name__ == '__main__':
     main()

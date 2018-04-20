@@ -110,9 +110,9 @@ class ChestView(QtWidgets.QSplitter):
 
         handle, self.temp_filename = tempfile.mkstemp()
 
-        input = self.input.toPlainText().toAscii()
+        input = self.input.toPlainText()
 
-        os.write(handle, input)
+        os.write(handle, input.encode('utf8'))
         os.close(handle)
 
         self.chestProc = QtCore.QProcess()
@@ -129,13 +129,12 @@ class ChestView(QtWidgets.QSplitter):
 
     def onOut(self):
         data = self.chestProc.readAllStandardOutput()
-        self.output.insertPlainText(QtCore.QString(data))
+        self.output.insertPlainText(str(data, encoding="utf8"))
         # TODO #1: add break for big output
 
     def onError(self):
         self.output.setTextColor(QtWidgets.QColor(255, 0, 0))
-        self.output.insertPlainText(QtCore.QString(
-            self.chestProc.readAllStandardError()))
+        self.output.insertPlainText(str(self.chestProc.readAllStandardError(), encoding="utf8"))
         self.output.setTextColor(QtWidgets.QColor(0, 0, 0))
 
     def onFailed(self):

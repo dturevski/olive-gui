@@ -173,11 +173,11 @@ class Board:
         if((at > 63) or (at < 0)):
             return
         if(self.board[at].prev != -1):
-            self.board[self.board[at].prev].next = self.board[at].__next__
-        if(self.board[at].__next__ != -1):
+            self.board[self.board[at].prev].next = self.board[at].next
+        if(self.board[at].next != -1):
             self.board[self.board[at].next].prev = self.board[at].prev
         if(at == self.head):
-            self.head = self.board[at].__next__
+            self.head = self.board[at].next
         self.board[at] = None
 
     def clear(self):
@@ -192,7 +192,7 @@ class Board:
         if(self.board[arr] is not None):
             self.drop(arr)
         self.board[arr] = self.board[dep]
-        if(self.board[arr].__next__ != -1):
+        if(self.board[arr].next != -1):
             self.board[self.board[arr].next].prev = arr
         if(self.board[arr].prev != -1):
             self.board[self.board[arr].prev].next = arr
@@ -402,6 +402,6 @@ class Pieces:
         if self.current == -1:
             raise StopIteration
         old_current = self.current
-        self.current = self.board.board[self.current].__next__
+        self.current = self.board.board[self.current].next
         return old_current, self.board.board[old_current]
 

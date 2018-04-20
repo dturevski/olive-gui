@@ -1,6 +1,6 @@
 import os
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtGui, QtWidgets
 
 
 class ParamInt(QtWidgets.QSpinBox):
@@ -131,6 +131,7 @@ class OptionsDialog(OkCancelDialog):
         self.createTabs('Conditions', conditions, rows, cols, entry_options)
         super(OptionsDialog, self).__init__(Lang)
         self.setWindowTitle(Lang.value('MI_Options'))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/settings.svg')))
 
     def createTabs(self, caption, options, rows, cols, entry_options):
         count_tabs = len(options) // (rows * cols) + \
@@ -246,6 +247,7 @@ class TwinsDialog(OkCancelDialog):
         self.mainWidget.setText(twins)
         super(TwinsDialog, self).__init__(Lang)
         self.setWindowTitle(Lang.value('MI_Twins'))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/gemini.svg')))
 
     def getTwins(self):
         return self.mainWidget.getTwins()
@@ -262,7 +264,7 @@ class SelectFileWidget(QtWidgets.QLineEdit):
         self.setReadOnly(True)
 
     def mousePressEvent(self, e):
-        fileName = QtWidgets.QFileDialog.getOpenFileName(self, self.title, os.path.dirname(self.value))
+        fileName = QtWidgets.QFileDialog.getOpenFileName(self, self.title, os.path.dirname(self.value))[0]
         if not fileName:
             return
         self.value = str(fileName)
