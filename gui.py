@@ -404,19 +404,17 @@ class Mainframe(QtWidgets.QMainWindow):
 
     def initFrame(self):
         # window banner
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/olive.png')))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/olive.svg')))
 
         # restoring windows and toolbars geometry
         settings = QtCore.QSettings()
-        if len(str(QtCore.QVariant(settings.value("overviewColumnWidths")))) > 0:
-            pass
-            #self.restoreGeometry(settings.value("geometry").toByteArray())
-            #self.restoreState(settings.value("windowState").toByteArray())
-            #self.overview.setColumnWidthsFromString(
-            #   str(QtCore.QVariant(settings.value("overviewColumnWidths"))))
-        else:
-            # first run
-            self.setGeometry(32, 32, 32, 32)
+        if settings.value("geometry") != None:
+            self.restoreGeometry(settings.value("geometry"))
+        if settings.value("windowState") != None:
+            self.restoreState(settings.value("windowState"))
+        if settings.value("overviewColumnWidths") != None:
+            self.overview.setColumnWidthsFromString(
+               str(QtCore.QVariant(settings.value("overviewColumnWidths"))))
 
     def updateTitle(self):
         docname = Lang.value('WT_New_Collection')
@@ -695,12 +693,15 @@ class Mainframe(QtWidgets.QMainWindow):
         try:
             ed = pdf.ExportDocument(Mainframe.model.entries, Lang)
             ed.doExport(str(fileName))
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(fileName))
         except IOError:
             msg = Lang.value('MSG_IO_failed');
             logging.exception(msg)
             msgBox(msg)
         except:
-            msgBox(Lang.value('MSG_PDF_export_failed'))
+            msg = Lang.value('MSG_PDF_export_failed');
+            logging.exception(msg)
+            msgBox(msg)
 
     def onExportImg(self):
         fileName = QtWidgets.QFileDialog.getSaveFileName(self, Lang.value(
@@ -714,7 +715,9 @@ class Mainframe(QtWidgets.QMainWindow):
             logging.exception(msg)
             msgBox(msg)
         except:
-            msgBox(Lang.value('MSG_Image_export_failed'))
+            msg = Lang.value('MSG_Image_export_failed')
+            logging.exception(Lang.value('MSG_Image_export_failed'))
+            msgBox(msg)
 
     def onAddEntry(self):
         idx = Mainframe.model.current + 1
@@ -831,6 +834,7 @@ class Mainframe(QtWidgets.QMainWindow):
             Mainframe.sigWrapper.sigModelChanged.emit()
 
         except Exception as ex:
+            logging.exception("AXR failure")
             msgBox(str(ex))
 
     def onDemoMode(self):
@@ -920,21 +924,25 @@ class AboutDialog(QtWidgets.QDialog):
         self.setBackgroundRole(QtGui.QPalette.Light)
         vbox = QtWidgets.QVBoxLayout()
         lblLogo = QtWidgets.QLabel()
-        iconLogo = QtGui.QIcon('resources/icons/olive-logo.png')
-        lblLogo.setPixmap(iconLogo.pixmap(331, 139))
+        iconLogo = QtGui.QIcon('resources/icons/olive.svg')
+        lblLogo.setPixmap(iconLogo.pixmap(256, 256))
         vbox.addWidget(lblLogo, QtCore.Qt.AlignCenter)
-        vbox.addWidget(
-            ClickableLabel(
-                'olive v' +
-                Conf.value('version') +
-                ' is free software licensed under GNU GPL'))
+        grid = QtWidgets.QGridLayout()
+
+
+        grid.addWidget(ClickableLabel('Version:'))
+        grid.addWidget(ClickableLabel(Conf.value('version')), 0, 1)
+        grid.addWidget(ClickableLabel('License:'))
+        grid.addWidget(ClickableLabel('<a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU GPL</a>'))
+        grid.addWidget(ClickableLabel('Info:'))
+        grid.addWidget(ClickableLabel('<a href="http://www.yacpdb.org/#static/olive">yacpdb.org/olive</a>'))
+        grid.addWidget(ClickableLabel('Issues:'))
+        grid.addWidget(ClickableLabel('<a href="https://github.com/dturevski/olive-gui/issues">GitHub</a>'))
+        w = QtWidgets.QWidget()
+        w.setLayout(grid)
+        vbox.addWidget(w)
+
         vbox.addWidget(ClickableLabel('© 2011-2018'))
-        vbox.addWidget(ClickableLabel('Project contributors (alphabetically):'))
-        vbox.addWidget(ClickableLabel('<b>Mihail Croitor (MDA), Борислав Гађански (SRB)</b>'))
-        vbox.addWidget(ClickableLabel('<b>Torsten Linß (GER), Thomas Maeder (CHE)</b>'))
-        vbox.addWidget(ClickableLabel('<b>Phil Sphicas (USA), Дмитрий Туревский (RUS)</b>'))
-        vbox.addWidget(ClickableLabel(
-            'For more information please visit <a href="http://www.yacpdb.org/#static/olive">http://www.yacpdb.org/#static/olive</a>'))
 
         vbox.addStretch(1)
         buttonOk = QtWidgets.QPushButton(Lang.value('CO_OK'), self)
@@ -1677,7 +1685,7 @@ class AddFairyPieceDialog(options.OkCancelDialog):
         self.setWindowTitle(Lang.value('MI_Add_piece'))
 
     def getPiece(self):
-        color = str(self.comboColor.currentText())
+        color = self.comboColor.currentText()
         type = str(self.piece_types[self.comboType.currentIndex()])
         specs = [
             x for i, x in enumerate(
@@ -1802,11 +1810,8 @@ class EasyEditView(QtWidgets.QWidget):
 
         Mainframe.model.cur()['authors'] = [x.strip() for x in str(
             self.inputAuthors.toPlainText()).split("\n") if x.strip() != '']
-        Mainframe.model.cur()['source'] = str(
-            self.inputSource.text()).strip()
-        i_id, s_id = str(
-            self.inputIssueId.text()).strip(), str(
-            self.inputSourceId.text()).strip()
+        Mainframe.model.cur()['source'] = self.inputSource.text().strip()
+        i_id, s_id = self.inputIssueId.text().strip(), self.inputSourceId.text().strip()
         is_id = '/'.join([i_id, s_id])
         if is_id.startswith('/'):
             is_id = is_id[1:]
@@ -1914,7 +1919,7 @@ class DistinctionWidget(QtWidgets.QWidget):
         distinction.name = DistinctionWidget.names[self.name.currentIndex()]
         distinction.lo = self.lo.value()
         distinction.hi = self.hi.value()
-        distinction.comment = str(self.comment.text())
+        distinction.comment = self.comment.text().strip()
         return str(distinction)
 
     def onModelChanged(self):
@@ -2185,12 +2190,8 @@ class PopeyeView(QtWidgets.QSplitter):
     def onChanged(self):
         if self.skip_model_changed:
             return
-        Mainframe.model.cur()['stipulation'] = str(
-            self.inputStipulation.currentText()).encode(
-            'ascii', 'ignore').strip()
-        Mainframe.model.cur()['intended-solutions'] = str(
-            self.inputIntended.text()).encode(
-            'ascii', 'ignore').strip()
+        Mainframe.model.cur()['stipulation'] = self.inputStipulation.currentText().strip()
+        Mainframe.model.cur()['intended-solutions'] = self.inputIntended.text().strip()
         for k in ['stipulation', 'intended-solutions']:
             if Mainframe.model.cur()[k] == '':
                 del Mainframe.model.cur()[k]
@@ -2200,7 +2201,7 @@ class PopeyeView(QtWidgets.QSplitter):
         self.skip_model_changed = False
 
     def onMemoryChanged(self):
-        try: Conf.popeye['memory'] = int(str(self.inputMemory.text()))
+        try: Conf.popeye['memory'] = model.myint(str(self.inputMemory.text()))
         except: pass
 
     def onPopeyePathChanged(self, newPath):
@@ -2308,9 +2309,9 @@ class PopeyeView(QtWidgets.QSplitter):
             msgBox(Lang.value('MSG_Popeye_failed') % Conf.popeye['path'])
 
     def onOut(self):
-        data = self.process.readAllStandardOutput()
-        self.raw_output = self.raw_output + str(data)
-        self.output.insertPlainText(str(data, encoding="utf8"))
+        data = bytes(self.process.readAllStandardOutput()).decode("utf8")
+        self.raw_output += data
+        self.output.insertPlainText(data)
         if len(self.raw_output) > int(Conf.popeye['stop-max-bytes']):
             self.stopPopeye()
 
@@ -2730,7 +2731,7 @@ class DemoFrame(QtWidgets.QWidget):
         self.setLayout(hbox)
 
     def initFrame(self):
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/olive.png')))
+        self.setWindowIcon(QtGui.QIcon('resources/icons/olive.svg'))
         self.setWindowTitle("Demo board")
 
     def factoryDraggableLabel(self, id):
@@ -2738,10 +2739,6 @@ class DemoFrame(QtWidgets.QWidget):
 
 
 class DraggableLabelWithHoverEffect(DraggableLabel):
-
-    color1 = QtGui.QColor('#112233')
-    color2 = QtGui.QColor('#332211')
-
 
     def __init__(self, id):
         super(DraggableLabelWithHoverEffect, self).__init__(id)

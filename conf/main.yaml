@@ -2,7 +2,7 @@ analyzers: [trajectories, miscellaneous]
 auto-compactify: 0
 check-for-latest-binary: 1
 chest-executable: {nt: ChestUCI-v5.2\WinChest.exe, posix: /home/dima/temp/chest/chest}
-default-lang: ru
+default-lang: en
 default-notation: en
 fairy-zoo:
 - [white Chameleon Q, white Chameleon R, white Chameleon B, white Chameleon S, white

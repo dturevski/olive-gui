@@ -4,7 +4,7 @@
 import re
 
 # 3rd party
-#from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw
 
 RE_TOKEN = re.compile('^(B?)(!?)([kqrbsnpeaofwdx])([1-7])?$', re.IGNORECASE)
 baseGlyphs = {

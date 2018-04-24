@@ -83,7 +83,7 @@ class Analyzer0:
         except Exception:
             raise RuntimeError("invalid solution")
 
-        print(entry["id"], solution.size)
+        #print(entry["id"], solution.size)
 
         if solution.size > 140:
             raise RuntimeError("solution too long")

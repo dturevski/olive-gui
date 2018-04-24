@@ -47,7 +47,7 @@ def main():
     # required for QSetting to work properly
     QtCore.QCoreApplication.setOrganizationName("OSS")
     QtCore.QCoreApplication.setOrganizationDomain("yacpdb.org")
-    QtCore.QCoreApplication.setApplicationName("olive")
+    QtCore.QCoreApplication.setApplicationName("olive-" + gui.Conf.value('version'))
 
     # loading fonts
     QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004d_.ttf')

@@ -24,7 +24,7 @@ class ParamStr(QtWidgets.QLineEdit):
         self.setFixedWidth(50)
 
     def get(self):
-        return str(self.text()).encode('ascii', 'replace')
+        return self.text()
 
     def set(self, v):
         self.setText(v)

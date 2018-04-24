@@ -2,4 +2,8 @@
 **parser.out
 **parsetab.py
 .idea/workspace.xml
+build/*
+dist/*
+olive.log
+olive.spec
 test.json

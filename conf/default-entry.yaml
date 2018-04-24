@@ -1,4 +1,16 @@
-algebraic: {}
-distinction: ''
+algebraic:
+  black: [Sf3, LEf8, Lh8, Kd1, Pf4]
+  white: [LEa1, Kg8, LEh1, Ra2]
+authors: ['Петков, Петко Андонов']
+comments: ['Reciprocal white leobatteries, and transformation of black leo/locust
+    battery into new batteries, from the fairy Mozart. [CJF]']
+date: 2009-02
+distinction: Special 1st Prize
+intended-solutions: '2'
+keywords: [Anti-battery]
 options: []
-stipulation: h#2
+solution: "1.LEh1-h7 LEf8-f6+ 2.Kg8-g7 Sf3-e5 3.LEh7-b1+ LEf6*a1 # \n1.LEa1-d4 LEf8-h6+\
+  \ 2.Kg8-h7 Sf3-h4 3.LEd4-g1+ LEh6*h1 #"
+source: Broodings
+source-id: 50/11
+stipulation: hs#3

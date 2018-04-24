@@ -10,3 +10,5 @@
   pip install markdown
   pip install PyMySQL
   pip install ply
+  pip install pyinstaller
+  #pip install https://github.com/bjones1/pyinstaller/archive/pyqt5_fix.zip
