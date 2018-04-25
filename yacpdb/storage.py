@@ -29,8 +29,9 @@ def entries(cursor):
                     e[key] = row[key]
             yield e
         except Exception as ex:
-            logging.error("Failed to unyaml entry %d" % row["id"])
-            logging.error(traceback.format_exc(ex))
+            pass
+            #logging.error("Failed to unyaml entry %d" % row["id"])
+            #logging.error(traceback.format_exc(ex))
 
 
 def scalar(query, params):
