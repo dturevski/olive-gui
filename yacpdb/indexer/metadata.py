@@ -1,3 +1,5 @@
+import os
+
 import markdown
 
 from .predicate import *
@@ -9,7 +11,7 @@ except ImportError as e:
 
 class PredicateStorage:
 
-    markdownFilename = '/yacpdb/indexer/indexer.md'
+    markdownFilename = 'yacpdb/indexer/indexer.md'
     domains = {
         'BOOLEAN': Domain('BOOLEAN', 'true|false'),
         'COLOR': Domain('COLOR', '[wbn]'),

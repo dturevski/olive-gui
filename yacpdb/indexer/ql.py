@@ -111,4 +111,4 @@ def p_error(t):
         raise Exception("Terminating syntax error")
 
 lexer=ply.lex.lex(debug=0)
-parser = ply.yacc.yacc()
+parser = ply.yacc.yacc(optimize=False, debug=False)

@@ -1,6 +1,6 @@
 analyzers: [trajectories, miscellaneous]
 auto-compactify: 0
-collections-dir: C:/Users/dmitr/IdeaProjects/olive-gui/collections
+collections-dir: ./
 default-lang: en
 default-notation: en
 fairy-zoo:

@@ -131,7 +131,7 @@ class OptionsDialog(OkCancelDialog):
         self.createTabs('Conditions', conditions, rows, cols, entry_options)
         super(OptionsDialog, self).__init__(Lang)
         self.setWindowTitle(Lang.value('MI_Options'))
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/settings.svg')))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/settings.svg')))
 
     def createTabs(self, caption, options, rows, cols, entry_options):
         count_tabs = len(options) // (rows * cols) + \
@@ -220,9 +220,7 @@ class TwinsInputWidget(QtWidgets.QTextEdit):
         twins = {}
         for line in [
             x.strip() for x in str(
-                self.toPlainText()).encode(
-                'ascii',
-                'replace').split("\n") if x.strip() != '']:
+                self.toPlainText()).split("\n") if x.strip() != '']:
             parts = line.split(":")
             if len(parts) != 2:
                 continue
@@ -247,7 +245,7 @@ class TwinsDialog(OkCancelDialog):
         self.mainWidget.setText(twins)
         super(TwinsDialog, self).__init__(Lang)
         self.setWindowTitle(Lang.value('MI_Twins'))
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/gemini.svg')))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/gemini.svg')))
 
     def getTwins(self):
         return self.mainWidget.getTwins()

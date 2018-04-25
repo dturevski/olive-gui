@@ -16,6 +16,7 @@ import logging
 from PyQt5 import QtGui, QtCore, QtWidgets
 
 # local
+import resources
 import base
 import gui
 
@@ -50,15 +51,15 @@ def main():
     QtCore.QCoreApplication.setApplicationName("olive-" + gui.Conf.value('version'))
 
     # loading fonts
-    QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004d_.ttf')
-    QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004x_.ttf')
-    QtGui.QFontDatabase.addApplicationFont('resources/fonts/gc2004y_.ttf')
+    QtGui.QFontDatabase.addApplicationFont(':/fonts/gc2004d_.ttf')
+    QtGui.QFontDatabase.addApplicationFont(':/fonts/gc2004x_.ttf')
+    QtGui.QFontDatabase.addApplicationFont(':/fonts/gc2004y_.ttf')
 
     mainframe = gui.Mainframe()
 
     # if invoked with "olive.py filename.olv" - read filename.olv
     if len(sys.argv) and sys.argv[-1][-4:] == '.olv':
-        mainframe.openCollection(str(sys.argv[-1], sys.getfilesystemencoding()))
+        mainframe.openCollection(sys.argv[-1])
 
     # entering main loop
     sys.exit(gui.Mainframe.app.exec_())

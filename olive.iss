@@ -11,30 +11,39 @@
 ;#define AppEnterprise
 
 #define AppName "Olive"
-
-
-#define AppVersion "1.18.4"
+#define AppVersion "1.0-beta.1"
+#define AppExeName "olive.exe"
 
 [Setup]
 AppName={#AppName}
 AppVersion={#AppVersion}
-DefaultDirName={pf}\{#AppName}-{#AppVersion}
+DefaultDirName={pf64}\{#AppName}-{#AppVersion}
 DefaultGroupName={#AppName} {#AppVersion}
 UninstallDisplayIcon={app}\uninstall.exe
-LicenseFile={#file AddBackslash(SourcePath) + "gpl.rtf"}
-VersionInfoVersion={#AppVersion}
+LicenseFile={#file AddBackslash(SourcePath) + "LICENSE.txt"}
 OutputDir=dist\
 OutputBaseFilename={#AppName}-{#AppVersion}-amd64
+AllowNoIcons=yes
+ChangesAssociations=yes
 
 [Files]
 Source: "dist\olive.exe"; DestDir: "{app}"
-Source: "dist\conf\*"; DestDir: "{app}\conf\"
-
+Source: "pywin64.exe"; DestDir: "{app}"
+Source: "WinChest.exe"; DestDir: "{app}"
+Source: "resources\fonts\*.ttf"; DestDir: "{app}\resources\fonts"
+Source: "resources\fonts\gc2.gif"; DestDir: "{app}\resources\fonts"
+Source: "resources\fonts\roboto\*.ttf"; DestDir: "{app}\resources\fonts\roboto"
+Source: "conf\*"; DestDir: "{localappdata}\{#AppName}\conf\"
+Source: "conf\dist\*"; DestDir: "{localappdata}\{#AppName}\conf"
+Source: "yacpdb\indexer\indexer.md"; DestDir: "{app}\yacpdb\indexer"
+Source: "p2w\parser.out"; DestDir: "{app}\p2w"
+    
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\olive.exe"
 
-#ifdef Debug
-  #expr SaveToFile(AddBackslash(SourcePath) + "Preprocessed.iss"), \
-        Exec(AddBackslash(CompilerPath) + "Compil32.exe", """" + AddBackslash(SourcePath) + "Preprocessed.iss""")
-#endif
+[Registry]
+Root: HKCR; Subkey: ".olv";                             ValueData: "{#AppName}";          Flags: uninsdeletevalue; ValueType: string;  ValueName: ""
+Root: HKCR; Subkey: "{#AppName}";                     ValueData: "Program {#AppName}";  Flags: uninsdeletekey;   ValueType: string;  ValueName: ""
+Root: HKCR; Subkey: "{#AppName}\DefaultIcon";             ValueData: "{app}\{#AppExeName},0";               ValueType: string;  ValueName: ""
+Root: HKCR; Subkey: "{#AppName}\shell\open\command";  ValueData: """{app}\{#AppExeName}"" ""%1""";  ValueType: string;  ValueName: ""

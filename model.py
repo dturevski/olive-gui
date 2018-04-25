@@ -13,7 +13,7 @@ import yaml
 import legacy.popeye
 import legacy.chess
 from board import *
-
+from base import get_write_dir
 
 def myint(string):
     f, s = False, []
@@ -201,7 +201,7 @@ def makeSafe(e):
 
 
 class Model:
-    file = 'conf/default-entry.yaml'
+    file = get_write_dir() + '/conf/default-entry.yaml'
 
     def __init__(self):
         f = open(Model.file, 'r', encoding="utf8")
@@ -355,3 +355,20 @@ def isFairy(p):
 
 def hasFairyElements(e):
     return hasFairyConditions(e) or hasFairyPieces(e)
+
+def transformEntryOptionsAndTwins(e, transform):
+    if 'options' in e:
+        e['options'] = [transformPopeyeInput(option, transform) for option in e['options']]
+    if 'twins' in e:
+        for twinId, twin in e['twins'].items():
+            e['twins'][twinId] = transformPopeyeInput(twin, transform)
+
+RE_ALGEBRAIC_SQUARE = re.compile("([a-h][1-8])")
+def transformPopeyeInput(input, transform):
+    return re.sub(RE_ALGEBRAIC_SQUARE, lambda m: transformAlgebraicSquare(m.group(1), transform), input)
+
+def transformAlgebraicSquare(square, transform):
+    s = Square(algebraicToIdx(square))
+    x, y = transform((s.x, s.y))
+    x, y = (x + 8) % 8, (y + 8) % 8
+    return idxToAlgebraic(Square(x, y).value)

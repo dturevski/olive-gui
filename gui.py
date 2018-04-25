@@ -2,6 +2,7 @@
 
 # standard
 import os
+import sys
 import tempfile
 import copy
 import string
@@ -16,6 +17,7 @@ import yaml
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 # local
+import board
 import legacy.popeye
 import legacy.chess
 import options
@@ -25,6 +27,7 @@ import pdf
 import xfen2img
 import fancy
 import chest
+from base import read_resource_file, get_write_dir
 
 # indexer
 import yacpdb.indexer.metadata
@@ -37,7 +40,6 @@ class SigWrapper(QtCore.QObject):
     sigFocusOnPopeye = QtCore.pyqtSignal()
     sigFocusOnStipulation = QtCore.pyqtSignal()
     sigFocusOnSolution = QtCore.pyqtSignal()
-    sigNewVersion = QtCore.pyqtSignal()
     sigDemoModeExit = QtCore.pyqtSignal()
 
 
@@ -76,34 +78,6 @@ class Mainframe(QtWidgets.QMainWindow):
         return Mainframe.fonts[Mainframe.currentFontSet]
     fontset = staticmethod(fontset)
 
-    class CheckNewVersion(QtCore.QThread):
-
-        def __init__(self, parent):
-            QtCore.QThread.__init__(self)
-            self.parent = parent
-
-        def run(self):
-            try:
-                info = yaml.load(
-                    urllib.request.urlopen(
-                        Conf.value('latest-binary-version-info-url')))
-                if cmp(info['version'], Conf.value('version')) > 0:
-                    self.parent.infoNewVersion = info
-                    # All GUI must be in the main thread
-                    Mainframe.sigWrapper.sigNewVersion.emit()
-            except:
-                pass
-
-            self.terminate()
-
-    def onNewVersion(self):
-        dialog = YesNoDialog(
-            Lang.value('MSG_New_version') %
-            self.infoNewVersion['version'])
-        if dialog.exec_():
-            QtWidgets.QDesktopServices.openUrl(
-                QtCore.QUrl(self.infoNewVersion['details']))
-
     def __init__(self):
         super(Mainframe, self).__init__()
 
@@ -120,12 +94,10 @@ class Mainframe(QtWidgets.QMainWindow):
         self.overview.rebuild()
         self.show()
 
-        if Conf.value('check-for-latest-binary'):
-            self.checkNewVersion = Mainframe.CheckNewVersion(self)
-            #self.checkNewVersion.start()
-
-
     def initLayout(self):
+
+        logging.debug("Mainframe.initLayout()")
+
         # widgets
         hbox = QtWidgets.QHBoxLayout()
 
@@ -180,22 +152,25 @@ class Mainframe(QtWidgets.QMainWindow):
         self.centralWidget().setLayout(hbox)
 
     def initActions(self):
+
+        logging.debug("Mainframe.initActions()")
+
         self.newAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/add-new-document.svg'),
+            QtGui.QIcon(':/icons/add-new-document.svg'),
             Lang.value('MI_New'),
             self)
         self.newAction.setShortcut('Ctrl+N')
         self.newAction.triggered.connect(self.onNewFile)
 
         self.openAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/open-file.svg'),
+            QtGui.QIcon(':/icons/open-file.svg'),
             Lang.value('MI_Open'),
             self)
         self.openAction.setShortcut('Ctrl+O')
         self.openAction.triggered.connect(self.onOpenFile)
 
         self.saveAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/save-file.svg'),
+            QtGui.QIcon(':/icons/save-file.svg'),
             Lang.value('MI_Save'),
             self)
         self.saveAction.setShortcut('Ctrl+S')
@@ -220,78 +195,78 @@ class Mainframe(QtWidgets.QMainWindow):
             Lang.value('MI_Export_HTML'), self)
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
         self.exportPdfAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/pdf.svg'),
+            QtGui.QIcon(':/icons/pdf.svg'),
             Lang.value('MI_Export_PDF'),
             self)
         self.exportPdfAction.triggered.connect(self.onExportPdf)
         self.exportImgAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/png.svg'),
+            QtGui.QIcon(':/icons/png.svg'),
             Lang.value('MI_Export_Image'), self)
         self.exportImgAction.triggered.connect(self.onExportImg)
         self.exportHtmlAction.setEnabled(False)
 
         self.addEntryAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/plus.svg'),
+            QtGui.QIcon(':/icons/plus.svg'),
             Lang.value('MI_Add_entry'),
             self)
         self.addEntryAction.triggered.connect(self.onAddEntry)
 
         self.deleteEntryAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/minus.svg'),
+            QtGui.QIcon(':/icons/minus.svg'),
             Lang.value('MI_Delete_entry'),
             self)
         self.deleteEntryAction.triggered.connect(self.onDeleteEntry)
 
         self.demoModeAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/fullscreen.svg'),
+            QtGui.QIcon(':/icons/fullscreen.svg'),
             Lang.value('MI_Demo_mode'),
             self)
         self.demoModeAction.triggered.connect(self.onDemoMode)
 
 
         self.exitAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/logout.svg'),
+            QtGui.QIcon(':/icons/logout.svg'),
             Lang.value('MI_Exit'),
             self)
         self.exitAction.setShortcut('Ctrl+Q')
         self.exitAction.triggered.connect(self.close)
 
         self.startPopeyeAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/key.svg'),
+            QtGui.QIcon(':/icons/key.svg'),
             Lang.value('MI_Run_Popeye'),
             self)
         self.startPopeyeAction.setShortcut('F7')
         self.startPopeyeAction.triggered.connect(self.popeyeView.startPopeye)
         self.stopPopeyeAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/stop.svg'),
+            QtGui.QIcon(':/icons/stop.svg'),
             Lang.value('MI_Stop_Popeye'),
             self)
         self.stopPopeyeAction.triggered.connect(self.popeyeView.stopPopeye)
         self.listLegalBlackMoves = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/fork-arrow-down.svg'),
+            QtGui.QIcon(':/icons/fork-arrow-down.svg'),
             Lang.value('MI_Legal_black_moves'),
             self)
         self.listLegalBlackMoves.triggered.connect(
             self.popeyeView.makeListLegal('black'))
         self.listLegalWhiteMoves = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/fork-arrow-up.svg'),
+            QtGui.QIcon(':/icons/fork-arrow-up.svg'),
             Lang.value('MI_Legal_white_moves'),
             self)
         self.listLegalWhiteMoves.triggered.connect(
             self.popeyeView.makeListLegal('white'))
         self.optionsAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/settings.svg'),
+            QtGui.QIcon(':/icons/settings.svg'),
             Lang.value('MI_Options'),
             self)
         self.optionsAction.triggered.connect(self.popeyeView.onOptions)
         self.twinsAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/gemini.svg'),
+            QtGui.QIcon(':/icons/gemini.svg'),
             Lang.value('MI_Twins'),
             self)
         self.twinsAction.triggered.connect(self.popeyeView.onTwins)
 
         self.runAxr = QtWidgets.QAction(
-                QtGui.QIcon('resources/icons/pointing-right.svg'),
+                QtGui.QIcon(':/icons/pointing-right.svg'),
                 Lang.value('PS_AXR'),
                 self)
         self.runAxr.triggered.connect(self.onAxr)
@@ -309,13 +284,16 @@ class Mainframe(QtWidgets.QMainWindow):
         self.langActions = []
         for key in sorted(langs.keys()):
             self.langActions.append(
-                QtWidgets.QAction(QtGui.QIcon('resources/icons/lang/'+ key +'.svg'), langs[key], self)
+                QtWidgets.QAction(QtGui.QIcon(':/icons/lang/'+ key +'.svg'), langs[key], self)
             )
             self.langActions[-1].triggered.connect(self.makeSetNewLang(key))
             self.langActions[-1].setCheckable(True)
             self.langActions[-1].setChecked(key == Lang.current)
 
     def initMenus(self):
+
+        logging.debug("Mainframe.initMenus()")
+
         # Menus
         menubar = self.menuBar()
         # File menu
@@ -327,7 +305,7 @@ class Mainframe(QtWidgets.QMainWindow):
              self.saveAsAction,
              self.saveTemplateAction]))
         self.fileMenu.addSeparator()
-        self.langMenu = self.fileMenu.addMenu(QtGui.QIcon('resources/icons/translate.svg'),
+        self.langMenu = self.fileMenu.addMenu(QtGui.QIcon(':/icons/translate.svg'),
                                               Lang.value('MI_Language'))
         list(map(self.langMenu.addAction, self.langActions))
         self.fileMenu.addSeparator()
@@ -362,13 +340,14 @@ class Mainframe(QtWidgets.QMainWindow):
         menubar.addSeparator()
         self.helpMenu = menubar.addMenu(Lang.value('MI_Help'))
         self.aboutAction = QtWidgets.QAction(
-            QtGui.QIcon('resources/icons/information.svg'),
+            QtGui.QIcon(':/icons/information.svg'),
             Lang.value('MI_About'),
             self)
         self.aboutAction.triggered.connect(self.onAbout)
         self.helpMenu.addAction(self.aboutAction)
 
     def initToolbar(self):
+        logging.debug("Mainframe.initToolbar()")
         self.toolbar = self.addToolBar('')
         self.toolbar.setObjectName('thetoolbar')
         list(map(self.toolbar.addAction, [
@@ -392,6 +371,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.createTransformActions()
 
     def initSignals(self):
+        logging.debug("Mainframe.initSignals()")
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigFocusOnPieces.connect(self.onFocusOnPieces)
@@ -399,12 +379,13 @@ class Mainframe(QtWidgets.QMainWindow):
             self.onFocusOnStipulation)
         Mainframe.sigWrapper.sigFocusOnPopeye.connect(self.onFocusOnPopeye)
         Mainframe.sigWrapper.sigFocusOnSolution.connect(self.onFocusOnSolution)
-        Mainframe.sigWrapper.sigNewVersion.connect(self.onNewVersion)
         Mainframe.sigWrapper.sigDemoModeExit.connect(self.onDemoModeExit)
 
     def initFrame(self):
+        logging.debug("Mainframe.initFrame()")
+
         # window banner
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/olive.svg')))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/olive.svg')))
 
         # restoring windows and toolbars geometry
         settings = QtCore.QSettings()
@@ -435,6 +416,7 @@ class Mainframe(QtWidgets.QMainWindow):
                 Mainframe.model.add(model.makeSafe(data), False)
             f.close()
             Mainframe.model.is_dirty = False
+            Conf.values['collections-dir'] = os.path.split(fileName)[0]
         except IOError:
             msg = Lang.value('MSG_IO_failed');
             logging.exception(msg)
@@ -533,11 +515,8 @@ class Mainframe(QtWidgets.QMainWindow):
     def onOpenFile(self):
         if not self.doDirtyCheck():
             return
-        default_dir = './collections/'
-        if Mainframe.model.filename != '':
-            default_dir, tail = os.path.split(Mainframe.model.filename)
         fileName = QtWidgets.QFileDialog.getOpenFileName(
-            self, Lang.value('MI_Open'), default_dir, "(*.olv)")[0]
+            self, Lang.value('MI_Open'), Conf.value('collections-dir'), "(*.olv)")[0]
         if not fileName:
             return
         self.openCollection(fileName)
@@ -552,6 +531,7 @@ class Mainframe(QtWidgets.QMainWindow):
                     Mainframe.model.dirty_flags[i] = False
                 Mainframe.model.is_dirty = False
                 self.overview.removeDirtyMarks()
+                Conf.values['collections-dir'] = os.path.split(Mainframe.model.filename)[0]
             finally:
                 f.close()
                 Mainframe.sigWrapper.sigModelChanged.emit()
@@ -559,11 +539,8 @@ class Mainframe(QtWidgets.QMainWindow):
             self.onSaveFileAs()
 
     def onSaveFileAs(self):
-        default_dir = './collections/'
-        if Mainframe.model.filename != '':
-            default_dir, tail = os.path.split(Mainframe.model.filename)
         fileName = QtWidgets.QFileDialog.getSaveFileName(
-            self, Lang.value('MI_Save_as'), default_dir, "(*.olv)")[0]
+            self, Lang.value('MI_Save_as'), Conf.value('collections-dir'), "(*.olv)")[0]
         if not fileName:
             return
         Mainframe.model.filename = str(fileName)
@@ -765,7 +742,7 @@ class Mainframe(QtWidgets.QMainWindow):
         for i, k in enumerate(Mainframe.transform_names):
             self.transforms.append(
                 QtWidgets.QAction(
-                    QtGui.QIcon('resources/icons/' + Mainframe.transform_icons[i] + '.svg'),
+                    QtGui.QIcon(':/icons/' + Mainframe.transform_icons[i] + '.svg'),
                     Lang.value('MI_' + k),
                     self
                 )
@@ -777,22 +754,10 @@ class Mainframe(QtWidgets.QMainWindow):
 
     def createTransformsCallable(self, command):
         def callable():
-            if command == 'Shift_up':
-                Mainframe.model.board.shift(0, -1)
-            elif command == 'Shift_down':
-                Mainframe.model.board.shift(0, 1)
-            elif command == 'Shift_left':
-                Mainframe.model.board.shift(-1, 0)
-            elif command == 'Shift_right':
-                Mainframe.model.board.shift(1, 0)
-            elif command == 'Rotate_CW':
-                Mainframe.model.board.rotate('270')
-            elif command == 'Rotate_CCW':
-                Mainframe.model.board.rotate('90')
-            elif command == 'Mirror_horizontal':
-                Mainframe.model.board.mirror('a1<-->a8')
-            elif command == 'Mirror_vertical':
-                Mainframe.model.board.mirror('a1<-->h1')
+            t = board.Board.getTransformByName(command)
+            if t != None:
+                Mainframe.model.board.transform(t)
+                model.transformEntryOptionsAndTwins(Mainframe.model.cur(), t)
             elif command == 'Clear':
                 Mainframe.model.board.clear()
             elif command == 'Invert_colors':
@@ -878,7 +843,7 @@ class QuickOptionsView():  # for clarity this View is not a widget
         for q in self.quickies:
             action = QtWidgets.QAction(
                 QtGui.QIcon(
-                    'resources/icons/' +
+                    ':/icons/' +
                     q['icon']),
                 Lang.value(
                     q['lang']),
@@ -924,20 +889,27 @@ class AboutDialog(QtWidgets.QDialog):
         self.setBackgroundRole(QtGui.QPalette.Light)
         vbox = QtWidgets.QVBoxLayout()
         lblLogo = QtWidgets.QLabel()
-        iconLogo = QtGui.QIcon('resources/icons/olive.svg')
+        iconLogo = QtGui.QIcon(':/icons/olive.svg')
         lblLogo.setPixmap(iconLogo.pixmap(256, 256))
         vbox.addWidget(lblLogo, QtCore.Qt.AlignCenter)
         grid = QtWidgets.QGridLayout()
 
 
         grid.addWidget(ClickableLabel('Version:'))
-        grid.addWidget(ClickableLabel(Conf.value('version')), 0, 1)
+        grid.addWidget(ClickableLabel("Olive %s (%s)" % (Conf.value('version'),  os.name)), 0, 1)
+
+        grid.addWidget(ClickableLabel(''))
+        grid.addWidget(ClickableLabel("Python %d.%d.%d" % (sys.version_info.major,
+                                                           sys.version_info.minor, sys.version_info.micro,)))
+        grid.addWidget(ClickableLabel(''))
+        grid.addWidget(ClickableLabel("Qt %s" % (QtCore.QT_VERSION_STR)))
+
         grid.addWidget(ClickableLabel('License:'))
         grid.addWidget(ClickableLabel('<a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU GPL</a>'))
-        grid.addWidget(ClickableLabel('Info:'))
-        grid.addWidget(ClickableLabel('<a href="http://www.yacpdb.org/#static/olive">yacpdb.org/olive</a>'))
-        grid.addWidget(ClickableLabel('Issues:'))
-        grid.addWidget(ClickableLabel('<a href="https://github.com/dturevski/olive-gui/issues">GitHub</a>'))
+
+        grid.addWidget(ClickableLabel('Info & Issues:'))
+        grid.addWidget(ClickableLabel('<a href="https://github.com/dturevski/olive-gui">GitHub</a>'))
+
         w = QtWidgets.QWidget()
         w.setLayout(grid)
         vbox.addWidget(w)
@@ -951,7 +923,7 @@ class AboutDialog(QtWidgets.QDialog):
 
         self.setLayout(vbox)
         self.setWindowTitle(Lang.value('MI_About'))
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/information.svg')))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/information.svg')))
 
 
 class YesNoDialog(QtWidgets.QDialog):
@@ -975,7 +947,7 @@ class YesNoDialog(QtWidgets.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/info.svg')))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
 
 
 
@@ -1002,7 +974,7 @@ class YesNoCancelDialog(QtWidgets.QDialog):
         hbox.addWidget(buttonCancel)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/info.svg')))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
 
         self.choice = 'Yes'
 
@@ -2441,11 +2413,9 @@ class PublishingView(QtWidgets.QSplitter):
 
     def loadFontInfo(self, filename):
         fontinfo = {}
-        f = open(filename)
-        for entry in [x.strip().split("\t") for x in f.readlines()]:
+        for entry in [x.strip().split("\t") for x in read_resource_file(filename)]:
             fontinfo[entry[0]] = {'postfix': entry[1], 'chars': [
                 chr(int(entry[2])), chr(int(entry[3]))]}
-        f.close()
         return fontinfo
 
     def solution2Html(self, s, config):
@@ -2542,7 +2512,7 @@ class PublishingView(QtWidgets.QSplitter):
     def __init__(self):
         super(PublishingView, self).__init__(QtCore.Qt.Horizontal)
 
-        f = open('conf/chessfonts.yaml', 'r')
+        f = open(get_write_dir() + '/conf/chessfonts.yaml', 'r')
         self.config = yaml.load(f)
         f.close()
         for family in self.config['diagram-fonts']:
@@ -2675,7 +2645,7 @@ class PopeyeOutputWidget(QtWidgets.QTextEdit):
 def msgBox(msg):
     box = QtWidgets.QMessageBox()
     box.setText(msg)
-    box.setWindowIcon(QtGui.QIcon(QtGui.QPixmap('resources/icons/information.svg')))
+    box.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/information.svg')))
     box.exec_()
 
 
@@ -2719,7 +2689,8 @@ class DemoFrame(QtWidgets.QWidget):
         vboxRightPane = QtWidgets.QVBoxLayout()
         self.chessBox = ChessBox()
         vboxRightPane.addWidget(self.chessBox)
-        vboxRightPane.addWidget(DemoBoardToolbar())
+        self.toolbar = DemoBoardToolbar()
+        vboxRightPane.addWidget(self.toolbar)
         widgetRightPane = QtWidgets.QWidget()
         widgetRightPane.setLayout(vboxRightPane)
 
@@ -2731,7 +2702,7 @@ class DemoFrame(QtWidgets.QWidget):
         self.setLayout(hbox)
 
     def initFrame(self):
-        self.setWindowIcon(QtGui.QIcon('resources/icons/olive.svg'))
+        self.setWindowIcon(QtGui.QIcon(':/icons/olive.svg'))
         self.setWindowTitle("Demo board")
 
     def factoryDraggableLabel(self, id):
@@ -2774,6 +2745,10 @@ class DemoBoardToolbar(QtWidgets.QWidget):
         btnClose = QtWidgets.QPushButton(Lang.value('MI_Exit'))
         btnClose.clicked.connect(self.onClose)
         hl.addWidget(btnClose)
+        self.exitAction = QtWidgets.QAction("close", btnClose)
+        self.exitAction.setShortcut('F5')
+        self.exitAction.setShortcutContext(QtCore.Qt.WindowShortcut)
+        self.exitAction.triggered.connect(self.onClose)
 
     def onClear(self):
         Mainframe.model.board.clear()
@@ -2795,11 +2770,11 @@ class DemoBoardToolbar(QtWidgets.QWidget):
 
 
 class Conf:
-    file = 'conf/main.yaml'
-    keywords_file = 'conf/keywords.yaml'
-    zoo_file = 'conf/zoos.yaml'
-    popeye_file = 'conf/popeye.yaml'
-    chest_file = 'conf/chest.yaml'
+    file = get_write_dir() + '/conf/main.yaml'
+    keywords_file = get_write_dir() + '/conf/keywords.yaml'
+    zoo_file = get_write_dir() + '/conf/zoos.yaml'
+    popeye_file = get_write_dir() + '/conf/popeye.yaml'
+    chest_file = get_write_dir() + '/conf/chest.yaml'
 
     def read():
 
@@ -2841,7 +2816,7 @@ class Conf:
 
 
 class Lang:
-    file = 'conf/lang.yaml'
+    file = get_write_dir() + '/conf/lang.yaml'
 
     def read():
         f = open(Lang.file, 'r', encoding="utf8")

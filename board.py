@@ -1,4 +1,5 @@
 import re, copy, json
+from base import read_resource_file, get_write_dir
 
 class Square:
 
@@ -58,7 +59,7 @@ def makePieceFromXfen(fen):
 class FairyHelper:
     defaults, overrides, glyphs, fontinfo = {}, {}, {}, {}
     options, conditions = [], []
-    f = open('conf/fairy-pieces.txt')
+    f = open(get_write_dir() + '/conf/fairy-pieces.txt')
     for entry in [x.strip().split("\t") for x in f.readlines()]:
         glyphs[entry[0]] = {'name': entry[1]}
         if len(entry) > 2:
@@ -73,17 +74,16 @@ class FairyHelper:
                 defaults[entry[2]] = entry[0]
     f.close()
 
-    f = open('resources/fonts/xfen.txt')
-    for entry in [x.strip().split("\t") for x in f.readlines()]:
+    for entry in [x.strip().split("\t") for x in read_resource_file(':/fonts/xfen.txt')]:
         fontinfo[entry[0]] = {'family': entry[1], 'chars': [
             chr(int(entry[2])), chr(int(entry[3]))]}
     f.close()
 
-    f = open('conf/py-options.txt')
+    f = open(get_write_dir() + '/conf/py-options.txt')
     options = [x.strip() for x in f.readlines()]
     f.close()
 
-    f = open('conf/py-conditions.txt')
+    f = open(get_write_dir() + '/conf/py-conditions.txt')
     conditions = [x.strip() for x in f.readlines()]
     f.close()
 
@@ -268,6 +268,22 @@ class Board:
             new_piece = Piece(piece.name, piece.color, piece.specs)
             new_piece.origin = piece.origin
             self.add(new_piece, new_x + 8 * new_y)
+
+    def getTransformByName(name):
+        try:
+            return  {
+                'Shift_up': lambda s: (s[0], s[1]-1),
+                'Shift_down': lambda s: (s[0], s[1]+1),
+                'Shift_left': lambda s: (s[0]-1, s[1]),
+                'Shift_right': lambda s: (s[0]+1, s[1]),
+                'Rotate_CW': lambda s: (7 - s[1], s[0]),
+                'Rotate_CCW': lambda s: (s[1], 7 - s[0]),
+                'Mirror_horizontal': lambda s: (s[0], 7 - s[1]),
+                'Mirror_vertical': lambda s: (7 - s[0], s[1]),
+            } [name]
+        except KeyError:
+            return None
+    getTransformByName = staticmethod(getTransformByName)
 
     def invertColors(self):
         b = copy.deepcopy(self)

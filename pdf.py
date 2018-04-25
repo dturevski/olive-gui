@@ -10,39 +10,12 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import reportlab.platypus
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.lib import colors
-
-# fixing py2exe/RLTK bug:
-# http://www.python-forum.org/pythonforum/viewtopic.php?f=15&t=21922
-from reportlab.pdfbase import _fontdata_widths_courier
-from reportlab.pdfbase import _fontdata_widths_courierbold
-from reportlab.pdfbase import _fontdata_widths_courieroblique
-from reportlab.pdfbase import _fontdata_widths_courierboldoblique
-from reportlab.pdfbase import _fontdata_widths_helvetica
-from reportlab.pdfbase import _fontdata_widths_helveticabold
-from reportlab.pdfbase import _fontdata_widths_helveticaoblique
-from reportlab.pdfbase import _fontdata_widths_helveticaboldoblique
-from reportlab.pdfbase import _fontdata_widths_timesroman
-from reportlab.pdfbase import _fontdata_widths_timesbold
-from reportlab.pdfbase import _fontdata_widths_timesitalic
-from reportlab.pdfbase import _fontdata_widths_timesbolditalic
-from reportlab.pdfbase import _fontdata_widths_symbol
-from reportlab.pdfbase import _fontdata_widths_zapfdingbats
-from reportlab.pdfbase import _fontdata_enc_winansi
-from reportlab.pdfbase import _fontdata_enc_macroman
-from reportlab.pdfbase import _fontdata_enc_standard
-from reportlab.pdfbase import _fontdata_enc_symbol
-from reportlab.pdfbase import _fontdata_enc_zapfdingbats
-from reportlab.pdfbase import _fontdata_enc_pdfdoc
-from reportlab.pdfbase import _fontdata_enc_macexpert
-
+from reportlab.lib.pagesizes import A4
+from PyQt5 import QtGui
 
 # local
 import model
 
-MARGIN_X, MARGIN_Y = 72, 72
-AUX_X_MARGIN = 36
 
 FONT_FAMILY = 'Roboto Condensed'
 FONT_SIZE = {
@@ -70,31 +43,38 @@ CHESS_FONTS = {
     'x': ('GC2004X', 'resources/fonts/gc2004x_.ttf'),
     'y': ('GC2004Y', 'resources/fonts/gc2004y_.ttf')
 }
-for variation in list(FONT_INFO.keys()):
-    pdfmetrics.registerFont(
-        TTFont(
-            FONT_INFO[variation][0],
-            FONT_DIR +
-            FONT_INFO[variation][1]))
-pdfmetrics.registerFontFamily(
-    FONT_FAMILY,
-    normal=FONT_INFO['normal'][0],
-    bold=FONT_INFO['bold'][0],
-    italic=FONT_INFO['italic'][0],
-    boldItalic=FONT_INFO['boldItalic'][0])
+CHESS_FONT_RENDERING_OFFSET = 0.25
+MARGIN_X, MARGIN_Y = 72 - FONT_SIZE['chess'], 72
+AUX_X_MARGIN = 36
+
 CHESS_FONT_STYLES = {}
-for key in list(CHESS_FONTS.keys()):
-    pdfmetrics.registerFont(TTFont(CHESS_FONTS[key][0], CHESS_FONTS[key][1]))
-    pdfmetrics.registerFontFamily(key, normal=key, bold=key, italic=key, boldItalic=key)
-    styles = getSampleStyleSheet()
-    styles.add(
-        ParagraphStyle(
-            name='chess'+key,
-            wordWrap=False,
-            fontName=CHESS_FONTS[key][0],
-            fontSize=FONT_SIZE['chess'],
-            spaceAfter=0))
-    CHESS_FONT_STYLES[key] = styles['chess'+key]
+
+def register_fonts():
+
+    for variation in list(FONT_INFO.keys()):
+        pdfmetrics.registerFont(TTFont(FONT_INFO[variation][0], FONT_DIR+FONT_INFO[variation][1]))
+
+    pdfmetrics.registerFontFamily(
+        FONT_FAMILY,
+        normal=FONT_INFO['normal'][0],
+        bold=FONT_INFO['bold'][0],
+        italic=FONT_INFO['italic'][0],
+        boldItalic=FONT_INFO['boldItalic'][0])
+
+
+    for key in list(CHESS_FONTS.keys()):
+        pdfmetrics.registerFont(TTFont(CHESS_FONTS[key][0], CHESS_FONTS[key][1]))
+        pdfmetrics.registerFontFamily(key, normal=key, bold=key, italic=key, boldItalic=key)
+        styles = getSampleStyleSheet()
+        styles.add(
+            ParagraphStyle(
+                name='chess'+key,
+                wordWrap=False,
+                fontName=CHESS_FONTS[key][0],
+                fontSize=FONT_SIZE['chess'],
+                spaceAfter=0))
+        CHESS_FONT_STYLES[key] = styles['chess'+key]
+
 
 def getPieceParagraph(font, char):
     return reportlab.platypus.Paragraph(
@@ -106,7 +86,9 @@ def getPieceParagraph(font, char):
 class ExportDocument:
 
     def __init__(self, records, Lang):
+        ExportDocument.startFonts()
         self.records, self.Lang = records, Lang
+        register_fonts()
         styles = getSampleStyleSheet()
         styles.add(ParagraphStyle(name='Justify', wordWrap=True))
         styles.add(ParagraphStyle(name='Center', alignment=reportlab.lib.enums.TA_CENTER))
@@ -150,7 +132,7 @@ class ExportDocument:
     def subscript(self, left, middle, right):
         fs = FONT_SIZE['chess']
         t = reportlab.platypus.Table([['', left, middle, right]],
-                                     colWidths=[fs*1.25, 2 * fs, 4 * fs, 2 * fs],
+                                     colWidths=[fs*(1+CHESS_FONT_RENDERING_OFFSET), 2 * fs, 4 * fs, 2 * fs],
                                      rowHeights=[None]
                                      )
         t.setStyle(reportlab.platypus.TableStyle([
@@ -184,10 +166,15 @@ class ExportDocument:
     def leftTop(self, e):
         if e is None:
             return ''
-        return reportlab.platypus.Paragraph(
-            '<font face="%s" size=%d>%s</font><br/>' %
-            (FONT_FAMILY, FONT_SIZE['header'], ExportDocument.header(
-                e, self.Lang)), self.style)
+        header = reportlab.platypus.Paragraph(
+            '<font face="%s" size=%d>%s</font><br/>' % (FONT_FAMILY, FONT_SIZE['header'],
+             ExportDocument.header(e, self.Lang)), self.style
+        )
+        return reportlab.platypus.Table(
+            [['', header]],
+            colWidths=[FONT_SIZE['chess'], 9*FONT_SIZE['chess']]
+        )
+
 
     def leftBottom(self, e):
         story = []
@@ -213,6 +200,16 @@ class ExportDocument:
         story.append(self.subscript(s_left, s_middle, b.getPiecesCount()))
         return story
 
+
+    def fenLine(self, b):
+        t = reportlab.platypus.Table([[b.toFen()]])
+        t.setStyle(reportlab.platypus.TableStyle([
+            ('TEXTCOLOR', (0, 0), (-1, -1), (0.75, 0.75, 0.75)),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ('TOPPADDING', (0, 0), (-1, -1), FONT_SIZE['rightpane']),
+        ]))
+        return t
+
     def rightBottom(self, e):
         story = []
         if e is None:
@@ -236,6 +233,10 @@ class ExportDocument:
                 '<br/><br/>'.join(parts)
             ), self.style
         ))
+        if 'algebraic' in e:
+            b = model.Board()
+            b.fromAlgebraic(e['algebraic'])
+            story.append(self.fenLine(b))
         return story
 
     def header(e, Lang):
@@ -286,10 +287,17 @@ class ExportDocument:
         return str
     escapeHtml = staticmethod(escapeHtml)
 
-    topBorder = [getPieceParagraph('y', char) for char in "KLLLLLLLLM"]
-    bottomBorder = [getPieceParagraph('y', char) for char in "RSSSSSSSST"]
-    leftBorder = getPieceParagraph('y', "N")
-    rightBorder = getPieceParagraph('y', "Q")
+    fontsStarted = False
+    def startFonts():
+        if ExportDocument.fontsStarted:
+            return
+        register_fonts()
+        ExportDocument.topBorder = [getPieceParagraph('y', char) for char in "KLLLLLLLLM"]
+        ExportDocument.bottomBorder = [getPieceParagraph('y', char) for char in "RSSSSSSSST"]
+        ExportDocument.leftBorder = getPieceParagraph('y', "N")
+        ExportDocument.rightBorder = getPieceParagraph('y', "Q")
+        ExportDocument.fontsStarted = True
+    startFonts = staticmethod(startFonts)
 
     def board2Table(self, board):
         rows, row = [ExportDocument.topBorder], None
