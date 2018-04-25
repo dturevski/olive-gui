@@ -173,7 +173,7 @@ class TwinCommand:
             p, q = Square(self.args[0]), Square(self.args[1])
             b.shift(q.x-p.x, q.y-p.y)
         elif 'PolishType' == self.name:
-            b.polishTwin()
+            b.invertColors()
         elif 'Imitator' == self.name:
             b.imitators = self.args
 
