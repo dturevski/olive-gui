@@ -269,6 +269,22 @@ class Board:
             new_piece.origin = piece.origin
             self.add(new_piece, new_x + 8 * new_y)
 
+    def getTransformByName(name):
+        try:
+            return  {
+                'Shift_up': lambda s: (s[0], s[1]-1),
+                'Shift_down': lambda s: (s[0], s[1]+1),
+                'Shift_left': lambda s: (s[0]-1, s[1]),
+                'Shift_right': lambda s: (s[0]+1, s[1]),
+                'Rotate_CW': lambda s: (7 - s[1], s[0]),
+                'Rotate_CCW': lambda s: (s[1], 7 - s[0]),
+                'Mirror_horizontal': lambda s: (s[0], 7 - s[1]),
+                'Mirror_vertical': lambda s: (7 - s[0], s[1]),
+            } [name]
+        except KeyError:
+            return None
+    getTransformByName = staticmethod(getTransformByName)
+
     def invertColors(self):
         b = copy.deepcopy(self)
         self.clear()

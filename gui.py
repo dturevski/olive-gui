@@ -16,6 +16,7 @@ import yaml
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 # local
+import board
 import legacy.popeye
 import legacy.chess
 import options
@@ -777,22 +778,9 @@ class Mainframe(QtWidgets.QMainWindow):
 
     def createTransformsCallable(self, command):
         def callable():
-            if command == 'Shift_up':
-                Mainframe.model.board.shift(0, -1)
-            elif command == 'Shift_down':
-                Mainframe.model.board.shift(0, 1)
-            elif command == 'Shift_left':
-                Mainframe.model.board.shift(-1, 0)
-            elif command == 'Shift_right':
-                Mainframe.model.board.shift(1, 0)
-            elif command == 'Rotate_CW':
-                Mainframe.model.board.rotate('270')
-            elif command == 'Rotate_CCW':
-                Mainframe.model.board.rotate('90')
-            elif command == 'Mirror_horizontal':
-                Mainframe.model.board.mirror('a1<-->a8')
-            elif command == 'Mirror_vertical':
-                Mainframe.model.board.mirror('a1<-->h1')
+            t = board.Board.getTransformByName(command)
+            if t != None:
+                Mainframe.model.board.transform(t)
             elif command == 'Clear':
                 Mainframe.model.board.clear()
             elif command == 'Invert_colors':

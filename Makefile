@@ -1,5 +1,5 @@
 PYTHON = python
-PIP = pip
+PIP = pip3
 PYINST = pyinstaller
 INNOSETUP = "c:\Program Files (x86)\Inno Setup 5\ISCC.exe"
 
@@ -24,5 +24,10 @@ binary:
 	mkdir dist/yacpdb/indexer
 	cp yacpdb/indexer/indexer.md dist/yacpdb/indexer/indexer.md
 
-inno:
+inno: binary
 	$(INNOSETUP) olive.iss
+
+clean:
+	rm -f dist/
+	rm -f build/
+    rm -f olive.spec

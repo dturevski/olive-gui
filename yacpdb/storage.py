@@ -1,13 +1,14 @@
-import os
+import os, sys
 import pymysql, pymysql.cursors
 import logging, traceback
 from . import entry
 
 
 database = None
-if 'nt' != os.name:
+if "QtCore" not in sys.modules: # don't try to connect when in GUI mode
     try:
-        database = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb", cursorclass=pymysql.cursors.DictCursor)
+        database = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb",
+                                   cursorclass=pymysql.cursors.DictCursor)
         database.cursor().execute("SET NAMES utf8")
     except pymysql.err.OperationalError:
         pass

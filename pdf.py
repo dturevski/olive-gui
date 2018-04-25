@@ -10,39 +10,12 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 import reportlab.platypus
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.lib import colors
-
-# fixing py2exe/RLTK bug:
-# http://www.python-forum.org/pythonforum/viewtopic.php?f=15&t=21922
-from reportlab.pdfbase import _fontdata_widths_courier
-from reportlab.pdfbase import _fontdata_widths_courierbold
-from reportlab.pdfbase import _fontdata_widths_courieroblique
-from reportlab.pdfbase import _fontdata_widths_courierboldoblique
-from reportlab.pdfbase import _fontdata_widths_helvetica
-from reportlab.pdfbase import _fontdata_widths_helveticabold
-from reportlab.pdfbase import _fontdata_widths_helveticaoblique
-from reportlab.pdfbase import _fontdata_widths_helveticaboldoblique
-from reportlab.pdfbase import _fontdata_widths_timesroman
-from reportlab.pdfbase import _fontdata_widths_timesbold
-from reportlab.pdfbase import _fontdata_widths_timesitalic
-from reportlab.pdfbase import _fontdata_widths_timesbolditalic
-from reportlab.pdfbase import _fontdata_widths_symbol
-from reportlab.pdfbase import _fontdata_widths_zapfdingbats
-from reportlab.pdfbase import _fontdata_enc_winansi
-from reportlab.pdfbase import _fontdata_enc_macroman
-from reportlab.pdfbase import _fontdata_enc_standard
-from reportlab.pdfbase import _fontdata_enc_symbol
-from reportlab.pdfbase import _fontdata_enc_zapfdingbats
-from reportlab.pdfbase import _fontdata_enc_pdfdoc
-from reportlab.pdfbase import _fontdata_enc_macexpert
+from reportlab.lib.pagesizes import A4
 
 
 # local
 import model
 
-MARGIN_X, MARGIN_Y = 72, 72
-AUX_X_MARGIN = 36
 
 FONT_FAMILY = 'Roboto Condensed'
 FONT_SIZE = {
@@ -70,6 +43,11 @@ CHESS_FONTS = {
     'x': ('GC2004X', 'resources/fonts/gc2004x_.ttf'),
     'y': ('GC2004Y', 'resources/fonts/gc2004y_.ttf')
 }
+CHESS_FONT_RENDERING_OFFSET = 0.25
+MARGIN_X, MARGIN_Y = 72 - FONT_SIZE['chess'], 72
+AUX_X_MARGIN = 36
+
+
 for variation in list(FONT_INFO.keys()):
     pdfmetrics.registerFont(
         TTFont(
@@ -150,7 +128,7 @@ class ExportDocument:
     def subscript(self, left, middle, right):
         fs = FONT_SIZE['chess']
         t = reportlab.platypus.Table([['', left, middle, right]],
-                                     colWidths=[fs*1.25, 2 * fs, 4 * fs, 2 * fs],
+                                     colWidths=[fs*(1+CHESS_FONT_RENDERING_OFFSET), 2 * fs, 4 * fs, 2 * fs],
                                      rowHeights=[None]
                                      )
         t.setStyle(reportlab.platypus.TableStyle([
@@ -184,10 +162,15 @@ class ExportDocument:
     def leftTop(self, e):
         if e is None:
             return ''
-        return reportlab.platypus.Paragraph(
-            '<font face="%s" size=%d>%s</font><br/>' %
-            (FONT_FAMILY, FONT_SIZE['header'], ExportDocument.header(
-                e, self.Lang)), self.style)
+        header = reportlab.platypus.Paragraph(
+            '<font face="%s" size=%d>%s</font><br/>' % (FONT_FAMILY, FONT_SIZE['header'],
+             ExportDocument.header(e, self.Lang)), self.style
+        )
+        return reportlab.platypus.Table(
+            [['', header]],
+            colWidths=[FONT_SIZE['chess'], 9*FONT_SIZE['chess']]
+        )
+
 
     def leftBottom(self, e):
         story = []

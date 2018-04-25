@@ -28,7 +28,9 @@ OutputBaseFilename={#AppName}-{#AppVersion}-amd64
 
 [Files]
 Source: "dist\olive.exe"; DestDir: "{app}"
-Source: "dist\conf\*"; DestDir: "{app}\conf\"
+Source: "conf\*"; DestDir: "{app}\conf\"
+Source: "resources\*"; DestDir: "{app}\resources\"
+Source: "collections\*.olv"; DestDir: "{app}\collections\"
 
 
 [Icons]
