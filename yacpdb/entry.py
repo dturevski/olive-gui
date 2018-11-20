@@ -36,8 +36,9 @@ def ash(e):
 
 def entry(yamltext):
     yamltext = yamltext.replace(">>", "//")
-    yamltext = re.sub(r'stipulation: =([^\\n]*)', r'stipulation: "=\1"', yamltext)
+    yamltext = re.sub(r'stipulation: =([^\n]*)', r'stipulation: "=\1"', yamltext)
     yamltext = yamltext.replace("stipulation: =", 'stipulation: "="')
+    yamltext = yamltext.replace('\t', '  ')
     e = yaml.load(yamltext)
     if "solution" in e:
         e["solution"] = unquote(unicode(e["solution"]).encode("utf8"))
