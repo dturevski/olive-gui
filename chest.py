@@ -6,7 +6,7 @@ import tempfile
 import re
 
 # 3rd party
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtWidgets
 
 # local
 import model
@@ -33,7 +33,7 @@ def checkOption(pbm, option):
     return False
 
 
-class ChestView(QtGui.QSplitter):
+class ChestView(QtWidgets.QSplitter):
 
     def __init__(self, Conf, Lang, Mainframe):
         self.Conf, self.Lang, self.Mainframe = Conf, Lang, Mainframe
@@ -44,12 +44,12 @@ class ChestView(QtGui.QSplitter):
         self.output = OutputWidget(self)
         self.output.setReadOnly(True)
 
-        self.btnRun = QtGui.QPushButton('')
+        self.btnRun = QtWidgets.QPushButton('')
         self.btnRun.clicked.connect(self.onRun)
-        self.btnStop = QtGui.QPushButton('')
+        self.btnStop = QtWidgets.QPushButton('')
         self.btnStop.clicked.connect(self.onStop)
 
-        self.btnCompact = QtGui.QPushButton('')
+        self.btnCompact = QtWidgets.QPushButton('')
         self.btnCompact.clicked.connect(self.onCompact)
 
         self.initLayout()
@@ -61,11 +61,11 @@ class ChestView(QtGui.QSplitter):
         self.onLangChanged()
 
     def initLayout(self):
-        w = QtGui.QWidget()
-        grid = QtGui.QGridLayout()
+        w = QtWidgets.QWidget()
+        grid = QtWidgets.QGridLayout()
 
         row = 0
-        self.labelChest = QtGui.QLabel()
+        self.labelChest = QtWidgets.QLabel()
         grid.addWidget(self.labelChest, row, 0, 1, 2)
         row += 1
 
@@ -76,9 +76,9 @@ class ChestView(QtGui.QSplitter):
         grid.addWidget(pathWidget, row, 0, 1, 2)
         row += 1
 
-        self.labelOptions = QtGui.QLabel()
+        self.labelOptions = QtWidgets.QLabel()
         grid.addWidget(self.labelOptions, row, 0)
-        self.inputOptions = QtGui.QLineEdit()
+        self.inputOptions = QtWidgets.QLineEdit()
         self.inputOptions.setText(str(self.Conf.chest['options']))
         self.inputOptions.textChanged.connect(self.onSettingsChanged)
         grid.addWidget(self.inputOptions, row, 1)
@@ -95,7 +95,7 @@ class ChestView(QtGui.QSplitter):
         row += 1
 
         # stretcher
-        grid.addWidget(QtGui.QWidget(), row, 2)
+        grid.addWidget(QtWidgets.QWidget(), row, 2)
         grid.setRowStretch(row, 1)
         grid.setColumnStretch(2, 1)
 
@@ -110,9 +110,9 @@ class ChestView(QtGui.QSplitter):
 
         handle, self.temp_filename = tempfile.mkstemp()
 
-        input = self.input.toPlainText().toAscii()
+        input = self.input.toPlainText()
 
-        os.write(handle, input)
+        os.write(handle, input.encode('utf8'))
         os.close(handle)
 
         self.chestProc = QtCore.QProcess()
@@ -129,14 +129,13 @@ class ChestView(QtGui.QSplitter):
 
     def onOut(self):
         data = self.chestProc.readAllStandardOutput()
-        self.output.insertPlainText(QtCore.QString(data))
+        self.output.insertPlainText(str(data, encoding="utf8"))
         # TODO #1: add break for big output
 
     def onError(self):
-        self.output.setTextColor(QtGui.QColor(255, 0, 0))
-        self.output.insertPlainText(QtCore.QString(
-            self.chestProc.readAllStandardError()))
-        self.output.setTextColor(QtGui.QColor(0, 0, 0))
+        self.output.setTextColor(QtWidgets.QColor(255, 0, 0))
+        self.output.insertPlainText(str(self.chestProc.readAllStandardError(), encoding="utf8"))
+        self.output.setTextColor(QtWidgets.QColor(0, 0, 0))
 
     def onFailed(self):
         try:
@@ -279,18 +278,18 @@ class ChestView(QtGui.QSplitter):
 
     def onSettingsChanged(self):
         try:
-            self.Conf.chest['options'] = unicode(self.inputOptions.text())
+            self.Conf.chest['options'] = str(self.inputOptions.text())
         except Exception as e:
-            print e
+            print(e)
 
-class OutputWidget(QtGui.QTextEdit):
+class OutputWidget(QtWidgets.QTextEdit):
 
     def __init__(self, parentView):
         self.parentView = parentView
         super(OutputWidget, self).__init__()
 
 
-class InputWidget(QtGui.QTextEdit):
+class InputWidget(QtWidgets.QTextEdit):
 
     def __init__(self):
         super(InputWidget, self).__init__()

@@ -1,21 +1,7 @@
 
 import model
-
-class Square:
-
-    def __init__(self, *args, **kwargs):
-        if len(args) == 1:
-            self.value = args[0]
-            self.x = self.value % 8
-            self.y = self.value >> 3
-        elif len(args) == 2:
-            self.x, self.y = args[0], args[1]
-            self.value = 8*self.y + self.x
-        else:
-            raise Exception("Wrong count of arguments")
-
-    def __str__(self):
-        return "abcdefgh"[self.x] + "87654321"[self.y]
+from board import Square
+from functools import reduce
 
 
 class Node(object):
@@ -56,7 +42,7 @@ class Node(object):
         return len(nodes)
 
     def linkContinuedTwins(self):
-        for i in xrange(1, len(self.children)):
+        for i in range(1, len(self.children)):
             if self.children[i].isContinued:
                 self.children[i].anticipator = self.children[i - 1]
 
@@ -93,7 +79,7 @@ class Node(object):
 
         if self.depth == 0: # root node
             for square, piece in model.Pieces(board):
-                piece.origin = str(square) + "/0"
+                piece.assignOrigin(square, 0)
 
         visitor.visit(self, board)
         self.make(board)
@@ -146,11 +132,7 @@ class TwinNode(Node):
     def unmake(self, board):
         board.unserialize(self.oldBoard)
 
-    def __str__(self):
-        retval = self.twinId + ')'
-        for command in self.commands:
-            retval += " " + str(command)
-        return retval
+    def __str__(self): return self.twinId + ')'
 
     def fullPrefix(self): return "\n\n"
 
@@ -172,10 +154,6 @@ class TwinCommand:
         self.name = name
         self.args = args
 
-    def __str__(self):
-        return ""
-        #return self.name  + " " + " ".join([str(Square(x)) for x in self.args])
-
     def execute(self, b, twinId):
         if 'Move' == self.name:
             b.move(self.args[0], self.args[1])
@@ -186,12 +164,12 @@ class TwinCommand:
         elif 'Remove' == self.name:
             b.drop(self.args[0])
         elif 'Add' == self.name:
-            self.args[0].origin = str(self.args[1]) + "/" + twinId
+            self.args[0].assignOrigin(self.args[1], twinId)
             b.add(self.args[0], self.args[1])
         elif 'Rotate' == self.name:
             b.rotate(str(self.args[0]))
         elif 'Mirror' == self.name:
-            b.mirror(self.args[0], self.args[1])
+            b.mirror("%s<-->%s" % (Square(self.args[0]).alg(), Square(self.args[1]).alg()))
         elif 'Shift' == self.name:
             p, q = Square(self.args[0]), Square(self.args[1])
             b.shift(q.x-p.x, q.y-p.y)
@@ -254,7 +232,7 @@ class MoveNode(Node):
         b.flip()
 
         # recoloring
-        for k, v in self.recolorings.iteritems():
+        for k, v in self.recolorings.items():
             for square in v:
                 if b.board[square] is not None:
                     b.board[square].color = k
@@ -323,12 +301,15 @@ class CastlingNode(MoveNode):
         shift = 0 if b.stm == 'black' else 56
 
         a8, c8, d8, e8, f8, g8, h8 = 0, 2, 3, 4, 5, 6, 7
+
         if self.kingside:
             b.move(e8 + shift, g8 + shift)
             b.move(h8 + shift, f8 + shift)
+            self.departure, self.arrival = e8 + shift, g8 + shift
         else:
             b.move(e8 + shift, c8 + shift)
             b.move(a8 + shift, d8 + shift)
+            self.departure, self.arrival = e8 + shift, c8 + shift
 
         b.flip()
 
@@ -343,3 +324,8 @@ class CastlingNode(MoveNode):
             raise Exception("Can't castle - the kingside rook square is empty")
         if not self.kingside and b.board[a8+shift] is None:
             raise Exception("Can't castle - the queenside rook square is empty")
+
+MOVELIKE_NODE_TYPES = [MoveNode, TwinNode, CastlingNode]
+
+def isMovelikeNode(node):
+    return reduce(lambda x, y: x or isinstance(node, y), MOVELIKE_NODE_TYPES, False)

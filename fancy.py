@@ -64,7 +64,7 @@ def parseConditions(words):
                 conditions.append(' '.join(acc))
             acc = [word]
         else:
-            print 'not starting', word
+            print('not starting', word)
             acc.append(word)
     if len(acc):
         conditions.append(' '.join(acc))
@@ -80,9 +80,9 @@ def isConditionStartWord(word):
 
 
 def readCvv(fileName, encoding):
-    h = open(unicode(fileName), 'r')
+    h = open(str(fileName), 'r')
     contents = "\n".join([x.strip() for x in h.readlines()])
-    contents = unicode(contents.decode(encoding))
+    contents = str(contents.decode(encoding))
     h.close()
     entries = []
     for chunk in contents.split("\n\n"):
@@ -102,7 +102,7 @@ def readCvv(fileName, encoding):
         entry = {}
         board = model.Board()
         imitators = []
-        for i in xrange(64):
+        for i in range(64):
             code = e[i >> 3][i % 8]
             if code:
                 if code == 20:

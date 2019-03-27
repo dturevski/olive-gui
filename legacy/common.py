@@ -15,10 +15,7 @@ def tuples(seq, n, with_permutations):
 
 
 def all_different(seq):
-    for i in xrange(len(seq)):
-        if seq[i] in seq[i + 1:]:
-            return False
-    return True
+    return len(set(seq)) == len(seq)
 
 
 def retval(provides):
@@ -26,3 +23,8 @@ def retval(provides):
     for k in provides():
         r[k] = False
     return r
+
+
+def find(seq, elem):
+    try: return seq.index(elem)
+    except: return -1

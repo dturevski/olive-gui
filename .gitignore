@@ -1,1 +1,11 @@
-/nbproject/private/
+**.pyc
+**parser.out
+**parsetab.py
+.idea/workspace.xml
+build/*
+dist/*
+*.exe
+resources.py
+olive.log
+olive.spec
+test.json

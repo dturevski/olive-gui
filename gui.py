@@ -1,31 +1,37 @@
-﻿# -*- coding: utf-8 -*-
+﻿﻿# -*- coding: utf-8 -*-
 
 # standard
 import os
+import sys
 import tempfile
 import copy
 import string
 import re
 import struct
 import ctypes
-import urllib
+import urllib.request, urllib.parse, urllib.error
+import logging
 
 # 3rd party
 import yaml
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 # local
+import board
 import legacy.popeye
 import legacy.chess
 import options
 import model
 import pbm
 import pdf
-import rtf
 import xfen2img
 import fancy
 import chest
+from base import read_resource_file, get_write_dir
 
+# indexer
+import yacpdb.indexer.metadata
+import yacpdb.indexer.cruncher
 
 class SigWrapper(QtCore.QObject):
     sigLangChanged = QtCore.pyqtSignal()
@@ -34,17 +40,22 @@ class SigWrapper(QtCore.QObject):
     sigFocusOnPopeye = QtCore.pyqtSignal()
     sigFocusOnStipulation = QtCore.pyqtSignal()
     sigFocusOnSolution = QtCore.pyqtSignal()
-    sigNewVersion = QtCore.pyqtSignal()
+    sigDemoModeExit = QtCore.pyqtSignal()
 
 
-class Mainframe(QtGui.QMainWindow):
+class Mainframe(QtWidgets.QMainWindow):
+
     sigWrapper = SigWrapper()
     fontSize = 24
+
     fonts = {
-        'd': QtGui.QFont(
-            'GC2004D', fontSize), 'y': QtGui.QFont(
-            'GC2004Y', fontSize), 'x': QtGui.QFont(
-                'GC2004X', fontSize)}
+        'normal': {
+            'd': QtGui.QFont('GC2004D', fontSize),
+            'y': QtGui.QFont('GC2004Y', fontSize),
+            'x': QtGui.QFont('GC2004X', fontSize)
+        },
+    }
+    currentFontSet = 'normal'
     currentlyDragged = None
     transform_names = [
         'Shift_up',
@@ -57,38 +68,15 @@ class Mainframe(QtGui.QMainWindow):
         'Mirror_horizontal',
         'Invert_colors',
         'Clear']
-    transform_icons = ['up', 'down', 'left',
-                       'right', 'rotate-clockwise', 'rotate-anticlockwise',
-                       'left-right', 'up-down', 'switch', 'out']
+    transform_icons = ['up-arrow', 'down-arrow', 'left-arrow',
+                       'right-arrow', 'redo', 'undo',
+                       'resize-x', 'resize-y', 'shuffle', 'expand']
     selectedPiece = None
+    predicateStorage = yacpdb.indexer.metadata.PredicateStorage('./')
 
-    class CheckNewVersion(QtCore.QThread):
-
-        def __init__(self, parent):
-            QtCore.QThread.__init__(self)
-            self.parent = parent
-
-        def run(self):
-            try:
-                info = yaml.load(
-                    urllib.urlopen(
-                        Conf.value('latest-binary-version-info-url')))
-                if cmp(info['version'], Conf.value('version')) > 0:
-                    self.parent.infoNewVersion = info
-                    # All GUI must be in the main thread
-                    Mainframe.sigWrapper.sigNewVersion.emit()
-            except:
-                pass
-
-            self.terminate()
-
-    def onNewVersion(self):
-        dialog = YesNoDialog(
-            Lang.value('MSG_New_version') %
-            self.infoNewVersion['version'])
-        if dialog.exec_():
-            QtGui.QDesktopServices.openUrl(
-                QtCore.QUrl(self.infoNewVersion['details']))
+    def fontset():
+        return Mainframe.fonts[Mainframe.currentFontSet]
+    fontset = staticmethod(fontset)
 
     def __init__(self):
         super(Mainframe, self).__init__()
@@ -106,28 +94,27 @@ class Mainframe(QtGui.QMainWindow):
         self.overview.rebuild()
         self.show()
 
-        if Conf.value('check-for-latest-binary'):
-            self.checkNewVersion = Mainframe.CheckNewVersion(self)
-            self.checkNewVersion.start()
-
     def initLayout(self):
+
+        logging.debug("Mainframe.initLayout()")
+
         # widgets
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
 
         # left pane
-        widgetLeftPane = QtGui.QWidget()
-        vboxLeftPane = QtGui.QVBoxLayout()
+        widgetLeftPane = QtWidgets.QWidget()
+        vboxLeftPane = QtWidgets.QVBoxLayout()
         vboxLeftPane.setSpacing(0)
         vboxLeftPane.setContentsMargins(0, 0, 0, 0)
         self.fenView = FenView(self)
-        self.boardView = BoardView()
+        self.boardView = BoardView(self)
         self.infoView = InfoView()
         self.chessBox = ChessBox()
 
         vboxLeftPane.addWidget(self.fenView)
         vboxLeftPane.addWidget(self.boardView)
 
-        self.tabBar1 = QtGui.QTabWidget()
+        self.tabBar1 = QtWidgets.QTabWidget()
         self.tabBar1.setTabPosition(1)
         self.tabBar1.addTab(self.infoView, Lang.value('TC_Info'))
         self.tabBar1.addTab(self.chessBox, Lang.value('TC_Pieces'))
@@ -142,14 +129,14 @@ class Mainframe(QtGui.QMainWindow):
         self.yamlView = YamlView()
         self.publishingView = PublishingView()
         self.chestView = chest.ChestView(Conf, Lang, Mainframe)
-        self.tabBar2 = QtGui.QTabWidget()
+        self.tabBar2 = QtWidgets.QTabWidget()
         self.tabBar2.addTab(self.popeyeView, Lang.value('TC_Popeye'))
         self.tabBar2.addTab(self.solutionView, Lang.value('TC_Solution'))
         self.tabBar2.addTab(self.easyEditView, Lang.value('TC_Edit'))
         self.tabBar2.addTab(self.yamlView, Lang.value('TC_YAML'))
         self.tabBar2.addTab(self.publishingView, Lang.value('TC_Publishing'))
         self.tabBar2.addTab(self.chestView, Lang.value('TC_Chest'))
-        splitter = QtGui.QSplitter(QtCore.Qt.Vertical)
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.overview = OverviewList()
         self.overview.init()
 
@@ -160,123 +147,129 @@ class Mainframe(QtGui.QMainWindow):
         hbox.addWidget(widgetLeftPane)
         hbox.addWidget(splitter, 1)
 
-        cw = QtGui.QWidget()
+        cw = QtWidgets.QWidget()
         self.setCentralWidget(cw)
         self.centralWidget().setLayout(hbox)
 
     def initActions(self):
-        self.newAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/page-white.png'),
+
+        logging.debug("Mainframe.initActions()")
+
+        self.newAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/add-new-document.svg'),
             Lang.value('MI_New'),
             self)
         self.newAction.setShortcut('Ctrl+N')
         self.newAction.triggered.connect(self.onNewFile)
 
-        self.openAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/folder.png'),
+        self.openAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/open-file.svg'),
             Lang.value('MI_Open'),
             self)
         self.openAction.setShortcut('Ctrl+O')
         self.openAction.triggered.connect(self.onOpenFile)
 
-        self.saveAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/disk.png'),
+        self.saveAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/save-file.svg'),
             Lang.value('MI_Save'),
             self)
         self.saveAction.setShortcut('Ctrl+S')
         self.saveAction.triggered.connect(self.onSaveFile)
 
-        self.saveAsAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/page-white-save.png'),
+        self.saveAsAction = QtWidgets.QAction(
             Lang.value('MI_Save_as'),
             self)
         self.saveAsAction.triggered.connect(self.onSaveFileAs)
 
-        self.saveTemplateAction = QtGui.QAction(
+        self.saveTemplateAction = QtWidgets.QAction(
             Lang.value('MI_Save_template'), self)
         self.saveTemplateAction.triggered.connect(self.onSaveTemplate)
 
-        self.importPbmAction = QtGui.QAction(Lang.value('MI_Import_PBM'), self)
+        self.importPbmAction = QtWidgets.QAction(Lang.value('MI_Import_PBM'), self)
         self.importPbmAction.triggered.connect(self.onImportPbm)
 
-        self.importCcvAction = QtGui.QAction(Lang.value('MI_Import_CCV'), self)
+        self.importCcvAction = QtWidgets.QAction(Lang.value('MI_Import_CCV'), self)
         self.importCcvAction.triggered.connect(self.onImportCcv)
 
-        self.exportHtmlAction = QtGui.QAction(
+        self.exportHtmlAction = QtWidgets.QAction(
             Lang.value('MI_Export_HTML'), self)
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
-        self.exportPdfAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/printer.png'),
+        self.exportPdfAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/pdf.svg'),
             Lang.value('MI_Export_PDF'),
             self)
         self.exportPdfAction.triggered.connect(self.onExportPdf)
-        self.exportImgAction = QtGui.QAction(
+        self.exportImgAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/png.svg'),
             Lang.value('MI_Export_Image'), self)
         self.exportImgAction.triggered.connect(self.onExportImg)
-        # rtf
-        self.exportRtfAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/rtf32.png'),
-            Lang.value('MI_Export_RTF'),
-            self)
-        self.exportRtfAction.triggered.connect(self.onExportRtf)
         self.exportHtmlAction.setEnabled(False)
 
-        self.addEntryAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/add.png'),
+        self.addEntryAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/plus.svg'),
             Lang.value('MI_Add_entry'),
             self)
         self.addEntryAction.triggered.connect(self.onAddEntry)
 
-        self.deleteEntryAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/delete.png'),
+        self.deleteEntryAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/minus.svg'),
             Lang.value('MI_Delete_entry'),
             self)
         self.deleteEntryAction.triggered.connect(self.onDeleteEntry)
 
-        self.exitAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/exit.png'),
+        self.demoModeAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/fullscreen.svg'),
+            Lang.value('MI_Demo_mode'),
+            self)
+        self.demoModeAction.triggered.connect(self.onDemoMode)
+
+
+        self.exitAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/logout.svg'),
             Lang.value('MI_Exit'),
             self)
         self.exitAction.setShortcut('Ctrl+Q')
         self.exitAction.triggered.connect(self.close)
 
-        self.startPopeyeAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/key.png'),
-            Lang.value('MI_Run_Popeye'),
-            self)
-        self.startPopeyeAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/key.png'),
+        self.startPopeyeAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/key.svg'),
             Lang.value('MI_Run_Popeye'),
             self)
         self.startPopeyeAction.setShortcut('F7')
         self.startPopeyeAction.triggered.connect(self.popeyeView.startPopeye)
-        self.stopPopeyeAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/stop.png'),
+        self.stopPopeyeAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/stop.svg'),
             Lang.value('MI_Stop_Popeye'),
             self)
         self.stopPopeyeAction.triggered.connect(self.popeyeView.stopPopeye)
-        self.listLegalBlackMoves = QtGui.QAction(
-            QtGui.QIcon('resources/icons/anyblack.png'),
+        self.listLegalBlackMoves = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/fork-arrow-down.svg'),
             Lang.value('MI_Legal_black_moves'),
             self)
         self.listLegalBlackMoves.triggered.connect(
             self.popeyeView.makeListLegal('black'))
-        self.listLegalWhiteMoves = QtGui.QAction(
-            QtGui.QIcon('resources/icons/anywhite.png'),
+        self.listLegalWhiteMoves = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/fork-arrow-up.svg'),
             Lang.value('MI_Legal_white_moves'),
             self)
         self.listLegalWhiteMoves.triggered.connect(
             self.popeyeView.makeListLegal('white'))
-        self.optionsAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/cog-key.png'),
+        self.optionsAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/settings.svg'),
             Lang.value('MI_Options'),
             self)
         self.optionsAction.triggered.connect(self.popeyeView.onOptions)
-        self.twinsAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/gemini.png'),
+        self.twinsAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/gemini.svg'),
             Lang.value('MI_Twins'),
             self)
         self.twinsAction.triggered.connect(self.popeyeView.onTwins)
+
+        self.runAxr = QtWidgets.QAction(
+                QtGui.QIcon(':/icons/pointing-right.svg'),
+                Lang.value('PS_AXR'),
+                self)
+        self.runAxr.triggered.connect(self.onAxr)
 
         self.popeyeView.setActions(
             {
@@ -290,80 +283,87 @@ class Mainframe(QtGui.QMainWindow):
         langs = Conf.value('languages')
         self.langActions = []
         for key in sorted(langs.keys()):
-            self.langActions.append(QtGui.QAction(langs[key], self))
+            self.langActions.append(
+                QtWidgets.QAction(QtGui.QIcon(':/icons/lang/'+ key +'.svg'), langs[key], self)
+            )
             self.langActions[-1].triggered.connect(self.makeSetNewLang(key))
             self.langActions[-1].setCheckable(True)
             self.langActions[-1].setChecked(key == Lang.current)
 
     def initMenus(self):
+
+        logging.debug("Mainframe.initMenus()")
+
         # Menus
         menubar = self.menuBar()
         # File menu
         self.fileMenu = menubar.addMenu(Lang.value('MI_File'))
-        map(self.fileMenu.addAction,
+        list(map(self.fileMenu.addAction,
             [self.newAction,
              self.openAction,
              self.saveAction,
              self.saveAsAction,
-             self.saveTemplateAction])
+             self.saveTemplateAction]))
         self.fileMenu.addSeparator()
-        self.langMenu = self.fileMenu.addMenu(Lang.value('MI_Language'))
-        map(self.langMenu.addAction, self.langActions)
+        self.langMenu = self.fileMenu.addMenu(QtGui.QIcon(':/icons/translate.svg'),
+                                              Lang.value('MI_Language'))
+        list(map(self.langMenu.addAction, self.langActions))
         self.fileMenu.addSeparator()
-        self.importMenu = self.fileMenu.addMenu(Lang.value('MI_Import'))
-        self.importMenu.addAction(self.importPbmAction)
-        self.importMenu.addAction(self.importCcvAction)
+        #self.importMenu = self.fileMenu.addMenu(Lang.value('MI_Import'))
+        #self.importMenu.addAction(self.importPbmAction)
+        #self.importMenu.addAction(self.importCcvAction)
         self.exportMenu = self.fileMenu.addMenu(Lang.value('MI_Export'))
         # self.exportMenu.addAction(self.exportHtmlAction)
         self.exportMenu.addAction(self.exportPdfAction)
         self.exportMenu.addAction(self.exportImgAction)
-        # add for export into rtf
-        self.exportMenu.addAction(self.exportRtfAction)
         self.fileMenu.addSeparator()
+        self.fileMenu.addAction(self.demoModeAction)
         self.fileMenu.addAction(self.exitAction)
 
         # Entry menu
         self.editMenu = menubar.addMenu(Lang.value('MI_Edit'))
-        map(self.editMenu.addAction, [
-            self.addEntryAction, self.deleteEntryAction])
+        list(map(self.editMenu.addAction, [
+            self.addEntryAction, self.deleteEntryAction]))
         self.editMenu.addSeparator()
 
         # Popeye menu
         self.popeyeMenu = menubar.addMenu(Lang.value('MI_Popeye'))
-        map(self.popeyeMenu.addAction,
+        list(map(self.popeyeMenu.addAction,
             [self.startPopeyeAction,
              self.stopPopeyeAction,
              self.listLegalBlackMoves,
              self.listLegalWhiteMoves,
              self.optionsAction,
-             self.twinsAction])
+             self.twinsAction]))
 
         # help menu
         menubar.addSeparator()
         self.helpMenu = menubar.addMenu(Lang.value('MI_Help'))
-        self.aboutAction = QtGui.QAction(
-            QtGui.QIcon('resources/icons/information.png'),
+        self.aboutAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/information.svg'),
             Lang.value('MI_About'),
             self)
         self.aboutAction.triggered.connect(self.onAbout)
         self.helpMenu.addAction(self.aboutAction)
 
     def initToolbar(self):
+        logging.debug("Mainframe.initToolbar()")
         self.toolbar = self.addToolBar('')
         self.toolbar.setObjectName('thetoolbar')
-        map(self.toolbar.addAction, [
-            self.newAction, self.openAction, self.saveAction])
+        list(map(self.toolbar.addAction, [
+            self.newAction, self.openAction, self.saveAction]))
         self.toolbar.addSeparator()
-        map(self.toolbar.addAction, [
-            self.addEntryAction, self.deleteEntryAction])
+        list(map(self.toolbar.addAction, [
+            self.addEntryAction, self.deleteEntryAction]))
         self.toolbar.addSeparator()
-        map(self.toolbar.addAction,
+        list(map(self.toolbar.addAction,
             [self.startPopeyeAction,
              self.stopPopeyeAction,
              self.listLegalBlackMoves,
              self.listLegalWhiteMoves,
              self.optionsAction,
-             self.twinsAction])
+             self.twinsAction,
+             self.runAxr]))
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
@@ -371,6 +371,7 @@ class Mainframe(QtGui.QMainWindow):
         self.createTransformActions()
 
     def initSignals(self):
+        logging.debug("Mainframe.initSignals()")
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigFocusOnPieces.connect(self.onFocusOnPieces)
@@ -378,26 +379,23 @@ class Mainframe(QtGui.QMainWindow):
             self.onFocusOnStipulation)
         Mainframe.sigWrapper.sigFocusOnPopeye.connect(self.onFocusOnPopeye)
         Mainframe.sigWrapper.sigFocusOnSolution.connect(self.onFocusOnSolution)
-        Mainframe.sigWrapper.sigNewVersion.connect(self.onNewVersion)
+        Mainframe.sigWrapper.sigDemoModeExit.connect(self.onDemoModeExit)
 
     def initFrame(self):
+        logging.debug("Mainframe.initFrame()")
+
         # window banner
-        self.setWindowIcon(
-            QtGui.QIcon(
-                QtGui.QPixmap('resources/icons/olive.png')))
-
-
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/olive.svg')))
 
         # restoring windows and toolbars geometry
         settings = QtCore.QSettings()
-        if len(settings.value("overviewColumnWidths").toString()) > 0:
-            self.restoreGeometry(settings.value("geometry").toByteArray())
-            self.restoreState(settings.value("windowState").toByteArray())
+        if settings.value("geometry") != None:
+            self.restoreGeometry(settings.value("geometry"))
+        if settings.value("windowState") != None:
+            self.restoreState(settings.value("windowState"))
+        if settings.value("overviewColumnWidths") != None:
             self.overview.setColumnWidthsFromString(
-                settings.value("overviewColumnWidths").toString())
-        else:
-            # first run
-            self.setGeometry(32, 32, 32, 32)
+               str(QtCore.QVariant(settings.value("overviewColumnWidths"))))
 
     def updateTitle(self):
         docname = Lang.value('WT_New_Collection')
@@ -408,6 +406,35 @@ class Mainframe(QtGui.QMainWindow):
             ' [' + [Lang.value('WT_Saved'), Lang.value('WT_Not_saved')][Mainframe.model.is_dirty] + \
             '] - olive ' + Conf.value('version')
         self.setWindowTitle(title)
+
+    def openCollection(self, fileName):
+        try:
+            f = open(str(fileName), 'r', encoding="utf8")
+            Mainframe.model = model.Model()
+            Mainframe.model.delete(0)
+            for data in yaml.load_all(f):
+                Mainframe.model.add(model.makeSafe(data), False)
+            f.close()
+            Mainframe.model.is_dirty = False
+            Conf.values['collections-dir'] = os.path.split(fileName)[0]
+        except IOError:
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
+            Mainframe.model = model.Model()
+        except yaml.YAMLError as e:
+            msgBox(Lang.value('MSG_YAML_failed') % e)
+            Mainframe.model = model.Model()
+        else:
+            if len(Mainframe.model.entries) == 0:
+                Mainframe.model = model.Model()
+            Mainframe.model.filename = str(fileName)
+        finally:
+            self.overview.rebuild()
+            Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def factoryDraggableLabel(self, id):
+        return DraggableLabel(id)
 
     def makeSetNewLang(self, newlang):
         def setNewLang():
@@ -441,6 +468,7 @@ class Mainframe(QtGui.QMainWindow):
 
         # actions
         self.exitAction.setText(Lang.value('MI_Exit'))
+        self.demoModeAction.setText(Lang.value('MI_Demo_mode'))
         self.newAction.setText(Lang.value('MI_New'))
         self.openAction.setText(Lang.value('MI_Open'))
         self.saveAction.setText(Lang.value('MI_Save'))
@@ -460,8 +488,7 @@ class Mainframe(QtGui.QMainWindow):
         self.exportHtmlAction.setText(Lang.value('MI_Export_HTML'))
         self.exportPdfAction.setText(Lang.value('MI_Export_PDF'))
         self.exportImgAction.setText(Lang.value('MI_Export_Image'))
-        self.exportRtfAction.setText(Lang.value('MI_Export_RTF'))
-        
+
         for i, k in enumerate(Mainframe.transform_names):
             self.transforms[i].setText(Lang.value('MI_' + k))
 
@@ -471,7 +498,7 @@ class Mainframe(QtGui.QMainWindow):
         self.editMenu.setTitle(Lang.value('MI_Edit'))
         self.popeyeMenu.setTitle(Lang.value('MI_Popeye'))
         self.helpMenu.setTitle(Lang.value('MI_Help'))
-        self.importMenu.setTitle(Lang.value('MI_Import'))
+        #self.importMenu.setTitle(Lang.value('MI_Import'))
         self.exportMenu.setTitle(Lang.value('MI_Export'))
 
         # window title
@@ -488,53 +515,23 @@ class Mainframe(QtGui.QMainWindow):
     def onOpenFile(self):
         if not self.doDirtyCheck():
             return
-        default_dir = './collections/'
-        if Mainframe.model.filename != '':
-            default_dir, tail = os.path.split(Mainframe.model.filename)
-        fileName = QtGui.QFileDialog.getOpenFileName(
-            self, Lang.value('MI_Open'), default_dir, "(*.olv)")
+        fileName = QtWidgets.QFileDialog.getOpenFileName(
+            self, Lang.value('MI_Open'), Conf.value('collections-dir'), "(*.olv)")[0]
         if not fileName:
             return
         self.openCollection(fileName)
 
-    def openCollection(self, fileName):
-        try:
-            f = open(unicode(fileName), 'r')
-            Mainframe.model = model.Model()
-            Mainframe.model.delete(0)
-            for data in yaml.load_all(f):
-                Mainframe.model.add(model.makeSafe(data), False)
-            f.close()
-            Mainframe.model.is_dirty = False
-        except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
-            Mainframe.model = model.Model()
-        except yaml.YAMLError as e:
-            msgBox(Lang.value('MSG_YAML_failed') % e)
-            Mainframe.model = model.Model()
-        else:
-            if len(Mainframe.model.entries) == 0:
-                Mainframe.model = model.Model()
-            Mainframe.model.filename = unicode(fileName)
-        finally:
-            self.overview.rebuild()
-            Mainframe.sigWrapper.sigModelChanged.emit()
-
     def onSaveFile(self):
         if Mainframe.model.filename != '':
-            f = open(Mainframe.model.filename, 'w')
+            f = open(Mainframe.model.filename, 'wb')
             try:
-                for i in xrange(len(Mainframe.model.entries)):
-                    f.write("---\n")
-                    f.write(
-                        unicode(
-                            yaml.dump(
-                                Mainframe.model.entries[i],
-                                encoding=None,
-                                allow_unicode=True)).encode('utf8'))
+                for i in range(len(Mainframe.model.entries)):
+                    f.write(bytes("---\n", encoding="ascii"))
+                    f.write(yaml.dump(Mainframe.model.entries[i], encoding="utf8", allow_unicode=True))
                     Mainframe.model.dirty_flags[i] = False
                 Mainframe.model.is_dirty = False
                 self.overview.removeDirtyMarks()
+                Conf.values['collections-dir'] = os.path.split(Mainframe.model.filename)[0]
             finally:
                 f.close()
                 Mainframe.sigWrapper.sigModelChanged.emit()
@@ -542,14 +539,11 @@ class Mainframe(QtGui.QMainWindow):
             self.onSaveFileAs()
 
     def onSaveFileAs(self):
-        default_dir = './collections/'
-        if Mainframe.model.filename != '':
-            default_dir, tail = os.path.split(Mainframe.model.filename)
-        fileName = QtGui.QFileDialog.getSaveFileName(
-            self, Lang.value('MI_Save_as'), default_dir, "(*.olv)")
+        fileName = QtWidgets.QFileDialog.getSaveFileName(
+            self, Lang.value('MI_Save_as'), Conf.value('collections-dir'), "(*.olv)")[0]
         if not fileName:
             return
-        Mainframe.model.filename = unicode(fileName)
+        Mainframe.model.filename = str(fileName)
         self.onSaveFile()
 
     def onSaveTemplate(self):
@@ -557,7 +551,9 @@ class Mainframe(QtGui.QMainWindow):
         try:
             Mainframe.model.saveDefaultEntry()
         except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
 
     def doDirtyCheck(self):
         if not Mainframe.model.is_dirty:
@@ -575,26 +571,26 @@ class Mainframe(QtGui.QMainWindow):
         return False
 
     def getOpenFileNameAndEncoding(self, title, dir, filter):
-        dialog = QtGui.QFileDialog()
-        dialog.setOption(QtGui.QFileDialog.DontUseNativeDialog, True)
+        dialog = QtWidgets.QFileDialog()
+        dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog, True)
         dialog.setFilter(filter)
         dialog.setWindowTitle(title)
 
         encodings = Conf.value('import-post-decode')
         keys = sorted(encodings.keys())
-        combo = QtGui.QComboBox()
+        combo = QtWidgets.QComboBox()
         combo.addItems(["%s (%s)" % (k, encodings[k]) for k in keys])
         combo.setCurrentIndex(
             keys.index(
                 Conf.value('import-post-decode-default')))
 
         grid = dialog.layout()
-        grid.addWidget(QtGui.QLabel(Lang.value('MISC_Encoding')), 4, 0)
+        grid.addWidget(QtWidgets.QLabel(Lang.value('MISC_Encoding')), 4, 0)
         grid.addWidget(combo, 4, 1)
 
         fileName = False
         if dialog.exec_() and len(dialog.selectedFiles()):
-            fileName = dialog.selectedFiles()[0]
+            fileName = dialog.selectedFiles()[0][0]
         return fileName, keys[combo.currentIndex()]
 
     def onImportPbm(self):
@@ -603,7 +599,7 @@ class Mainframe(QtGui.QMainWindow):
         default_dir = './collections/'
         if Mainframe.model.filename != '':
             default_dir, tail = os.path.split(Mainframe.model.filename)
-        #fileName = QtGui.QFileDialog.getOpenFileName(self, Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
+        #fileName = QtWidgets.QFileDialog.getOpenFileName(self, Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
         fileName, encoding = self.getOpenFileNameAndEncoding(
             Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
         if not fileName:
@@ -611,14 +607,16 @@ class Mainframe(QtGui.QMainWindow):
         try:
             Mainframe.model = model.Model()
             Mainframe.model.delete(0)
-            file = open(unicode(fileName))
+            file = open(str(fileName))
             pbm.PBM_ENCODING = encoding
             for data in pbm.PbmEntries(file):
                 Mainframe.model.add(model.makeSafe(data), False)
             file.close()
             Mainframe.model.is_dirty = False
         except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
         except:
             msgBox(Lang.value('MSG_PBM_import_failed'))
         finally:
@@ -644,7 +642,9 @@ class Mainframe(QtGui.QMainWindow):
                 Mainframe.model.add(model.makeSafe(data), False)
             Mainframe.model.is_dirty = False
         except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
         except:
             msgBox(Lang.value('MSG_CCV_import_failed'))
         finally:
@@ -658,51 +658,43 @@ class Mainframe(QtGui.QMainWindow):
 
     def onExportPdf(self):
         default_dir = './collections/'
-        fileName = QtGui.QFileDialog.getSaveFileName(
+        fileName = QtWidgets.QFileDialog.getSaveFileName(
             self,
             Lang.value('MI_Export') +
             ' ' +
             Lang.value('MI_Export_PDF'),
             default_dir,
-            "(*.pdf)")
+            "(*.pdf)")[0]
         if not fileName:
             return
         try:
             ed = pdf.ExportDocument(Mainframe.model.entries, Lang)
-            ed.doExport(unicode(fileName))
+            ed.doExport(str(fileName))
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(fileName))
         except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
         except:
-            msgBox(Lang.value('MSG_PDF_export_failed'))
+            msg = Lang.value('MSG_PDF_export_failed');
+            logging.exception(msg)
+            msgBox(msg)
 
     def onExportImg(self):
-        fileName = QtGui.QFileDialog.getSaveFileName(self, Lang.value(
-            'MI_Export') + ' / ' + Lang.value('MI_Export_Image'), '', "(*.png)")
+        fileName = QtWidgets.QFileDialog.getSaveFileName(self, Lang.value(
+            'MI_Export') + ' / ' + Lang.value('MI_Export_Image'), '', "(*.png)")[0]
         if not fileName:
             return
         try:
-            xfen2img.convert(Mainframe.model.board.toFen(), unicode(fileName))
+            xfen2img.convert(Mainframe.model.board.toFen(), str(fileName))
         except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
         except:
-            msgBox(Lang.value('MSG_Image_export_failed'))
-            
-    # try to export into rtf
-    def onExportRtf(self):
-        default_dir = './collections/'
-        fileName = QtGui.QFileDialog.getSaveFileName(self, 
-            Lang.value('MI_Export') + ' ' + Lang.value('MI_Export_RTF'),
-            default_dir, 
-            "(*.rtf)")
-        if not fileName:
-            return
-        try:
-            ed = rtf.ExportDocument(Mainframe.model.entries, Lang)
-            ed.do_export(unicode(fileName))
-        except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
-        except RuntimeError:
-            msgBox(Lang.value('MSG_RTF_export_failed') % Error)
+            msg = Lang.value('MSG_Image_export_failed')
+            logging.exception(Lang.value('MSG_Image_export_failed'))
+            msgBox(msg)
 
     def onAddEntry(self):
         idx = Mainframe.model.current + 1
@@ -749,15 +741,12 @@ class Mainframe(QtGui.QMainWindow):
         self.transforms = []
         for i, k in enumerate(Mainframe.transform_names):
             self.transforms.append(
-                QtGui.QAction(
-                    QtGui.QIcon(
-                        'resources/icons/arrow-' +
-                        Mainframe.transform_icons[i] +
-                        '.png'),
-                    Lang.value(
-                        'MI_' +
-                        k),
-                    self))
+                QtWidgets.QAction(
+                    QtGui.QIcon(':/icons/' + Mainframe.transform_icons[i] + '.svg'),
+                    Lang.value('MI_' + k),
+                    self
+                )
+            )
             self.transforms[-1].triggered.connect(
                 self.createTransformsCallable(k))
             self.toolbar.addAction(self.transforms[-1])
@@ -765,22 +754,10 @@ class Mainframe(QtGui.QMainWindow):
 
     def createTransformsCallable(self, command):
         def callable():
-            if command == 'Shift_up':
-                Mainframe.model.board.shift(0, -1)
-            elif command == 'Shift_down':
-                Mainframe.model.board.shift(0, 1)
-            elif command == 'Shift_left':
-                Mainframe.model.board.shift(-1, 0)
-            elif command == 'Shift_right':
-                Mainframe.model.board.shift(1, 0)
-            elif command == 'Rotate_CW':
-                Mainframe.model.board.rotate('270')
-            elif command == 'Rotate_CCW':
-                Mainframe.model.board.rotate('90')
-            elif command == 'Mirror_horizontal':
-                Mainframe.model.board.mirror('a1<-->a8')
-            elif command == 'Mirror_vertical':
-                Mainframe.model.board.mirror('a1<-->h1')
+            t = board.Board.getTransformByName(command)
+            if t != None:
+                Mainframe.model.board.transform(t)
+                model.transformEntryOptionsAndTwins(Mainframe.model.cur(), t)
             elif command == 'Clear':
                 Mainframe.model.board.clear()
             elif command == 'Invert_colors':
@@ -806,8 +783,46 @@ class Mainframe(QtGui.QMainWindow):
         Conf.write()
         event.accept()
 
+    def onAxr(self):
+        Mainframe.sigWrapper.sigFocusOnSolution.emit()
+        try:
+            a0 = yacpdb.indexer.cruncher.Analyzer0(Conf.value("analyzers"), Mainframe.predicateStorage)
+            e = Mainframe.model.cur()
+            rs = a0.runOne(e)
+            for k in rs.counts:
+                if rs.counts[k] > 1:
+                    k += " x %d" % rs.counts[k]
+                if "keywords" not in e:
+                    e["keywords"] = []
+                if k not in e["keywords"]:
+                    e["keywords"].append(k)
+            Mainframe.sigWrapper.sigModelChanged.emit()
 
-class ClickableLabel(QtGui.QLabel):
+        except Exception as ex:
+            logging.exception("AXR failure")
+            msgBox(str(ex))
+
+    def onDemoMode(self):
+        if 'demo' not in Mainframe.fonts:
+            fontSize = (Mainframe.app.desktop().screenGeometry().height() - 400) >> 3
+            Mainframe.fonts['demo'] = {
+              'd': QtGui.QFont('GC2004D', fontSize),
+              'y': QtGui.QFont('GC2004Y', fontSize),
+              'x': QtGui.QFont('GC2004X', fontSize)}
+        Mainframe.currentFontSet = 'demo'
+        self.hide()
+        self.demoFrame = DemoFrame()
+        Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def onDemoModeExit(self):
+        Mainframe.currentFontSet = 'normal'
+        self.demoFrame.close()
+        Mainframe.sigWrapper.sigModelChanged.emit()
+        self.update()
+        self.show()
+
+
+class ClickableLabel(QtWidgets.QLabel):
 
     def __init__(self, str):
         super(ClickableLabel, self).__init__(str)
@@ -818,16 +833,17 @@ class QuickOptionsView():  # for clarity this View is not a widget
 
     def __init__(self, mainframeInstance):
         self.quickies = [
-            {'option': 'SetPlay', 'icon': 'setplay.png', 'lang': 'QO_SetPlay'},
-            {'option': 'Defence 1', 'icon': 'tries.png', 'lang': 'QO_Tries'},
-            {'option': 'PostKeyPlay', 'icon': 'postkeyplay.png', 'lang': 'QO_PostKeyPlay'},
-            {'option': 'Intelligent', 'icon': 'intelligent.png', 'lang': 'QO_IntelligentMode'}
+            {'option': 'SetPlay', 'icon': 'miscellaneus.svg', 'lang': 'QO_SetPlay'},
+            {'option': 'Defence 1', 'icon': 'question.svg', 'lang': 'QO_Tries'},
+            {'option': 'PostKeyPlay', 'icon': 'more.svg', 'lang': 'QO_PostKeyPlay'},
+            {'option': 'Intelligent', 'icon': 'flash.svg', 'lang': 'QO_IntelligentMode'},
+            {'option': 'MoveNumbers', 'icon': 'list.svg', 'lang': 'QO_MoveNumbers'}
         ]
         self.actions = []
         for q in self.quickies:
-            action = QtGui.QAction(
+            action = QtWidgets.QAction(
                 QtGui.QIcon(
-                    'resources/icons/' +
+                    ':/icons/' +
                     q['icon']),
                 Lang.value(
                     q['lang']),
@@ -856,62 +872,74 @@ class QuickOptionsView():  # for clarity this View is not a widget
     def onModelChanged(self):
         if self.skip_model_changed:
             return
-        for i in xrange(len(self.quickies)):
+        for i in range(len(self.quickies)):
             self.actions[i].setChecked('options' in Mainframe.model.cur() and self.quickies[
                                        i]['option'] in Mainframe.model.cur()['options'])
 
     def onLangChanged(self):
-        for i in xrange(len(self.quickies)):
+        for i in range(len(self.quickies)):
             self.actions[i].setText(Lang.value(self.quickies[i]['lang']))
 
 
-class AboutDialog(QtGui.QDialog):
+class AboutDialog(QtWidgets.QDialog):
 
     def __init__(self):
         super(AboutDialog, self).__init__()
         self.setAutoFillBackground(True)
         self.setBackgroundRole(QtGui.QPalette.Light)
-        vbox = QtGui.QVBoxLayout()
-        lblLogo = QtGui.QLabel()
-        iconLogo = QtGui.QIcon('resources/icons/olive-logo.png')
-        lblLogo.setPixmap(iconLogo.pixmap(331, 139))
+        vbox = QtWidgets.QVBoxLayout()
+        lblLogo = QtWidgets.QLabel()
+        iconLogo = QtGui.QIcon(':/icons/olive.svg')
+        lblLogo.setPixmap(iconLogo.pixmap(256, 256))
         vbox.addWidget(lblLogo, QtCore.Qt.AlignCenter)
-        vbox.addWidget(
-            ClickableLabel(
-                'olive v' +
-                Conf.value('version') +
-                ' is free software licensed under GNU GPL'))
-        vbox.addWidget(ClickableLabel(u'© 2011-2016'))
-        vbox.addWidget(ClickableLabel(u'Project contributors:'))
-        vbox.addWidget(ClickableLabel(u'<b>Mihail Croitor (MDA), Борислав Гађански (SRB)</b>'))
-        vbox.addWidget(ClickableLabel(u'<b>Torsten Linß (GER), Thomas Maeder (CHE)</b>'))
-        vbox.addWidget(ClickableLabel(u'<b>Phil Sphicas (USA), Дмитрий Туревский (RUS)</b>'))
-        vbox.addWidget(ClickableLabel(
-            'For more information please visit <a href="http://www.yacpdb.org/#static/olive">http://www.yacpdb.org/#static/olive</a>'))
+        grid = QtWidgets.QGridLayout()
+
+
+        grid.addWidget(ClickableLabel('Version:'))
+        grid.addWidget(ClickableLabel("Olive %s (%s)" % (Conf.value('version'),  os.name)), 0, 1)
+
+        grid.addWidget(ClickableLabel(''))
+        grid.addWidget(ClickableLabel("Python %d.%d.%d" % (sys.version_info.major,
+                                                           sys.version_info.minor, sys.version_info.micro,)))
+        grid.addWidget(ClickableLabel(''))
+        grid.addWidget(ClickableLabel("Qt %s" % (QtCore.QT_VERSION_STR)))
+
+        grid.addWidget(ClickableLabel('License:'))
+        grid.addWidget(ClickableLabel('<a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU GPL</a>'))
+
+        grid.addWidget(ClickableLabel('Info & Issues:'))
+        grid.addWidget(ClickableLabel('<a href="https://github.com/dturevski/olive-gui">GitHub</a>'))
+
+        w = QtWidgets.QWidget()
+        w.setLayout(grid)
+        vbox.addWidget(w)
+
+        vbox.addWidget(ClickableLabel('© 2011-2018'))
 
         vbox.addStretch(1)
-        buttonOk = QtGui.QPushButton(Lang.value('CO_OK'), self)
+        buttonOk = QtWidgets.QPushButton(Lang.value('CO_OK'), self)
         buttonOk.clicked.connect(self.accept)
         vbox.addWidget(buttonOk)
 
         self.setLayout(vbox)
         self.setWindowTitle(Lang.value('MI_About'))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/information.svg')))
 
 
-class YesNoDialog(QtGui.QDialog):
+class YesNoDialog(QtWidgets.QDialog):
 
     def __init__(self, msg):
         super(YesNoDialog, self).__init__()
 
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(QtGui.QLabel(msg))
+        vbox = QtWidgets.QVBoxLayout()
+        vbox.addWidget(QtWidgets.QLabel(msg))
         vbox.addStretch(1)
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.addStretch(1)
-        buttonYes = QtGui.QPushButton(Lang.value('CO_Yes'), self)
+        buttonYes = QtWidgets.QPushButton(Lang.value('CO_Yes'), self)
         buttonYes.clicked.connect(self.accept)
-        buttonNo = QtGui.QPushButton(Lang.value('CO_No'), self)
+        buttonNo = QtWidgets.QPushButton(Lang.value('CO_No'), self)
         buttonNo.clicked.connect(self.reject)
 
         hbox.addWidget(buttonYes)
@@ -919,23 +947,26 @@ class YesNoDialog(QtGui.QDialog):
         vbox.addLayout(hbox)
         self.setLayout(vbox)
 
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
 
-class YesNoCancelDialog(QtGui.QDialog):
+
+
+class YesNoCancelDialog(QtWidgets.QDialog):
 
     def __init__(self, msg):
         super(YesNoCancelDialog, self).__init__()
 
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(QtGui.QLabel(msg))
+        vbox = QtWidgets.QVBoxLayout()
+        vbox.addWidget(QtWidgets.QLabel(msg))
         vbox.addStretch(1)
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.addStretch(1)
-        buttonYes = QtGui.QPushButton(Lang.value('CO_Yes'), self)
+        buttonYes = QtWidgets.QPushButton(Lang.value('CO_Yes'), self)
         buttonYes.clicked.connect(self.yes)
-        buttonNo = QtGui.QPushButton(Lang.value('CO_No'), self)
+        buttonNo = QtWidgets.QPushButton(Lang.value('CO_No'), self)
         buttonNo.clicked.connect(self.no)
-        buttonCancel = QtGui.QPushButton(Lang.value('CO_Cancel'), self)
+        buttonCancel = QtWidgets.QPushButton(Lang.value('CO_Cancel'), self)
         buttonCancel.clicked.connect(self.cancel)
 
         hbox.addWidget(buttonYes)
@@ -943,6 +974,7 @@ class YesNoCancelDialog(QtGui.QDialog):
         hbox.addWidget(buttonCancel)
         vbox.addLayout(hbox)
         self.setLayout(vbox)
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
 
         self.choice = 'Yes'
 
@@ -959,7 +991,7 @@ class YesNoCancelDialog(QtGui.QDialog):
         self.reject()
 
 
-class FenView(QtGui.QLineEdit):
+class FenView(QtWidgets.QLineEdit):
 
     def __init__(self, mainframe):
         super(FenView, self).__init__()
@@ -989,49 +1021,49 @@ class FenView(QtGui.QLineEdit):
         self.skip_model_changed = False
 
 
-class OverviewList(QtGui.QTreeWidget):
+class OverviewList(QtWidgets.QTreeWidget):
 
     def __init__(self):
         super(OverviewList, self).__init__()
         self.setAlternatingRowColors(True)
 
-        self.clipboard = QtGui.QApplication.clipboard()
+        self.clipboard = QtWidgets.QApplication.clipboard()
 
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         self.currentItemChanged.connect(self.onCurrentItemChanged)
 
-        # self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
-        self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        # self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
         self.skip_model_changed = False
         self.skip_current_item_changed = False
 
     def mousePressEvent(self, e):
         if e.buttons() != QtCore.Qt.RightButton:
-            return QtGui.QTreeWidget.mousePressEvent(self, e)
+            return QtWidgets.QTreeWidget.mousePressEvent(self, e)
 
         hasSelection = len(self.selectionModel().selectedRows()) > 0
 
-        menu = QtGui.QMenu('')
+        menu = QtWidgets.QMenu('')
 
-        copyAction = QtGui.QAction(Lang.value('MI_Copy'), self)
+        copyAction = QtWidgets.QAction(Lang.value('MI_Copy'), self)
         copyAction.triggered.connect(self.onCopy)
         copyAction.setEnabled(hasSelection)
         menu.addAction(copyAction)
 
-        cutAction = QtGui.QAction(Lang.value('MI_Cut'), self)
+        cutAction = QtWidgets.QAction(Lang.value('MI_Cut'), self)
         cutAction.triggered.connect(self.onCut)
         cutAction.setEnabled(hasSelection)
         menu.addAction(cutAction)
 
-        pasteAction = QtGui.QAction(Lang.value('MI_Paste'), self)
+        pasteAction = QtWidgets.QAction(Lang.value('MI_Paste'), self)
         pasteAction.triggered.connect(self.onPaste)
         pasteAction.setEnabled(len(self.clipboard.text()) > 0)
         menu.addAction(pasteAction)
 
-        saveSelection = QtGui.QAction(Lang.value('MI_Save_selection_as'), self)
+        saveSelection = QtWidgets.QAction(Lang.value('MI_Save_selection_as'), self)
         saveSelection.triggered.connect(self.onSaveSelectionAs)
         saveSelection.setEnabled(hasSelection)
         menu.addAction(saveSelection)
@@ -1047,7 +1079,7 @@ class OverviewList(QtGui.QTreeWidget):
             self.onCut()
 
     def getSelectionAsYaml(self):
-        text = u''
+        text = ''
         for idx in sorted([x.row()
                            for x in self.selectionModel().selectedRows()]):
             text = text + "---\n"
@@ -1073,7 +1105,7 @@ class OverviewList(QtGui.QTreeWidget):
 
     def onPaste(self):
         try:
-            data = yaml.load_all(unicode(self.clipboard.text()))
+            data = yaml.load_all(str(self.clipboard.text()))
             if isinstance(data, dict):
                 data = [data]
         except yaml.YAMLError as e:
@@ -1089,16 +1121,18 @@ class OverviewList(QtGui.QTreeWidget):
         default_dir = './collections/'
         if Mainframe.model.filename != '':
             default_dir, tail = os.path.split(Mainframe.model.filename)
-        fileName = QtGui.QFileDialog.getSaveFileName(
-            self, Lang.value('MI_Save_selection_as'), default_dir, "(*.olv)")
+        fileName = QtWidgets.QFileDialog.getSaveFileName(
+            self, Lang.value('MI_Save_selection_as'), default_dir, "(*.olv)")[0]
         if not fileName:
             return
 
-        f = open(unicode(fileName), 'w')
+        f = open(str(fileName), 'w')
         try:
             f.write(self.getSelectionAsYaml().encode('utf8'))
         except IOError:
-            msgBox(Lang.value('MSG_IO_failed'))
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
         finally:
             f.close()
 
@@ -1107,7 +1141,7 @@ class OverviewList(QtGui.QTreeWidget):
         self.onLangChanged()
 
     def getColumnWidths(self):
-        return ";".join([str(self.columnWidth(i)) for i in xrange(self.columnCount())])
+        return ";".join([str(self.columnWidth(i)) for i in range(self.columnCount())])
 
     def setColumnWidthsFromString(self, widths):
         try:
@@ -1125,21 +1159,22 @@ class OverviewList(QtGui.QTreeWidget):
                               Lang.value('EP_Distinction'),
                               Lang.value('EP_Stipulation'),
                               Lang.value('EP_Pieces_count')])
-        for i in xrange(len(Mainframe.model.entries)):
+        for i in range(len(Mainframe.model.entries)):
             if 'distinction' in Mainframe.model.entries[i]:
                 d = model.Distinction.fromString(
                     Mainframe.model.entries[i]['distinction'])
                 # 4 is the index of the distinction column
-                self.topLevelItem(i).setText(4, d.toStringInLang(Lang))
+                if self.topLevelItem(i) is not None:
+                    self.topLevelItem(i).setText(4, d.toStringInLang(Lang))
 
     def removeDirtyMarks(self):
-        for i in xrange(len(Mainframe.model.entries)):
+        for i in range(len(Mainframe.model.entries)):
             self.topLevelItem(i).setText(0, str(i + 1))
 
     def rebuild(self):
         self.clear()
-        for i in xrange(len(Mainframe.model.entries)):
-            newItem = QtGui.QTreeWidgetItem()
+        for i in range(len(Mainframe.model.entries)):
+            newItem = QtWidgets.QTreeWidgetItem()
             for j, text in enumerate(self.createItem(i)):
                 newItem.setText(j, text)
             self.addTopLevelItem(newItem)
@@ -1147,12 +1182,12 @@ class OverviewList(QtGui.QTreeWidget):
         self.setCurrentItem(self.topLevelItem(Mainframe.model.current))
 
     def insertItem(self, idx):
-        newItem = QtGui.QTreeWidgetItem()
+        newItem = QtWidgets.QTreeWidgetItem()
         for j, text in enumerate(self.createItem(idx)):
             newItem.setText(j, text)
         self.insertTopLevelItem(idx, newItem)
 
-        for j in xrange(idx + 1, len(Mainframe.model.entries)):
+        for j in range(idx + 1, len(Mainframe.model.entries)):
             self.topLevelItem(j).setText(
                 0, str(j + 1) + ['', '*'][Mainframe.model.dirty_flags[j]])
         self.skip_model_changed = True
@@ -1160,7 +1195,7 @@ class OverviewList(QtGui.QTreeWidget):
 
     def deleteItem(self, idx):
         self.takeTopLevelItem(idx)
-        for j in xrange(idx, len(Mainframe.model.entries)):
+        for j in range(idx, len(Mainframe.model.entries)):
             self.topLevelItem(j).setText(
                 0, str(j + 1) + ['', '*'][Mainframe.model.dirty_flags[j]])
         # which item is current now depends and handled by the caller
@@ -1182,7 +1217,7 @@ class OverviewList(QtGui.QTreeWidget):
                         Mainframe.model.entries[idx][key])
                     item.append(d.toStringInLang(Lang))
                 else:
-                    item.append(unicode(Mainframe.model.entries[idx][key]))
+                    item.append(str(Mainframe.model.entries[idx][key]))
             else:
                 item.append('')
 
@@ -1196,7 +1231,9 @@ class OverviewList(QtGui.QTreeWidget):
             return
 
         for i, text in enumerate(self.createItem(Mainframe.model.current)):
-            self.topLevelItem(Mainframe.model.current).setText(i, text)
+            try:
+                self.topLevelItem(Mainframe.model.current).setText(i, text)
+            except AttributeError: pass
 
     def onCurrentItemChanged(self, current, prev):
         if current is None:  # happens when deleting
@@ -1214,7 +1251,7 @@ class OverviewList(QtGui.QTreeWidget):
         Mainframe.sigWrapper.sigModelChanged.emit()
 
 
-class DraggableLabel(QtGui.QLabel):
+class DraggableLabel(QtWidgets.QLabel):
 
     def __init__(self, id):
         super(DraggableLabel, self).__init__()
@@ -1222,7 +1259,7 @@ class DraggableLabel(QtGui.QLabel):
 
     def setTextAndFont(self, text, font):
         self.setText(text)
-        self.setFont(Mainframe.fonts[font])
+        self.setFont(Mainframe.fontset()[font])
 
     # mouseMoveEvent works as well but with slightly different mechanics
     def mousePressEvent(self, e):
@@ -1249,7 +1286,7 @@ class DraggableLabel(QtGui.QLabel):
             return
 
         # ctrl-drag copies existing piece
-        modifiers = QtGui.QApplication.keyboardModifiers()
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
         Mainframe.currentlyDragged = Mainframe.model.board.board[self.id]
         if not (modifiers & QtCore.Qt.ControlModifier):
             Mainframe.model.board.drop(self.id)
@@ -1260,7 +1297,7 @@ class DraggableLabel(QtGui.QLabel):
         drag = QtGui.QDrag(self)
         drag.setMimeData(mimeData)
         drag.setHotSpot(e.pos() - self.rect().topLeft())
-        dropAction = drag.start(QtCore.Qt.MoveAction)
+        dropAction = drag.exec_ (QtCore.Qt.MoveAction)
         Mainframe.currentlyDragged = None
 
     def dragEnterEvent(self, e):
@@ -1282,7 +1319,7 @@ class DraggableLabel(QtGui.QLabel):
         Mainframe.sigWrapper.sigModelChanged.emit()
 
 
-class ChessBoxItem(QtGui.QLabel):
+class ChessBoxItem(QtWidgets.QLabel):
 
     def __init__(self, piece):
         super(ChessBoxItem, self).__init__()
@@ -1297,13 +1334,13 @@ class ChessBoxItem(QtGui.QLabel):
 
     def changePiece(self, piece):
         if piece is None:
-            self.setFont(Mainframe.fonts['d'])
+            self.setFont(Mainframe.fontset()['d'])
             self.setText("\xA3")
             self.setToolTip('')
         else:
             glyph = ChessBoxItem.getShortGlyph(piece)
             self.setFont(
-                Mainframe.fonts[
+                Mainframe.fontset()[
                     model.FairyHelper.fontinfo[glyph]['family']])
             self.setText(model.FairyHelper.fontinfo[glyph]['chars'][0])
             self.setToolTip(str(piece))
@@ -1322,7 +1359,7 @@ class ChessBoxItem(QtGui.QLabel):
         drag = QtGui.QDrag(self)
         drag.setMimeData(mimeData)
         drag.setHotSpot(e.pos() - self.rect().topLeft())
-        dropAction = drag.start(QtCore.Qt.MoveAction)
+        drag.exec_(QtCore.Qt.MoveAction)
         Mainframe.currentlyDragged = None
 
 
@@ -1338,30 +1375,30 @@ class ChessBoxItemManagable(ChessBoxItem):
         if e.buttons() != QtCore.Qt.RightButton:
             return
 
-        menu = QtGui.QMenu(Lang.value('MI_Fairy_pieces'))
+        menu = QtWidgets.QMenu(Lang.value('MI_Fairy_pieces'))
 
-        populateFromCurrent = QtGui.QAction(
+        populateFromCurrent = QtWidgets.QAction(
             Lang.value('MI_Populate_from_current'), self)
         populateFromCurrent.triggered.connect(self.manager.populateFromCurrent)
         menu.addAction(populateFromCurrent)
         menu.addSeparator()
 
         if self.piece is None:
-            addNewAction = QtGui.QAction(Lang.value('MI_Add_piece'), self)
+            addNewAction = QtWidgets.QAction(Lang.value('MI_Add_piece'), self)
             addNewAction.triggered.connect(self.choose)
             menu.addAction(addNewAction)
         else:
-            deleteAction = QtGui.QAction(Lang.value('MI_Delete_piece'), self)
+            deleteAction = QtWidgets.QAction(Lang.value('MI_Delete_piece'), self)
             deleteAction.triggered.connect(self.remove)
             menu.addAction(deleteAction)
-        deleteAllAction = QtGui.QAction(
+        deleteAllAction = QtWidgets.QAction(
             Lang.value('MI_Delete_all_pieces'), self)
         deleteAllAction.triggered.connect(self.manager.deleteAll)
         menu.addAction(deleteAllAction)
 
         menu.addSeparator()
-        for i in xrange(len(Conf.zoos)):
-            action = QtGui.QAction(Conf.zoos[i]['name'], self)
+        for i in range(len(Conf.zoos)):
+            action = QtWidgets.QAction(Conf.zoos[i]['name'], self)
             action.triggered.connect(self.manager.makeChangeZooCallable(i))
             menu.addAction(action)
 
@@ -1376,54 +1413,55 @@ class ChessBoxItemManagable(ChessBoxItem):
             self.changePiece(dialog.getPiece())
 
 
-class BoardView(QtGui.QWidget):
+class BoardView(QtWidgets.QWidget):
 
-    def __init__(self):
+    def __init__(self, parent):
         super(BoardView, self).__init__()
+        self.parent = parent
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         self.skip_model_changed = False
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         vbox.setSpacing(0)
 
-        labelTop = QtGui.QLabel("\xA3\xA6\xA6\xA6\xA6\xA6\xA6\xA6\xA6\xA3")
-        labelTop.setFont(Mainframe.fonts['d'])
+        labelTop = QtWidgets.QLabel("\xA3\xA6\xA6\xA6\xA6\xA6\xA6\xA6\xA6\xA3")
+        labelTop.setFont(Mainframe.fontset()['d'])
 
-        labelBottom = QtGui.QLabel(
+        labelBottom = QtWidgets.QLabel(
             "\x4F\xA7\xA8\xA9\xAA\xAB\xAC\xAD\xAE\xAF\x4F")
-        labelBottom.setFont(Mainframe.fonts['y'])
+        labelBottom.setFont(Mainframe.fontset()['y'])
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.setSpacing(0)
 
-        vboxEdgeLeft = QtGui.QVBoxLayout()
+        vboxEdgeLeft = QtWidgets.QVBoxLayout()
         vboxEdgeLeft.setSpacing(0)
-        centerWidget = QtGui.QWidget()
+        centerWidget = QtWidgets.QWidget()
         centerWidget.setBackgroundRole(QtGui.QPalette.Light)
         centerWidget.setAutoFillBackground(True)
-        centerGrid = QtGui.QGridLayout()
+        centerGrid = QtWidgets.QGridLayout()
         centerGrid.setVerticalSpacing(0)
         centerGrid.setHorizontalSpacing(0)
         centerGrid.setContentsMargins(0, 0, 0, 0)
         centerWidget.setLayout(centerGrid)
         self.labels = []
-        for i in xrange(8):
-            for j in xrange(8):
-                lbl = DraggableLabel(j + i * 8)
+        for i in range(8):
+            for j in range(8):
+                lbl = self.parent.factoryDraggableLabel(j + i * 8)
                 lbl.setTextAndFont(["\xA3", "\xA4"][(i + j) % 2], 'd')
                 # lbl.setDragEnabled(True)
                 lbl.setAcceptDrops(True)
                 centerGrid.addWidget(lbl, i, j)
                 self.labels.append(lbl)
 
-        vboxEdgeRight = QtGui.QVBoxLayout()
+        vboxEdgeRight = QtWidgets.QVBoxLayout()
         vboxEdgeRight.setSpacing(0)
-        for i in xrange(8):
-            labelLeft = QtGui.QLabel(chr(110 - i))
-            labelLeft.setFont(Mainframe.fonts['y'])
+        for i in range(8):
+            labelLeft = QtWidgets.QLabel(chr(110 - i))
+            labelLeft.setFont(Mainframe.fontset()['y'])
             vboxEdgeLeft.addWidget(labelLeft)
-            labelRight = QtGui.QLabel("\xA5")
-            labelRight.setFont(Mainframe.fonts['d'])
+            labelRight = QtWidgets.QLabel("\xA5")
+            labelRight.setFont(Mainframe.fontset()['d'])
             vboxEdgeRight.addWidget(labelRight)
 
         # hbox.addLayout(vboxEdgeLeft)
@@ -1431,11 +1469,11 @@ class BoardView(QtGui.QWidget):
         hbox.addStretch(1)
         # hbox.addLayout(vboxEdgeRight)
 
-        hboxExtra = QtGui.QHBoxLayout()
-        spacer = QtGui.QLabel("\xA3")
-        spacer.setFont(Mainframe.fonts['d'])
-        self.labelStipulation = QtGui.QLabel("")
-        self.labelPiecesCount = QtGui.QLabel("")
+        hboxExtra = QtWidgets.QHBoxLayout()
+        spacer = QtWidgets.QLabel("\xA3")
+        spacer.setFont(Mainframe.fontset()['d'])
+        self.labelStipulation = QtWidgets.QLabel("")
+        self.labelPiecesCount = QtWidgets.QLabel("")
         # hboxExtra.addWidget(spacer)
         hboxExtra.addWidget(self.labelStipulation)
         hboxExtra.addStretch(1)
@@ -1456,14 +1494,14 @@ class BoardView(QtGui.QWidget):
 
         for i, lbl in enumerate(self.labels):
             if Mainframe.model.board.board[i] is None:
-                lbl.setFont(Mainframe.fonts['d'])
+                lbl.setFont(Mainframe.fontset()['d'])
                 lbl.setText(["\xA3", "\xA4"][((i >> 3) + (i % 8)) % 2])
             else:
                 glyph = Mainframe.model.board.board[i].toFen()
                 if len(glyph) > 1:
                     glyph = glyph[1:-1]
                 lbl.setFont(
-                    Mainframe.fonts[
+                    Mainframe.fontset()[
                         model.FairyHelper.fontinfo[glyph]['family']])
                 lbl.setText(model.FairyHelper.fontinfo[glyph][
                             'chars'][((i >> 3) + (i % 8)) % 2])
@@ -1474,7 +1512,7 @@ class BoardView(QtGui.QWidget):
         self.labelPiecesCount.setText(Mainframe.model.board.getPiecesCount())
 
 
-class InfoView(QtGui.QTextEdit):
+class InfoView(QtWidgets.QTextEdit):
 
     def __init__(self):
         super(InfoView, self).__init__()
@@ -1496,15 +1534,15 @@ class InfoView(QtGui.QTextEdit):
         return pdf.ExportDocument.legend(Mainframe.model.board)
 
 
-class ChessBox(QtGui.QWidget):
+class ChessBox(QtWidgets.QWidget):
     rows, cols = 3, 7
 
     def __init__(self):
         super(ChessBox, self).__init__()
-        self.gboxOrtho = QtGui.QGroupBox(Lang.value('TC_Pieces_Ortho'))
-        self.gboxFairy = QtGui.QGroupBox(Lang.value('TC_Pieces_Fairy'))
-        self.gridOrtho = QtGui.QGridLayout()
-        self.gridFairy = QtGui.QGridLayout()
+        self.gboxOrtho = QtWidgets.QGroupBox(Lang.value('TC_Pieces_Ortho'))
+        self.gboxFairy = QtWidgets.QGroupBox(Lang.value('TC_Pieces_Fairy'))
+        self.gridOrtho = QtWidgets.QGridLayout()
+        self.gridFairy = QtWidgets.QGridLayout()
         self.gridFairy.setVerticalSpacing(0)
         self.gridFairy.setHorizontalSpacing(0)
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
@@ -1515,8 +1553,8 @@ class ChessBox(QtGui.QWidget):
             for j, name in enumerate('KQRBSP'):
                 item = ChessBoxItem(model.Piece(name, color, []))
                 self.gridOrtho.addWidget(item, i, j)
-        for i in xrange(ChessBox.rows):
-            for j in xrange(ChessBox.cols):
+        for i in range(ChessBox.rows):
+            for j in range(ChessBox.cols):
                 x = i * ChessBox.cols + j
                 item = ChessBoxItemManagable(None, i * ChessBox.cols + j, self)
                 if '' != Conf.value('fairy-zoo')[i][j]:
@@ -1527,13 +1565,13 @@ class ChessBox(QtGui.QWidget):
                 self.gridFairy.addWidget(item, i, j)
 
         # a stretcher
-        self.gridFairy.addWidget(QtGui.QWidget(), ChessBox.rows, ChessBox.cols)
+        self.gridFairy.addWidget(QtWidgets.QWidget(), ChessBox.rows, ChessBox.cols)
         self.gridFairy.setRowStretch(ChessBox.rows, 1)
         self.gridFairy.setColumnStretch(ChessBox.cols, 1)
 
         self.gboxFairy.setLayout(self.gridFairy)
         self.gboxOrtho.setLayout(self.gridOrtho)
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(self.gboxOrtho)
         vbox.addWidget(self.gboxFairy)
         vbox.addStretch(10)
@@ -1562,8 +1600,8 @@ class ChessBox(QtGui.QWidget):
         return callable
 
     def changeZoo(self, zoo):
-        for i in xrange(ChessBox.rows):
-            for j in xrange(ChessBox.cols):
+        for i in range(ChessBox.rows):
+            for j in range(ChessBox.cols):
                 piece = None
                 if zoo[i][j] != '':
                     piece = model.Piece.fromAlgebraic(zoo[i][j])
@@ -1571,8 +1609,8 @@ class ChessBox(QtGui.QWidget):
 
     def sync(self):
         zoo = Conf.value('fairy-zoo')
-        for i in xrange(ChessBox.rows):
-            for j in xrange(ChessBox.cols):
+        for i in range(ChessBox.rows):
+            for j in range(ChessBox.cols):
                 if not self.items[i * ChessBox.cols + j].piece is None:
                     zoo[i][j] = self.items[
                         i * ChessBox.cols + j].piece.serialize()
@@ -1593,33 +1631,33 @@ class ChessBox(QtGui.QWidget):
 class AddFairyPieceDialog(options.OkCancelDialog):
 
     def __init__(self, Lang):
-        form = QtGui.QFormLayout()
-        self.comboColor = QtGui.QComboBox()
+        form = QtWidgets.QFormLayout()
+        self.comboColor = QtWidgets.QComboBox()
         self.comboColor.addItems(model.COLORS)
         form.addRow(Lang.value('PP_Color'), self.comboColor)
 
-        self.piece_types = sorted(model.FairyHelper.glyphs.iterkeys())
-        self.comboType = QtGui.QComboBox()
+        self.piece_types = sorted(model.FairyHelper.glyphs.keys())
+        self.comboType = QtWidgets.QComboBox()
         self.comboType.addItems(
             [x + ' (' + model.FairyHelper.glyphs[x]['name'] + ')' for x in self.piece_types])
         form.addRow(Lang.value('PP_Type'), self.comboType)
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         vbox.addLayout(form, 1)
-        vbox.addWidget(QtGui.QLabel(Lang.value('PP_Fairy_properties')))
+        vbox.addWidget(QtWidgets.QLabel(Lang.value('PP_Fairy_properties')))
 
-        self.checkboxes = [QtGui.QCheckBox(x) for x in model.FAIRYSPECS]
+        self.checkboxes = [QtWidgets.QCheckBox(x) for x in model.FAIRYSPECS]
         for box in self.checkboxes:
             vbox.addWidget(box)
 
-        self.mainWidget = QtGui.QWidget()
+        self.mainWidget = QtWidgets.QWidget()
         self.mainWidget.setLayout(vbox)
         super(AddFairyPieceDialog, self).__init__(Lang)
 
         self.setWindowTitle(Lang.value('MI_Add_piece'))
 
     def getPiece(self):
-        color = str(self.comboColor.currentText())
+        color = self.comboColor.currentText()
         type = str(self.piece_types[self.comboType.currentIndex()])
         specs = [
             x for i, x in enumerate(
@@ -1627,31 +1665,31 @@ class AddFairyPieceDialog(options.OkCancelDialog):
         return model.Piece(type, color, specs)
 
 
-class EasyEditView(QtGui.QWidget):
+class EasyEditView(QtWidgets.QWidget):
 
     def __init__(self):
         super(EasyEditView, self).__init__()
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
         # authors
-        self.labelAuthors = QtGui.QLabel(
+        self.labelAuthors = QtWidgets.QLabel(
             Lang.value('EP_Authors') +
             ':<br/><br/>' +
             Lang.value('EE_Authors_memo'))
-        self.inputAuthors = QtGui.QTextEdit()
+        self.inputAuthors = QtWidgets.QTextEdit()
         grid.addWidget(self.labelAuthors, 0, 0)
         grid.addWidget(self.inputAuthors, 0, 1)
 
-        self.labelSource = QtGui.QLabel(Lang.value('EP_Source') + ':')
-        self.memoSource = QtGui.QLabel(Lang.value('EE_Source_memo'))
-        self.inputSource = QtGui.QLineEdit()
-        self.inputIssueId = QtGui.QLineEdit()
+        self.labelSource = QtWidgets.QLabel(Lang.value('EP_Source') + ':')
+        self.memoSource = QtWidgets.QLabel(Lang.value('EE_Source_memo'))
+        self.inputSource = QtWidgets.QLineEdit()
+        self.inputIssueId = QtWidgets.QLineEdit()
         self.inputIssueId.setFixedWidth(
             self.inputIssueId.minimumSizeHint().width())
-        self.inputSourceId = QtGui.QLineEdit()
+        self.inputSourceId = QtWidgets.QLineEdit()
         self.inputSourceId.setFixedWidth(
             self.inputSourceId.minimumSizeHint().width())
-        tmpWidget = QtGui.QWidget()
-        hbox = QtGui.QHBoxLayout()
+        tmpWidget = QtWidgets.QWidget()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
         hbox.addWidget(self.inputSource)
         hbox.addWidget(self.inputIssueId)
@@ -1661,21 +1699,21 @@ class EasyEditView(QtGui.QWidget):
         grid.addWidget(self.labelSource, 1, 0)
         grid.addWidget(tmpWidget, 1, 1)
 
-        self.labelDate = QtGui.QLabel(Lang.value('EP_Date') + ':')
-        self.memoDate = QtGui.QLabel(Lang.value('EE_Date_memo'))
-        self.inputDateYear = QtGui.QLineEdit()
+        self.labelDate = QtWidgets.QLabel(Lang.value('EP_Date') + ':')
+        self.memoDate = QtWidgets.QLabel(Lang.value('EE_Date_memo'))
+        self.inputDateYear = QtWidgets.QLineEdit()
         self.inputDateYear.setMaxLength(4)
         self.inputDateYear.setValidator(QtGui.QIntValidator())
         self.inputDateYear.setFixedWidth(
             self.inputDateYear.minimumSizeHint().width())
-        self.inputDateMonth = QtGui.QComboBox()
+        self.inputDateMonth = QtWidgets.QComboBox()
         self.inputDateMonth.addItems([''])
-        self.inputDateMonth.addItems([str(x) for x in xrange(1, 13)])
-        self.inputDateDay = QtGui.QComboBox()
+        self.inputDateMonth.addItems([str(x) for x in range(1, 13)])
+        self.inputDateDay = QtWidgets.QComboBox()
         self.inputDateDay.addItems([''])
-        self.inputDateDay.addItems(["%02d" % x for x in xrange(1, 32)])
-        tmpWidget = QtGui.QWidget()
-        hbox = QtGui.QHBoxLayout()
+        self.inputDateDay.addItems(["%02d" % x for x in range(1, 32)])
+        tmpWidget = QtWidgets.QWidget()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
         hbox.addWidget(self.inputDateYear, 1)
         hbox.addWidget(self.inputDateMonth)
@@ -1686,14 +1724,14 @@ class EasyEditView(QtGui.QWidget):
         grid.addWidget(self.labelDate, 2, 0)
         grid.addWidget(tmpWidget, 2, 1)
 
-        self.labelDistinction = QtGui.QLabel(
+        self.labelDistinction = QtWidgets.QLabel(
             Lang.value('EP_Distinction') + ':')
         self.inputDistinction = DistinctionWidget()
         grid.addWidget(self.labelDistinction, 3, 0)
         grid.addWidget(self.inputDistinction, 3, 1)
 
         # stretcher
-        grid.addWidget(QtGui.QWidget(), 4, 1)
+        grid.addWidget(QtWidgets.QWidget(), 4, 1)
         grid.setRowStretch(4, 1)
 
         self.setLayout(grid)
@@ -1742,23 +1780,16 @@ class EasyEditView(QtGui.QWidget):
         if self.skip_model_changed:
             return
 
-        Mainframe.model.cur()['authors'] = [x.strip() for x in unicode(
+        Mainframe.model.cur()['authors'] = [x.strip() for x in str(
             self.inputAuthors.toPlainText()).split("\n") if x.strip() != '']
-        Mainframe.model.cur()['source'] = unicode(
-            self.inputSource.text()).strip()
-        i_id, s_id = unicode(
-            self.inputIssueId.text()).strip(), unicode(
-            self.inputSourceId.text()).strip()
+        Mainframe.model.cur()['source'] = self.inputSource.text().strip()
+        i_id, s_id = self.inputIssueId.text().strip(), self.inputSourceId.text().strip()
         is_id = '/'.join([i_id, s_id])
         if is_id.startswith('/'):
             is_id = is_id[1:]
         Mainframe.model.cur()['source-id'] = is_id
 
-        date = model.myint(
-            unicode(
-                self.inputDateYear.text()).encode(
-                'ascii',
-                'replace'))
+        date = model.myint(self.inputDateYear.text())
         if date != 0:
             date = str(date)
             if self.inputDateMonth.currentIndex() != 0:
@@ -1796,24 +1827,24 @@ class EasyEditView(QtGui.QWidget):
         self.labelDistinction.setText(Lang.value('EP_Distinction') + ':')
 
 
-class DistinctionWidget(QtGui.QWidget):
+class DistinctionWidget(QtWidgets.QWidget):
     names = ['', 'Place', 'Prize', 'HM', 'Comm.']
     lang_entries = ['', 'DSTN_Place', 'DSTN_Prize', 'DSTN_HM', 'DSTN_Comm']
 
     def __init__(self):
         super(DistinctionWidget, self).__init__()
-        hbox = QtGui.QHBoxLayout()
-        self.special = QtGui.QCheckBox(Lang.value('DSTN_Special'))
+        hbox = QtWidgets.QHBoxLayout()
+        self.special = QtWidgets.QCheckBox(Lang.value('DSTN_Special'))
         hbox.addWidget(self.special)
-        self.lo = QtGui.QSpinBox()
+        self.lo = QtWidgets.QSpinBox()
         hbox.addWidget(self.lo)
-        self.hi = QtGui.QSpinBox()
+        self.hi = QtWidgets.QSpinBox()
         hbox.addWidget(self.hi)
-        self.name = QtGui.QComboBox()
+        self.name = QtWidgets.QComboBox()
         self.name.addItems(
             ['X' * 15 for i in DistinctionWidget.names])  # spacers
         hbox.addWidget(self.name)
-        self.comment = QtGui.QLineEdit()
+        self.comment = QtWidgets.QLineEdit()
         hbox.addWidget(self.comment)
         hbox.addStretch(1)
         self.setLayout(hbox)
@@ -1860,8 +1891,8 @@ class DistinctionWidget(QtGui.QWidget):
         distinction.name = DistinctionWidget.names[self.name.currentIndex()]
         distinction.lo = self.lo.value()
         distinction.hi = self.hi.value()
-        distinction.comment = unicode(self.comment.text())
-        return unicode(distinction)
+        distinction.comment = self.comment.text().strip()
+        return str(distinction)
 
     def onModelChanged(self):
         if self.skip_model_changed:
@@ -1883,16 +1914,16 @@ class DistinctionWidget(QtGui.QWidget):
                 self.name.setItemText(i, '')
 
 
-class KeywordsInputWidget(QtGui.QTextEdit):
+class KeywordsInputWidget(QtWidgets.QTextEdit):
 
     def __init__(self):
         super(KeywordsInputWidget, self).__init__()
-        self.kwdMenu = QtGui.QMenu(Lang.value('MI_Add_keyword'))
+        self.kwdMenu = QtWidgets.QMenu(Lang.value('MI_Add_keyword'))
         # for section in sorted(Conf.keywords.keys()):
-        for section in Conf.keywords.keys():
+        for section in list(Conf.keywords.keys()):
             submenu = self.kwdMenu.addMenu(section)
             for keyword in sorted(Conf.keywords[section]):
-                action = QtGui.QAction(keyword, self)
+                action = QtWidgets.QAction(keyword, self)
                 action.triggered.connect(self.createCallable(keyword))
                 submenu.addAction(action)
 
@@ -1906,24 +1937,24 @@ class KeywordsInputWidget(QtGui.QTextEdit):
     def createCallable(self, keyword):
         def callable():
             keywords = [
-                x.strip() for x in unicode(
+                x.strip() for x in str(
                     self.toPlainText()).split("\n") if x.strip() != '']
             keywords.append(keyword)
             self.setText("\n".join(keywords))
         return callable
 
 
-class SolutionView(QtGui.QWidget):
+class SolutionView(QtWidgets.QWidget):
 
     def __init__(self):
         super(SolutionView, self).__init__()
-        grid = QtGui.QGridLayout()
-        self.solution = QtGui.QTextEdit()
-        self.solutionLabel = QtGui.QLabel(Lang.value('SS_Solution'))
+        grid = QtWidgets.QGridLayout()
+        self.solution = QtWidgets.QTextEdit()
+        self.solutionLabel = QtWidgets.QLabel(Lang.value('SS_Solution'))
         self.keywords = KeywordsInputWidget()
-        self.keywordsLabel = QtGui.QLabel(Lang.value('SS_Keywords'))
-        self.comments = QtGui.QTextEdit()
-        self.commentsLabel = QtGui.QLabel(Lang.value('SS_Comments'))
+        self.keywordsLabel = QtWidgets.QLabel(Lang.value('SS_Keywords'))
+        self.comments = QtWidgets.QTextEdit()
+        self.commentsLabel = QtWidgets.QLabel(Lang.value('SS_Comments'))
 
         grid.addWidget(self.solutionLabel, 0, 0)
         grid.addWidget(self.solution, 1, 0, 3, 1)
@@ -1946,11 +1977,11 @@ class SolutionView(QtGui.QWidget):
     def onChanged(self):
         if self.skip_model_changed:
             return
-        Mainframe.model.cur()['solution'] = unicode(
+        Mainframe.model.cur()['solution'] = str(
             self.solution.toPlainText()).strip()
-        Mainframe.model.cur()['keywords'] = [x.strip() for x in unicode(
+        Mainframe.model.cur()['keywords'] = [x.strip() for x in str(
             self.keywords.toPlainText()).split("\n") if x.strip() != '']
-        Mainframe.model.cur()['comments'] = [x.strip() for x in unicode(
+        Mainframe.model.cur()['comments'] = [x.strip() for x in str(
             self.comments.toPlainText()).split("\n\n") if x.strip() != '']
 
         for k in ['solution']:
@@ -1994,7 +2025,7 @@ class SolutionView(QtGui.QWidget):
         self.commentsLabel.setText(Lang.value('SS_Comments'))
 
 
-class PopeyeInputWidget(QtGui.QTextEdit):
+class PopeyeInputWidget(QtWidgets.QTextEdit):
 
     def __init__(self):
         super(PopeyeInputWidget, self).__init__()
@@ -2010,7 +2041,7 @@ class PopeyeInputWidget(QtGui.QTextEdit):
         menu.exec_(e.globalPos())
 
 
-class PopeyeView(QtGui.QSplitter):
+class PopeyeView(QtWidgets.QSplitter):
     stipulations = [
         '',
         '#2',
@@ -2060,15 +2091,15 @@ class PopeyeView(QtGui.QSplitter):
         self.output = PopeyeOutputWidget(self)
         self.output.setReadOnly(True)
 
-        self.sstip = QtGui.QCheckBox(Lang.value('PS_SStipulation'))
-        self.btnEdit = QtGui.QPushButton(Lang.value('PS_Edit'))
+        self.sstip = QtWidgets.QCheckBox(Lang.value('PS_SStipulation'))
+        self.btnEdit = QtWidgets.QPushButton(Lang.value('PS_Edit'))
         self.btnEdit.clicked.connect(self.onEdit)
-        w = QtGui.QWidget()
+        w = QtWidgets.QWidget()
 
         row = 0
-        grid = QtGui.QGridLayout()
+        grid = QtWidgets.QGridLayout()
 
-        self.labelPopeye = QtGui.QLabel(Lang.value('TC_Popeye') + ':')
+        self.labelPopeye = QtWidgets.QLabel(Lang.value('TC_Popeye') + ':')
         grid.addWidget(self.labelPopeye, row, 0)
         row +=1
 
@@ -2076,9 +2107,9 @@ class PopeyeView(QtGui.QSplitter):
         grid.addWidget(self.inputPyPath, row, 0, 1, 2)
         row += 1
 
-        self.labelMemory = QtGui.QLabel(Lang.value('PS_Hashtables') + ':')
+        self.labelMemory = QtWidgets.QLabel(Lang.value('PS_Hashtables') + ':')
         grid.addWidget(self.labelMemory, row, 0)
-        self.inputMemory = QtGui.QLineEdit()
+        self.inputMemory = QtWidgets.QLineEdit()
         self.inputMemory.setText(str(Conf.popeye['memory']))
         self.inputMemory.setValidator(QtGui.QIntValidator(1, 1000000))
         self.inputMemory.textChanged.connect(self.onMemoryChanged)
@@ -2088,19 +2119,19 @@ class PopeyeView(QtGui.QSplitter):
         grid.addWidget(self.input, row, 0, 1, 2)
         row += 1
 
-        self.labelStipulation = QtGui.QLabel(
+        self.labelStipulation = QtWidgets.QLabel(
             Lang.value('EP_Stipulation') + ':')
         grid.addWidget(self.labelStipulation, row, 0)
-        self.labelIntended = QtGui.QLabel(
+        self.labelIntended = QtWidgets.QLabel(
                 Lang.value('EP_Intended_solutions') + ':')
         grid.addWidget(self.labelIntended, row, 1)
         row += 1
 
-        self.inputStipulation = QtGui.QComboBox()
+        self.inputStipulation = QtWidgets.QComboBox()
         self.inputStipulation.setEditable(True)
         self.inputStipulation.addItems(PopeyeView.stipulations)
         grid.addWidget(self.inputStipulation, row, 0)
-        self.inputIntended = QtGui.QLineEdit()
+        self.inputIntended = QtWidgets.QLineEdit()
         grid.addWidget(self.inputIntended, row, 1)
         row += 1
 
@@ -2108,7 +2139,7 @@ class PopeyeView(QtGui.QSplitter):
         row += 1
 
         # stretcher
-        grid.addWidget(QtGui.QWidget(), row, 2)
+        grid.addWidget(QtWidgets.QWidget(), row, 2)
         grid.setRowStretch(row, 1)
         grid.setColumnStretch(2, 1)
 
@@ -2131,12 +2162,8 @@ class PopeyeView(QtGui.QSplitter):
     def onChanged(self):
         if self.skip_model_changed:
             return
-        Mainframe.model.cur()['stipulation'] = unicode(
-            self.inputStipulation.currentText()).encode(
-            'ascii', 'ignore').strip()
-        Mainframe.model.cur()['intended-solutions'] = unicode(
-            self.inputIntended.text()).encode(
-            'ascii', 'ignore').strip()
+        Mainframe.model.cur()['stipulation'] = self.inputStipulation.currentText().strip()
+        Mainframe.model.cur()['intended-solutions'] = self.inputIntended.text().strip()
         for k in ['stipulation', 'intended-solutions']:
             if Mainframe.model.cur()[k] == '':
                 del Mainframe.model.cur()[k]
@@ -2146,7 +2173,7 @@ class PopeyeView(QtGui.QSplitter):
         self.skip_model_changed = False
 
     def onMemoryChanged(self):
-        try: Conf.popeye['memory'] = int(str(self.inputMemory.text()))
+        try: Conf.popeye['memory'] = model.myint(str(self.inputMemory.text()))
         except: pass
 
     def onPopeyePathChanged(self, newPath):
@@ -2200,8 +2227,7 @@ class PopeyeView(QtGui.QSplitter):
     def stopPopeye(self):
         self.stop_requested = True
         self.process.kill()
-        self.output.insertPlainText(QtCore.QString(
-            "\n" + Lang.value('MSG_Terminated')))
+        self.output.insertPlainText("\n" + Lang.value('MSG_Terminated'))
 
     def reset(self):
         self.stop_requested = False
@@ -2227,7 +2253,7 @@ class PopeyeView(QtGui.QSplitter):
 
         # writing input to temporary file
         handle, self.temp_filename = tempfile.mkstemp()
-        os.write(handle, input)
+        os.write(handle, input.encode('utf8'))
         os.close(handle)
 
         self.process = QtCore.QProcess()
@@ -2255,16 +2281,15 @@ class PopeyeView(QtGui.QSplitter):
             msgBox(Lang.value('MSG_Popeye_failed') % Conf.popeye['path'])
 
     def onOut(self):
-        data = self.process.readAllStandardOutput()
-        self.raw_output = self.raw_output + str(data)
-        self.output.insertPlainText(QtCore.QString(data))
+        data = bytes(self.process.readAllStandardOutput()).decode("utf8")
+        self.raw_output += data
+        self.output.insertPlainText(data)
         if len(self.raw_output) > int(Conf.popeye['stop-max-bytes']):
             self.stopPopeye()
 
     def onError(self):
         self.output.setTextColor(QtGui.QColor(255, 0, 0))
-        self.output.insertPlainText(QtCore.QString(
-            self.process.readAllStandardError()))
+        self.output.insertPlainText(str(self.process.readAllStandardError(), encoding="utf8"))
         self.output.setTextColor(QtGui.QColor(0, 0, 0))
 
     def onFinished(self):
@@ -2384,24 +2409,22 @@ class PopeyeView(QtGui.QSplitter):
         return callable
 
 
-class PublishingView(QtGui.QSplitter):
+class PublishingView(QtWidgets.QSplitter):
 
     def loadFontInfo(self, filename):
         fontinfo = {}
-        f = open(filename)
-        for entry in map(lambda x: x.strip().split("\t"), f.readlines()):
+        for entry in [x.strip().split("\t") for x in read_resource_file(filename)]:
             fontinfo[entry[0]] = {'postfix': entry[1], 'chars': [
                 chr(int(entry[2])), chr(int(entry[3]))]}
-        f.close()
         return fontinfo
 
     def solution2Html(self, s, config):
-        s = string.replace(s, "\n", "<br/>")
+        s = s.replace("\n", "<br/>")
         if 'kqrbsp' in config:
-            s = string.replace(s, "x", ":")
-            s = string.replace(s, "*", ":")
+            s = s.replace("x", ":")
+            s = s.replace("*", ":")
             # so both pieces match RE in eg: '1.a1=Q Be5'
-            s = string.replace(s, " ", "  ")
+            s = s.replace(" ", "  ")
             pattern = re.compile('([ \.\(\=\a-z18])([KQRBSP])([^\)\]A-Z])')
             s = re.sub(
                 pattern,
@@ -2409,7 +2432,7 @@ class PublishingView(QtGui.QSplitter):
                     config,
                     m),
                 s)
-            s = string.replace(s, "  ", " ")
+            s = s.replace("  ", " ")
         return '<b>' + s + '</b>'
 
     def replaceSolutionChars(self, config, m):
@@ -2429,7 +2452,7 @@ class PublishingView(QtGui.QSplitter):
                       8 * chr(int(config['edges']['N'])) +
                       chr(int(config['edges']['NE'])) +
                       "<br/>"])
-        for i in xrange(64):
+        for i in range(64):
             # left edge
             if i % 8 == 0:
                 font = config['prefix'] + config['aux-postfix']
@@ -2481,7 +2504,7 @@ class PublishingView(QtGui.QSplitter):
             spans[-1].append(edge)
         html = ''.join([
             '<font face="%s">%s</font>' % (fonts[i], ''.join(spans[i]))
-            for i in xrange(len(fonts))
+            for i in range(len(fonts))
         ])
         return ('<font size="%s">%s</font>') % (config['size'], html)
         # return html
@@ -2489,36 +2512,36 @@ class PublishingView(QtGui.QSplitter):
     def __init__(self):
         super(PublishingView, self).__init__(QtCore.Qt.Horizontal)
 
-        f = open('conf/chessfonts.yaml', 'r')
+        f = open(get_write_dir() + '/conf/chessfonts.yaml', 'r')
         self.config = yaml.load(f)
         f.close()
         for family in self.config['diagram-fonts']:
             self.config['config'][family]['fontinfo'] = self.loadFontInfo(
                 self.config['config'][family]['glyphs-tab'])
 
-        self.richText = QtGui.QTextEdit()
+        self.richText = QtWidgets.QTextEdit()
         self.richText.setReadOnly(True)
 
-        w = QtGui.QWidget()
-        vbox = QtGui.QVBoxLayout()
+        w = QtWidgets.QWidget()
+        vbox = QtWidgets.QVBoxLayout()
 
-        self.labelDiaFont = QtGui.QLabel()
+        self.labelDiaFont = QtWidgets.QLabel()
         vbox.addWidget(self.labelDiaFont)
-        self.diaFontSelect = QtGui.QComboBox()
+        self.diaFontSelect = QtWidgets.QComboBox()
         self.diaFontSelect.addItems(
             [self.config['config'][x]['display-name'] for x in self.config['diagram-fonts']])
         self.diaFontSelect.setCurrentIndex(
             self.config['diagram-fonts'].index(self.config['defaults']['diagram']))
         vbox.addWidget(self.diaFontSelect)
-        self.labelSolFont = QtGui.QLabel()
+        self.labelSolFont = QtWidgets.QLabel()
         vbox.addWidget(self.labelSolFont)
-        self.solFontSelect = QtGui.QComboBox()
+        self.solFontSelect = QtWidgets.QComboBox()
         self.solFontSelect.addItems(
             [self.config['config'][x]['display-name'] for x in self.config['inline-fonts']])
         self.solFontSelect.setCurrentIndex(
             self.config['inline-fonts'].index(self.config['defaults']['inline']))
         vbox.addWidget(self.solFontSelect)
-        self.labelMemo = QtGui.QLabel()
+        self.labelMemo = QtWidgets.QLabel()
         vbox.addWidget(self.labelMemo)
         vbox.addStretch(1)
 
@@ -2591,7 +2614,7 @@ class PublishingView(QtGui.QSplitter):
         self.onModelChanged()
 
 
-class PopeyeOutputWidget(QtGui.QTextEdit):
+class PopeyeOutputWidget(QtWidgets.QTextEdit):
 
     def __init__(self, parentView):
         self.parentView = parentView
@@ -2611,7 +2634,7 @@ class PopeyeOutputWidget(QtGui.QTextEdit):
                     Lang.value('PS_Original_output'),
                     self.parentView.toggleCompact)
                 notations = Conf.value('notations')
-                for notation in notations.keys():
+                for notation in list(notations.keys()):
                     submenu.addAction(
                         ''.join(
                             notations[notation]),
@@ -2620,12 +2643,13 @@ class PopeyeOutputWidget(QtGui.QTextEdit):
 
 
 def msgBox(msg):
-    box = QtGui.QMessageBox()
+    box = QtWidgets.QMessageBox()
     box.setText(msg)
+    box.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/information.svg')))
     box.exec_()
 
 
-class YamlView(QtGui.QTextEdit):
+class YamlView(QtWidgets.QTextEdit):
 
     def __init__(self):
         super(YamlView, self).__init__()
@@ -2639,41 +2663,146 @@ class YamlView(QtGui.QTextEdit):
                 encoding=None,
                 allow_unicode=True))
 
+class DemoFrame(QtWidgets.QWidget):
+
+    def __init__(self):
+        super(DemoFrame, self).__init__()
+        self.initLayout()
+        self.initFrame()
+        self.showFullScreen()
+
+    def initLayout(self):
+
+        # left pane
+        widgetLeftPane = QtWidgets.QWidget()
+        vboxLeftPane = QtWidgets.QVBoxLayout()
+        vboxLeftPane.setSpacing(0)
+        vboxLeftPane.setContentsMargins(0, 0, 0, 0)
+        self.fenView = FenView(self)
+        self.boardView = BoardView(self)
+
+        vboxLeftPane.addWidget(self.fenView)
+        vboxLeftPane.addWidget(self.boardView)
+        widgetLeftPane.setLayout(vboxLeftPane)
+
+        # right pane
+        vboxRightPane = QtWidgets.QVBoxLayout()
+        self.chessBox = ChessBox()
+        vboxRightPane.addWidget(self.chessBox)
+        self.toolbar = DemoBoardToolbar()
+        vboxRightPane.addWidget(self.toolbar)
+        widgetRightPane = QtWidgets.QWidget()
+        widgetRightPane.setLayout(vboxRightPane)
+
+        # putting panes together
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.addWidget(widgetLeftPane)
+        hbox.addWidget(widgetRightPane)
+
+        self.setLayout(hbox)
+
+    def initFrame(self):
+        self.setWindowIcon(QtGui.QIcon(':/icons/olive.svg'))
+        self.setWindowTitle("Demo board")
+
+    def factoryDraggableLabel(self, id):
+        return DraggableLabelWithHoverEffect(id)
+
+
+class DraggableLabelWithHoverEffect(DraggableLabel):
+
+    def __init__(self, id):
+        super(DraggableLabelWithHoverEffect, self).__init__(id)
+        self.setMouseTracking(True)
+
+    def enterEvent(self,event):
+        self.setStyleSheet('QLabel { background-color: #42bff4; }')
+
+    def leaveEvent(self,event):
+        self.setStyleSheet('QLabel { background-color: #ffffff; }')
+
+
+class DemoBoardToolbar(QtWidgets.QWidget):
+
+    def __init__(self):
+        super(DemoBoardToolbar, self).__init__()
+
+        hl =  QtWidgets.QHBoxLayout()
+        self.setLayout(hl)
+
+        btnClear = QtWidgets.QPushButton(Lang.value('MI_Clear'))
+        btnClear.clicked.connect(self.onClear)
+        hl.addWidget(btnClear)
+
+        btnPrev = QtWidgets.QPushButton("<<<")
+        btnPrev.clicked.connect(self.onPrev)
+        hl.addWidget(btnPrev)
+
+        btnNext = QtWidgets.QPushButton(">>>")
+        btnNext.clicked.connect(self.onNext)
+        hl.addWidget(btnNext)
+
+        btnClose = QtWidgets.QPushButton(Lang.value('MI_Exit'))
+        btnClose.clicked.connect(self.onClose)
+        hl.addWidget(btnClose)
+        self.exitAction = QtWidgets.QAction("close", btnClose)
+        self.exitAction.setShortcut('F5')
+        self.exitAction.setShortcutContext(QtCore.Qt.WindowShortcut)
+        self.exitAction.triggered.connect(self.onClose)
+
+    def onClear(self):
+        Mainframe.model.board.clear()
+        Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def onNext(self):
+        c = len(Mainframe.model.entries)
+        Mainframe.model.setNewCurrent((Mainframe.model.current+1)%c)
+        Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def onPrev(self):
+        c = len(Mainframe.model.entries)
+        Mainframe.model.setNewCurrent((Mainframe.model.current+c-1)%c)
+        Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def onClose(self):
+        Mainframe.sigWrapper.sigDemoModeExit.emit()
+
+
 
 class Conf:
-    file = 'conf/main.yaml'
-    keywords_file = 'conf/keywords.yaml'
-    zoo_file = 'conf/zoos.yaml'
-    popeye_file = 'conf/popeye.yaml'
-    chest_file = 'conf/chest.yaml'
+    file = get_write_dir() + '/conf/main.yaml'
+    keywords_file = get_write_dir() + '/conf/keywords.yaml'
+    zoo_file = get_write_dir() + '/conf/zoos.yaml'
+    popeye_file = get_write_dir() + '/conf/popeye.yaml'
+    chest_file = get_write_dir() + '/conf/chest.yaml'
 
     def read():
 
-        with open(Conf.file, 'r') as f:
+        with open(Conf.file, 'r', encoding="utf8") as f:
             Conf.values = yaml.load(f)
 
         Conf.zoos = []
-        with open(Conf.zoo_file, 'r') as f:
+        with open(Conf.zoo_file, 'r', encoding="utf8") as f:
             for zoo in yaml.load_all(f):
                 Conf.zoos.append(zoo)
 
-        with open(Conf.keywords_file, 'r') as f:
+        with open(Conf.keywords_file, 'r', encoding="utf8") as f:
             Conf.keywords = yaml.load(f)
 
-        with open(Conf.popeye_file, 'r') as f:
+        with open(Conf.popeye_file, 'r', encoding="utf8") as f:
             Conf.popeye = yaml.load(f)
 
-        with open(Conf.chest_file, 'r') as f:
+        with open(Conf.chest_file, 'r', encoding="utf8") as f:
             Conf.chest = yaml.load(f)
 
     read = staticmethod(read)
 
     def write():
-        with open(Conf.file, 'w') as f:
+        with open(Conf.file, 'wb') as f:
             f.write(Conf.dump(Conf.values))
-        with open(Conf.popeye_file, 'w') as f:
+        with open(Conf.popeye_file, 'wb') as f:
             f.write(Conf.dump(Conf.popeye))
-        with open(Conf.chest_file, 'w') as f:
+        with open(Conf.chest_file, 'wb') as f:
             f.write(Conf.dump(Conf.chest))
     write = staticmethod(write)
 
@@ -2682,19 +2811,15 @@ class Conf:
     value = staticmethod(value)
 
     def dump(object):
-        return unicode(
-                yaml.dump(
-                        object,
-                        encoding=None,
-                        allow_unicode=True)).encode('utf8')
+        return yaml.dump(object, encoding="utf8", allow_unicode=True)
     dump = staticmethod(dump)
 
 
 class Lang:
-    file = 'conf/lang.yaml'
+    file = get_write_dir() + '/conf/lang.yaml'
 
     def read():
-        f = open(Lang.file, 'r')
+        f = open(Lang.file, 'r', encoding="utf8")
         try:
             Lang.values = yaml.load(f)
         finally:

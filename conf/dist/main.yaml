@@ -1,0 +1,18 @@
+analyzers: [trajectories, miscellaneous]
+auto-compactify: 0
+collections-dir: ./
+default-lang: en
+default-notation: en
+fairy-zoo:
+- ['', black L, '', white L, '', '', '']
+- ['', '', '', '', '', '', '']
+- ['', '', '', '', '', '', '']
+horsehead-glyph: N
+import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
+import-post-decode-default: ISO-8859-1
+languages: {de: Deutsch, en: English, rs: Српски, ru: Русский}
+notations:
+  en: [K, Q, R, B, S, P]
+  fide: [K, D, T, L, S, B]
+  ru: [Кр, Ф, Л, С, К, п]
+version: 1.0-beta.1

@@ -2,7 +2,7 @@
 import re
 
 # local
-import chess
+from . import chess
 
 # regular expressions to parse popeye options
 RE_PY_OPTIONS = [re.compile('^' + expr + '$', re.IGNORECASE) for expr in [

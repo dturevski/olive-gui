@@ -115,6 +115,11 @@ MI_Language:
   rs: Промена језика
   ru: Сменить язык
   de: Sprachauswahl
+MI_Demo_mode:
+  en: Demo mode
+  rs: Демонстрацијски мод
+  ru: Демонстрационный режим
+  de: Demo-Modus
 MI_Exit:
   en: Exit
   rs: Излаз
@@ -454,6 +459,12 @@ PS_Hashtables:
   rs: Hashtables (Mb)
   ru: Таблицы транспозиций (Мб)
   de: Hashtables (Mb)
+PS_AXR:
+  en: Auto Indexer
+  rs: Auto Indexer
+  ru: Auto Indexer
+  de: Auto Indexer
+
 
 # Solution screen
 SS_Solution:
@@ -584,6 +595,12 @@ QO_PostKeyPlay:
   rs: PostKeyPlay
   ru: PostKeyPlay
   de: Nach dem Schlüssel
+QO_MoveNumbers:
+  en: MoveNumbers
+  rs: MoveNumbers
+  ru: MoveNumbers
+  de: MoveNumbers
+
 MI_Invert_colors:
   en: Invert colors of the pieces
   rs: Обрни боје фигура

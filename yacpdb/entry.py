@@ -4,6 +4,10 @@ import hashlib
 import yaml
 import re
 
+try: from .. import board
+except ImportError as e: import board
+except ValueError as e: import board
+
 def unquote(str):
     str = str.strip()
     if len(str) < 2:
@@ -17,6 +21,7 @@ def unquote(str):
 
 
 # ASH = Algebraic + Solution/Stipulation Hash
+# ASH only make sense if the problem passes validation
 def ash(e):
     if "solution" not in e or "stipulation" not in e or "algebraic" not in e:
         return ""
@@ -35,8 +40,12 @@ def entry(yamltext):
     yamltext = yamltext.replace("stipulation: =", 'stipulation: "="')
     e = yaml.load(yamltext)
     if "solution" in e:
-        e["solution"] = unicode(e["solution"]).encode("utf8")
+        e["solution"] = unquote(str(e["solution"]).encode("utf8"))
     if "stipulation" in e:
-        e["stipulation"] = unicode(e["stipulation"]).encode("utf8")
+        e["stipulation"] = str(e["stipulation"]).encode("utf8")
+    if 'algebraic' in e:
+        b = board.Board()
+        b.fromAlgebraic(e["algebraic"])
+        e["legend"] = b.getLegend()
     return e
 

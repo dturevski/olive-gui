@@ -33,7 +33,7 @@ class PbmEntries:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.num_entries == self.entries_read:
             raise StopIteration
         r = Record(self.file)
@@ -46,8 +46,8 @@ def readPbm(filename):  # throws (IOError)
     records = []
     try:
         num_entries = read_int(input, 'H') + 1
-        print num_entries
-        for i in xrange(num_entries):
+        print(num_entries)
+        for i in range(num_entries):
             r = Record(input)
             records.append(r.to_yacpdb_struct())
             #r.dump(i != num_entries - 1)
@@ -70,7 +70,7 @@ def read_string(file):
     file.seek(offset)
     string = file.read(read_int(file, 'H'))
     file.seek(cur_pos)
-    return unicode(string.decode(PBM_ENCODING))
+    return str(string.decode(PBM_ENCODING))
 
 
 def byte2piece(byte):
@@ -123,7 +123,7 @@ class Record:
         self.parse_twins()
 
         self.fen, blanks = '', 0
-        for i in xrange(64):
+        for i in range(64):
             if((i > 0) and (i % 8 == 0)):  # new row
                 self.fen = self.fen + ['', str(blanks)][blanks > 0]
                 self.fen = self.fen + "/"
@@ -146,7 +146,7 @@ class Record:
         self.is_zero = True
 
         twins = []
-        for i in xrange(len(self.info['twins']) // 4):
+        for i in range(len(self.info['twins']) // 4):
             # for j in xrange(4):
             #    print ord(self.info['twins'][1 + 4*i + j]) - 32,
             # print
@@ -218,11 +218,11 @@ class Record:
             r['source'] = self.info['source']
         if self.info['distinction']:
             d = model.Distinction()
-            parts = self.info['distinction'].split(u'°')
+            parts = self.info['distinction'].split('°')
             d.lo = model.myint(parts[0])
             if len(parts) > 1:
                 d.hi = model.myint(parts[1])
-            tail = (u'°'.join(parts[1:])).lower()
+            tail = ('°'.join(parts[1:])).lower()
             if len(parts) == 1:
                 tail = self.info['distinction'].lower()
             if 'special' in tail:
@@ -254,24 +254,24 @@ class Record:
         return copy.deepcopy(r)
 
     def dump(self, with_separator):
-        print
+        print()
         if self.info['author']:
-            print "Author " + self.info['author']
+            print("Author " + self.info['author'])
         if self.info['source']:
-            print "Origin " + self.info['source']
+            print("Origin " + self.info['source'])
         if self.info['distinction']:
-            print "Title " + self.info['distinction']
+            print("Title " + self.info['distinction'])
         for comment in self.comments:
-            print 'Remark', comment
+            print('Remark', comment)
         if self.is_maximummer:
-            print "Condition maximummer"
-        print "Stipulation " + self.stipulation
-        print "Forsyth " + self.fen
+            print("Condition maximummer")
+        print("Stipulation " + self.stipulation)
+        print("Forsyth " + self.fen)
         if self.is_duplex:
-            print "Option Duplex"
+            print("Option Duplex")
         for index, twin in enumerate(self.twins):
-            print ["Twin", "ZeroPosition"][index == 0 and self.is_zero],
-            print ["", "continued "][self.succesive_twining] + twin
-        print
+            print(["Twin", "ZeroPosition"][index == 0 and self.is_zero], end=' ')
+            print(["", "continued "][self.succesive_twining] + twin)
+        print()
         if with_separator:
-            print "NextProblem"
+            print("NextProblem")

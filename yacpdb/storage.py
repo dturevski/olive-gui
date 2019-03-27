@@ -1,94 +1,218 @@
-import MySQLdb, MySQLdb.cursors
-import entry
+import os, sys
+import pymysql, pymysql.cursors
+import logging, traceback
+from . import entry
 
-database = MySQLdb.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb", cursorclass=MySQLdb.cursors.DictCursor)
 
-"""
-alter table problems2 add ash varchar(32);
-alter table problems2 add key(ash);
-
-create table auto_index (
-    ash varchar(32) not null,
-    updated datetime not null,
-    valid integer not null,
-    error varchar(255),
-    primary key(ash)
-);
-"""
-
+database = None
+if "QtCore" not in sys.modules: # don't try to connect when in GUI mode
+    try:
+        database = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb",
+                                   cursorclass=pymysql.cursors.DictCursor)
+        database.cursor().execute("SET NAMES utf8")
+    except pymysql.err.OperationalError:
+        pass
 
 def commit(query, params):
-    c = database.cursor(MySQLdb.cursors.Cursor)
+    c = database.cursor(pymysql.cursors.Cursor)
     try:
         c.execute(query, params)
         database.commit()
     except Exception as ex:
         database.rollback()
-        print ex
-        print c._last_executed
+        print(ex)
+        print(c._last_executed)
 
 
-def calculateHashes(count):
-    c = database.cursor()
-    c.execute("""
-      select p.id, y.yaml from
-      problems2 p join yaml y on (p.id = y.problem_id)
-      where p.ash is NULL
-      order by p.id limit %s
-    """, (count,))
+def mysqldt(dt):
+    return dt.strftime('%Y-%m-%d %H:%M:%S')
 
-    ok, failed = 0, 0
 
-    for row in c:
+def entries(cursor):
+    for row in cursor:
         try:
             e = entry.entry(row["yaml"])
+            for key in ["id", "ash"]:
+                if key in row:
+                    e[key] = row[key]
+            yield e
         except Exception as ex:
-            print "============ ID = %d" % row["id"]
-            print ex
-            failed += 1
-            continue
-        ash = entry.ash(e)
-        database.cursor().execute("update problems2 set ash=%s where id=%s", (ash, row["id"]))
-        ok += 1
-        #print ash, row["id"]
-
-    print "ok: %d, failed: %d" % (ok, failed)
+            logging.error("Failed to unyaml entry %d" % row["id"])
+            logging.error(traceback.format_exc(ex))
 
 
-def allEntries():
-    c = database.cursor()
-    c.execute("select p.id, y.yaml from problems2 p join yaml y on (p.id = y.problem_id) order by p.id")
+def scalar(query, params):
+    c = database.cursor(pymysql.cursors.Cursor)
+    c.execute(query, params)
     for row in c:
+        return row[0]
+    return None
+
+
+class Dao:
+
+    def __init__(self):
+        self.caches = None
+        pass
+
+    def ixr_getPredicateNameById(self, id_):
+        self.ixr_initCache()
+        return self.caches["in"][int(id_)]
+
+    def ixr_getPredicateIdByName(self, name):
+        self.ixr_initCache()
         try:
-            e = entry.entry(row["yaml"])
-            yield row["id"], entry.ash(e), e
-        except:
-            pass
+            return self.caches["ni"][name]
+        except KeyError:
+            database.cursor().execute("INSERT INTO predicate_names (name) VALUES (%s)", (name,))
+            self.caches["ni"][name] = database.insert_id()
+            return self.caches["ni"][name]
 
-def queryProblems():
-    c = database.cursor()
-    c.execute("""
-        select
+    def ixr_initCache(self):
+        if self.caches != None:
+            return
+        self.caches = {"ni": {}, "in": {}}
+        c = database.cursor()
+        c.execute("SELECT id, name FROM predicate_names")
+        for row in c:
+            self.caches["ni"][row["name"]], self.caches["in"][row["id"]] = row["id"], row["name"]
+
+
+    def ixr_getEntriesWithoutAsh(self, count):
+        c = database.cursor()
+        c.execute("""
+          SELECT
             p.id, y.yaml
-        from
+          FROM
+            problems2 p JOIN
+            yaml y ON p.id = y.problem_id
+          WHERE
+            p.ash IS NULL
+          ORDER BY
+            p.id
+          LIMIT %s
+        """, (count,))
+        return entries(c)
+
+    def ixr_updateEntryAsh(self, eid, ash):
+        database.cursor().execute("update problems2 set ash=%s where id=%s", (ash, eid))
+
+    def ixr_updateEntryOrtho(self, eid, ortho):
+        database.cursor().execute("update problems2 set orthodox=%s where id=%s", ("1" if ortho else "0", eid))
+
+    def allEntries(self):
+        c = database.cursor()
+        c.execute("""
+          SELECT
+            p.id, y.yaml
+          FROM
             problems2 p join
-            yaml y on (p.id = y.problem_id) join
-            auto_index ai on (p.ash = ai.ash)
-        where
-            ai.error like '\\'None%'
-        order by p.id""")
-    for row in c:
-        e = entry.entry(row["yaml"])
-        yield row["id"], entry.ash(e), e
+            yaml y on p.id = y.problem_id
+          ORDER BY
+            p.id
+            """)
+        return entries(c)
+
+    def ixr_updateCruncherLog(self, ash, error):
+        commit("""
+          REPLACE INTO
+            cruncher_timestamps
+            (ash, checked, error)
+          VALUES
+            (%s, now(), %s)
+          """, (ash, error))
+
+    def ixr_getLastRun(self, ash):
+        return scalar("SELECT checked from cruncher_timestamps WHERE ash=%s", (ash,))
+
+    def ixr_getNeverChecked(self, maxcount):
+        c = database.cursor()
+        c.execute("""
+          SELECT
+            p.id, p.ash, y.yaml
+          FROM 
+            problems2 p JOIN
+            yaml y ON p.id = y.problem_id LEFT JOIN 
+            cruncher_timestamps ct ON p.ash = ct.ash
+          WHERE 
+            p.ash IS NOT NULL and ct.ash IS NULL
+          ORDER BY p.id
+          LIMIT %d
+          """ % maxcount)
+        return entries(c)
+
+    def ixr_getNotCheckedSince(self, since, maxcount):
+        c = database.cursor()
+        c.execute("""
+          SELECT
+            p.id, p.ash
+          FROM 
+            problems2 p JOIN
+            yaml y ON p.id = y.problem_id JOIN 
+            cruncher_timestamps ct ON p.ash = ct.ash
+          WHERE 
+            ct.checked < %s
+          ORDER BY
+            ct.checked
+          limit 
+          """ + str(maxcount), (mysqldt(since),))
+        return entries(c)
+
+    def ixr_saveAnalysisResults(self, ash, analysisResults):
+        c = database.cursor()
+        for key, predicate in analysisResults.predicates.items():
+            c.execute("INSERT INTO predicates (name_id, ash, matchcount) VALUES (%s, %s, %s)",
+                      (self.ixr_getPredicateIdByName(predicate.name), ash, str(analysisResults.counts[key])))
+            pid = database.insert_id()
+            for i, param in enumerate(predicate.params):
+                c.execute("INSERT INTO predicate_params (pid, pos, val) VALUES (%s, %s, %s)",
+                          (str(pid), str(i), param))
+
+    def ixr_deleteAnalysisResults(self, ash):
+        c, c2 = database.cursor(), database.cursor()
+        c.execute("SELECT id FROM predicates WHERE ash=%s", (ash,))
+        for row in c:
+            c2.execute("DELETE FROM predicate_params WHERE pid=%s", (row["id"],))
+        c.execute("DELETE FROM predicates WHERE ash=%s", (ash,))
+
+    def ixr_getPredicatesByAsh(self, ash):
+        c, c2, ps = database.cursor(), database.cursor(), {}
+        c.execute("""SELECT id, name_id, matchcount FROM  predicates WHERE ash = %s""", (ash,))
+        for row in c:
+            params = []
+            c2.execute("SELECT val FROM predicate_params where pid=%s ORDER BY pos", (row["id"],))
+            for row2 in c2:
+                params.append(row2["val"])
+            name = self.ixr_getPredicateNameById(row["name_id"])
+            if len(params) > 0:
+                name = "%s(%s)" % (name, ", ".join(params))
+            ps[name] = row["matchcount"]
+        return ps
 
 
+    def search(self, query, params, page, pageSize=100):
+        limits = " limit %d, %d" % ((page-1)*pageSize, pageSize)
+        c, matches = database.cursor(), []
+        for p in params:
+           logging.debug(str(p) + ", " + str(type(params[0])))
+        c.execute(query + limits, params)
+        lastExecuted = c._last_executed
+        for row in c:
+            try:
+                e = entry.entry(row["yaml"])
+                e["id"] = row['problem_id']
+                e["ash"] = row['ash']
+                matches.append(e)
+            except Exception as ex:
+                logging.error("Bad YAML: %d" % row['problem_id'])
+        c.execute("select FOUND_ROWS() fr")
+        return {
+            'entries':matches,
+            'count': c.fetchone()["fr"],
+            # 'q':lastExecuted
+        }
 
-def insertAuto(ash, valid, message):
-    commit("""
-          replace into auto_index
-          (ash, valid, error, updated) values
-          (%s, %s, %s, now())""", (ash, valid, message))
-
+dao = Dao()
 
 
 

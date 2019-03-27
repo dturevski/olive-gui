@@ -6,7 +6,7 @@ t_ignore = " \t\r\n"
 
 # List of token names.
 tokens = (
-    'ROTATE',
+    'MIRROR',
     'IMITATOR_MOVEMENT_OPENING_BRACKET',
     'LEFT_SQUARE_BRACKET',
     'RIGHT_SQUARE_BRACKET',
@@ -16,10 +16,11 @@ tokens = (
     'PLUS',
     'EQUALS',
     'ANNOTATION',
-    'MIRROR',
+    'ROTATE',
     'SHIFT',
     'POLISH_TYPE',
     'IMITATOR',
+    'PIECE_NAME',
     'MOVE_NUMBER',
     'KINGSIDE_CASTLING',
     'QUEENSIDE_CASTLING',
@@ -42,11 +43,33 @@ tokens = (
     'FAIRY_PROPERTIES',
     'COMMA',
     'OTHER_CHECK_SIGN',
-    'PIECE_NAME',
 )
 
 # tokens
 
+
+# these must be functions because lexer always tries functions first
+# so they preceed t_PIECE_NAME
+
+def t_MIRROR(t):
+    r'mirror'
+    return t
+
+def t_ROTATE(t):
+    r'rotate'
+    return t
+
+def t_SHIFT(t):
+    r'shift'
+    return t
+
+def t_POLISH_TYPE(t):
+    r'PolishType'
+    return t
+
+def t_IMITATOR(t):
+    r'Imitator'
+    return t
 
 
 t_LEFT_SQUARE_BRACKET = r'\['
@@ -64,6 +87,8 @@ t_PLUS = r'\+'
 t_EQUALS = r'='
 t_OTHER_CHECK_SIGN = r'[#]'
 t_ANNOTATION = r'[!\?][!\?]?'
+t_FAIRY_PROPERTIES = r'[cjkprvfhmu]+'
+t_PIECE_NAME = r'([0-9A-Z][0-9A-Z])|[A-Z]'
 
 
 # before INT
@@ -98,7 +123,7 @@ t_ZUGZWANG = r'zugzwang\.'
 
 
 def t_TWIN_ID(t):
-    r'[a-z]\)'
+    r'([a-z]|(z[0-9]+))\)'
     t.value = str(t.value[0])
     return t
 
@@ -106,20 +131,8 @@ t_ARROW = r'\->'
 t_LONG_ARROW = r'\-\->'
 t_LONG_DOUBLE_ARROW = r'==>'
 t_DOUBLE_POINTED_ARROW = r'<\-\->'
-
-def t_ROTATE(t):
-    r'rotate'
-    return t
-
-t_MIRROR = r'mirror'
-t_SHIFT = r'shift'
-t_POLISH_TYPE = r'PolishType'
-t_IMITATOR = r'Imitator'
 t_IMITATOR_MOVEMENT_OPENING_BRACKET = r'\[I'
 t_COMMA = r','
-
-t_FAIRY_PROPERTIES = r'[cjkprvfhmu]+'
-t_PIECE_NAME = r'([0-9A-Z][0-9A-Z])|[A-Z]'
 
 
 def t_error(t):

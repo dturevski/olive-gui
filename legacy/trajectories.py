@@ -1,5 +1,5 @@
-import common
-import chess
+from . import common
+from . import chess
 import copy
 
 # patterns/cycles/pw
@@ -26,7 +26,7 @@ def traverse_for_platzwechsel(head, tail, retval):
         # 2) find all who left from the arrival square (candidates)
         # 3) for each of them check if they crossed the route
         route, candidates = [], []
-        for i in xrange(len(head) - 1):
+        for i in range(len(head) - 1):
             if head[i].departing_piece_id == head[-1].departing_piece_id:
                 route.append(head[i].dep[1])
             if head[i].dep[
@@ -57,7 +57,7 @@ def traverse_trajectories(head, tail, retval):
     if len(head) > 0:
         if len(head[-1].branches) > 3:
             patterns = get_patterns(head[-1].square)
-            for (name, squares) in patterns.items():
+            for (name, squares) in list(patterns.items()):
                 if len(squares) == len([y for y in squares if y in [
                         x.square for x in head[-1].branches]]):
                     retval[name] = True
@@ -68,14 +68,14 @@ def traverse_trajectories(head, tail, retval):
     if len(head) > 2:
         # search the head backwards to find its last element
         prev = -1
-        for i in xrange(len(head) - 2, -1, -1):
+        for i in range(len(head) - 2, -1, -1):
             if head[i].square == head[-1].square:
                 rl = len(head) - 1 - i > 1  # cycle length > 2
                 if rl:  # all cycle elements are different
                     rl = common.all_different(
                         [x.square for x in head[i + 1:len(head) - 2]])
                 if rl:  # all cycle elements are not on the same line
-                    for j in xrange(i + 1, len(head) - 2):
+                    for j in range(i + 1, len(head) - 2):
                         if not chess.LUT.att['q'][
                                 head[i].square][
                                 head[j].square]:
@@ -103,9 +103,9 @@ class TNode:
         self.square, self.id, self.piece, self.branches = square, id, piece, []
 
     def dump(self, level):
-        for i in xrange(level):
-            print " ",
-        print '->', self.piece + chess.to_xy(self.square)
+        for i in range(level):
+            print(" ", end=' ')
+        print('->', self.piece + chess.to_xy(self.square))
         for tn in self.branches:
             tn.dump(level + 1)
 
@@ -139,7 +139,7 @@ class TrajectoriesBuilder():
                 self.result.append(new_tnode)
                 level.append(new_tnode)
             # looking for the piece in the level
-            for i in xrange(len(level)):
+            for i in range(len(level)):
                 if level[i].id == solution_node.move.departing_piece_id and level[i].piece == solution_node.move.dep[0]:
                     new_tnode = TNode(
                         solution_node.move.arr[1],
@@ -147,7 +147,7 @@ class TrajectoriesBuilder():
                         level[i].piece)
                     level[i].branches.append(new_tnode)
                     new_level = []
-                    for j in xrange(len(level)):
+                    for j in range(len(level)):
                         if i != j:
                             new_level.append(level[j])
                         else:
@@ -170,7 +170,7 @@ def get_patterns(square):
     }
     retval = {}
     x, y = chess.LUT.to_xy(square)
-    for (name, vecs) in patterns.items():
+    for (name, vecs) in list(patterns.items()):
         tmp = []
         for (a, b) in vecs:
             x_, y_ = x + a, y + b
