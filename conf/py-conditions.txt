@@ -151,6 +151,7 @@ RoyalDynasty
 SAT
 StrictSAT
 Take&MakeChess
+Make&TakeChess
 BlackSynchronMover
 WhiteSynchronMover
 BlackAntiSynchronMover
