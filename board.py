@@ -268,6 +268,7 @@ class Board:
             new_piece = Piece(piece.name, piece.color, piece.specs)
             new_piece.origin = piece.origin
             self.add(new_piece, new_x + 8 * new_y)
+        self.stm = b.stm
 
     def invertColors(self):
         b = copy.deepcopy(self)

@@ -320,4 +320,15 @@ problems = {
           "1...f2-f4   2.Rd2*h2 f4-f5  3.Kd5-e4 f5-f6 4.Ke4-f3 f6-f7 5.Kf3-g2 f7-f8=Q   6.Kg2-h1 Qf8-f1 #
           1...h2-h3   2.Rd2*f2 h3-h4   3.Kd5-e6 h4-h5   4.Ke6-f7 h5-h6   5.Kf7-f8 h6-h7   6.Rf2-f7 h7-h8=Q #"
     """)),
+
+    'rotateandcastle': model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Kh5, Rh8]
+        stipulation: "#1"
+        solution: |
+          "a)
+          1.Kh5-g5 #
+          b) rotate 270
+          1.0-0 #"
+    """)),
 }
