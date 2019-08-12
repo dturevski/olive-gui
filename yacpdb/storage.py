@@ -205,6 +205,9 @@ class Dao:
             # 'q':lastExecuted
         }
 
+    def findByFen(self, fen):
+        return scalar("select id from problems2 where fen=%s", (fen,))
+
 dao = Dao()
 
 
