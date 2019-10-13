@@ -331,4 +331,12 @@ problems = {
           b) rotate 270
           1.0-0 #"
     """)),
+
+    'rebirthatarrival': model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Bf2]
+          black: [Bd4,Pe3]
+        stipulation: "h#3"
+        solution: "1.e3*f2[+wPf2][+wBd2] f2-f4 2.Bd4-g7"
+            """)),
 }
