@@ -1,7 +1,7 @@
 #import re, yaml, os, subprocess, tempfile, array, copy, sys
 
 import yaml
-import yacpdb
+from . import yacpdb
 
 # todo:
 # - dual underpromotions Q+R Q+B
@@ -107,4 +107,4 @@ problem = yaml.load("""---
 
 result = yacpdb.process(problem)
 
-print yaml.dump(result)
+print(yaml.dump(result))

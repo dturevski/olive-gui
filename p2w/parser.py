@@ -1,4 +1,4 @@
-from nodes import *
+from .nodes import *
 import ply.yacc as yacc
 
 # lex & yacc transform the popeye output into a list of Nodes
@@ -355,5 +355,5 @@ def p_error(t):
         raise Exception("Terminating syntax error")
 
 
-from lexer import *
+from .lexer import *
 parser = yacc.yacc()

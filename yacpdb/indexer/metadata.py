@@ -1,6 +1,8 @@
+import os
+
 import markdown
 
-from predicate import *
+from .predicate import *
 try:
     from board import *
 except ImportError as e:
@@ -9,7 +11,7 @@ except ImportError as e:
 
 class PredicateStorage:
 
-    markdownFilename = '/yacpdb/indexer/indexer.md'
+    markdownFilename = 'yacpdb/indexer/indexer.md'
     domains = {
         'BOOLEAN': Domain('BOOLEAN', 'true|false'),
         'COLOR': Domain('COLOR', '[wbn]'),
@@ -83,7 +85,7 @@ class PredicateStorage:
     def getDocumentation(self):
         docs = {}
         for arity in self.ps:
-            for name, p in self.ps[arity].iteritems():
+            for name, p in self.ps[arity].items():
                 docs[name] = {"declaration": p.getDeclarationString(), "doc": p.doc }
         return docs
 
@@ -170,7 +172,7 @@ class Matrix(Predicate):
             if i > 0: p.square = Square(p.square.x - cs[0].square.x, p.square.y - cs[0].square.y)
         for T in Matrix.transformations[self.transformation]:
             cs_, q = self.transform(cs, T), ""
-            for i in xrange(1, len(cs_)):
+            for i in range(1, len(cs_)):
                 q += "join coords c{i} on (c{i}.piece={n} and c{i}.problem_id = c0.problem_id and " \
                      "c{i}.x = c0.x + ({x}) and c{i}.y = c0.y + ({y}))\n" \
                     .format(i=i, n=Matrix.pieceCode(cs_[i].name), x=cs_[i].square.x, y=cs_[i].square.y)

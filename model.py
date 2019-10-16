@@ -3,7 +3,6 @@
 # standard
 import json
 import re
-import exceptions
 import copy
 import datetime
 
@@ -14,26 +13,26 @@ import yaml
 import legacy.popeye
 import legacy.chess
 from board import *
-
+from base import get_write_dir
 
 def myint(string):
     f, s = False, []
     for char in string:
-        if char in '0123456789':
+        if char in "0123456789":
             s.append(char)
             f = True
         elif f:
             break
     try:
         return int(''.join(s))
-    except exceptions.ValueError:
+    except ValueError:
         return 0
 
 
 def notEmpty(hash, key):
     if key not in hash:
         return False
-    return len(unicode(hash[key])) != 0
+    return len(str(hash[key])) != 0
 
 
 
@@ -87,10 +86,10 @@ class Distinction:
         if(self.hi < 1) and (self.lo > 0):
             lo, hi = hi, lo
         if hi > 0:
-            retval = unicode(
+            retval = str(
                 hi) + Distinction.pluralSuffixInLang(hi, Lang) + ' ' + retval
             if lo > 0:
-                retval = unicode(
+                retval = str(
                     lo) + Distinction.pluralSuffixInLang(lo, Lang) + '-' + retval
         if self.special:
             retval = Lang.value('DSTN_Special') + ' ' + retval
@@ -163,7 +162,7 @@ def makeSafe(e):
     for k in ['source', 'solution', 'source-id', 'distinction']:
         if k in e:
             try:
-                r[k] = unquote(unicode(e[k]))
+                r[k] = unquote(str(e[k]))
             except:
                 pass
 
@@ -182,7 +181,7 @@ def makeSafe(e):
             try:
                 r[k] = []
                 for element in e[k]:
-                    r[k].append(unquote(unicode(element)))
+                    r[k].append(unquote(str(element)))
             except:
                 del r[k]
     # date
@@ -202,10 +201,10 @@ def makeSafe(e):
 
 
 class Model:
-    file = 'conf/default-entry.yaml'
+    file = get_write_dir() + '/conf/default-entry.yaml'
 
     def __init__(self):
-        f = open(Model.file, 'r')
+        f = open(Model.file, 'r', encoding="utf8")
         try:
             self.defaultEntry = yaml.load(f)
         finally:
@@ -268,7 +267,7 @@ class Model:
         issue_id, source_id = '', ''
         if 'source-id' not in self.entries[self.current]:
             return issue_id, source_id
-        parts = unicode(self.entries[self.current]['source-id']).split("/")
+        parts = str(self.entries[self.current]['source-id']).split("/")
         if len(parts) == 1:
             source_id = parts[0]
         else:
@@ -295,14 +294,9 @@ class Model:
                           for k in sorted(self.entries[self.current]['twins'].keys())])
 
     def saveDefaultEntry(self):
-        f = open(Model.file, 'w')
+        f = open(Model.file, 'wb')
         try:
-            f.write(
-                unicode(
-                    yaml.dump(
-                        self.defaultEntry,
-                        encoding=None,
-                        allow_unicode=True)).encode('utf8'))
+            f.write(yaml.dump(self.defaultEntry, encoding='utf8', allow_unicode=True))
         finally:
             f.close()
 
@@ -361,3 +355,20 @@ def isFairy(p):
 
 def hasFairyElements(e):
     return hasFairyConditions(e) or hasFairyPieces(e)
+
+def transformEntryOptionsAndTwins(e, transform):
+    if 'options' in e:
+        e['options'] = [transformPopeyeInput(option, transform) for option in e['options']]
+    if 'twins' in e:
+        for twinId, twin in e['twins'].items():
+            e['twins'][twinId] = transformPopeyeInput(twin, transform)
+
+RE_ALGEBRAIC_SQUARE = re.compile("([a-h][1-8])")
+def transformPopeyeInput(input, transform):
+    return re.sub(RE_ALGEBRAIC_SQUARE, lambda m: transformAlgebraicSquare(m.group(1), transform), input)
+
+def transformAlgebraicSquare(square, transform):
+    s = Square(algebraicToIdx(square))
+    x, y = transform((s.x, s.y))
+    x, y = (x + 8) % 8, (y + 8) % 8
+    return idxToAlgebraic(Square(x, y).value)

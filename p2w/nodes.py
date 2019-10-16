@@ -1,6 +1,7 @@
 
 import model
 from board import Square
+from functools import reduce
 
 
 class Node(object):
@@ -41,7 +42,7 @@ class Node(object):
         return len(nodes)
 
     def linkContinuedTwins(self):
-        for i in xrange(1, len(self.children)):
+        for i in range(1, len(self.children)):
             if self.children[i].isContinued:
                 self.children[i].anticipator = self.children[i - 1]
 
@@ -231,7 +232,7 @@ class MoveNode(Node):
         b.flip()
 
         # recoloring
-        for k, v in self.recolorings.iteritems():
+        for k, v in self.recolorings.items():
             for square in v:
                 if b.board[square] is not None:
                     b.board[square].color = k

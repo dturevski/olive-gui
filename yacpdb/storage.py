@@ -1,19 +1,27 @@
-import MySQLdb, MySQLdb.cursors
+import os, sys
+import pymysql, pymysql.cursors
 import logging, traceback
-import entry
+from . import entry
 
-database = MySQLdb.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb", cursorclass=MySQLdb.cursors.DictCursor)
-database.cursor().execute("SET NAMES utf8")
+
+database = None
+if "QtCore" not in sys.modules: # don't try to connect when in GUI mode
+    try:
+        database = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb",
+                                   cursorclass=pymysql.cursors.DictCursor)
+        database.cursor().execute("SET NAMES utf8")
+    except pymysql.err.OperationalError:
+        pass
 
 def commit(query, params):
-    c = database.cursor(MySQLdb.cursors.Cursor)
+    c = database.cursor(pymysql.cursors.Cursor)
     try:
         c.execute(query, params)
         database.commit()
     except Exception as ex:
         database.rollback()
-        print ex
-        print c._last_executed
+        print(ex)
+        print(c._last_executed)
 
 
 def mysqldt(dt):
@@ -35,7 +43,7 @@ def entries(cursor):
 
 
 def scalar(query, params):
-    c = database.cursor(MySQLdb.cursors.Cursor)
+    c = database.cursor(pymysql.cursors.Cursor)
     c.execute(query, params)
     for row in c:
         return row[0]
@@ -153,7 +161,7 @@ class Dao:
 
     def ixr_saveAnalysisResults(self, ash, analysisResults):
         c = database.cursor()
-        for key, predicate in analysisResults.predicates.iteritems():
+        for key, predicate in analysisResults.predicates.items():
             c.execute("INSERT INTO predicates (name_id, ash, matchcount) VALUES (%s, %s, %s)",
                       (self.ixr_getPredicateIdByName(predicate.name), ash, str(analysisResults.counts[key])))
             pid = database.insert_id()

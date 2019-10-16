@@ -5,13 +5,13 @@ import array
 import copy
 
 # local
-import popeye
+from . import popeye
 
 # globals
 PIECES = 'KkQqRrBbSsPp'
 BLACK = False
 WHITE = True
-NOTATION = {'K': u'Кр', 'Q': u'Ф', 'R': u'Л', 'B': u'С', 'S': u'К', 'P': u'п'}
+NOTATION = {'K': 'Кр', 'Q': 'Ф', 'R': 'Л', 'B': 'С', 'S': 'К', 'P': 'п'}
 
 
 NAME = 0
@@ -74,7 +74,7 @@ class Board:
         self.ep = -1  # square where an en passant capture is possible
         self.castling = [[True, True], [True, True]]  # castling rights
 
-        for i in xrange(64):
+        for i in range(64):
             self.board.append(['', -1, -1, -1])
 
     def rotate(self, angle):
@@ -110,7 +110,7 @@ class Board:
         self.clear()
         if 'neutral' in algebraic:
             raise UnsupportedError('neutral')
-        for color in algebraic.keys():
+        for color in list(algebraic.keys()):
             for piecedecl in algebraic[color]:
                 if(len(piecedecl) != 3) or (not piecedecl[0] in PIECES):
                     raise UnsupportedError(piecedecl)
@@ -140,7 +140,7 @@ class Board:
 
     def to_fen(self):
         fen, blanks = '', 0
-        for i in xrange(64):
+        for i in range(64):
             if((i > 0) and (i % 8 == 0)):  # new row
                 if(blanks > 0):
                     fen = fen + ("%d" % (blanks))
@@ -253,22 +253,22 @@ class Board:
         return retval
 
     def dump(self):
-        for i in xrange(64):
+        for i in range(64):
             if self.board[i][NAME] != '':
-                print self.board[i][NAME],
+                print(self.board[i][NAME], end=' ')
             else:
-                print '-',
+                print('-', end=' ')
             if((i > 0) and (i % 8 == 7)):
-                print
-        print 'ep:', self.ep
-        print 'black:',
+                print()
+        print('ep:', self.ep)
+        print('black:', end=' ')
         for x, y in Pieces(self, BLACK):
-            print "%s%s" % (x, to_xy(y)),
-        print
-        print 'white:',
+            print("%s%s" % (x, to_xy(y)), end=' ')
+        print()
+        print('white:', end=' ')
         for x, y in Pieces(self, WHITE):
-            print "%s%s" % (x, to_xy(y)),
-        print
+            print("%s%s" % (x, to_xy(y)), end=' ')
+        print()
 
     def check_integrity(self):
         retval = True
@@ -320,7 +320,7 @@ class BitBoard:
             retval += 1
         return retval
 
-    def next(self):
+    def __next__(self):
         if(self.pos > 63):
             raise StopIteration
         # return self[self.pos++] :)
@@ -330,7 +330,7 @@ class BitBoard:
 
     def __str__(self):
         retval = ''
-        for i in xrange(64):
+        for i in range(64):
             retval += '-*'[self[i]]
             if((i > 0) and (i % 8 == 7)):
                 retval += "\n"
@@ -347,7 +347,7 @@ class SetBits:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         while(True):
             self.pos = self.pos + 1
             if(self.pos > 63):
@@ -564,7 +564,7 @@ class LookupTables:
         rules.append({'pieces': 'P', 'vecs': self.vecWP, 'range': 1})
 
         # attack bitboards & move lists
-        for i in xrange(64):
+        for i in range(64):
             for rule in rules:
                 (att, mov) = self.trace(i, rule['vecs'], rule['range'])
                 for piece in rule['pieces']:
@@ -579,9 +579,9 @@ class LookupTables:
             self.mov['P'][i] += mov
 
         # between bitboards
-        for i in xrange(64):
+        for i in range(64):
             self.btw.append([])
-            for j in xrange(64):
+            for j in range(64):
                 if(self.att['q'][i][j] == 1):
                     self.btw[i].append(self.trace_to(i, j))
                 else:
@@ -654,7 +654,7 @@ class Pieces:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if not len(self.pieces):
             raise StopIteration
         return self.pieces.pop()
@@ -670,18 +670,18 @@ class Moves:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         # init iteration
         if(self.piece == ('', -1)):
             self.next_piece()
         # if we're out of castlings - switch to next piece
         if(self.castling > 1):  # there are only 2 castlings: 0 and 1
             self.next_piece()
-            return self.next()
+            return next(self)
         # if we're out of promotions - switch to next range (trace)
         if(self.promotion >= len(LUT.promotions[self.color])):
             self.next_range()
-            return self.next()
+            return next(self)
         # if we're out of traces - check if we can try castlings ...
         if(self.trace >= len(LUT.mov[self.piece[0]][self.piece[1]])):
             if self.can_castle():
@@ -699,15 +699,15 @@ class Moves:
                     return move
                 else:
                     self.next_castling()
-                    return self.next()
+                    return next(self)
             # ... or switch to next piece
             else:
                 self.next_piece()
-                return self.next()
+                return next(self)
         # if we're out of ranges - switch to next trace
         if(self.range >= len(LUT.mov[self.piece[0]][self.piece[1]][self.trace])):
             self.next_trace()
-            return self.next()
+            return next(self)
 
         # here piece, trace, range and promotion pointing to smth valid:
         arrival = LUT.mov[self.piece[0]][self.piece[1]][self.trace][self.range]
@@ -727,7 +727,7 @@ class Moves:
                 return move
             else:  # selfblock
                 self.next_trace()
-                return self.next()
+                return next(self)
             pass
         else:  # now pawns:
             # pawn captures
@@ -743,7 +743,7 @@ class Moves:
                         Board.is_of(self.brd.board[arrival][NAME], self.color):
                     # nothing to capture or same color
                     self.next_trace()
-                    return self.next()
+                    return next(self)
                 elif self.can_promote():
                     # promotion captures
                     move = Move(
@@ -770,7 +770,7 @@ class Moves:
                           LUT.btw[self.piece[1]][arrival]).is_zero())):
                     # blocked
                     self.next_trace()
-                    return self.next()
+                    return next(self)
                 elif self.can_promote():
                     # promotion advance
                     move = Move(
@@ -786,7 +786,7 @@ class Moves:
                     return move
 
     def next_piece(self):
-        self.piece = self.pieces.next()
+        self.piece = next(self.pieces)
         self.trace, self.range, self.promotion, self.castling = 0, 0, 0, 0
 
     def next_range(self):
@@ -822,17 +822,17 @@ class LegalMoves:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if not (self.move is None):
             self.move.unmake(self.board)
-        self.move = self.moves.next()
+        self.move = next(self.moves)
         self.move.make(self.board)
         legal = not self.board.is_attacked(self.board.kings[self.color],
                                            not self.color)
         if(legal):
             return self.move
         else:
-            return self.next()
+            return next(self)
 
 
 class Node:
@@ -950,7 +950,7 @@ class Node:
                 if len(self.siblings) > 1:
                     if not isinstance(groups[digest][0].move, NullMove):
                         so.add("\n", board, False)
-                        for i in xrange(self.ply_no + 1):
+                        for i in range(self.ply_no + 1):
                             so.add(" ", board, False)
                         if groups[digest][0].is_refutation:
                             so.add('but: ', board, False)
@@ -1020,7 +1020,7 @@ class MoveNode(Node):
                 return 'threat: '
         else:
             self.move.disambiguate(board)
-        return unicode(self.move)
+        return str(self.move)
 
     def hash(self):
         return self.move.hash()
@@ -1047,7 +1047,7 @@ class TwinNode(Node):
         self.old_fen = board.to_fen()
         if not self.anticipator is None:
             self.anticipator.make(board)
-        for i in xrange(len(self.commands)):
+        for i in range(len(self.commands)):
             if 'move' == self.commands[i]:
                 board.drop(from_xy(self.arguments[i][1]))
                 board.move(
@@ -1125,37 +1125,37 @@ class TwinNode(Node):
             #retval += 'Diagram'
             return retval
         parts = []
-        for i in xrange(len(self.commands)):
+        for i in range(len(self.commands)):
             if 'move' == self.commands[i]:
                 parts.append(
-                    u'%s→%s' %
+                    '%s→%s' %
                     (self.arguments[i][0], self.arguments[i][1]))
             if 'exchange' == self.commands[i]:
                 parts.append(
-                    u'%s↔%s' %
+                    '%s↔%s' %
                     (self.arguments[i][0], self.arguments[i][1]))
             if 'remove' == self.commands[i]:
-                parts.append(u'-%s' % self.arguments[i][0])
+                parts.append('-%s' % self.arguments[i][0])
             if 'substitute' == self.commands[i]:
                 parts.append(
-                    u'%s→%s' %
+                    '%s→%s' %
                     (self.arguments[i][0].upper(),
                      self.arguments[i][1].upper()))
             if 'add' == self.commands[i]:
-                parts.append(u'+%s %s ' %
+                parts.append('+%s %s ' %
                              (self.arguments[i][0], self.arguments[i][1]))
             if 'rotate' == self.commands[i]:
-                parts.append(u'↻%s°' % self.arguments[i][0])
+                parts.append('↻%s°' % self.arguments[i][0])
             if 'mirror' == self.commands[i]:
-                parts.append(u'%s' % self.arguments[i][0])
+                parts.append('%s' % self.arguments[i][0])
             if 'shift' == self.commands[i]:
                 parts.append(
-                    u'%s⇒%s' %
+                    '%s⇒%s' %
                     (self.arguments[i][0], self.arguments[i][1]))
             if 'polishType' == self.commands[i]:
-                parts.append(u'Polish')
+                parts.append('Polish')
         retval += " ".join([self.commands[i].title() + " " +
-                            " ".join(self.arguments[i]) for i in xrange(len(self.commands))])
+                            " ".join(self.arguments[i]) for i in range(len(self.commands))])
         # return retval + ' '.join(parts)
         return retval
 
@@ -1182,7 +1182,7 @@ class TwinNode(Node):
                 if len(self.siblings) > 1:
                     if not isinstance(sibling.move, NullMove):
                         so.add("\n", board, False)
-                        for i in xrange(self.ply_no + 1):
+                        for i in range(self.ply_no + 1):
                             so.add(" ", board, False)
                         so.add(sibling_move_no + ellipsis, board, False)
                 else:

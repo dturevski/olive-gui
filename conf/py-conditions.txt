@@ -181,8 +181,14 @@ CirceTake&Make
 MarineChess
 UltramarineChess
 SuperGuards
-Wormholes
+Wormholes <str>
 ArgentinianChess
 LostPieces
 PartialParalysis
 PointReflection
+BackToBack
+CheekToCheek
+FaceToFace
+Disparate
+SnekChess
+SnekCircleChess

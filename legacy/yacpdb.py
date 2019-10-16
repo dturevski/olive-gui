@@ -1,9 +1,9 @@
-import popeye
-import finales
-import chess
-import soundness
-import key
-import trajectories
+from . import popeye
+from . import finales
+from . import chess
+from . import soundness
+from . import key
+from . import trajectories
 
 VERSION = '2010-10-28'
 

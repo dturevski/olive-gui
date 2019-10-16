@@ -12,7 +12,7 @@ class Domain:
         self.name, self.regexp = name, re.compile('^' + regexp + '$')
 
     def test(self, value):
-        return (value == Domain.wildcard) or (self.regexp.match(str(value).decode("utf8")) is not None)
+        return (value == Domain.wildcard) or (self.regexp.match(str(value)) is not None)
 
 
 class Param:

@@ -1,6 +1,6 @@
 import datetime
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import logging
 import traceback
 
@@ -28,7 +28,7 @@ class Analyzer:
             params = { "a": "3", "fen": board.toFen(), "stip": entry["stipulation"], "sol": entry["solution"] }
             if 'twins' in entry:
                 params['twins'] = " ".join(["%s) %s" % (k, entry['twins'][k]) for k in sorted(entry['twins'].keys())])
-            for predicate in urllib2.urlopen(urllib2.Request(GATEWAY, urllib.urlencode(params))).read().split("\n"):
+            for predicate in urllib.request.urlopen(urllib.request.Request(GATEWAY, urllib.parse.urlencode(params))).read().split("\n"):
                 #todo xN modifiers & syntax differencies
                 acc.push(predicate)
         except Exception as ex:

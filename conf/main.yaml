@@ -1,20 +1,18 @@
 analyzers: [trajectories, miscellaneous]
 auto-compactify: 0
-check-for-latest-binary: 1
-chest-executable: {nt: ChestUCI-v5.2\WinChest.exe, posix: /home/dima/temp/chest/chest}
+collections-dir: C:/Users/dmitr/IdeaProjects/olive-gui/collections
 default-lang: en
 default-notation: en
 fairy-zoo:
-- [white LE, black L, black LE, '', '', '', '']
+- ['', black L, '', white L, '', '', '']
 - ['', '', '', '', '', '', '']
 - ['', '', '', '', '', '', '']
 horsehead-glyph: N
 import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
 import-post-decode-default: ISO-8859-1
 languages: {de: Deutsch, en: English, rs: Српски, ru: Русский}
-latest-binary-version-info-url: http://olive-gui.googlecode.com/svn/trunk/conf/latest-binary-version.yaml
 notations:
   en: [K, Q, R, B, S, P]
   fide: [K, D, T, L, S, B]
   ru: [Кр, Ф, Л, С, К, п]
-version: 1.18.4
+version: 1.0-beta.1

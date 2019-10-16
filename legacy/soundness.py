@@ -1,5 +1,5 @@
-import common
-import chess
+from . import common
+from . import chess
 
 
 def provides():
@@ -45,12 +45,12 @@ def check(problem, board, solution):
 class IntendedSolutions:
 
     def __init__(self, str, stipulation):
-        branching = [0 for x in xrange(stipulation.ply_count)]
+        branching = [0 for x in range(stipulation.ply_count)]
         if str.find('.') == -1:  # case 'n'
             if stipulation.starts_with_null:
                 branching[0] = 0
                 branching[1] = int(str)
-                for i in xrange(stipulation.ply_count - 2):
+                for i in range(stipulation.ply_count - 2):
                     cur_ply = i + 2
                     if stipulation.style in ['h', 'hs']:
                         branching[cur_ply] = 1
@@ -58,7 +58,7 @@ class IntendedSolutions:
                         branching[cur_ply] = cur_ply % 2
             else:
                 branching[0] = int(str)
-                for i in xrange(stipulation.ply_count - 1):
+                for i in range(stipulation.ply_count - 1):
                     cur_ply = i + 1
                     if stipulation.style in ['h', 'hs']:
                         branching[cur_ply] = 1

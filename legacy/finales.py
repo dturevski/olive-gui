@@ -1,6 +1,6 @@
-import chess
+from . import chess
 import copy
-import common
+from . import common
 
 
 sw, w, nw, n, ne, e, se, s = (-1, -1), (-1, 0), (-1, 1), (0, 1), \
@@ -101,10 +101,10 @@ def _analyze(board, mated):
     if len(attackers[board.kings[mated]]) > 0:
         init_id_map[attackers[board.kings[mated]][0][1]] = 0  # checking unit
     # id of other participants depend on traversal
-    for i in xrange(len(traversals)):
+    for i in range(len(traversals)):
         # if i <> 2: continue
         id_map, hash, pinmask, next_id = copy.deepcopy(init_id_map), 0, 0, 1
-        for j in xrange(len(traversals[i])):
+        for j in range(len(traversals[i])):
             participant_id = -1
             square = add(board.kings[mated], traversals[i][j])
             if -1 == square:  # board edge
@@ -142,7 +142,7 @@ def print_bin(i):
     while i != 0:
         s = str(1 & i) + s
         i = i >> 1
-    print s
+    print(s)
 
 
 class FinalesVisitor:

@@ -1,4 +1,5 @@
-import re, exceptions, copy, json
+import re, copy, json
+from base import read_resource_file, get_write_dir
 
 class Square:
 
@@ -58,8 +59,8 @@ def makePieceFromXfen(fen):
 class FairyHelper:
     defaults, overrides, glyphs, fontinfo = {}, {}, {}, {}
     options, conditions = [], []
-    f = open('conf/fairy-pieces.txt')
-    for entry in map(lambda x: x.strip().split("\t"), f.readlines()):
+    f = open(get_write_dir() + '/conf/fairy-pieces.txt')
+    for entry in [x.strip().split("\t") for x in f.readlines()]:
         glyphs[entry[0]] = {'name': entry[1]}
         if len(entry) > 2:
             if '' != entry[2].strip():
@@ -73,18 +74,17 @@ class FairyHelper:
                 defaults[entry[2]] = entry[0]
     f.close()
 
-    f = open('resources/fonts/xfen.txt')
-    for entry in map(lambda x: x.strip().split("\t"), f.readlines()):
+    for entry in [x.strip().split("\t") for x in read_resource_file(':/fonts/xfen.txt')]:
         fontinfo[entry[0]] = {'family': entry[1], 'chars': [
             chr(int(entry[2])), chr(int(entry[3]))]}
     f.close()
 
-    f = open('conf/py-options.txt')
-    options = map(lambda x: x.strip(), f.readlines())
+    f = open(get_write_dir() + '/conf/py-options.txt')
+    options = [x.strip() for x in f.readlines()]
     f.close()
 
-    f = open('conf/py-conditions.txt')
-    conditions = map(lambda x: x.strip(), f.readlines())
+    f = open(get_write_dir() + '/conf/py-conditions.txt')
+    conditions = [x.strip() for x in f.readlines()]
     f.close()
 
 def twinId(twin_index):
@@ -182,7 +182,7 @@ class Board:
 
     def clear(self):
         self.head, self.board, self.stm = -1, [], 'black'
-        for i in xrange(64):
+        for i in range(64):
             self.board.append(None)
 
     def flip(self):
@@ -270,6 +270,22 @@ class Board:
             self.add(new_piece, new_x + 8 * new_y)
         self.stm = b.stm
 
+    def getTransformByName(name):
+        try:
+            return  {
+                'Shift_up': lambda s: (s[0], s[1]-1),
+                'Shift_down': lambda s: (s[0], s[1]+1),
+                'Shift_left': lambda s: (s[0]-1, s[1]),
+                'Shift_right': lambda s: (s[0]+1, s[1]),
+                'Rotate_CW': lambda s: (7 - s[1], s[0]),
+                'Rotate_CCW': lambda s: (s[1], 7 - s[0]),
+                'Mirror_horizontal': lambda s: (s[0], 7 - s[1]),
+                'Mirror_vertical': lambda s: (7 - s[0], s[1]),
+            } [name]
+        except KeyError:
+            return None
+    getTransformByName = staticmethod(getTransformByName)
+
     def invertColors(self):
         b = copy.deepcopy(self)
         self.clear()
@@ -300,7 +316,7 @@ class Board:
 
     def toFen(self):
         fen, blanks = '', 0
-        for i in xrange(64):
+        for i in range(64):
             if((i > 0) and (i % 8 == 0)):  # new row
                 if(blanks > 0):
                     fen = fen + ("%d" % (blanks))
@@ -350,10 +366,10 @@ class Board:
             c[p.color][specs][p.name].append(idxToAlgebraic(s))
 
         lines = []
-        for color in c.keys():
+        for color in list(c.keys()):
             for specs in c[color]:
                 line = '  ' + color + ' ' + specs + ' ' + \
-                       ' '.join([name + ''.join(c[color][specs][name]) for name in c[color][specs].keys()])
+                       ' '.join([name + ''.join(c[color][specs][name]) for name in list(c[color][specs].keys())])
                 lines.append(line)
         return "\n".join(lines)
 
@@ -399,7 +415,7 @@ class Pieces:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.current == -1:
             raise StopIteration
         old_current = self.current
