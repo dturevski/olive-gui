@@ -278,7 +278,7 @@ class MoveNode(Node):
                   " is occupied but capture is specified at " + model.idxToAlgebraic(self.capture)
         elif self.capture != -1 and b.board[self.capture] is None:
             err = "Capture at empty square " + model.idxToAlgebraic(self.capture)
-        elif self.arrival in [r['at'] for r in self.rebirths] or self.arrival in [r['at'] for r in self.antirebirths]:
+        elif self.arrival in [r['at'] for r in self.rebirths] or self.arrival in [r['to'] for r in self.antirebirths]:
             err = "Rebirth at arrival square " + model.idxToAlgebraic(self.arrival)
 
         # todo: rebirth, recolorings
