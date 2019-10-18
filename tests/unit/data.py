@@ -2,7 +2,7 @@ import base
 import model, yaml
 
 problems = {
-    'orthodox': model.makeSafe(yaml.load("""---
+    'orthodox': model.makeSafe(yaml.safe_load("""---
         algebraic:
           white: [Kc7, Qb2, Rg8, Sf2]
           black: [Kg2, Pg3, Pf4]
@@ -26,12 +26,12 @@ problems = {
                             3.Qc2-d3 #"
     """)),
 
-    'switchbacks':  model.makeSafe(yaml.load("""
+    'switchbacks':  model.makeSafe(yaml.safe_load("""
         {algebraic: {white: ["Ba1", "Bh1"]}, stipulation: "ser-~3",
         solution: "1.Ba1-h8 2.Bh8-a1 3.Ba1-h8 4.Bh8-a1" }
     """)),
 
-    'c2c':  model.makeSafe(yaml.load("""
+    'c2c':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ka1, Pg2, Pe2]
           black: [Kc1, Rc4, Bf4, Ba6, Sd5, Sb6, Pg3, Pf5, Pe5, Pe3, Pb3, Pa3]
@@ -41,7 +41,7 @@ problems = {
           } 5.Rc4-d4 Ke1-f1 6.Sb6-c4 Kf1-g1 7.Sc4-d2 Kg1-h1 8.Sd2-f3 g2*f3#"
     """)),
 
-    'doublealbino':  model.makeSafe(yaml.load("""
+    'doublealbino':  model.makeSafe(yaml.safe_load("""
         algebraic:
             white: [Kc6, Qb5, Rd1, Bb6, Ph2, Pg2, Pd2, Pb2]
             black: [Ke5, Qb4, Rb7, Ra6, Ba4, Sc5, Sc3, Ph3, Pf6, Pf3, Pe6, Pe3, Pb3]
@@ -53,7 +53,7 @@ problems = {
             1.Ke5-e4 g2-g3   2.Sc5-d7 d2-d3 #"
     """)),
 
-    'longtraceback':  model.makeSafe(yaml.load("""
+    'longtraceback':  model.makeSafe(yaml.safe_load("""
         algebraic:
             white: [Ka6, Bb2]
             black: [Ka8, Qb3, Sc3, Pe5]
@@ -64,7 +64,7 @@ problems = {
             } 9.Sc3-b1 Ba3-b2 #"
     """)),
 
-    'caillaudtempobishop':  model.makeSafe(yaml.load("""
+    'caillaudtempobishop':  model.makeSafe(yaml.safe_load("""
         algebraic:
             white: [Kh1, Bh5, Be1, Pg6, Pg5, Pg4, Pf2, Pe3, Pc3]
             black: [Kh3, Ph4, Pg7, Pf3, Pe4, Pc6, Pc4, Pa7]
@@ -75,12 +75,12 @@ problems = {
             9.h4-h3 Be1*f2 #"
     """)),
 
-    'pw':  model.makeSafe(yaml.load("""
+    'pw':  model.makeSafe(yaml.safe_load("""
         {algebraic: {neutral: ["Qa8", "Qa7", "Qb7"]}, stipulation: "ser-h~4",
         solution: "1.nQa7-b8 nQa8-a7 2.nQb7-a8 nQb8-b7" }
     """)),
 
-    'pw2':  model.makeSafe(yaml.load("""
+    'pw2':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Kh8, Rg8, Bc6, Pe5]
           black: [Ke7, Pe6, Pc7]
@@ -95,7 +95,7 @@ problems = {
                                     4.Kg8-f7 #"
     """)),
 
-    'twinssetplay':  model.makeSafe(yaml.load("""
+    'twinssetplay':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Kh1, Rh4, Rc1]
           black: [Kd2, Pe3, Pe2]
@@ -112,7 +112,7 @@ problems = {
           c) wRh4-->h3 1.e2-e1=B Rc1-c3   2.e3-e2 Rh3-d3 #"
     """)),
 
-    'z2x1':  model.makeSafe(yaml.load("""
+    'z2x1':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ka6, Rh1, Re6, Bh7, Sh5, Pd3]
           black: [Kg2, Qg1, Rh6, Ph2]
@@ -122,7 +122,7 @@ problems = {
           1.Rh6*h7 Re6-e2 +   2.Kg2-f1 Sh5-g3 #"
     """)),
 
-    'z5x1':  model.makeSafe(yaml.load("""
+    'z5x1':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Kb2, Rb7, Be5, Bb3, Sf3, Sd3]
           black: [Kc6, Re3, Sa5, Pf6, Pe4, Pa6]
@@ -135,7 +135,7 @@ problems = {
             1.f6*e5 Sf3*e5 +   2.Kc6-d6 Rb7-d7 #"
     """)),
 
-    'z3x2':  model.makeSafe(yaml.load("""
+    'z3x2':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ke3, Rb4, Ba6, Sa3, Ph3]
           black: [Kf5, Rc4, Bb7, Bb2, Sa2, Ph4, Ph2, Pg7, Pg2, Pd7, Pc3]
@@ -148,7 +148,7 @@ problems = {
           1.Bb7*a6-b5 Rb4*c4-g4   2.Kf5*g4-g3 Sa3*b5-e2 #"
     """)),
 
-    'z3x2-ortho':  model.makeSafe(yaml.load("""
+    'z3x2-ortho':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ka3, Rb7, Ra5, Bd2, Ba2, Sd4, Pg5, Pf4, Pd5, Pb5, Pa6]
           black: [Kd6, Qc3, Rc2, Ra1, Sc1, Sb3, Pg6, Pf6, Pc5, Pa4]
@@ -159,7 +159,7 @@ problems = {
           1.Qc3*a5 f4-f5 {(b6?)} 2.Sb3*d4 Bd2-f4 #"
     """)),
 
-    '1234':  model.makeSafe(yaml.load("""
+    '1234':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ke2, Qh1, Sd5, Pe6]
           black: [Ke8, Rh8, Sh7]
@@ -180,7 +180,7 @@ problems = {
 
 
 
-    'complextwin':  model.makeSafe(yaml.load("""
+    'complextwin':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Kg1, Qc7, Rf5, Rf3, Bc8, Bc1, Sg5, Sd6, Pc5, Pb3, Pb2]
           black: [Kd4, Rb8, Bh1, Bf4, Sg7, Sg6, Pg3, Pe7, Pd5, Pd3, Pa3]
@@ -208,7 +208,7 @@ problems = {
                 1...Bf4-e3  {(A)} 2.Bc1*e3 #"
     """)),
 
-    'valladao':  model.makeSafe(yaml.load("""
+    'valladao':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ke1, Qc1, Rh8, Rh1, Bh3, Ba1, Sd1, Sb5, Pg7, Pg6, Pg5, Pd2, Pc7, Pc2]
           black: [Ke7, Rh7, Be8, Ph4, Pf7, Pd5, Pb2, Pa3, Pa2]
@@ -263,7 +263,7 @@ problems = {
                  2.Rf1*f7 #"
     """)),
 
-    'fox':  model.makeSafe(yaml.load("""
+    'fox':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ke1, Ra5, Bg5, Se2, Pf2]
           black: [Ke4, Bd8, Sg4, Pg6, Pe6, Pb4]
@@ -275,7 +275,7 @@ problems = {
           b) -bPb4 1.Bd8*g5 f2-f3 +   2.Ke4-e3 Ra5-a3 #"
     """)),
 
-    '623':  model.makeSafe(yaml.load("""
+    '623':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ke5, Ph7, Pb7]
           black: [Ke8]
@@ -292,7 +292,7 @@ problems = {
                  2.h7-h8=Q #"
     """)),
 
-    'z22':  model.makeSafe(yaml.load("""
+    'z22':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Ka2, Rh1, Bg8, Sf6, Sd4, Pe6]
           black: [Ke5, Qc8, Re8, Bd6, Bb5, Sg7, Ph5, Pf5, Pf4, Pe4, Pd7, Pc3]
@@ -310,7 +310,7 @@ problems = {
           1.Qc8-d8 e6*d7   2.Qd8*f6 Sd4-c6 #"
     """)),
 
-    'zpawns':  model.makeSafe(yaml.load("""
+    'zpawns':  model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Kd8, Ph2, Pf2]
           black: [Kd5, Rd2]
@@ -321,7 +321,7 @@ problems = {
           1...h2-h3   2.Rd2*f2 h3-h4   3.Kd5-e6 h4-h5   4.Ke6-f7 h5-h6   5.Kf7-f8 h6-h7   6.Rf2-f7 h7-h8=Q #"
     """)),
 
-    'rotateandcastle': model.makeSafe(yaml.load("""
+    'rotateandcastle': model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Kh5, Rh8]
         stipulation: "#1"
@@ -332,7 +332,7 @@ problems = {
           1.0-0 #"
     """)),
 
-    'rebirthatarrival': model.makeSafe(yaml.load("""
+    'rebirthatarrival': model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Bf2]
           black: [Bd4,Pe3]

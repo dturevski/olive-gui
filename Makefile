@@ -1,11 +1,10 @@
-PYTHON = python
+PYTHON = python3
 PIP = pip3
 PYINST = pyinstaller
 INNOSETUP = "c:\Program Files (x86)\Inno Setup 5\ISCC.exe"
 RCC = pyrcc5
 
 dependencies:
-	$(PYTHON) -m pip install --upgrade pip
 	$(PIP) install PyQt5
 	$(PIP) install PyYAML
 	$(PIP) install reportlab
