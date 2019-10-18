@@ -39,7 +39,7 @@ def entry(yamltext):
     yamltext = re.sub(r'stipulation: =([^\n]*)', r'stipulation: "=\1"', yamltext)
     yamltext = yamltext.replace("stipulation: =", 'stipulation: "="')
     yamltext = yamltext.replace('\t', '  ')
-    e = yaml.load(yamltext)
+    e = yaml.safe_load(yamltext)
     if "solution" in e:
         e["solution"] = unquote(str(e["solution"]).encode("utf8"))
     if "stipulation" in e:

@@ -138,11 +138,11 @@ class Matrix(Predicate):
             raise ValueError("'%s' is not a valid piece specification in Matrix(piecelist)" % spec)
         return Matrix.Placement(match.group(1), Square(algebraicToIdx(match.group(2))))
 
-    def compare(self, a, b):
-        ia, ib = len(Matrix.frequency), len(Matrix.frequency)
-        try: ia, ib = Matrix.frequency.index(a.name), Matrix.frequency.index(b.name)
-        except: pass
-        return ia - ib
+    def cmp_key(self, placement):
+        try:
+            return Matrix.frequency.index(placement.name)
+        except ValueError:
+            return len(Matrix.frequency)
 
     def transform(self, cs, T):
         return [Matrix.Placement(c.name, Square(
@@ -167,7 +167,7 @@ class Matrix(Predicate):
                                  "integer not null, primary key(id)) "
                                  "engine=memory" % table, []))
 
-        cs = sorted(self.placements, cmp=self.compare)
+        cs = sorted(self.placements, key=self.cmp_key)
         for i, p in enumerate(cs):
             if i > 0: p.square = Square(p.square.x - cs[0].square.x, p.square.y - cs[0].square.y)
         for T in Matrix.transformations[self.transformation]:
