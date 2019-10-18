@@ -17,7 +17,7 @@ config:
     prefix: ISDiagram
     empty-squares: {light: 63, dark: 64}
     edges: {W: 73, NW: 77, N: 75, NE: 78, E: 74, SE: 79, S: 76, SW: 80}
-    aux-postfix: !!python/unicode ''
+    aux-postfix: ''
     glyphs-tab: :/fonts/xfen-isdiagram.txt
     size: 8
   merida:
@@ -25,7 +25,7 @@ config:
     prefix: Chess Merida
     empty-squares: {light: 42, dark: 43}
     edges: {W: 36, NW: 33, N: 34, NE: 35, E: 37, SE: 41, S: 40, SW: 47}
-    aux-postfix: !!python/unicode ''
+    aux-postfix: ''
     glyphs-tab: :/fonts/xfen-common.txt
     size: 8
   alpha:
@@ -33,7 +33,7 @@ config:
     prefix: Chess Alpha
     empty-squares: {light: 42, dark: 43}
     edges: {W: 52, NW: 49, N: 50, NE: 51, E: 53, SE: 56, S: 55, SW: 54}
-    aux-postfix: !!python/unicode ''
+    aux-postfix: ''
     glyphs-tab: :/fonts/xfen-alpha.txt
     size: 8
   leipzig:
@@ -41,7 +41,7 @@ config:
     prefix: Chess Leipzig
     empty-squares: {light: 42, dark: 43}
     edges: {W: 36, NW: 33, N: 34, NE: 35, E: 37, SE: 41, S: 40, SW: 47}
-    aux-postfix: !!python/unicode ''
+    aux-postfix: ''
     glyphs-tab: :/fonts/xfen-common.txt
     size: 8
   Ches:

@@ -1,4 +1,4 @@
-﻿﻿# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 # standard
 import os
@@ -412,7 +412,7 @@ class Mainframe(QtWidgets.QMainWindow):
             f = open(str(fileName), 'r', encoding="utf8")
             Mainframe.model = model.Model()
             Mainframe.model.delete(0)
-            for data in yaml.load_all(f):
+            for data in yaml.safe_load_all(f):
                 Mainframe.model.add(model.makeSafe(data), False)
             f.close()
             Mainframe.model.is_dirty = False
@@ -1105,7 +1105,7 @@ class OverviewList(QtWidgets.QTreeWidget):
 
     def onPaste(self):
         try:
-            data = yaml.load_all(str(self.clipboard.text()))
+            data = yaml.safe_load_all(str(self.clipboard.text()))
             if isinstance(data, dict):
                 data = [data]
         except yaml.YAMLError as e:
@@ -2513,7 +2513,7 @@ class PublishingView(QtWidgets.QSplitter):
         super(PublishingView, self).__init__(QtCore.Qt.Horizontal)
 
         f = open(get_write_dir() + '/conf/chessfonts.yaml', 'r')
-        self.config = yaml.load(f)
+        self.config = yaml.safe_load(f)
         f.close()
         for family in self.config['diagram-fonts']:
             self.config['config'][family]['fontinfo'] = self.loadFontInfo(
@@ -2779,21 +2779,21 @@ class Conf:
     def read():
 
         with open(Conf.file, 'r', encoding="utf8") as f:
-            Conf.values = yaml.load(f)
+            Conf.values = yaml.safe_load(f)
 
         Conf.zoos = []
         with open(Conf.zoo_file, 'r', encoding="utf8") as f:
-            for zoo in yaml.load_all(f):
+            for zoo in yaml.safe_load_all(f):
                 Conf.zoos.append(zoo)
 
         with open(Conf.keywords_file, 'r', encoding="utf8") as f:
-            Conf.keywords = yaml.load(f)
+            Conf.keywords = yaml.safe_load(f)
 
         with open(Conf.popeye_file, 'r', encoding="utf8") as f:
-            Conf.popeye = yaml.load(f)
+            Conf.popeye = yaml.safe_load(f)
 
         with open(Conf.chest_file, 'r', encoding="utf8") as f:
-            Conf.chest = yaml.load(f)
+            Conf.chest = yaml.safe_load(f)
 
     read = staticmethod(read)
 
@@ -2821,7 +2821,7 @@ class Lang:
     def read():
         f = open(Lang.file, 'r', encoding="utf8")
         try:
-            Lang.values = yaml.load(f)
+            Lang.values = yaml.safe_load(f)
         finally:
             f.close()
         Lang.current = Conf.value('default-lang')

@@ -15,13 +15,13 @@ Olive is named after the fictional character Olive Oyl, girlfriend of Popeye the
 The prerequisites are Python3 (with pip), git and make. Clone the repository and from the repository
 root run
 
-`make dependencies`
+`sudo make dependencies`
 
 `make resources.py`
 
 Then olive can be started with
 
-`python olive.py`
+`python3 olive.py`
 
 If you want to use Popeye/Chest with Olive (you probably do), then these programs
 must be installed separately.

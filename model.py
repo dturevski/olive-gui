@@ -206,7 +206,7 @@ class Model:
     def __init__(self):
         f = open(Model.file, 'r', encoding="utf8")
         try:
-            self.defaultEntry = yaml.load(f)
+            self.defaultEntry = yaml.safe_load(f)
         finally:
             f.close()
         self.current, self.entries, self.dirty_flags, self.board = -1, [], [], Board()

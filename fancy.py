@@ -96,7 +96,7 @@ def readCvv(fileName, encoding):
         # changing brackets to square brackets:
         chunk = ''.join(lines)
         chunk = '[' + chunk[1:-1] + ']'
-        e = yaml.load(chunk)
+        e = yaml.safe_load(chunk)
 
         # creating yacpdb-like entry
         entry = {}
