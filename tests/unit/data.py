@@ -339,4 +339,12 @@ problems = {
         stipulation: "h#3"
         solution: "1.e3*f2[+wPf2][+wBd2] f2-f4 2.Bd4-g7"
             """)),
+
+    'simple_anticirce': model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Pc4]
+          black: [Kc3]
+        stipulation: "h#1"
+        solution: "1.Kc3*c4[bKc4->e8] "
+            """)),
 }
