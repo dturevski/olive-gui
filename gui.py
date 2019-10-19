@@ -1070,13 +1070,15 @@ class OverviewList(QtWidgets.QTreeWidget):
 
         menu.exec_(e.globalPos())
 
-    def keyPressEvent(self,event):
+    def keyPressEvent(self, event):
         if event.key()==(QtCore.Qt.Key_Control and QtCore.Qt.Key_C):
             self.onCopy()
-        if event.key()==(QtCore.Qt.Key_Control and QtCore.Qt.Key_V):
+        elif event.key()==(QtCore.Qt.Key_Control and QtCore.Qt.Key_V):
             self.onPaste()
-        if event.key()==(QtCore.Qt.Key_Control and QtCore.Qt.Key_X):
+        elif event.key()==(QtCore.Qt.Key_Control and QtCore.Qt.Key_X):
             self.onCut()
+        else:
+            super().keyPressEvent(event)
 
     def getSelectionAsYaml(self):
         text = ''
