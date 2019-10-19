@@ -59,7 +59,7 @@ def makePieceFromXfen(fen):
 class FairyHelper:
     defaults, overrides, glyphs, fontinfo = {}, {}, {}, {}
     options, conditions = [], []
-    f = open(get_write_dir() + '/conf/fairy-pieces.txt')
+    f = open(get_write_dir() + '/conf/fairy-pieces.txt', encoding='utf-8')
     for entry in [x.strip().split("\t") for x in f.readlines()]:
         glyphs[entry[0]] = {'name': entry[1]}
         if len(entry) > 2:

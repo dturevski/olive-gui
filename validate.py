@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
 import json
-import base, model
+import model
 from p2w.parser import parser
-import re
-#import yacpdb.storage
 
 LIST_COMMON_STIPULATIONS = ["=", "+", "= black to move", "+ black to move", "see text"]
 

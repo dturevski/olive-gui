@@ -4,9 +4,7 @@ import hashlib
 import yaml
 import re
 
-try: from .. import board
-except ImportError as e: import board
-except ValueError as e: import board
+import board
 
 def unquote(str):
     str = str.strip()
@@ -41,9 +39,9 @@ def entry(yamltext):
     yamltext = yamltext.replace('\t', '  ')
     e = yaml.safe_load(yamltext)
     if "solution" in e:
-        e["solution"] = unquote(str(e["solution"]).encode("utf8"))
+        e["solution"] = unquote(str(e["solution"]))
     if "stipulation" in e:
-        e["stipulation"] = str(e["stipulation"]).encode("utf8")
+        e["stipulation"] = str(e["stipulation"])
     if 'algebraic' in e:
         b = board.Board()
         b.fromAlgebraic(e["algebraic"])

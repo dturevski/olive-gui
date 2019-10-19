@@ -37,7 +37,7 @@ class PredicateStorage:
         return self.ps[arity][name]
 
     def load(self, fname):
-        with open(fname) as f:
+        with open(fname, encoding='utf-8') as f:
             blanks, waitfordoc, doc, lastpredicate = 0, False, "", None
             for line in f.readlines():
                 try:
