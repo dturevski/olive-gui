@@ -213,12 +213,17 @@ class Mainframe(QtWidgets.QMainWindow):
             self)
         self.deleteEntryAction.triggered.connect(self.onDeleteEntry)
 
+        self.editSolutionAction = QtWidgets.QAction(
+            Lang.value('PS_Edit'),
+            self)
+        self.editSolutionAction.setShortcut('Ctrl+E')
+        self.editSolutionAction.triggered.connect(self.popeyeView.onEdit)
+
         self.demoModeAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/fullscreen.svg'),
             Lang.value('MI_Demo_mode'),
             self)
         self.demoModeAction.triggered.connect(self.onDemoMode)
-
 
         self.exitAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/logout.svg'),
@@ -320,6 +325,8 @@ class Mainframe(QtWidgets.QMainWindow):
         self.editMenu = menubar.addMenu(Lang.value('MI_Edit'))
         list(map(self.editMenu.addAction, [
             self.addEntryAction, self.deleteEntryAction]))
+        self.editMenu.addSeparator()
+        self.editMenu.addAction(self.editSolutionAction)
         self.editMenu.addSeparator()
 
         # Popeye menu
@@ -472,6 +479,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.saveTemplateAction.setText(Lang.value('MI_Save_template'))
         self.addEntryAction.setText(Lang.value('MI_Add_entry'))
         self.deleteEntryAction.setText(Lang.value('MI_Delete_entry'))
+        self.editSolutionAction.setText(Lang.value('PS_Edit'))
         self.startPopeyeAction.setText(Lang.value('MI_Run_Popeye'))
         self.stopPopeyeAction.setText(Lang.value('MI_Stop_Popeye'))
         self.listLegalWhiteMoves.setText(Lang.value('MI_Legal_white_moves'))
