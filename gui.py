@@ -1132,9 +1132,9 @@ class OverviewList(QtWidgets.QTreeWidget):
         if not fileName:
             return
 
-        f = open(str(fileName), 'w')
+        f = open(str(fileName), 'w', encoding='utf-8')
         try:
-            f.write(self.getSelectionAsYaml().encode('utf8'))
+            f.write(self.getSelectionAsYaml())
         except IOError:
             msg = Lang.value('MSG_IO_failed');
             logging.exception(msg)
