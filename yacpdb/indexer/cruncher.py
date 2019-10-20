@@ -73,7 +73,7 @@ class Analyzer0:
             if k not in entry:
                 raise Exception("No %s" % k)
 
-        print(entry["id"], len(entry['solution']))
+        print(entry.get("id", "0"), len(entry['solution']))
         visitor = validate.DummyVisitor()
         try:
             solution = parser.parse(entry["solution"], debug=0)

@@ -418,7 +418,7 @@ class Mainframe(QtWidgets.QMainWindow):
             Mainframe.model.is_dirty = False
             Conf.values['collections-dir'] = os.path.split(fileName)[0]
         except IOError:
-            msg = Lang.value('MSG_IO_failed');
+            msg = Lang.value('MSG_IO_failed')
             logging.exception(msg)
             msgBox(msg)
             Mainframe.model = model.Model()
