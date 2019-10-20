@@ -347,4 +347,34 @@ problems = {
         stipulation: "h#1"
         solution: "1.Kc3*c4[bKc4->e8] "
             """)),
+
+
+    '#2 with set-play': model.makeSafe(yaml.load("""
+        algebraic: 
+          white: [Kc6, Qf3, Sb5, Pa3]
+          black: [Kc4, Se4, Pd4]
+        stipulation: "#2"
+        solution: |
+          "1...d4-d3 2.Qf3-f7 #
+          1...Se4-f2 {(S~)} 2.Sb5-d6 # {(A)}
+           but 1...Se4-c3 !
+          
+          1.Qf3-d1 ! zugzwang.
+             1...d4-d3  2.Qd1-a4 #
+             1...Se4-f2  {(S~)} 2.Qd1-c2 #
+             1...Se4-c3 2.Sb5-d6 # {(A)}"
+            """)),
+
+    'h#2.5 with 4 solutions': model.makeSafe(yaml.load("""
+        algebraic:
+          black: [Ph5, Sa5, Rh6, Ke6, Ph7, Rb7, Qf8, Bd8]
+          white: [Re2, Pd3, Pf4, Be4, Be5, Ka6]
+        stipulation: h#2.5
+        solution: "1...Be5-a1   2.Qf8*f4 Re2-b2   3.Ke6-e5 + Rb2-b6 # \n1...Be5-h8   2.Bd8-f6\
+          \ f4-f5 +   3.Ke6-f7 Be4-d5 # \n1...Be4-h1   2.Qf8-c5 Re2-g2   3.Ke6-d5 + Rg2-g6\
+          \ # \n1...Re2-g2   2.Bd8-b6 Be4-d5 +   3.Ke6-f5 Rg2-g5 #"
+            """)),
+
+
+
 }

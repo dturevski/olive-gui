@@ -281,6 +281,9 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 * `Phases`
 
    How many there are distinct first moves (actual or null) in the solution, counted across all twins.
+   If the problem has only set lines then each is considered a distinct phase, otherwise all set lines are
+   counted as one phase (e.g. direct #2 with set play has 2 phases, no matter how many variations are there in
+   the set play).
    
 * `Twins`
 
