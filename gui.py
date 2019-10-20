@@ -1,16 +1,12 @@
 ﻿# -*- coding: utf-8 -*-
 
+import copy
+import logging
 # standard
 import os
+import re
 import sys
 import tempfile
-import copy
-import string
-import re
-import struct
-import ctypes
-import urllib.request, urllib.parse, urllib.error
-import logging
 
 # 3rd party
 import yaml
@@ -18,20 +14,20 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 # local
 import board
-import legacy.popeye
+import chest
+import fancy
 import legacy.chess
-import options
+import legacy.popeye
 import model
+import options
 import pbm
 import pdf
 import xfen2img
-import fancy
-import chest
-from base import read_resource_file, get_write_dir
-
+import yacpdb.indexer.cruncher
 # indexer
 import yacpdb.indexer.metadata
-import yacpdb.indexer.cruncher
+from base import read_resource_file, get_write_dir
+
 
 class SigWrapper(QtCore.QObject):
     sigLangChanged = QtCore.pyqtSignal()
