@@ -918,7 +918,7 @@ class AboutDialog(QtWidgets.QDialog):
         w.setLayout(grid)
         vbox.addWidget(w)
 
-        vbox.addWidget(ClickableLabel('© 2011-2018'))
+        vbox.addWidget(ClickableLabel('© 2011-2019'))
 
         vbox.addStretch(1)
         buttonOk = QtWidgets.QPushButton(Lang.value('CO_OK'), self)

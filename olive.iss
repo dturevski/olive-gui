@@ -11,7 +11,7 @@
 ;#define AppEnterprise
 
 #define AppName "Olive"
-#define AppVersion "1.0-beta.1"
+#define AppVersion "1.0"
 #define AppExeName "olive.exe"
 
 [Setup]
@@ -41,6 +41,7 @@ Source: "p2w\parser.out"; DestDir: "{app}\p2w"
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\olive.exe"
+Name: "{commondesktop}\{#AppName}-{#AppVersion}"; Filename: "{app}\olive.exe"
 
 [Registry]
 Root: HKCR; Subkey: ".olv";                             ValueData: "{#AppName}";          Flags: uninsdeletevalue; ValueType: string;  ValueName: ""

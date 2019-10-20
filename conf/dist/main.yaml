@@ -15,4 +15,4 @@ notations:
   en: [K, Q, R, B, S, P]
   fide: [K, D, T, L, S, B]
   ru: [Кр, Ф, Л, С, К, п]
-version: 1.0-beta.1
+version: "1.0"
