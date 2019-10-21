@@ -14,10 +14,9 @@ import logging
 
 # 3rd party
 from PyQt5 import QtGui, QtCore, QtWidgets
+import yaml
 
 # local
-import resources
-import base
 import gui
 
 # logging uncaught exceptions
@@ -41,6 +40,8 @@ def main():
         except:
             pass
 
+    # allow safe loader to load old olv files
+    yaml.SafeLoader.add_constructor("tag:yaml.org,2002:python/unicode", lambda loader, node: node.value)
 
     # Qt bootstrap
     gui.Mainframe.app = QtWidgets.QApplication(sys.argv)
