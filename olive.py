@@ -17,6 +17,8 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 import yaml
 
 # local
+import resources
+import base
 import gui
 
 # logging uncaught exceptions
