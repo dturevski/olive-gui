@@ -12,7 +12,7 @@ dependencies:
 	$(PIP) install PyMySQL
 	$(PIP) install ply
 	$(PIP) install pyinstaller
-	#$(PIP) install https://github.com/bjones1/pyinstaller/archive/pyqt5_fix.zip
+	$(PIP) install jsonschema
 
 resources.py: resources/olive.qrc
 	$(RCC) -o resources.py resources/olive.qrc
