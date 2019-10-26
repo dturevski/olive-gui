@@ -11,11 +11,12 @@ import jsonschema
 import model
 from p2w.parser import parser
 from yacpdb.storage import dao
+import yacpdb.entry
 
 LIST_COMMON_STIPULATIONS = ["=", "+", "= black to move", "+ black to move", "see text"]
 
 def load_schema():
-    with open("yacpdb/schemas/v1.0.json") as f:
+    with open("yacpdb/schemas/yacpdb-entry.schema.json") as f:
         return json.load(f)
 
 json_schema = load_schema()
@@ -84,16 +85,16 @@ def validate(entry, propagate_exceptions=True):
 
 def validateSchema(entries):
     for e in entries:
-        entry_id = e['id']
-        for key in ["id", "ash", "legend", "authors"]:
-            e.pop(key, None)
-        for key in ["source", "keywords", "comments", "options"]:
-            if key in e and e[key] is None:
-                e.pop(key, None)
+        e = yacpdb.entry.convert_v1_0_v1_1(e)
+        e.pop("authors", None) # ignore misformatted authors
         try:
             jsonschema.validate(instance=e, schema=json_schema)
         except jsonschema.ValidationError as ex:
-            print(entry_id, ex.message)
+            # ignore missing dates & misformatted author names
+            if ex.message.endswith("'date' is a required property") or \
+                    ex.message.endswith("does not match '^[^,]+, [^,]+$'"):
+                continue
+            print(e["foreignids"][0]["problemid"], ex.message)
 
 
 if __name__ == '__main__':
