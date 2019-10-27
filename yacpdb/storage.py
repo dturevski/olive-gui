@@ -9,7 +9,7 @@ class Connection:
     
     def get():
         if Connection.instance is None:
-            Connection.instance = pymysql.connect(host = "localhost", user = "root", passwd = "root", db = "yacpdb",
+            Connection.instance = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb",
                                    cursorclass=pymysql.cursors.DictCursor)
             Connection.instance.cursor().execute("SET NAMES utf8")
         return Connection.instance

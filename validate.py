@@ -26,6 +26,9 @@ def main():
         with open(sys.argv[1], 'r') as f:
             entry = json.load(f)
             print(json.dumps(validate(entry)))
+    except (jsonschema.ValidationError, StipulationError) as ex:
+        print(json.dumps({'success': False, "errors": [ex.message]}))
+        sys.exit(-1)
     except Exception as e:
         print(json.dumps({'success': False, "errors": [str(e)]}))
         sys.exit(-1)
@@ -98,5 +101,5 @@ def validateSchema(entries):
 
 
 if __name__ == '__main__':
-    #main()
-    validateSchema(dao.allEntries())
+    main()
+    #validateSchema(dao.allEntries())
