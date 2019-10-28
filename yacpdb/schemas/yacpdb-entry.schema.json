@@ -5,7 +5,7 @@
 
   "properties": {
     "foreignids": { "type": "array", "items": { "$ref" : "#/definitions/foreignid_type" }, "minItems": 1 },
-    "authors": { "type": "array", "items": { "$ref" : "#/definitions/author_type" }, "minItems": 1 },
+    "authors": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1 },
     "source": { "$ref" : "#/definitions/source_type" },
     "award": { "$ref" : "#/definitions/award_type" },
     "reprints": { "type": "array", "items": { "$ref" : "#/definitions/source_type" }, "minItems": 1 },
@@ -123,13 +123,14 @@
       "type": "object",
       "properties": {
         "tourney": {"$ref" : "#/definitions/tourney_type"},
-        "distinction": {"$ref" : "#/definitions/distinction"}
+        "distinction": {"$ref" : "#/definitions/distinction"},
+        "judges": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1 }
       },
       "required": ["tourney", "distinction"],
       "additionalProperties": false
     },
 
-    "author_type": {
+    "person_type": {
       "type": "string",
       "pattern": "^[^,]+, [^,]+$",
       "maxLength": 255
