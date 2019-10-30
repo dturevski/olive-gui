@@ -23,9 +23,18 @@ json_schema = load_schema()
 
 def main():
     try:
-        with open(sys.argv[1], 'r') as f:
-            entry = json.load(f)
-            print(json.dumps(validate(entry)))
+        if len(sys.argv) < 3:
+            print(json.dumps({'success': False, "errors": ["Too few parameters"]}))
+            return
+        with open(sys.argv[2], 'r') as f:
+            request = json.load(f)
+            if sys.argv[1] == "--validate":
+                print(json.dumps(validate(request)))
+            elif sys.argv[1] == "--convert1011":
+                print(json.dumps({'success': True, "entry": yacpdb.entry.convert_v1_0_v1_1(request)}))
+            else:
+                print(json.dumps({'success': False, "errors": ["Unrecognized command: "+sys.argv[1]]}))
+
     except (jsonschema.ValidationError, StipulationError) as ex:
         print(json.dumps({'success': False, "errors": [ex.message]}))
         sys.exit(-1)

@@ -115,11 +115,14 @@ def convert_v1_0_v1_1(e):
     # remove empty elements
     e = remove_empty_elements(e)
     # foreignid
-    if "id" in e:
-        e["foreignids"] = [{"domain": "yacpdb.org", "problemid": e["id"]}]
-        del e["id"]
+    #if "id" in e:
+    #    e["foreignids"] = [{"domain": "yacpdb.org", "problemid": e["id"]}]
+    #    del e["id"]
+
     # source
     if "source" in e:
+        if type(e["source"]) is dict:
+            return e
         source = {"name": e["source"]}
         if "date" in e:
             date_dict = convert_date_v1_0_v1_1(e["date"])
