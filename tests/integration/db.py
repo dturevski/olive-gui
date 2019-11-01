@@ -53,6 +53,9 @@ class TestQl(unittest.TestCase):
     def test_Text(self):
         rs = self.runYacpdbQuery("Text('%Предновогодняя%')", 1)
 
+    def test_AuthorSourceStip(self):
+        rs = self.runYacpdbQuery("Author('Туревский, Дмитрий Евгеньевич') and Source('Mat Plus') and Stip('#9')", 1)
+
     def test_GetPredicatesByAsh(self):
         dao.ixr_getPredicatesByAsh("3c4a9b80c8edec94e7f33fcd09960457")
 

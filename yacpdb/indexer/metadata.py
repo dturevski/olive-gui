@@ -230,7 +230,8 @@ class Author(Predicate):
 
     def sql(self, params, cmp, ord):
         return Query(
-            "p2.id in (select problem_id from authorship aus join authors au on (aus.author_id = au.id) where au.name like %s) ",
+            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
+            "where e.name like %s and e2p.link_type='author') ",
             [params[0]], []
         )
 
@@ -241,7 +242,11 @@ class Source(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("s.name like %s", [params[0]], ['sources s on (p2.source_id = s.id)'])
+        return Query(
+            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
+            "where e.name like %s and e2p.link_type='source') ",
+            [params[0]], []
+        )
 
 
 class IssueId(Predicate):
@@ -268,7 +273,7 @@ class PublishedAfter(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("p2.published > %s", [params[0]], [])
+        return Query("p2.published_after > %s", [params[0]], [])
 
 
 
