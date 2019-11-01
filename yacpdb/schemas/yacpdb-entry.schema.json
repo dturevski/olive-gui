@@ -78,17 +78,21 @@
     },
 
     "date_type" : {
-      "type": "object",
-      "properties" : {
-        "year" : { "$ref" : "#/definitions/year" },
-        "month": { "type": "integer", "minimum": 1, "maximum": 12 },
-        "day": { "type": "integer", "minimum": 1, "maximum": 31 }
-      },
-      "required": ["year"],
-      "dependencies": {
-        "day": { "required": ["month"] }
-      },
-      "additionalProperties": false
+      "anyOf": [{
+        "type": "object",
+        "properties" : {
+          "year" : { "$ref" : "#/definitions/year" },
+          "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "day": { "type": "integer", "minimum": 1, "maximum": 31 }
+        },
+        "required": ["year"],
+        "dependencies": {
+          "day": { "required": ["month"] }
+        },
+        "additionalProperties": false
+      }, {
+        "type": "string", "pattern": "^[0-9]{4}(-[0-9]{2})?(-[0-9]{2})?$"
+      }]
     },
 
     "source_type": {
