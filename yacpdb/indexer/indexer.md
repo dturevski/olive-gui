@@ -103,6 +103,7 @@ Logical operators precedence is NOT > AND > OR, i.e.:
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
 * **DATE**: a date in YYYY[-MM[-DD]] format
 * **INTEGER**: any integer number
+* **REFTYPE**: "author", "judge", "source", "reprint" or "tourney"
 * **TRANSFORMATIONS**: "All", "Mirror" or "None"
 * **PIECE**: concatenation of COLOR and PIECENAME
 * **PIECENAME**: one- or two-letter piece code, as defined by the [Popeye](https://github.com/thomas-maeder/popeye) solving software (english input)
@@ -124,11 +125,20 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 	More control over the matrix searches. Additional parameters identify which translations and
 	transformations of the search pattern are to be enabled. Wildcards * default to "true" and "All".
 
+* `Entity(REFTYPE type, STRING name)`
+
+	Matches entries that are linked to the entity (person, publication source, composing tourney)
+	named `name` with the link type of `type`
+
 * `Author(STRING name)`
 
-	Meaning that at least one of the authors matches **name**
+	Meaning that at least one of the authors matches **name**.
+	Same as `Entity("author", name)`
 
 * `Source(STRING name)`
+
+	Same as `Entity("source", name)`
+
 * `SourceId(STRING sourceid)`
 * `IssueId(STRING issueid)`
 * `PublishedAfter(DATE date)`
