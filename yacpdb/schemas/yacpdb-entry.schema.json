@@ -20,7 +20,7 @@
     "twins" : {
       "type": "object",
       "patternProperties": {
-        "^[a-z]|(z[0-9]+)$": { "type": "string", "minLength": 1 }
+        "^[a-z]|(z[0-9]+)$": { "$ref": "#/definitions/twin_description" }
       },
       "required": ["b"],
       "additionalProperties": false
@@ -95,6 +95,10 @@
       }]
     },
 
+    "twin_description" : {
+      "$ref": "#/definitions/label"
+    },
+
     "source_type": {
       "type": "object",
       "properties": {
@@ -102,7 +106,10 @@
         "date": {"$ref" : "#/definitions/date_type"},
         "volume": {"$ref" : "#/definitions/label"},
         "issue": {"$ref" : "#/definitions/label"},
-        "problemid": {"$ref" : "#/definitions/label"}
+        "round": {"$ref" : "#/definitions/label"},
+        "problemid": {"$ref" : "#/definitions/label"},
+        "variant": {"$ref" : "#/definitions/twin_description"},
+        "comments": { "$ref": "#/definitions/text_list" }
       },
       "required": ["name", "date"],
       "additionalProperties": false
