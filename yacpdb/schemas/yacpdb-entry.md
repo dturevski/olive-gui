@@ -5,7 +5,7 @@
 ## Overview
 
 The YACPDB entry is a YAML document that should satisfy this JSON schema:
-[yacpdb-entry.schema.json](https://www.yacpdb.org/static/schemas/yacpdb-entry.schema.json)
+[yacpdb-entry.schema.json](./yacpdb-entry.schema.json)
 
 * What is [YAML](http://en.wikipedia.org/wiki/YAML)
 * What is [JSON schema](https://json-schema.org/)
@@ -177,7 +177,7 @@ A list of comments with the information that does not fit into the other fields.
 
 ### reprints:
 `reprints` is the list of the secondary sources and follow the same semantics as the `source` field.
-Additionally, two more nested fields could be specified - `variant` and `comments`:
+Additionally, two more nested fields could be specified - `variant` and `comments`.
 The `variant` field follows the same Popeye twins syntax and indicates that a modified position
 was used. `comments` are comments only applicable to this reprint.
 ```yaml
