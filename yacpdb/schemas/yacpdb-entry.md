@@ -29,7 +29,7 @@ A typical YACPDB entry may look like this:
     algebraic: 
       white: [Kh1, Re4, Pg2, Pf5, Pf4, Pf3, Pe6, Pc4]
       black: [Kd1, Bc3, Ph2, Pg3, Pf6, Pe7, Pd3, Pd2, Pc5]
-    stipulation: "h#4"
+    stipulation: h#4
     options: 
       - SetPlay
     solution: |
@@ -108,7 +108,7 @@ are available at the edit form via the `Insert' pulldown menu.
 
 ### stipulation:
 ```yaml
-    stipulation: "h#4"
+    stipulation: h#4
 ```
 The stipulation of the composition. Most Popeye stipulations can be entered here, also 
 `"PGXX(.5)"` for proofgames, `"=", "+", "= black to move", "+ black to move"` for endgame
@@ -133,7 +133,7 @@ so it is `Add white Sa1`, not `Add white Na1` to add a white knight.
     twins:
       b: Move a1 a2
       c: Continued Exchange a2 h7 # "Continued" means that the transformation is applied
-                                  # to the position of twin "b", not to the diagram position
+                                  # to the position of the previous twin, not to the diagram position
 ```
 
 
@@ -159,7 +159,8 @@ Note the YAML pipe symbol `|` for a block of text.
 ### keywords:
 A list of applicable keywords:
 ```yaml
-  - Rundlauf
+  - Zilahi
+  - Model mates
 ```
 There are two special or "system" keywords:
 * `Attention` - to make other users know that there's something wrong with this problem,
@@ -202,7 +203,8 @@ reprints:
 This field is used to cross-reference other problem collections.
 ```yaml
     foreignids:
-      -
-        domain: PDB
+      - domain: PDB
         problemid: P0503887
+      - domain: WinChloe
+        problemid: 123456
 ```
