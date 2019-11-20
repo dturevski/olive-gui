@@ -38,6 +38,9 @@
   },
 
   "required": ["stipulation", "algebraic", "solution"],
+  "dependencies": {
+    "award": { "required": ["source"] }
+  },
   "additionalProperties": false,
 
   "definitions": {
