@@ -79,7 +79,7 @@ of the composition. May be omitted if the source is unknown.
 
 ### award:
 This field indicates that composition took part in a certain composing competition
-and earned a certain distinction.
+and earned a certain distinction. If the `award` fiels is present the `source` field is required.
 ```yaml
     tourney:
         name: feenschach
