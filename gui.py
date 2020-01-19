@@ -1478,7 +1478,7 @@ class BoardView(QtWidgets.QWidget):
         hboxExtra = QtWidgets.QHBoxLayout()
         spacer = QtWidgets.QLabel("\xA3")
         spacer.setFont(Mainframe.fontset()['d'])
-        self.labelStipulation = QtWidgets.QLabel("")
+        self.labelStipulation = BoardView.StipulationLabel()
         self.labelPiecesCount = QtWidgets.QLabel("")
         # hboxExtra.addWidget(spacer)
         hboxExtra.addWidget(self.labelStipulation)
@@ -1516,6 +1516,39 @@ class BoardView(QtWidgets.QWidget):
         else:
             self.labelStipulation.setText("")
         self.labelPiecesCount.setText(Mainframe.model.board.getPiecesCount())
+
+    class StipulationLabel(QtWidgets.QLabel):
+
+        def __init__(self):
+            self.skip_model_changed = False
+            super(BoardView.StipulationLabel, self).__init__()
+
+        def mousePressEvent(self, e):
+            if e.buttons() == QtCore.Qt.LeftButton:
+                dialog = BoardView.StipulationLabel.Dialog(Lang)
+                dialog.move(self.mapToGlobal(e.pos()))
+                if(dialog.exec_()):
+                    if self.skip_model_changed:
+                        return
+                    Mainframe.model.cur()['stipulation'] = dialog.input.currentText().strip()
+                    self.skip_model_changed = True
+                    Mainframe.model.markDirty()
+                    Mainframe.sigWrapper.sigModelChanged.emit()
+                    self.skip_model_changed = False
+
+        class Dialog(options.OkCancelDialog):
+
+            def __init__(self, Lang):
+                self.input = PopeyeView.createStipulationInput()
+                self.input.setEditText(Mainframe.model.cur()["stipulation"])
+                form = QtWidgets.QVBoxLayout()
+                form.addWidget(self.input)
+                self.mainWidget = QtWidgets.QWidget()
+                self.mainWidget.setLayout(form)
+                super(BoardView.StipulationLabel.Dialog, self).__init__(Lang)
+                self.setWindowTitle(Lang.value('EP_Stipulation'))
+                self.input.setFocus()
+
 
 
 class InfoView(QtWidgets.QTextEdit):
@@ -2090,6 +2123,13 @@ class PopeyeView(QtWidgets.QSplitter):
         self.setActionEnabled(True)
         self.input.setActions(actions)
 
+    def createStipulationInput():
+        comboBox = QtWidgets.QComboBox()
+        comboBox.setEditable(True)
+        comboBox.addItems(PopeyeView.stipulations)
+        return comboBox
+    createStipulationInput = staticmethod(createStipulationInput)
+
     def __init__(self):
         super(PopeyeView, self).__init__(QtCore.Qt.Horizontal)
 
@@ -2133,9 +2173,7 @@ class PopeyeView(QtWidgets.QSplitter):
         grid.addWidget(self.labelIntended, row, 1)
         row += 1
 
-        self.inputStipulation = QtWidgets.QComboBox()
-        self.inputStipulation.setEditable(True)
-        self.inputStipulation.addItems(PopeyeView.stipulations)
+        self.inputStipulation = PopeyeView.createStipulationInput()
         grid.addWidget(self.inputStipulation, row, 0)
         self.inputIntended = QtWidgets.QLineEdit()
         grid.addWidget(self.inputIntended, row, 1)
