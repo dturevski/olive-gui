@@ -836,28 +836,14 @@ class ClickableLabel(QtWidgets.QLabel):
 class QuickOptionsView():  # for clarity this View is not a widget
 
     def __init__(self, mainframeInstance):
-        self.quickies = [
-            {'option': 'SetPlay', 'icon': 'miscellaneus.svg', 'lang': 'QO_SetPlay'},
-            {'option': 'Defence 1', 'icon': 'question.svg', 'lang': 'QO_Tries'},
-            {'option': 'PostKeyPlay', 'icon': 'more.svg', 'lang': 'QO_PostKeyPlay'},
-            {'option': 'Intelligent', 'icon': 'flash.svg', 'lang': 'QO_IntelligentMode'},
-            {'option': 'MoveNumbers', 'icon': 'list.svg', 'lang': 'QO_MoveNumbers'}
-        ]
         self.actions = []
-        for q in self.quickies:
-            action = QtWidgets.QAction(
-                QtGui.QIcon(
-                    ':/icons/' +
-                    q['icon']),
-                Lang.value(
-                    q['lang']),
-                mainframeInstance)
+        for q in Conf.value("popeye-toolbar-options"):
+            action = QtWidgets.QAction(QtGui.QIcon(':/icons/' + q['icon']), q['option'], mainframeInstance)
             action.setCheckable(True)
             action.triggered.connect(self.makeToggleOption(q['option']))
             self.actions.append(action)
 
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
-        Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
 
         self.skip_model_changed = False
 
@@ -876,13 +862,9 @@ class QuickOptionsView():  # for clarity this View is not a widget
     def onModelChanged(self):
         if self.skip_model_changed:
             return
-        for i in range(len(self.quickies)):
-            self.actions[i].setChecked('options' in Mainframe.model.cur() and self.quickies[
-                                       i]['option'] in Mainframe.model.cur()['options'])
 
-    def onLangChanged(self):
-        for i in range(len(self.quickies)):
-            self.actions[i].setText(Lang.value(self.quickies[i]['lang']))
+        for i, o in enumerate(Conf.value("popeye-toolbar-options")):
+            self.actions[i].setChecked('options' in Mainframe.model.cur() and o['option'] in Mainframe.model.cur()['options'])
 
 
 class AboutDialog(QtWidgets.QDialog):

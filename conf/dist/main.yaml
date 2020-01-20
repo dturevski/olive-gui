@@ -15,4 +15,13 @@ notations:
   en: [K, Q, R, B, S, P]
   fide: [K, D, T, L, S, B]
   ru: [Кр, Ф, Л, С, К, п]
-version: "1.0.1"
+version: "1.1"
+popeye-toolbar-options:
+- {icon: miscellaneus.svg, option: SetPlay}
+- {icon: question.svg, option: Defence 1}
+- {icon: more.svg, option: PostKeyPlay}
+- {icon: flash.svg, option: Intelligent}
+- {icon: list.svg, option: MoveNumbers}
+- {icon: contrast.svg, option: WhiteToPlay}
+- {icon: checklist.svg, option: NoShortVariations}
+- {icon: no-bombs.svg, option: NoThreat}

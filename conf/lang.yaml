@@ -556,33 +556,6 @@ MISC_Encoding:
   ru: "Кодировка:"
   de: "Kodierung:"
 
-# Quick options
-QO_SetPlay:
-  en: Set play
-  rs: Привидна игра
-  ru: Иллюзорная игра
-  de: Satzspiel
-QO_Tries:
-  en: Tries
-  rs: Варке
-  ru: Попытки
-  de: Verführungen
-QO_IntelligentMode:
-  en: Intelligent mode
-  rs: Интелигентни мод
-  ru: Режим Intelligent
-  de: Intelligentmodus
-QO_PostKeyPlay:
-  en: PostKeyPlay
-  rs: PostKeyPlay
-  ru: PostKeyPlay
-  de: Nach dem Schlüssel
-QO_MoveNumbers:
-  en: MoveNumbers
-  rs: MoveNumbers
-  ru: MoveNumbers
-  de: MoveNumbers
-
 MI_Invert_colors:
   en: Invert colors of the pieces
   rs: Обрни боје фигура
