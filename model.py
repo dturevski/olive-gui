@@ -29,12 +29,30 @@ def myint(string):
         return 0
 
 
+def mergeInto(target, source):
+    for k, v in source:
+        if v.strip() != '':
+            target[k] = v.strip()
+        elif k in target:
+            del target[k]
+    return target
+
 def notEmpty(hash, key):
     if key not in hash:
         return False
     return len(str(hash[key])) != 0
 
 
+def filterAndJoin(dict, keys, separator):
+    return separator.join(map(lambda x: dict[x], filter(lambda x: x in dict, keys)))
+
+
+def formatDate(dict):
+    return filterAndJoin(dict, ['year', 'month', 'day'], '-')
+
+
+def formatIssueAndProblemId(dict):
+    return filterAndJoin(dict, ['issue', 'problemid'], '/')
 
 
 class Distinction:
@@ -147,25 +165,26 @@ def unquote(str):
         return str
 
 
+def unquoteKeys(dict, keys):
+    for key in keys:
+        if key in dict:
+            try:
+                dict[key] = unquote(dict[key])
+            except:
+                pass
+
+
 def makeSafe(e):
     r = {}
     if not isinstance(e, dict):
         return r
-    # ascii scalars
-    for k in ['distinction', 'intended-solutions', 'stipulation']:
-        if k in e:
-            try:
-                r[k] = unquote(str(e[k]))
-            except:
-                pass
+    # string scalars
+    unquoteKeys(e, ['intended-solutions', 'stipulation', 'solution'])
     # utf8 scalars
-    for k in ['source', 'solution', 'source-id', 'distinction']:
-        if k in e:
-            try:
-                r[k] = unquote(str(e[k]))
-            except:
-                pass
-
+    if 'source' in e:
+        unquoteKeys(e['source'], ['name', 'issue', 'volume', 'round', 'problemid'])
+    if 'award' in e:
+        unquoteKeys(e['award'], ['tourney', 'distinction'])
     # ascii lists
     for k in ['keywords', 'options']:
         if k in e and isinstance(e[k], list):
@@ -185,15 +204,15 @@ def makeSafe(e):
             except:
                 del r[k]
     # date
-    k = 'date'
-    if k in e:
-        if isinstance(e[k], int):
-            r[k] = str(e[k])
-        elif isinstance(e[k], str):
-            r[k] = e[k]
-        elif isinstance(e[k], datetime.date):
-            r[k] = str(e[k])
-    # date
+    #k = 'date'
+    #if k in e:
+    #    if isinstance(e[k], int):
+    #        r[k] = str(e[k])
+    #    elif isinstance(e[k], str):
+    #        r[k] = e[k]
+    #    elif isinstance(e[k], datetime.date):
+    #        r[k] = str(e[k])
+
     for k in ['algebraic', 'twins']:
         if k in e and isinstance(e[k], dict):
             r[k] = e[k]
@@ -262,17 +281,6 @@ class Model:
                 self.setNewCurrent(idx - 1)
         else:
             self.current = -1
-
-    def parseSourceId(self):
-        issue_id, source_id = '', ''
-        if 'source-id' not in self.entries[self.current]:
-            return issue_id, source_id
-        parts = str(self.entries[self.current]['source-id']).split("/")
-        if len(parts) == 1:
-            source_id = parts[0]
-        else:
-            issue_id, source_id = parts[0], "/".join(parts[1:])
-        return issue_id, source_id
 
     def parseDate(self):
         y, m, d = '', 0, 0

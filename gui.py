@@ -119,7 +119,7 @@ class Mainframe(QtWidgets.QMainWindow):
         widgetLeftPane.setLayout(vboxLeftPane)
 
         # right pane
-        self.easyEditView = EasyEditView()
+        self.easyEditView = MetadataView()
         self.solutionView = SolutionView()
         self.popeyeView = PopeyeView()
         self.yamlView = YamlView()
@@ -845,14 +845,14 @@ class QuickOptionsView():  # for clarity this View is not a widget
 
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
 
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def makeToggleOption(self, option):
         def toggleOption():
             Mainframe.model.toggleOption(option)
-            self.skip_model_changed = True
+            self.skipModelChanged = True
             Mainframe.sigWrapper.sigModelChanged.emit()
-            self.skip_model_changed = False
+            self.skipModelChanged = False
         return toggleOption
 
     def embedTo(self, toolbar):
@@ -860,7 +860,7 @@ class QuickOptionsView():  # for clarity this View is not a widget
             toolbar.addAction(action)
 
     def onModelChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
 
         for i, o in enumerate(Conf.value("popeye-toolbar-options")):
@@ -982,29 +982,29 @@ class FenView(QtWidgets.QLineEdit):
     def __init__(self, mainframe):
         super(FenView, self).__init__()
         self.parent = mainframe
-        self.skip_model_changed = False
+        self.skipModelChanged = False
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         self.textChanged.connect(self.onTextChanged)
 
     def onModelChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
-        self.skip_model_changed = True
+        self.skipModelChanged = True
         fen = Mainframe.model.board.toFen()
         fen = fen.replace('S', Conf.value('horsehead-glyph').upper()).\
             replace('s', Conf.value('horsehead-glyph').lower())
         self.setText(fen)
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onTextChanged(self, text):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
         self.parent.chessBox.updateXFenOverrides()
         Mainframe.model.board.fromFen(text)
-        self.skip_model_changed = True
+        self.skipModelChanged = True
         Mainframe.model.onBoardChanged()
         Mainframe.sigWrapper.sigModelChanged.emit()
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
 
 class OverviewList(QtWidgets.QTreeWidget):
@@ -1023,7 +1023,7 @@ class OverviewList(QtWidgets.QTreeWidget):
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
-        self.skip_model_changed = False
+        self.skipModelChanged = False
         self.skip_current_item_changed = False
 
     def mousePressEvent(self, e):
@@ -1166,7 +1166,7 @@ class OverviewList(QtWidgets.QTreeWidget):
             for j, text in enumerate(self.createItem(i)):
                 newItem.setText(j, text)
             self.addTopLevelItem(newItem)
-        self.skip_model_changed = True
+        self.skipModelChanged = True
         self.setCurrentItem(self.topLevelItem(Mainframe.model.current))
 
     def insertItem(self, idx):
@@ -1178,7 +1178,7 @@ class OverviewList(QtWidgets.QTreeWidget):
         for j in range(idx + 1, len(Mainframe.model.entries)):
             self.topLevelItem(j).setText(
                 0, str(j + 1) + ['', '*'][Mainframe.model.dirty_flags[j]])
-        self.skip_model_changed = True
+        self.skipModelChanged = True
         self.setCurrentItem(self.topLevelItem(Mainframe.model.current))
 
     def deleteItem(self, idx):
@@ -1214,8 +1214,8 @@ class OverviewList(QtWidgets.QTreeWidget):
         return item
 
     def onModelChanged(self):
-        if self.skip_model_changed:
-            self.skip_model_changed = False
+        if self.skipModelChanged:
+            self.skipModelChanged = False
             return
 
         for i, text in enumerate(self.createItem(Mainframe.model.current)):
@@ -1235,7 +1235,7 @@ class OverviewList(QtWidgets.QTreeWidget):
             text = text[:-1]
         Mainframe.model.setNewCurrent(int(text) - 1)
 
-        self.skip_model_changed = True
+        self.skipModelChanged = True
         Mainframe.sigWrapper.sigModelChanged.emit()
 
 
@@ -1407,7 +1407,7 @@ class BoardView(QtWidgets.QWidget):
         super(BoardView, self).__init__()
         self.parent = parent
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
         vbox = QtWidgets.QVBoxLayout()
         vbox.setSpacing(0)
@@ -1476,8 +1476,8 @@ class BoardView(QtWidgets.QWidget):
         self.setLayout(vbox)
 
     def onModelChanged(self):
-        if self.skip_model_changed:
-            self.skip_model_changed = False
+        if self.skipModelChanged:
+            self.skipModelChanged = False
             return
 
         for i, lbl in enumerate(self.labels):
@@ -1502,7 +1502,7 @@ class BoardView(QtWidgets.QWidget):
     class StipulationLabel(QtWidgets.QLabel):
 
         def __init__(self):
-            self.skip_model_changed = False
+            self.skipModelChanged = False
             super(BoardView.StipulationLabel, self).__init__()
 
         def mousePressEvent(self, e):
@@ -1510,13 +1510,13 @@ class BoardView(QtWidgets.QWidget):
                 dialog = BoardView.StipulationLabel.Dialog(Lang)
                 dialog.move(self.mapToGlobal(e.pos()))
                 if(dialog.exec_()):
-                    if self.skip_model_changed:
+                    if self.skipModelChanged:
                         return
                     Mainframe.model.cur()['stipulation'] = dialog.input.currentText().strip()
-                    self.skip_model_changed = True
+                    self.skipModelChanged = True
                     Mainframe.model.markDirty()
                     Mainframe.sigWrapper.sigModelChanged.emit()
-                    self.skip_model_changed = False
+                    self.skipModelChanged = False
 
         class Dialog(options.OkCancelDialog):
 
@@ -1686,10 +1686,10 @@ class AddFairyPieceDialog(options.OkCancelDialog):
         return model.Piece(type, color, specs)
 
 
-class EasyEditView(QtWidgets.QWidget):
+class MetadataView(QtWidgets.QWidget):
 
     def __init__(self):
-        super(EasyEditView, self).__init__()
+        super(MetadataView, self).__init__()
         grid = QtWidgets.QGridLayout()
         # authors
         self.labelAuthors = QtWidgets.QLabel(
@@ -1745,19 +1745,29 @@ class EasyEditView(QtWidgets.QWidget):
         grid.addWidget(self.labelDate, 2, 0)
         grid.addWidget(tmpWidget, 2, 1)
 
+        self.labelTourney = QtWidgets.QLabel(Lang.value('EE_Tourney') + ':')
+        self.inputTourney = QtWidgets.QLineEdit()
+        grid.addWidget(self.labelTourney, 3, 0)
+        grid.addWidget(self.inputTourney, 3, 1)
+
         self.labelDistinction = QtWidgets.QLabel(
             Lang.value('EP_Distinction') + ':')
         self.inputDistinction = DistinctionWidget()
-        grid.addWidget(self.labelDistinction, 3, 0)
-        grid.addWidget(self.inputDistinction, 3, 1)
+        grid.addWidget(self.labelDistinction, 4, 0)
+        grid.addWidget(self.inputDistinction, 4, 1)
+
+        self.labelJudges = QtWidgets.QLabel(Lang.value('EE_Judges') + ':')
+        self.inputJudges = QtWidgets.QTextEdit()
+        grid.addWidget(self.labelJudges, 5, 0)
+        grid.addWidget(self.inputJudges, 5, 1)
 
         # stretcher
-        grid.addWidget(QtWidgets.QWidget(), 4, 1)
-        grid.setRowStretch(4, 1)
+        grid.addWidget(QtWidgets.QWidget(), 6, 1)
+        grid.setRowStretch(6, 1)
 
         self.setLayout(grid)
 
-        self.skip_model_changed = False
+        self.skipModelChanged = False
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
 
@@ -1768,72 +1778,66 @@ class EasyEditView(QtWidgets.QWidget):
         self.inputDateYear.textChanged.connect(self.onChanged)
         self.inputDateMonth.currentIndexChanged.connect(self.onChanged)
         self.inputDateDay.currentIndexChanged.connect(self.onChanged)
+        self.inputTourney.textChanged.connect(self.onChanged)
+        self.inputJudges.textChanged.connect(self.onChanged)
 
     def onModelChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
 
-        self.skip_model_changed = True
+        self.skipModelChanged = True
+        e = Mainframe.model.cur()
 
-        if 'authors' in Mainframe.model.cur():
-            self.inputAuthors.setText(
-                "\n".join(Mainframe.model.cur()['authors']))
-        else:
-            self.inputAuthors.setText("")
+        self.inputAuthors.setText("\n".join(e.get('authors', [])))
 
-        if 'source' in Mainframe.model.cur():
-            self.inputSource.setText(Mainframe.model.cur()['source'])
-        else:
-            self.inputSource.setText("")
+        source = e.get('source', {})
+        self.inputSource.setText(source.get('name', ''))
+        self.inputIssueId.setText(source.get('issue', ''))
+        self.inputSourceId.setText(source.get('problemid', ''))
+        date = source.get('date')
+        self.inputDateYear.setText(date.get('year', ''))
+        self.inputDateMonth.setCurrentIndex(date.get('month', 0))
+        self.inputDateDay.setCurrentIndex(date.get('day', 0))
+        award = e.get('award', {})
+        self.inputTourney.setText(award.get('tourney', ""))
+        self.inputJudges.setText("\n".join(award.get('judges', [])))
 
-        issue_id, source_id = Mainframe.model.parseSourceId()
-        self.inputIssueId.setText(issue_id)
-        self.inputSourceId.setText(source_id)
-
-        y, m, d = Mainframe.model.parseDate()
-        self.inputDateYear.setText(y)
-        self.inputDateMonth.setCurrentIndex(m)
-        self.inputDateDay.setCurrentIndex(d)
-
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
 
         Mainframe.model.cur()['authors'] = [x.strip() for x in str(
             self.inputAuthors.toPlainText()).split("\n") if x.strip() != '']
-        Mainframe.model.cur()['source'] = self.inputSource.text().strip()
-        i_id, s_id = self.inputIssueId.text().strip(), self.inputSourceId.text().strip()
-        is_id = '/'.join([i_id, s_id])
-        if is_id.startswith('/'):
-            is_id = is_id[1:]
-        Mainframe.model.cur()['source-id'] = is_id
 
-        date = model.myint(self.inputDateYear.text())
-        if date != 0:
-            date = str(date)
+        e = Mainframe.model.cur()
+
+        e['source'] = model.mergeInto(e.get('source', {}), {
+            'name': self.inputSource.text(),
+            'issue': self.inputIssueId.text(),
+            'problemid': self.inputSourceId.text(),
+        })
+
+        year = self.inputDateYear.text().strip()
+        if year != '':
+            date = { 'year': year }
             if self.inputDateMonth.currentIndex() != 0:
-                date = date + '-' + ("%02d" %
-                                     self.inputDateMonth.currentIndex())
+                date['month'] = self.inputDateMonth.currentIndex()
                 if self.inputDateDay.currentIndex() != 0:
-                    date = date + '-' + ("%02d" %
-                                         self.inputDateDay.currentIndex())
-            Mainframe.model.cur()['date'] = date
+                    date['day'] = self.inputDateDay.currentIndex()
+            e['source']['date'] = date
         elif 'date' in Mainframe.model.cur():
             del Mainframe.model.cur()['date']
 
-        for k in ['source', 'source-id']:
-            if Mainframe.model.cur()[k] == '':
-                del Mainframe.model.cur()[k]
-        for k in ['authors']:
-            if len(Mainframe.model.cur()[k]) == 0:
-                del Mainframe.model.cur()[k]
+        for k in ['authors', 'source', 'award']:
+            if len(e[k]) == 0:
+                del e[k]
 
-        self.skip_model_changed = True
+        self.skipModelChanged = True
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onLangChanged(self):
         self.labelAuthors.setText(
@@ -1846,6 +1850,8 @@ class EasyEditView(QtWidgets.QWidget):
         self.labelDate.setText(Lang.value('EP_Date') + ':')
         self.memoDate.setText(Lang.value('EE_Date_memo'))
         self.labelDistinction.setText(Lang.value('EP_Distinction') + ':')
+        self.labelTourney.setText(Lang.value('EE_Tourney') + ':')
+        self.labelJudges.setText(Lang.value('EE_Judges') + ':')
 
 
 class DistinctionWidget(QtWidgets.QWidget):
@@ -1878,24 +1884,22 @@ class DistinctionWidget(QtWidgets.QWidget):
 
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
-        self.skip_model_changed = False
+        self.skipModelChanged = False
         self.onLangChanged()
 
     def onChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
         distinction = self.get()
-        if 'distinction' in Mainframe.model.cur():
-            if distinction == Mainframe.model.cur()['distinction']:
-                return
-        else:
-            if distinction == '':
-                return
-        self.skip_model_changed = True
-        Mainframe.model.cur()['distinction'] = distinction
+        e = Mainframe.model.cur()
+        award = e.get('award', {})
+        if award.get('distinction', '') == distinction:
+            return
+        self.skipModelChanged = True
+        e['award'] = model.mergeInto(award, {'distinction': distinction})
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def set(self, distinction):
         self.special.setChecked(distinction.special)
@@ -1916,15 +1920,12 @@ class DistinctionWidget(QtWidgets.QWidget):
         return str(distinction)
 
     def onModelChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
-        distinction = model.Distinction()
-        if 'distinction' in Mainframe.model.cur():
-            distinction = model.Distinction.fromString(
-                Mainframe.model.cur()['distinction'])
-        self.skip_model_changed = True
+        distinction = model.Distinction.fromString(Mainframe.model.cur().get('award', {}).get('distinction', ''))
+        self.skipModelChanged = True
         self.set(distinction)
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onLangChanged(self):
         self.special.setText(Lang.value('DSTN_Special'))
@@ -1993,10 +1994,10 @@ class SolutionView(QtWidgets.QWidget):
         self.keywords.textChanged.connect(self.onChanged)
         self.comments.textChanged.connect(self.onChanged)
 
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
         Mainframe.model.cur()['solution'] = str(
             self.solution.toPlainText()).strip()
@@ -2012,16 +2013,16 @@ class SolutionView(QtWidgets.QWidget):
             if len(Mainframe.model.cur()[k]) == 0:
                 del Mainframe.model.cur()[k]
 
-        self.skip_model_changed = True
+        self.skipModelChanged = True
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onModelChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
 
-        self.skip_model_changed = True
+        self.skipModelChanged = True
 
         if 'solution' in Mainframe.model.cur():
             self.solution.setText(Mainframe.model.cur()['solution'])
@@ -2038,7 +2039,7 @@ class SolutionView(QtWidgets.QWidget):
         else:
             self.comments.setText("")
 
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onLangChanged(self):
         self.solutionLabel.setText(Lang.value('SS_Solution'))
@@ -2183,20 +2184,20 @@ class PopeyeView(QtWidgets.QSplitter):
         self.inputIntended.textChanged.connect(self.onChanged)
         self.inputStipulation.editTextChanged.connect(self.onChanged)
 
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onChanged(self):
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
         Mainframe.model.cur()['stipulation'] = self.inputStipulation.currentText().strip()
         Mainframe.model.cur()['intended-solutions'] = self.inputIntended.text().strip()
         for k in ['stipulation', 'intended-solutions']:
             if Mainframe.model.cur()[k] == '':
                 del Mainframe.model.cur()[k]
-        self.skip_model_changed = True
+        self.skipModelChanged = True
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onMemoryChanged(self):
         try: Conf.popeye['memory'] = model.myint(str(self.inputMemory.text()))
@@ -2213,10 +2214,10 @@ class PopeyeView(QtWidgets.QSplitter):
             model.FairyHelper.conditions), 14, 3, entry_options, Lang)
         if(dialog.exec_()):
             Mainframe.model.cur()['options'] = dialog.getOptions()
-            self.skip_model_changed = True
+            self.skipModelChanged = True
             Mainframe.model.markDirty()
             Mainframe.sigWrapper.sigModelChanged.emit()
-            self.skip_model_changed = False
+            self.skipModelChanged = False
 
     def onTwins(self):
         twins = {}
@@ -2229,10 +2230,10 @@ class PopeyeView(QtWidgets.QSplitter):
                 Mainframe.model.cur()['twins'] = new_twins
             elif 'twins' in Mainframe.model.cur():
                 del Mainframe.model.cur()['twins']
-            self.skip_model_changed = True
+            self.skipModelChanged = True
             Mainframe.model.markDirty()
             Mainframe.sigWrapper.sigModelChanged.emit()
-            self.skip_model_changed = False
+            self.skipModelChanged = False
 
     def onTchSettings(self):
         pass
@@ -2392,13 +2393,13 @@ class PopeyeView(QtWidgets.QSplitter):
                 self.sstip.isChecked(),
                 copy.deepcopy(Conf.popeye['sticky-options']),
                 Mainframe.model.board.toPopeyePiecesClause()))
-        if self.skip_model_changed:
+        if self.skipModelChanged:
             return
 
         if self.current_index != Mainframe.model.current:
             self.reset()
 
-        self.skip_model_changed = True
+        self.skipModelChanged = True
 
         if 'stipulation' in Mainframe.model.cur():
             stipulation = Mainframe.model.cur()['stipulation']
@@ -2415,7 +2416,7 @@ class PopeyeView(QtWidgets.QSplitter):
         else:
             self.inputIntended.setText("")
 
-        self.skip_model_changed = False
+        self.skipModelChanged = False
 
     def onLangChanged(self):
         self.labelPopeye.setText(Lang.value('TC_Popeye') + ':')
