@@ -113,7 +113,7 @@ def readCvv(fileName, encoding):
         if e[8][0] != '':
             entry['authors'] = [e[8][0]]
         if e[9][0] != '':
-            entry['source'] = e[9][0]
+            entry['source'] = { 'name': e[9][0] }
         if e[10][0] != '':
             entry['solution'] = "\n".join(e[10][0].split('\\n'))
         extra = e[11][0].split('\\n')
