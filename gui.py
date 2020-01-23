@@ -839,7 +839,7 @@ class QuickOptionsView():  # for clarity this View is not a widget
 
     def __init__(self, mainframeInstance):
         self.actions = []
-        for q in Conf.value("popeye-toolbar-options"):
+        for q in (p for p in Conf.value("popeye-toolbar-options") if p['enabled']):
             action = QtWidgets.QAction(QtGui.QIcon(':/icons/' + q['icon']), q['option'], mainframeInstance)
             action.setCheckable(True)
             action.triggered.connect(self.makeToggleOption(q['option']))
@@ -902,7 +902,7 @@ class AboutDialog(QtWidgets.QDialog):
         w.setLayout(grid)
         vbox.addWidget(w)
 
-        vbox.addWidget(ClickableLabel('© 2011-2019'))
+        vbox.addWidget(ClickableLabel('© 2011-2020'))
 
         vbox.addStretch(1)
         buttonOk = QtWidgets.QPushButton(Lang.value('CO_OK'), self)
