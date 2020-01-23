@@ -36,6 +36,7 @@ Source: "resources\fonts\roboto\*.ttf"; DestDir: "{app}\resources\fonts\roboto"
 Source: "conf\*"; DestDir: "{localappdata}\{#AppName}\conf\"
 Source: "conf\dist\*"; DestDir: "{localappdata}\{#AppName}\conf"
 Source: "yacpdb\indexer\indexer.md"; DestDir: "{app}\yacpdb\indexer"
+Source: "yacpdb\schemas\*"; DestDir: "{app}\yacpdb\schemas"
 Source: "p2w\parser.out"; DestDir: "{app}\p2w"
     
 
