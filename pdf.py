@@ -252,8 +252,10 @@ class ExportDocument:
                 s = s + "<i>, " + model.formatDate(e['source']['date']) + "</i>"
             parts.append(s)
         if 'award' in e:
-            if 'tourney' in e['award'] and 'source' in e and 'name' in e['source'] and e['source']['name'] != e['award']['tourney']:
-                parts.append(e['award']['tourney'])
+            tourney = e.get('award', {}).get('tourney', {}).get('name', '')
+            source = e.get('source', {}).get('name', '')
+            if tourney != '' and tourney != source:
+                parts.append(tourney)
             if 'distinction' in e['award']:
                 d = model.Distinction.fromString(e['award']['distinction'])
                 parts.append(d.toStringInLang(Lang))

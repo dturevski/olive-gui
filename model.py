@@ -30,11 +30,19 @@ def myint(string):
 
 
 def mergeInto(target, source):
-    for k, v in source:
-        if v.strip() != '':
-            target[k] = v.strip()
-        elif k in target:
-            del target[k]
+    for k, v in source.items():
+        if type(v) is str:
+            if v.strip() != '':
+                target[k] = v.strip()
+            elif k in target:
+                del target[k]
+        elif (type(v) is dict) or (type(v) is list):
+            if len(v) > 0:
+                target[k] = v
+            elif k in target:
+                del target[k]
+        else:
+            target[k] = v
     return target
 
 def notEmpty(hash, key):
@@ -44,15 +52,21 @@ def notEmpty(hash, key):
 
 
 def filterAndJoin(dict, keys, separator):
-    return separator.join(map(lambda x: dict[x], filter(lambda x: x in dict, keys)))
+    return separator.join(map(lambda x: str(dict[x]), filter(lambda x: x in dict, keys)))
+
+def splitAndStrip(text):
+    return [x.strip() for x in str(text).split("\n") if x.strip() != '']
 
 
 def formatDate(dict):
-    return filterAndJoin(dict, ['year', 'month', 'day'], '-')
+    return filterAndJoin(dict, ['year', 'month', 'day'], '/')
 
 
 def formatIssueAndProblemId(dict):
     return filterAndJoin(dict, ['issue', 'problemid'], '/')
+
+def parseYear(year):
+    return int(year) if re.compile("^[0-9]{4}$").match(year) else year
 
 
 class Distinction:
@@ -169,40 +183,29 @@ def unquoteKeys(dict, keys):
     for key in keys:
         if key in dict:
             try:
-                dict[key] = unquote(dict[key])
+                dict[key] = unquote(str(dict[key]))
             except:
                 pass
 
 
 def makeSafe(e):
-    r = {}
     if not isinstance(e, dict):
-        return r
+        return {}
     # string scalars
     unquoteKeys(e, ['intended-solutions', 'stipulation', 'solution'])
-    # utf8 scalars
+    # string dicts
     if 'source' in e:
         unquoteKeys(e['source'], ['name', 'issue', 'volume', 'round', 'problemid'])
     if 'award' in e:
-        unquoteKeys(e['award'], ['tourney', 'distinction'])
-    # ascii lists
-    for k in ['keywords', 'options']:
+        unquoteKeys(e['award'], ['distinction'])
+        if 'tourney' in e['award']:
+            unquoteKeys(e['award']['tourney'], ['name'])
+    # string lists
+    for k in ['keywords', 'options', 'authors', 'comments']:
         if k in e and isinstance(e[k], list):
-            try:
-                r[k] = []
-                for element in e[k]:
-                    r[k].append(unquote(str(element)))
-            except:
-                del r[k]
-    # utf8 lists
-    for k in ['authors', 'comments']:
-        if k in e and isinstance(e[k], list):
-            try:
-                r[k] = []
-                for element in e[k]:
-                    r[k].append(unquote(str(element)))
-            except:
-                del r[k]
+            e[k] = [unquote(str(x)) for x in e[k]]
+        elif k in e:
+            del e[k]
     # date
     #k = 'date'
     #if k in e:
@@ -214,9 +217,9 @@ def makeSafe(e):
     #        r[k] = str(e[k])
 
     for k in ['algebraic', 'twins']:
-        if k in e and isinstance(e[k], dict):
-            r[k] = e[k]
-    return r
+        if k in e and not isinstance(e[k], dict):
+            del e[k]
+    return e
 
 
 class Model:

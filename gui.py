@@ -24,6 +24,7 @@ import pbm
 import pdf
 import xfen2img
 import yacpdb.indexer.cruncher
+import yacpdb.entry
 # indexer
 import yacpdb.indexer.metadata
 from base import read_resource_file, get_write_dir
@@ -416,6 +417,7 @@ class Mainframe(QtWidgets.QMainWindow):
             Mainframe.model = model.Model()
             Mainframe.model.delete(0)
             for data in yaml.safe_load_all(f):
+                data = yacpdb.entry.convert_v1_0_v1_1(data)
                 Mainframe.model.add(model.makeSafe(data), False)
             f.close()
             Mainframe.model.is_dirty = False
@@ -1198,17 +1200,12 @@ class OverviewList(QtWidgets.QTreeWidget):
             authorsTxt = '; '.join(Mainframe.model.entries[idx]['authors'])
         item.append(authorsTxt)
 
-        for key in ['source', 'date', 'distinction', 'stipulation']:
-            if key in Mainframe.model.entries[idx]:
-                if key == 'distinction':
-                    d = model.Distinction.fromString(
-                        Mainframe.model.entries[idx][key])
-                    item.append(d.toStringInLang(Lang))
-                else:
-                    item.append(str(Mainframe.model.entries[idx][key]))
-            else:
-                item.append('')
-
+        e = Mainframe.model.entries[idx]
+        item.append(e.get('source', {}).get('name', ''))
+        item.append(model.formatDate(e.get('source', {}).get('date', {})))
+        d = model.Distinction.fromString(e.get('award', {}).get('distinction', ''))
+        item.append(d.toStringInLang(Lang))
+        item.append(e.get('stipulation', ''))
         item.append(Mainframe.model.pieces_counts[idx])
 
         return item
@@ -1794,12 +1791,12 @@ class MetadataView(QtWidgets.QWidget):
         self.inputSource.setText(source.get('name', ''))
         self.inputIssueId.setText(source.get('issue', ''))
         self.inputSourceId.setText(source.get('problemid', ''))
-        date = source.get('date')
-        self.inputDateYear.setText(date.get('year', ''))
+        date = source.get('date', {})
+        self.inputDateYear.setText(str(date.get('year', '')))
         self.inputDateMonth.setCurrentIndex(date.get('month', 0))
         self.inputDateDay.setCurrentIndex(date.get('day', 0))
         award = e.get('award', {})
-        self.inputTourney.setText(award.get('tourney', ""))
+        self.inputTourney.setText(award.get('tourney', {}).get('name', ''))
         self.inputJudges.setText("\n".join(award.get('judges', [])))
 
         self.skipModelChanged = False
@@ -1808,8 +1805,7 @@ class MetadataView(QtWidgets.QWidget):
         if self.skipModelChanged:
             return
 
-        Mainframe.model.cur()['authors'] = [x.strip() for x in str(
-            self.inputAuthors.toPlainText()).split("\n") if x.strip() != '']
+        Mainframe.model.cur()['authors'] = model.splitAndStrip(self.inputAuthors.toPlainText())
 
         e = Mainframe.model.cur()
 
@@ -1821,7 +1817,7 @@ class MetadataView(QtWidgets.QWidget):
 
         year = self.inputDateYear.text().strip()
         if year != '':
-            date = { 'year': year }
+            date = { 'year': model.parseYear(year) }
             if self.inputDateMonth.currentIndex() != 0:
                 date['month'] = self.inputDateMonth.currentIndex()
                 if self.inputDateDay.currentIndex() != 0:
@@ -1830,8 +1826,14 @@ class MetadataView(QtWidgets.QWidget):
         elif 'date' in Mainframe.model.cur():
             del Mainframe.model.cur()['date']
 
+        tourney = self.inputTourney.text().strip()
+        e['award'] = model.mergeInto(e.get('award', {}), {
+            'tourney': {'name': tourney} if tourney != '' else {},
+            'judges':  model.splitAndStrip(self.inputJudges.toPlainText()),
+        })
+
         for k in ['authors', 'source', 'award']:
-            if len(e[k]) == 0:
+            if k in e and len(e[k]) == 0:
                 del e[k]
 
         self.skipModelChanged = True
