@@ -866,7 +866,9 @@ class QuickOptionsView():  # for clarity this View is not a widget
             return
 
         for i, o in enumerate(Conf.value("popeye-toolbar-options")):
-            self.actions[i].setChecked('options' in Mainframe.model.cur() and o['option'] in Mainframe.model.cur()['options'])
+            if o['enabled']:
+                self.actions[i].setChecked('options' in Mainframe.model.cur()
+                                           and o['option'] in Mainframe.model.cur()['options'])
 
 
 class AboutDialog(QtWidgets.QDialog):
@@ -1720,8 +1722,8 @@ class MetadataView(QtWidgets.QWidget):
         self.labelDate = QtWidgets.QLabel(Lang.value('EP_Date') + ':')
         self.memoDate = QtWidgets.QLabel(Lang.value('EE_Date_memo'))
         self.inputDateYear = QtWidgets.QLineEdit()
-        self.inputDateYear.setMaxLength(4)
-        self.inputDateYear.setValidator(QtGui.QIntValidator())
+        self.inputDateYear.setMaxLength(9)
+        self.inputDateYear.setValidator(MetadataView.ValidYear(self.inputDateYear))
         self.inputDateYear.setFixedWidth(
             self.inputDateYear.minimumSizeHint().width())
         self.inputDateMonth = QtWidgets.QComboBox()
@@ -1777,6 +1779,26 @@ class MetadataView(QtWidgets.QWidget):
         self.inputDateDay.currentIndexChanged.connect(self.onChanged)
         self.inputTourney.textChanged.connect(self.onChanged)
         self.inputJudges.textChanged.connect(self.onChanged)
+
+    class ValidYear(QtGui.QValidator):
+
+        acceptable = [re.compile("^" + x + "$") for x in ["", "[0-9]{4}", "[0-9]{4}\\-[0-9]{4}"]]
+        intermediate = [re.compile("^" + x + "$") for x in ["[0-9]{0,3}", "[0-9]{4}\\-[0-9]{0,3}"]]
+
+        def __init__(self, parent):
+            QtGui.QValidator.__init__(self, parent)
+
+        def matches(self, rs, s):
+            return True in [True for r in rs if r.match(s)]
+
+        def validate(self, s, pos):
+            if self.matches(MetadataView.ValidYear.acceptable, s):
+                return QtGui.QValidator.Acceptable, s, pos
+            elif self.matches(MetadataView.ValidYear.intermediate, s):
+                return QtGui.QValidator.Intermediate, s, pos
+            else:
+                return QtGui.QValidator.Invalid, s, pos
+
 
     def onModelChanged(self):
         if self.skipModelChanged:
