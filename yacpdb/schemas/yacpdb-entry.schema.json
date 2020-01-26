@@ -111,6 +111,7 @@
         "issue": {"$ref" : "#/definitions/label"},
         "round": {"$ref" : "#/definitions/label"},
         "problemid": {"$ref" : "#/definitions/label"},
+        "pagenumber": { "type": "integer", "minimum": 1 },
         "variant": {"$ref" : "#/definitions/twin_description"},
         "comments": { "$ref": "#/definitions/text_list" }
       },

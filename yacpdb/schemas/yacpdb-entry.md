@@ -71,6 +71,7 @@ of the composition. May be omitted if the source is unknown.
     issue: 01-02
     round: 3C # applicable if the source is actually a solving competition event
     problemid: H1234
+    pagenumber: 65
     date:
       year: 1965 # or alternatively a span of years, eg: "1965-1967"
       month: 2 # optional
