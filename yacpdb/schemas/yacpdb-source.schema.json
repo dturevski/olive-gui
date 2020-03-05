@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#/definitions/",
+  "$id": "https://www.yacpdb.org/schemas/yacpdb-source.schema.json",
+  "type": "object",
+  "properties": {
+    "name": { "$ref" : "#/definitions/text" },
+    "type": { "$ref": "#/definitions/source_type_type" },
+    "comments": { "$ref": "#/definitions/text_list" }
+  },
+  "required": ["name"],
+  "additionalProperties": false,
+
+  "definitions": {
+    "text" : {
+      "anyOf": [
+        { "type": "number" },
+        { "type": "string", "minLength": 1 }
+      ]
+    },
+
+    "text_list" : {
+      "type": "array",
+      "elements": { "$ref": "#/definitions/text" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+
+    "source_type_type": {
+      "type": "string",
+      "pattern": "^(magazine|newspaper|award booklet|book|anthology|article|lecture|solving event|website)$",
+      "maxLength": 255
+    }
+  }
+}
