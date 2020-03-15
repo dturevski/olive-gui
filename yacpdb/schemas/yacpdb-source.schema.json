@@ -5,6 +5,7 @@
   "properties": {
     "name": { "$ref" : "#/definitions/text" },
     "type": { "$ref": "#/definitions/source_type_type" },
+    "foreignids": { "type": "array", "items": { "$ref" : "#/definitions/foreignid_type" }, "minItems": 1 },
     "comments": { "$ref": "#/definitions/text_list" }
   },
   "required": ["name"],
@@ -29,6 +30,16 @@
       "type": "string",
       "pattern": "^(magazine|newspaper|award booklet|book|anthology|article|lecture|solving event|website)$",
       "maxLength": 255
+    },
+
+    "foreignid_type": {
+      "type": "object",
+      "properties": {
+        "domain": { "type": "string", "pattern": "^database\\.wfcc\\.ch$" },
+        "id": { "type": "integer", "minimum": 1 }
+      },
+      "required": ["domain", "id"],
+      "additionalProperties": false
     }
   }
 }
