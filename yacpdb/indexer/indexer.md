@@ -32,7 +32,7 @@ Apart from providing basic logic operators to combine the predicates, the query 
 **pattern match counts**. While `Predicate(x, y, z)` means that pattern was found in entry, using
 `Predicate(x, y, z) > N` allows to constraint the number of times the pattern was found.
 
-[Cheatsheet] (http://yacpdb.org/#static/ql-cheatsheet)
+[Cheatsheet](http://yacpdb.org/#static/ql-cheatsheet)
 
 ### Formal definition
 
@@ -138,6 +138,14 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 * `Source(STRING name)`
 
 	Same as `Entity("source", name)`
+	
+* `ReprintType(STRING type)`
+
+    Matches entries with at least one of the reprints having the type **type**. The primary purpose of this 
+    predicate is to filter problems that were used (or never used) in solving competitions. Check the
+    [entity format documentation](../schemas/yacpdb-entities.md) for the list of possible source types.
+    
+    *Example:* [ReprintType("solving event")](https://yacpdb.org/#q/ReprintType("solving%20event")/1)
 
 * `SourceId(STRING sourceid)`
 * `IssueId(STRING issueid)`

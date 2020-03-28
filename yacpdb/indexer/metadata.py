@@ -250,6 +250,18 @@ class Entity(Predicate):
         )
 
 
+class ReprintType(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query(
+            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
+            "where e.subtype=%s and e2p.link_type='reprint') ", [params[0]], []
+        )
+
+
 class Source(Predicate):
 
     def __init__(self, name, params):
