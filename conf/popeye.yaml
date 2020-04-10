@@ -1,4 +1,4 @@
-memory: 1
+memory: 1024
 path: pywin64.exe
 sticky-options:
 - Variation
