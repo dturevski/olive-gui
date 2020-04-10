@@ -285,11 +285,6 @@ MI_Export_Image:
   rs: Дијаграм у имиџ фајл
   ru: Диаграмму в файл изображения
   de: Diagram als Bilddatei exportieren
-MI_Export_RTF:
-  en: Collection to RTF
-  rs: Збирку у RTF
-  ru: Коллекцию в RTF
-  de: Sammlung als RTF exportieren
 MI_Cut:
   en: Cut
   rs: Исеци
