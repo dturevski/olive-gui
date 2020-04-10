@@ -543,19 +543,6 @@ MSG_Image_export_failed:
   rs: Слика није извезена. Формат није подржан.
   ru: Не удалось экспортировать изображение. Формат не поддерживается.
   de: Export als Bilddatei gescheitert. Format wird nicht unterstützt.
-MSG_RTF_export_failed:
-  en: |
-    RTF export failed.
-    Perhaps the collection contains records that can not be properly fitted into the template (e.g. extensively long solution)
-  rs: |
-    Грешка код извоза у RTF.
-    Могуће да постоје записи који се не улапају у одабрани шаблон (нпр. преширок испис решења).    
-  ru: |
-    Ошибка при экспорте RTF.
-    Возможно коллекция содержит записи, которые не могут быть корректно отображены c использованием примененного шаблона (напр. слишком пространная запись решения).
-  de: |
-    Konnte nicht nach RTF exportieren.
-    Die Sammlung enthält möglicherweise Datensätze, die nicht in die Vorlage passen (z.B. sehr lange Lösungen)
 MSG_Confirm_delete_entry:
   en: Delete this entry?
   rs: Уклонити овај проблем?
