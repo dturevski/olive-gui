@@ -43,6 +43,11 @@ class ZilahiTraverser:
     def visit(self, node, board, captured, moved):
         if node.depth == 1:
             self.twins += 1
+            # in eg. #2 all set lines are a single phase, in h#n.5 each set line is a distinct phase
+            # so we differentiate by if there is anything else beside the set lines
+            # still not ideal (2 set + 2 actual helpmate would be counted as 3 phases)
+            if len(node.children) == 1 and isinstance(node.children[0], p2w.nodes.NullNode):
+                self.phases += len(node.children[0].children) - 1 # -1 because +1 will be added on the next level
         if node.depth == 2:
             self.phases += 1
 

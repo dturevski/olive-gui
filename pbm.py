@@ -215,7 +215,7 @@ class Record:
         if self.info['author']:
             r['authors'] = self.info['author'].split(';')
         if self.info['source']:
-            r['source'] = self.info['source']
+            r['source'] = { 'name': self.info['source'] }
         if self.info['distinction']:
             d = model.Distinction()
             parts = self.info['distinction'].split('°')
@@ -235,7 +235,8 @@ class Record:
                 d.name = 'Comm.'
             if 'place' in tail:
                 d.name = 'Place'
-            r['distinction'] = "%s, (%s)" % (str(d), self.info['distinction'])
+            distinction = "%s, (%s)" % (str(d), self.info['distinction'])
+            r['award'] = { 'tourney': r.get('source', {}).get('name', ''), 'distinction': distinction }
         if len(self.comments):
             r['comments'] = self.comments
         if self.is_maximummer:

@@ -1,0 +1,184 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#/definitions/",
+  "$id": "https://www.yacpdb.org/schemas/yacpdb-entry.schema.json",
+  "type": "object",
+
+  "properties": {
+    "foreignids": { "type": "array", "items": { "$ref" : "#/definitions/foreignid_type" }, "minItems": 1 },
+    "authors": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1, "uniqueItems": true },
+    "source": { "$ref" : "#/definitions/source_type" },
+    "award": { "$ref" : "#/definitions/award_type" },
+    "reprints": { "type": "array", "items": { "$ref" : "#/definitions/source_type" }, "minItems": 1, "uniqueItems": true },
+    "stipulation": { "$ref": "#/definitions/label" },
+    "algebraic" : {
+      "type": "object",
+      "patternProperties": {
+        "^white|black|neutral$": { "$ref": "#/definitions/piece_decl_list" }
+      },
+      "additionalProperties": false
+    },
+    "twins" : {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z]|(z[0-9]+)$": { "$ref": "#/definitions/twin_description" }
+      },
+      "required": ["b"],
+      "additionalProperties": false
+    },
+    "intended-solutions": {
+      "anyOf": [
+        { "type": "integer", "minimum": 2 },
+        { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)*(\\.\\.\\.)?$" }
+      ]
+    },
+    "solution": { "$ref": "#/definitions/text" },
+    "options": { "$ref": "#/definitions/label_list" },
+    "keywords": { "$ref": "#/definitions/label_list" },
+    "comments": { "$ref": "#/definitions/text_list" }
+  },
+
+  "required": ["stipulation", "algebraic", "solution"],
+  "dependencies": {
+    "award": { "required": ["source"] }
+  },
+  "additionalProperties": false,
+
+  "definitions": {
+
+    "label" : {
+      "anyOf": [
+        { "type": "number" },
+        { "type": "string", "maxLength": 255 }
+      ]
+    },
+
+    "text" : {
+      "anyOf": [
+        { "type": "number" },
+        { "type": "string", "minLength": 1 }
+      ]
+    },
+
+    "label_list" : {
+      "type": "array",
+      "elements": { "$ref": "#/definitions/label" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+
+    "text_list" : {
+      "type": "array",
+      "elements": { "$ref": "#/definitions/text" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+
+    "year" : {
+      "anyOf": [
+        { "type": "integer", "minimum": 1, "maximum": 9999 },
+        { "type": "string", "pattern": "^[0-9]{4}-[0-9]{4}$" }
+      ]
+    },
+
+    "date_type" : {
+      "anyOf": [{
+        "type": "object",
+        "properties" : {
+          "year" : { "$ref" : "#/definitions/year" },
+          "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "day": { "type": "integer", "minimum": 1, "maximum": 31 }
+        },
+        "required": ["year"],
+        "dependencies": {
+          "day": { "required": ["month"] }
+        },
+        "additionalProperties": false
+      }, {
+        "type": "string", "pattern": "^[0-9]{4}(-[0-9]{2})?(-[0-9]{2})?$"
+      }, {
+        "$ref" : "#/definitions/year"
+      }]
+    },
+
+    "twin_description" : {
+      "$ref": "#/definitions/label"
+    },
+
+    "source_type": {
+      "type": "object",
+      "properties": {
+        "name": {"$ref" : "#/definitions/label"},
+        "date": {"$ref" : "#/definitions/date_type"},
+        "volume": {"$ref" : "#/definitions/label"},
+        "issue": {"$ref" : "#/definitions/label"},
+        "round": {"$ref" : "#/definitions/label"},
+        "problemid": {"$ref" : "#/definitions/label"},
+        "pagenumber": { "type": "integer", "minimum": 1 },
+        "variant": {"$ref" : "#/definitions/twin_description"},
+        "comments": { "$ref": "#/definitions/text_list" }
+      },
+      "required": ["name", "date"],
+      "additionalProperties": false
+    },
+
+    "tourney_type": {
+      "type": "object",
+      "properties": {
+        "name": {"$ref" : "#/definitions/label"},
+        "date": {"$ref" : "#/definitions/date_type"}
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+
+    "distinction" : {
+      "type": "string",
+      "pattern": "^(?i)(((Special)|([0-9]*1st)|([0-9]*2nd)|([0-9]*3rd)|([0-9]*[0456789]th)|([0-9]*1[123]th))(-(([0-9]*1st)|([0-9]*2nd)|([0-9]*3rd)|([0-9]*[0456789]th)|([0-9]*1[123]th)))? )?(Special )?((Prize)|(Place)|(HM)|(Honorable Mention)|(Commendation)|(Comm\\.)|(cm))(, .*)?$"
+    },
+
+    "award_type": {
+      "type": "object",
+      "properties": {
+        "tourney": {
+          "anyOf" : [
+            { "$ref" : "#/definitions/tourney_type"},
+            { "type": "string", "pattern": "^ditto$" }
+          ]
+        },
+        "distinction": {"$ref" : "#/definitions/distinction"},
+        "judges": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1 }
+      },
+      "required": ["tourney", "distinction"],
+      "additionalProperties": false
+    },
+
+    "person_type": {
+      "type": "string",
+      "pattern": "^[^,]+, [^,]+$",
+      "maxLength": 255
+    },
+
+    "piece_decl": {
+      "type": "string",
+      "pattern": "^((Chameleon|Jigger|Kamikaze|Paralysing|Royal|Volage|Functionary|HalfNeutral|HurdleColourChanging|Protean|Magic|Uncapturable) )*[A-Za-z0-9]{1,2}[a-h][1-8]$"
+    },
+
+    "piece_decl_list": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/piece_decl"},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+
+    "foreignid_type": {
+      "type": "object",
+      "properties": {
+        "domain": {"$ref" : "#/definitions/label"},
+        "problemid": {"$ref" : "#/definitions/label"}
+      },
+      "required": ["domain", "problemid"],
+      "additionalProperties": false
+    }
+
+  }
+}

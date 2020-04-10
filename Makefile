@@ -1,11 +1,10 @@
-PYTHON = python
+PYTHON = python3
 PIP = pip3
 PYINST = pyinstaller
 INNOSETUP = "c:\Program Files (x86)\Inno Setup 5\ISCC.exe"
 RCC = pyrcc5
 
 dependencies:
-	$(PYTHON) -m pip install --upgrade pip
 	$(PIP) install PyQt5
 	$(PIP) install PyYAML
 	$(PIP) install reportlab
@@ -13,7 +12,7 @@ dependencies:
 	$(PIP) install PyMySQL
 	$(PIP) install ply
 	$(PIP) install pyinstaller
-	#$(PIP) install https://github.com/bjones1/pyinstaller/archive/pyqt5_fix.zip
+	$(PIP) install jsonschema
 
 resources.py: resources/olive.qrc
 	$(RCC) -o resources.py resources/olive.qrc

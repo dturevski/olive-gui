@@ -4,22 +4,25 @@ import logging, traceback
 from . import entry
 
 
-database = None
-if "QtCore" not in sys.modules: # don't try to connect when in GUI mode
-    try:
-        database = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb",
+class Connection:
+    instance = None
+    
+    def get():
+        if Connection.instance is None:
+            Connection.instance = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb",
                                    cursorclass=pymysql.cursors.DictCursor)
-        database.cursor().execute("SET NAMES utf8")
-    except pymysql.err.OperationalError:
-        pass
+            Connection.instance.cursor().execute("SET NAMES utf8")
+        return Connection.instance
+    get = staticmethod(get)
+
 
 def commit(query, params):
-    c = database.cursor(pymysql.cursors.Cursor)
+    c = Connection.get().cursor(pymysql.cursors.Cursor)
     try:
         c.execute(query, params)
-        database.commit()
+        Connection.get().commit()
     except Exception as ex:
-        database.rollback()
+        Connection.get().rollback()
         print(ex)
         print(c._last_executed)
 
@@ -37,12 +40,13 @@ def entries(cursor):
                     e[key] = row[key]
             yield e
         except Exception as ex:
-            logging.error("Failed to unyaml entry %d" % row["id"])
-            logging.error(traceback.format_exc(ex))
+            pass
+            #logging.error("Failed to unyaml entry %d" % row["id"])
+            #logging.error(traceback.format_exc(ex))
 
 
 def scalar(query, params):
-    c = database.cursor(pymysql.cursors.Cursor)
+    c = Connection.get().cursor(pymysql.cursors.Cursor)
     c.execute(query, params)
     for row in c:
         return row[0]
@@ -64,22 +68,22 @@ class Dao:
         try:
             return self.caches["ni"][name]
         except KeyError:
-            database.cursor().execute("INSERT INTO predicate_names (name) VALUES (%s)", (name,))
-            self.caches["ni"][name] = database.insert_id()
+            Connection.get().cursor().execute("INSERT INTO predicate_names (name) VALUES (%s)", (name,))
+            self.caches["ni"][name] = Connection.get().insert_id()
             return self.caches["ni"][name]
 
     def ixr_initCache(self):
         if self.caches != None:
             return
         self.caches = {"ni": {}, "in": {}}
-        c = database.cursor()
+        c = Connection.get().cursor()
         c.execute("SELECT id, name FROM predicate_names")
         for row in c:
             self.caches["ni"][row["name"]], self.caches["in"][row["id"]] = row["id"], row["name"]
 
 
     def ixr_getEntriesWithoutAsh(self, count):
-        c = database.cursor()
+        c = Connection.get().cursor()
         c.execute("""
           SELECT
             p.id, y.yaml
@@ -95,13 +99,13 @@ class Dao:
         return entries(c)
 
     def ixr_updateEntryAsh(self, eid, ash):
-        database.cursor().execute("update problems2 set ash=%s where id=%s", (ash, eid))
+        Connection.get().cursor().execute("update problems2 set ash=%s where id=%s", (ash, eid))
 
     def ixr_updateEntryOrtho(self, eid, ortho):
-        database.cursor().execute("update problems2 set orthodox=%s where id=%s", ("1" if ortho else "0", eid))
+        Connection.get().cursor().execute("update problems2 set orthodox=%s where id=%s", ("1" if ortho else "0", eid))
 
     def allEntries(self):
-        c = database.cursor()
+        c = Connection.get().cursor()
         c.execute("""
           SELECT
             p.id, y.yaml
@@ -126,7 +130,7 @@ class Dao:
         return scalar("SELECT checked from cruncher_timestamps WHERE ash=%s", (ash,))
 
     def ixr_getNeverChecked(self, maxcount):
-        c = database.cursor()
+        c = Connection.get().cursor()
         c.execute("""
           SELECT
             p.id, p.ash, y.yaml
@@ -142,7 +146,7 @@ class Dao:
         return entries(c)
 
     def ixr_getNotCheckedSince(self, since, maxcount):
-        c = database.cursor()
+        c = Connection.get().cursor()
         c.execute("""
           SELECT
             p.id, p.ash
@@ -159,24 +163,24 @@ class Dao:
         return entries(c)
 
     def ixr_saveAnalysisResults(self, ash, analysisResults):
-        c = database.cursor()
+        c = Connection.get().cursor()
         for key, predicate in analysisResults.predicates.items():
             c.execute("INSERT INTO predicates (name_id, ash, matchcount) VALUES (%s, %s, %s)",
                       (self.ixr_getPredicateIdByName(predicate.name), ash, str(analysisResults.counts[key])))
-            pid = database.insert_id()
+            pid = Connection.get().insert_id()
             for i, param in enumerate(predicate.params):
                 c.execute("INSERT INTO predicate_params (pid, pos, val) VALUES (%s, %s, %s)",
                           (str(pid), str(i), param))
 
     def ixr_deleteAnalysisResults(self, ash):
-        c, c2 = database.cursor(), database.cursor()
+        c, c2 = Connection.get().cursor(), Connection.get().cursor()
         c.execute("SELECT id FROM predicates WHERE ash=%s", (ash,))
         for row in c:
             c2.execute("DELETE FROM predicate_params WHERE pid=%s", (row["id"],))
         c.execute("DELETE FROM predicates WHERE ash=%s", (ash,))
 
     def ixr_getPredicatesByAsh(self, ash):
-        c, c2, ps = database.cursor(), database.cursor(), {}
+        c, c2, ps = Connection.get().cursor(), Connection.get().cursor(), {}
         c.execute("""SELECT id, name_id, matchcount FROM  predicates WHERE ash = %s""", (ash,))
         for row in c:
             params = []
@@ -192,7 +196,7 @@ class Dao:
 
     def search(self, query, params, page, pageSize=100):
         limits = " limit %d, %d" % ((page-1)*pageSize, pageSize)
-        c, matches = database.cursor(), []
+        c, matches = Connection.get().cursor(), []
         for p in params:
            logging.debug(str(p) + ", " + str(type(params[0])))
         c.execute(query + limits, params)
@@ -211,6 +215,9 @@ class Dao:
             'count': c.fetchone()["fr"],
             # 'q':lastExecuted
         }
+
+    def findByFen(self, fen):
+        return scalar("select id from problems2 where fen=%s", (fen,))
 
 dao = Dao()
 

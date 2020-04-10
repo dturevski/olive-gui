@@ -17,6 +17,7 @@ class PredicateStorage:
         'COLOR': Domain('COLOR', '[wbn]'),
         'DATE': Domain('DATE', r'[0-9]{4}(\-[0-9]{2}(\-[0-9]{2})?)?'),
         'INTEGER': Domain('INTEGER', '[0-9]+'),
+        'REFTYPE': Domain('REFTYPE', 'author|judge|source|reprint|tourney'),
         'TRANSFORMATIONS': Domain('TRANSFORMATIONS', 'All|Mirror|None'),
         'PIECENAME': Domain('PIECENAME', '[0-9A-Z][0-9A-Z]?'),
         'PIECE': Domain('PIECE', '[wbn][0-9A-Z][0-9A-Z]?'),
@@ -37,7 +38,7 @@ class PredicateStorage:
         return self.ps[arity][name]
 
     def load(self, fname):
-        with open(fname) as f:
+        with open(fname, encoding='utf-8') as f:
             blanks, waitfordoc, doc, lastpredicate = 0, False, "", None
             for line in f.readlines():
                 try:
@@ -138,11 +139,11 @@ class Matrix(Predicate):
             raise ValueError("'%s' is not a valid piece specification in Matrix(piecelist)" % spec)
         return Matrix.Placement(match.group(1), Square(algebraicToIdx(match.group(2))))
 
-    def compare(self, a, b):
-        ia, ib = len(Matrix.frequency), len(Matrix.frequency)
-        try: ia, ib = Matrix.frequency.index(a.name), Matrix.frequency.index(b.name)
-        except: pass
-        return ia - ib
+    def cmp_key(self, placement):
+        try:
+            return Matrix.frequency.index(placement.name)
+        except ValueError:
+            return len(Matrix.frequency)
 
     def transform(self, cs, T):
         return [Matrix.Placement(c.name, Square(
@@ -167,7 +168,7 @@ class Matrix(Predicate):
                                  "integer not null, primary key(id)) "
                                  "engine=memory" % table, []))
 
-        cs = sorted(self.placements, cmp=self.compare)
+        cs = sorted(self.placements, key=self.cmp_key)
         for i, p in enumerate(cs):
             if i > 0: p.square = Square(p.square.x - cs[0].square.x, p.square.y - cs[0].square.y)
         for T in Matrix.transformations[self.transformation]:
@@ -230,8 +231,34 @@ class Author(Predicate):
 
     def sql(self, params, cmp, ord):
         return Query(
-            "p2.id in (select problem_id from authorship aus join authors au on (aus.author_id = au.id) where au.name like %s) ",
+            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
+            "where e.name like %s and e2p.link_type='author') ",
             [params[0]], []
+        )
+
+
+class Entity(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query(
+            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
+            "where e.name like %s and e2p.link_type=%s) ",
+            [params[1], params[0]], []
+        )
+
+
+class ReprintType(Predicate):
+
+    def __init__(self, name, params):
+        Predicate.__init__(self, name, params)
+
+    def sql(self, params, cmp, ord):
+        return Query(
+            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
+            "where e.subtype=%s and e2p.link_type='reprint') ", [params[0]], []
         )
 
 
@@ -241,7 +268,11 @@ class Source(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("s.name like %s", [params[0]], ['sources s on (p2.source_id = s.id)'])
+        return Query(
+            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
+            "where e.name like %s and e2p.link_type='source') ",
+            [params[0]], []
+        )
 
 
 class IssueId(Predicate):
@@ -268,7 +299,7 @@ class PublishedAfter(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("p2.published > %s", [params[0]], [])
+        return Query("p2.published_after > %s", [params[0]], [])
 
 
 

@@ -32,7 +32,7 @@ Apart from providing basic logic operators to combine the predicates, the query 
 **pattern match counts**. While `Predicate(x, y, z)` means that pattern was found in entry, using
 `Predicate(x, y, z) > N` allows to constraint the number of times the pattern was found.
 
-[Cheatsheet] (http://yacpdb.org/#static/ql-cheatsheet)
+[Cheatsheet](http://yacpdb.org/#static/ql-cheatsheet)
 
 ### Formal definition
 
@@ -103,6 +103,7 @@ Logical operators precedence is NOT > AND > OR, i.e.:
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
 * **DATE**: a date in YYYY[-MM[-DD]] format
 * **INTEGER**: any integer number
+* **REFTYPE**: "author", "judge", "source", "reprint" or "tourney"
 * **TRANSFORMATIONS**: "All", "Mirror" or "None"
 * **PIECE**: concatenation of COLOR and PIECENAME
 * **PIECENAME**: one- or two-letter piece code, as defined by the [Popeye](https://github.com/thomas-maeder/popeye) solving software (english input)
@@ -124,11 +125,28 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 	More control over the matrix searches. Additional parameters identify which translations and
 	transformations of the search pattern are to be enabled. Wildcards * default to "true" and "All".
 
+* `Entity(REFTYPE type, STRING name)`
+
+	Matches entries that are linked to the entity (person, publication source, composing tourney)
+	named `name` with the link type of `type`
+
 * `Author(STRING name)`
 
-	Meaning that at least one of the authors matches **name**
+	Meaning that at least one of the authors matches **name**.
+	Same as `Entity("author", name)`
 
 * `Source(STRING name)`
+
+	Same as `Entity("source", name)`
+	
+* `ReprintType(STRING type)`
+
+    Matches entries with at least one of the reprints having the type **type**. The primary purpose of this 
+    predicate is to filter problems that were used (or never used) in solving competitions. Check the
+    [entity format documentation](../schemas/yacpdb-entities.md) for the list of possible source types.
+    
+    *Example:* [ReprintType("solving event")](https://yacpdb.org/#q/ReprintType("solving%20event")/1)
+
 * `SourceId(STRING sourceid)`
 * `IssueId(STRING issueid)`
 * `PublishedAfter(DATE date)`
@@ -281,6 +299,9 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 * `Phases`
 
    How many there are distinct first moves (actual or null) in the solution, counted across all twins.
+   If the problem has only set lines then each is considered a distinct phase, otherwise all set lines are
+   counted as one phase (e.g. direct #2 with set play has 2 phases, no matter how many variations are there in
+   the set play).
    
 * `Twins`
 

@@ -72,6 +72,8 @@ class Analyzer0:
         for k in ["solution", "stipulation", "algebraic"]:
             if k not in entry:
                 raise Exception("No %s" % k)
+
+        print(entry.get("id", "0"), len(entry['solution']))
         visitor = validate.DummyVisitor()
         try:
             solution = parser.parse(entry["solution"], debug=0)
@@ -82,8 +84,6 @@ class Analyzer0:
             solution.size = visitor.count
         except Exception:
             raise RuntimeError("invalid solution")
-
-        #print(entry["id"], solution.size)
 
         if solution.size > 140:
             raise RuntimeError("solution too long")

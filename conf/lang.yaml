@@ -378,10 +378,20 @@ EE_Authors_memo:
   ru: <b>Фамилия,&nbsp;Имя&nbsp;Отчество</b><br/>каждого с новой строки
   de: <b>Familienname,&nbsp;Vorname</b><br/>durch Zeilenumbruch getrennt
 EE_Source_memo:
-  en: "Tourney, Magazine / issue # / problem #"
-  rs: Турнир, Часопис / Бр. часописа / Бр.проблема
-  ru: Конкурс, Журнал / № журнала / № задачи
-  de: "Turnier, Zeitschrift / Heftnr. / Problemnr."
+  en: "Magazine / issue # / problem #"
+  rs: Часопис / Бр. часописа / Бр.проблема
+  ru: Журнал / № журнала / № задачи
+  de: "Zeitschrift / Heftnr. / Problemnr."
+EE_Tourney:
+  en: Tourney
+  rs: Турнир
+  ru: Конкурс
+  de: Turnier
+EE_Judges:
+  en: Judges
+  rs: Cудије
+  ru: Судьи
+  de: Preisrichter
 EE_Date_memo:
   en: Year / Month / Day
   rs: Год / Месец / Дан
@@ -573,33 +583,6 @@ MISC_Encoding:
   rs: "Кодна ознака:"
   ru: "Кодировка:"
   de: "Kodierung:"
-
-# Quick options
-QO_SetPlay:
-  en: Set play
-  rs: Привидна игра
-  ru: Иллюзорная игра
-  de: Satzspiel
-QO_Tries:
-  en: Tries
-  rs: Варке
-  ru: Попытки
-  de: Verführungen
-QO_IntelligentMode:
-  en: Intelligent mode
-  rs: Интелигентни мод
-  ru: Режим Intelligent
-  de: Intelligentmodus
-QO_PostKeyPlay:
-  en: PostKeyPlay
-  rs: PostKeyPlay
-  ru: PostKeyPlay
-  de: Nach dem Schlüssel
-QO_MoveNumbers:
-  en: MoveNumbers
-  rs: MoveNumbers
-  ru: MoveNumbers
-  de: MoveNumbers
 
 MI_Invert_colors:
   en: Invert colors of the pieces

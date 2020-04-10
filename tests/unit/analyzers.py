@@ -75,7 +75,7 @@ class TestTrajectories(unittest.TestCase):
         e = tests.unit.data.problems['doublealbino']
         solution, b = self.prepare(e)
         yacpdb.indexer.analyzers.trajectories.Analyzer().analyze(e, solution, b, resultsAccumulator)
-        self.assertEqual(resultsAccumulator.counts['PseudoAlbino(wP)'], 2)
+        self.assertEqual(resultsAccumulator.counts['Albino(wP)'], 2)
 
     def test_TraceBack(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalysisResultAccumulator(predicateStorage)
@@ -100,6 +100,14 @@ class TestTrajectories(unittest.TestCase):
         yacpdb.indexer.analyzers.miscellaneous.Analyzer().analyze(e, solution, b, resultsAccumulator)
         self.assertEqual(resultsAccumulator.counts['Twins'], 3)
         self.assertEqual(resultsAccumulator.counts['Phases'], 4)
+
+    def test_CountPhasesWithSetPlayDifferently(self):
+        for key, phases in {'#2 with set-play': 2, 'h#2.5 with 4 solutions': 4}.items():
+            resultsAccumulator = yacpdb.indexer.predicate.AnalysisResultAccumulator(predicateStorage)
+            e = tests.unit.data.problems[key]
+            solution, b = self.prepare(e)
+            yacpdb.indexer.analyzers.miscellaneous.Analyzer().analyze(e, solution, b, resultsAccumulator)
+            self.assertEqual(resultsAccumulator.counts['Phases'], phases)
 
     def test_Zilahi5(self):
         resultsAccumulator = yacpdb.indexer.predicate.AnalysisResultAccumulator(predicateStorage)

@@ -1,4 +1,4 @@
-﻿﻿# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 # local
 import model
@@ -241,18 +241,24 @@ class ExportDocument:
 
     def header(e, Lang):
         parts = []
-        if('authors' in e):
+        if'authors' in e:
             parts.append("<b>" + "<br/>".join(e['authors']) + "</b>")
-        if(model.notEmpty(e, 'source')):
-            s = "<i>" + e['source'] + "</i>"
-            if(model.notEmpty(e, 'source-id')):
-                s = s + "<i> (" + e['source-id'] + ")</i>"
-            if(model.notEmpty(e, 'date')):
-                s = s + "<i>, " + e['date'] + "</i>"
+        if 'source' in e and 'name' in e['source']:
+            s = "<i>" + e['source']['name'] + "</i>"
+            sourceid = model.formatIssueAndProblemId(e['source'])
+            if sourceid != '':
+                s = s + "<i> (" + sourceid + ")</i>"
+            if 'date' in e['source']:
+                s = s + "<i>, " + model.formatDate(e['source']['date']) + "</i>"
             parts.append(s)
-        if(model.notEmpty(e, 'distinction')):
-            d = model.Distinction.fromString(e['distinction'])
-            parts.append(d.toStringInLang(Lang))
+        if 'award' in e:
+            tourney = e.get('award', {}).get('tourney', {}).get('name', '')
+            source = e.get('source', {}).get('name', '')
+            if tourney != '' and tourney != source:
+                parts.append(tourney)
+            if 'distinction' in e['award']:
+                d = model.Distinction.fromString(e['award']['distinction'])
+                parts.append(d.toStringInLang(Lang))
         return ExportDocument.escapeHtml("<br/>".join(parts))
     header = staticmethod(header)
 

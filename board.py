@@ -30,7 +30,7 @@ FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
               'Royal', 'Volage', 'Functionary', 'HalfNeutral',
               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
 
-RE_COMMON_STIPULATION = re.compile('^(?P<intro>[0-9]+->)?(?P<serial>p?ser-)?(?P<play>h|s|r|hs|pg|)(?P<aim>([#=\+]?)|(==)) *(?P<length>[0-9\.]+)$', re.IGNORECASE)
+RE_COMMON_STIPULATION = re.compile('^(?P<intro>[0-9]+->)?(?P<serial>p?h?ser-)?(?P<play>h|s|r|semi-r|hs|pg|)(?P<aim>([#=\+]?)|(==)) *(?P<length>[0-9\.]+)$', re.IGNORECASE)
 
 def algebraicToIdx(a1):
     return ord(a1[0]) - ord('a') + 8 * (7 + ord('1') - ord(a1[1]))
@@ -59,7 +59,7 @@ def makePieceFromXfen(fen):
 class FairyHelper:
     defaults, overrides, glyphs, fontinfo = {}, {}, {}, {}
     options, conditions = [], []
-    f = open(get_write_dir() + '/conf/fairy-pieces.txt')
+    f = open(get_write_dir() + '/conf/fairy-pieces.txt', encoding='utf-8')
     for entry in [x.strip().split("\t") for x in f.readlines()]:
         glyphs[entry[0]] = {'name': entry[1]}
         if len(entry) > 2:
@@ -268,6 +268,7 @@ class Board:
             new_piece = Piece(piece.name, piece.color, piece.specs)
             new_piece.origin = piece.origin
             self.add(new_piece, new_x + 8 * new_y)
+        self.stm = b.stm
 
     def getTransformByName(name):
         try:
