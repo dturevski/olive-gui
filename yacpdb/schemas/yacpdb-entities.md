@@ -54,6 +54,7 @@ The only required field is `name`. All comments regarding the `foreignids` above
 Possible values for `type` are:
 * magazine
 * newspaper
+* booklet
 * award booklet
 * book
 * anthology

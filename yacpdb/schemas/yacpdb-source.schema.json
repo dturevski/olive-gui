@@ -28,7 +28,7 @@
 
     "source_type_type": {
       "type": "string",
-      "pattern": "^(magazine|newspaper|award booklet|book|anthology|article|lecture|solving event|website)$",
+      "pattern": "^(magazine|newspaper|award booklet|book|anthology|article|lecture|solving event|website|booklet)$",
       "maxLength": 255
     },
 
