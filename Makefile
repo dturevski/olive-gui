@@ -1,7 +1,7 @@
 PYTHON = python3
 PIP = pip3
 PYINST = pyinstaller
-INNOSETUP = "c:\Program Files (x86)\Inno Setup 5\ISCC.exe"
+INNOSETUP = "c:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 RCC = pyrcc5
 
 dependencies:
