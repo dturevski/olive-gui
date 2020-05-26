@@ -95,6 +95,8 @@
         "additionalProperties": false
       }, {
         "type": "string", "pattern": "^[0-9]{4}(-[0-9]{2})?(-[0-9]{2})?$"
+      }, {
+        "$ref" : "#/definitions/year"
       }]
     },
 
@@ -137,7 +139,12 @@
     "award_type": {
       "type": "object",
       "properties": {
-        "tourney": {"$ref" : "#/definitions/tourney_type"},
+        "tourney": {
+          "anyOf" : [
+            { "$ref" : "#/definitions/tourney_type"},
+            { "type": "string", "pattern": "^ditto$" }
+          ]
+        },
         "distinction": {"$ref" : "#/definitions/distinction"},
         "judges": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1 }
       },

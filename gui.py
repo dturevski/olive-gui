@@ -77,6 +77,16 @@ class Mainframe(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(Mainframe, self).__init__()
+        if 'font-size' in Conf.values:
+            Mainframe.fontSize = Conf.value('font-size')
+
+        Mainframe.fonts = {
+            'normal': {
+                'd': QtGui.QFont('GC2004D', Mainframe.fontSize),
+                'y': QtGui.QFont('GC2004Y', Mainframe.fontSize),
+                'x': QtGui.QFont('GC2004X', Mainframe.fontSize)
+            },
+        }
 
         Mainframe.model = model.Model()
 

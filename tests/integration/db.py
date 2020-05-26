@@ -59,6 +59,9 @@ class TestQl(unittest.TestCase):
     def test_EntityJudge(self):
         rs = self.runYacpdbQuery("Entity('judge', 'Стёпочкин, Анатолий Викторович') and Id(347014)", 1)
 
+    def test_ReprintType(self):
+        rs = self.runYacpdbQuery("ReprintType('newspaper') and Id(4)", 1)
+
     def test_GetPredicatesByAsh(self):
         dao.ixr_getPredicatesByAsh("3c4a9b80c8edec94e7f33fcd09960457")
 

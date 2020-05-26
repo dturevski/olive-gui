@@ -15,9 +15,10 @@ import yacpdb.entry
 
 LIST_COMMON_STIPULATIONS = ["=", "+", "= black to move", "+ black to move", "see text"]
 
-def load_schema():
-    with open("yacpdb/schemas/yacpdb-entry.schema.json") as f:
+def load_schema(type="entry"):
+    with open("yacpdb/schemas/yacpdb-" + type + ".schema.json") as f:
         return json.load(f)
+
 
 json_schema = load_schema()
 
@@ -29,7 +30,10 @@ def main():
         with open(sys.argv[2], 'r') as f:
             request = json.load(f)
             if sys.argv[1] == "--validate":
-                print(json.dumps(validate(request)))
+                if len(sys.argv) == 3:
+                    print(json.dumps(validate(request)))
+                else:
+                    print(json.dumps(validateEntity(sys.argv[3], request)))
             elif sys.argv[1] == "--convert1011":
                 print(json.dumps({'success': True, "entry": yacpdb.entry.convert_v1_0_v1_1(request)}))
             else:
@@ -98,6 +102,11 @@ def validate(entry, propagate_exceptions=True):
         return {'success': False, "errors": [str(ex)]}
 
     return {'success': True, 'orthodox': not model.hasFairyElements(entry)}
+
+
+def validateEntity(type, data):
+    jsonschema.validate(instance=data, schema=load_schema(type))
+    return {'success': True}
 
 
 def validateSchema(entries):

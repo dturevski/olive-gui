@@ -90,7 +90,14 @@ and earned a certain distinction. If the `award` fiels is present the `source` f
     judges:
       - Páros, György
 ```
+Alternatively, when the tourney and the source name are the same, shortcut syntax with `ditto` keyword is allowed:
 
+```yaml
+    tourney: ditto
+    distinction: ...
+    judges: ... 
+```
+      
 ### algebraic:
 ```yaml
     white: [Ka1, Sa2, Pag7]                   # white pao (chinese rook) g7
