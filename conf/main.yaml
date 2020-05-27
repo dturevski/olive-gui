@@ -11,7 +11,7 @@ font-size: 24
 horsehead-glyph: N
 import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
 import-post-decode-default: ISO-8859-1
-languages: {de: Deutsch, en: English, rs: Српски, ru: Русский}
+languages: {de: Deutsch, en: English, ro: Română, rs: Српски, ru: Русский}
 notations:
   en: [K, Q, R, B, S, P]
   fide: [K, D, T, L, S, B]
