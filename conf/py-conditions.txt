@@ -192,6 +192,12 @@ FaceToFace
 Disparate
 SnekChess
 SnekCircleChess
+Breton
+BretonAdverse
+Make&TakeChess
+LeseMajeste
+Rokagogo
+PointReflection
 MasandGeneralised
 NannaChess
 Bolero
