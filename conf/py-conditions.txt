@@ -192,3 +192,8 @@ FaceToFace
 Disparate
 SnekChess
 SnekCircleChess
+MasandGeneralised
+NannaChess
+Bolero
+BoleroInverse
+Influencer
