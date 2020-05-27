@@ -58,7 +58,6 @@ MirrorAntiCirce <select{|Cheylan|Calvet}>
 DiagramAntiCirce <select{|Cheylan|Calvet}>
 FileAntiCirce <select{|Cheylan|Calvet}>
 SymmetryAntiCirce <select{|Cheylan|Calvet}>
-MirrorAntiCirce <select{|Cheylan|Calvet}>
 AntipodeanAntiCirce <select{|Cheylan|Calvet}>
 EquipollentsAntiCirce <select{|Cheylan|Calvet}>
 FileImmunChess <select{|RexInclusiv}>
@@ -194,10 +193,8 @@ SnekChess
 SnekCircleChess
 Breton
 BretonAdverse
-Make&TakeChess
 LeseMajeste
 Rokagogo
-PointReflection
 MasandGeneralised
 NannaChess
 Bolero
