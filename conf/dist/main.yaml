@@ -7,15 +7,21 @@ fairy-zoo:
 - ['', black L, '', white L, '', '', '']
 - ['', '', '', '', '', '', '']
 - ['', '', '', '', '', '', '']
+font-size: 24
 horsehead-glyph: N
 import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
 import-post-decode-default: ISO-8859-1
-languages: {de: Deutsch, en: English, rs: Српски, ru: Русский}
+languages:
+  de: Deutsch
+  en: English
+  ro: Română
+  rs: Српски
+  ru: Русский
 notations:
   en: [K, Q, R, B, S, P]
   fide: [K, D, T, L, S, B]
   ru: [Кр, Ф, Л, С, К, п]
-version: "1.1"
+version: "1.2"
 popeye-toolbar-options:
 - {icon: miscellaneus.svg, option: SetPlay, enabled: true}
 - {icon: question.svg, option: Defence 1, enabled: true}
