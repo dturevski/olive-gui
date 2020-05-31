@@ -2130,7 +2130,9 @@ class PopeyeView(QtWidgets.QSplitter):
                 entry,
                 False,
                 copy.deepcopy(Conf.popeye['sticky-options']),
-                Mainframe.model.board.toPopeyePiecesClause())
+                Mainframe.model.board.toPopeyePiecesClause(),
+                model.FairyHelper.is_popeye_option
+            )
             self.runPopeyeInGui(input)
 
         return callable
@@ -2426,7 +2428,8 @@ class PopeyeView(QtWidgets.QSplitter):
                 Mainframe.model.cur(),
                 self.sstip.isChecked(),
                 copy.deepcopy(Conf.popeye['sticky-options']),
-                Mainframe.model.board.toPopeyePiecesClause()))
+                Mainframe.model.board.toPopeyePiecesClause(),
+                model.FairyHelper.is_popeye_option))
         if self.skipModelChanged:
             return
 

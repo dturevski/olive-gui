@@ -4,41 +4,6 @@ import re
 # local
 from . import chess
 
-# regular expressions to parse popeye options
-RE_PY_OPTIONS = [re.compile('^' + expr + '$', re.IGNORECASE) for expr in [
-    'Try',
-    'WhiteToPlay',
-    'MoveNumbers',
-    'StartMoveNumber [1-9][0-9]*',
-    'NoWk',
-    'NoBk',
-    'NoThreat',
-    'MaxSolutions [1-9][0-9]*',
-    'CastlingMutuallyExclusive [1-9][0-9]*',
-    'NoBoard',
-    'NoShortVariations',
-    'NonTrivial [0-9][0-9]* +[0-9][0-9]*',
-    'Intelligent( [1-9][0-9]*)?',
-    'MaxTime [1-9][0-9]*',
-    'StopOnShortSolutions',
-    'Beep',
-    'SuppressGrid',
-    'WriteGrid',
-    'KeepMatingPiece',
-    'LastCapture .*',
-
-    "Defence [1-9][0-9]*",
-    "SetPlay",
-    "Threat [1-9][0-9]*",
-    "Variation",
-    "Duplex",
-    "MaxFlightsquares [1-9][0-9]*",
-    "EnPassant ([a-h][1-8])+",
-    "HalfDuplex",
-    "PostKeyPlay",
-    "NoCastling( [a-h][1-8])+",
-    "Hole [a-h][1-8]",
-    "Quodlibet"]]
 
 RE_PY_TWINS = [re.compile('^' + expr, re.IGNORECASE) for expr in [
     "(?P<command>Stipulation)\s+(?P<args>\S+)",
@@ -186,14 +151,7 @@ def parse_ply(text, side_to_move):
                 :3]))
 
 
-def is_py_option(option):
-    for pattern in RE_PY_OPTIONS:
-        if pattern.match(option):
-            return True
-    return False
-
-
-def create_input(problem, sstip, sticky, pieces_clause):
+def create_input(problem, sstip, sticky, pieces_clause, is_py_option):
     lines = ["BeginProblem"]
     # stipulation
     if 'stipulation' in problem:
