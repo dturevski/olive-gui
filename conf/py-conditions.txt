@@ -50,7 +50,7 @@ EinsteinChess
 Bicolores
 NewKoeko
 CirceClone
-AntiCirce <select{|Cheylan|Calvet}>
+AntiCirce <select{|Cheylan|Calvet|Couscous}>
 MirrorFileCirce
 AntipodeanCirce
 MirrorCirceClone
