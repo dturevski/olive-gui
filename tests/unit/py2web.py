@@ -33,3 +33,5 @@ class TestParser(unittest.TestCase):
     def test_AnticirceRebirth(self):
         self.validate('simple_anticirce', validate.SemanticValidationVisitor())
 
+    def test_CanParseDigitalPieces(self):
+        self.validate('digital', validate.SemanticValidationVisitor())

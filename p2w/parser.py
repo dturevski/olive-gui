@@ -88,7 +88,7 @@ def p_CommandList(t):
 
 
 def p_Command(t):
-    '''Command : ROTATE INT
+    '''Command : ROTATE ANGLE
             | MIRROR SQUARE DOUBLE_POINTED_ARROW SQUARE
             | SHIFT SQUARE LONG_DOUBLE_ARROW SQUARE
             | POLISH_TYPE

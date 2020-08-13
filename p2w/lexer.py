@@ -24,7 +24,7 @@ tokens = (
     'MOVE_NUMBER',
     'KINGSIDE_CASTLING',
     'QUEENSIDE_CASTLING',
-    'INT',
+    'ANGLE',
     'SQUARE',
     'COLOR_NEUTRAL',
     'COLOR_WHITE',
@@ -100,8 +100,8 @@ def t_MOVE_NUMBER(t):
 t_KINGSIDE_CASTLING = r'0\-0'
 t_QUEENSIDE_CASTLING = r'0\-0\-0'
 
-def t_INT(t):
-    r'[1-9][0-9]*'
+def t_ANGLE(t):
+    r'90|180|270'
     t.value = int(t.value)
     return t
 
