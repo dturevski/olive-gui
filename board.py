@@ -87,6 +87,15 @@ class FairyHelper:
     conditions = [x.strip() for x in f.readlines()]
     f.close()
 
+    def is_popeye_option(s):
+        command = FairyHelper.first_word(s)
+        return any([FairyHelper.first_word(o) == command for o in FairyHelper.options])
+    is_popeye_option = staticmethod(is_popeye_option)
+
+    def first_word(s):
+        return s.split(" ")[0].lower()
+    first_word = staticmethod(first_word)
+
 def twinId(twin_index):
     if twin_index < 26:
         return chr(ord("a") + twin_index)
