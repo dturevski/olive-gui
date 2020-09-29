@@ -2,8 +2,8 @@ analyzers:
 - trajectories
 - miscellaneous
 auto-compactify: 0
-collections-dir: ./
-default-lang: en
+collections-dir: /home/torsten/chess/develop/olive-gui
+default-lang: de
 default-notation: en
 fairy-zoo:
 - - ''
