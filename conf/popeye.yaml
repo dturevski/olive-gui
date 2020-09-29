@@ -1,5 +1,5 @@
 memory: 1
-path: pywin64.exe
+path: /home/torsten/chess/popeye/py
 sticky-options:
 - Variation
 - NoBoard
