@@ -133,7 +133,10 @@ class Distinction:
         if Lang.current == 'en':
             return Distinction.pluralSuffix(integer)
         else:
-            return ''
+            if Lang.current == 'de':
+                return '.'
+            else:
+                return ''
     pluralSuffixInLang = staticmethod(pluralSuffixInLang)
 
     def pluralSuffix(integer):

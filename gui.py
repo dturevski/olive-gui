@@ -135,7 +135,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.popeyeView = PopeyeView()
         self.yamlView = YamlView()
         self.publishingView = PublishingView()
-        self.latexView = LaTeXView()
+        self.texView = LaTeXView()
         self.chestView = chest.ChestView(Conf, Lang, Mainframe)
         self.tabBar2 = QtWidgets.QTabWidget()
         self.tabBar2.addTab(self.popeyeView, Lang.value('TC_Popeye'))
@@ -144,7 +144,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.addTab(self.yamlView, Lang.value('TC_YAML'))
         self.tabBar2.addTab(self.publishingView, Lang.value('TC_Publishing'))
         self.tabBar2.addTab(self.chestView, Lang.value('TC_Chest'))
-        self.tabBar2.addTab(self.latexView, Lang.value('TC_LaTeX'))
+        self.tabBar2.addTab(self.texView, Lang.value('TC_LaTeX'))
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.overview = OverviewList()
         self.overview.init()
@@ -2004,40 +2004,125 @@ class KeywordsInputWidget(QtWidgets.QTextEdit):
 
 
 class LaTeXView(QtWidgets.QSplitter):
-#    def setActions(self, actions):
-#        self.actions = actions
-#        self.setActionEnabled(True)
-#        self.input.setActions(actions)
+    def indent(self, s):
+        lines = s.splitlines(False)
+        t = ""
+        for line in lines:
+            if line.strip() == "":
+                continue
+            t = t + "    " + line + "\n"
+        return t
+
+    def string2LaTeX(self, s):
+        # how to indent solution?
+        s = s.replace("#", "\\#")
+        s = s.replace("&", "\\&")
+        s = s.replace("%", "\\%")
+        s = s.replace("*", "{\\x}")
+        return s
 
     def __init__(self):
         super(LaTeXView, self).__init__(QtCore.Qt.Horizontal)
 
-        self.input = PopeyeInputWidget()
+        self.LaTeXSource = QtWidgets.QPlainTextEdit()
+        self.LaTeXSource.setReadOnly(True)
 
-        self.sstip = QtWidgets.QCheckBox(Lang.value('PS_SStipulation'))
+        self.addWidget(self.LaTeXSource)
 
-        self.addWidget(self.input)
-
-        # self.reset()
-
-        self.sstip.stateChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigLangChanged.connect(self.onModelChanged)
 
         self.skipModelChanged = False
 
     def onModelChanged(self):
-        self.input.setText(
-            legacy.popeye.create_input(
-                Mainframe.model.cur(),
-                self.sstip.isChecked(),
-                copy.deepcopy(Conf.popeye['sticky-options']),
-                Mainframe.model.board.toPopeyePiecesClause(),
-                model.FairyHelper.is_popeye_option))
-        if self.skipModelChanged:
-            return
+        self.setFont(QtGui.QFont("Courier", 10))
+
+        self.LaTeXSource.setPlainText("")
+        self.LaTeXSource.appendPlainText("\\begin{diagram}%")
+
+        e = Mainframe.model.cur()
+        # authors
+        if 'authors' in e:
+            self.LaTeXSource.appendPlainText(
+                "  \\authors{" +
+                '; '.join(e['authors']) +
+                "}%")
+
+        # source
+        if 'source' in Mainframe.model.cur():
+            sourcenr = ""
+            source = ""
+            issue = ""
+            day = ""
+            month = ""
+            year = ""
+            s = e['source']
+            if 'name' in s:
+                source = "\\source{" + s['name'] + "}"
+                if 'problemid' in s:
+                    sourcenr = "\\sourcenr{" + s['problemid'] + "}"
+                if 'issue' in s:
+                    issue = "\\issue{" + s['issue'] + "}"
+
+            if 'date' in s:
+                d = s['date']
+                if 'day' in d:
+                   day = "\\day{" + str(d['day']) + "}"
+                if 'month' in d:
+                   month = "\\month{" + str(d['month']) + "}"
+                if 'year' in d:
+                   year = "\\year{" + str(d['year']) + "}"
+
+            self.LaTeXSource.appendPlainText(
+                "  " + sourcenr + source + issue + day + month + year + "%")
+
+        # distinction
+        if 'award' in e:
+            a = e['award']
+            tourney = ""
+            dist = ""
+            if 'tourney' in a:
+                tourney = "\\tournament{" + a['tourney']['name'] + "}"
+            if 'distinction' in a:
+                d = model.Distinction.fromString(a['distinction'])
+                dist = "\\award{" + d.toStringInLang(Lang) + "}"
+
+            self.LaTeXSource.appendPlainText(
+                "  " + dist + tourney + "%")
+
+
+        # pieces
+
+        # stipulation
+        self.LaTeXSource.appendPlainText(
+            "  \\stipulation{" +
+            self.string2LaTeX(Mainframe.model.cur()['stipulation']) + "}%")
+
+        # twins
+
+        # remarks
+
+        if 'solution' in Mainframe.model.cur():
+            self.LaTeXSource.appendPlainText(
+                "  \\solution{%\n" +
+                self.indent(self.string2LaTeX(Mainframe.model.cur()['solution'])) + "  }%")
+
+        if('keywords' in Mainframe.model.cur()):
+            self.LaTeXSource.appendPlainText(
+                "  \\themes{%\n    " +
+                self.string2LaTeX(
+                ', '.join(
+                    Mainframe.model.cur()['keywords'])) +
+                "\n  }%")
+
+        if('comments' in Mainframe.model.cur()):
+            self.LaTeXSource.appendPlainText(
+                "  \\comment{%\n" +
+                self.indent(self.string2LaTeX("".join(Mainframe.model.cur()['comments']))) + "  }%")
+
+        self.LaTeXSource.appendPlainText("\\end{diagram}%")
 
         self.skipModelChanged = False
-
 
 class PublishingView(QtWidgets.QSplitter):
 
