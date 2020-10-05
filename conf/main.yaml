@@ -6,26 +6,26 @@ collections-dir: ''
 default-lang: de
 default-notation: en
 fairy-zoo:
-- - black LE
-  - black SI
+- - white LI
+  - white RL
+  - white BL
+  - white NL
+  - white RN
+  - white KL
   - ''
+- - black LI
+  - black RL
+  - black BL
+  - black NL
+  - black RN
+  - black KL
   - ''
-  - ''
-  - ''
-  - ''
-- - ''
-  - ''
-  - black DR
-  - ''
-  - ''
-  - ''
-  - ''
-- - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
+- - neutral LI
+  - neutral RL
+  - neutral BL
+  - neutral NL
+  - neutral RN
+  - neutral KL
   - ''
 font-size: 24
 horsehead-glyph: N
