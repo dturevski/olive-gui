@@ -128,6 +128,41 @@ class Piece:
             glyph = '(' + glyph + ')'
         return glyph
 
+    def toLaTeX(self):
+        glyph = FairyHelper.glyphs[self.name.lower()]['glyph']
+        if self.color == 'white':
+            piece = 'w'
+        if self.color == 'black':
+            piece = 's'
+        if self.color == 'neutral':
+            piece = 'n'
+        # King
+        glyph= glyph.replace("k", "K")
+        # Queen
+        glyph= glyph.replace("q", "D")
+        # Rook
+        glyph= glyph.replace("r", "T")
+        # Bishop
+        glyph= glyph.replace("b", "L")
+        # Knight
+        glyph= glyph.replace("s", "S")
+        # Pawn
+        glyph= glyph.replace("p", "B")
+        # "Orphan"
+        glyph= glyph.replace("o", "C")
+        # "Equihopper"
+        glyph= glyph.replace("e", "X")
+        # rest
+        glyph= glyph.replace("a", "C")
+        glyph= glyph.replace("f", "C")
+
+        # rotation of pieces
+        glyph= glyph.replace("1", "R")
+        glyph= glyph.replace("2", "U")
+        glyph= glyph.replace("3", "L")
+        piece = piece + glyph
+        return piece
+
     def toAlgebraic(self):
         retval = self.name.upper()
         if len(self.specs) > 0:
@@ -342,6 +377,19 @@ class Board:
             fen = fen + ("%d" % (blanks))
         return fen
 
+    def toLaTeX(self):
+        pieces = ''
+        first = True
+        for i in range(64):
+            if(self.board[i] is not None):
+                if first:
+                    first = False
+                else:
+                    pieces = pieces + ", "
+                pieces = pieces + self.board[i].toLaTeX() + idxToAlgebraic(i)
+
+        return pieces
+
     def getLegend(self):
         legend = {}
         for square, piece in Pieces(self):
@@ -350,6 +398,24 @@ class Board:
                 t.append(" ".join(piece.specs))
             if piece.color == 'neutral':
                 t.append('Neutral')
+            if (not piece.name.lower() in [
+                'k', 'q', 'r', 'b', 's', 'p']) or (len(t) > 0):
+                t.append(
+                        (FairyHelper.glyphs[
+                             piece.name.lower()]['name']).title())
+            if len(t) > 0:
+                str = " ".join(t)
+                if str not in legend:
+                    legend[str] = []
+                legend[str].append(idxToAlgebraic(square))
+        return legend
+
+    def getLaTeXLegend(self):
+        legend = {}
+        for square, piece in Pieces(self):
+            t = []
+            if len(piece.specs) > 0:
+                t.append(" ".join(piece.specs))
             if (not piece.name.lower() in [
                 'k', 'q', 'r', 'b', 's', 'p']) or (len(t) > 0):
                 t.append(

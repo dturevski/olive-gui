@@ -2038,18 +2038,21 @@ class LaTeXView(QtWidgets.QSplitter):
         self.setFont(QtGui.QFont("Courier", 10))
 
         self.LaTeXSource.setPlainText("")
+        self.LaTeXSource.appendPlainText("\\documentclass{article}%")
+        self.LaTeXSource.appendPlainText("\\usepackage{diagram}%\n")
+        self.LaTeXSource.appendPlainText("\\begin{document}%\n")
         self.LaTeXSource.appendPlainText("\\begin{diagram}%")
 
         e = Mainframe.model.cur()
         # authors
         if 'authors' in e:
             self.LaTeXSource.appendPlainText(
-                "  \\authors{" +
+                "  \\author{" +
                 '; '.join(e['authors']) +
                 "}%")
 
         # source
-        if 'source' in Mainframe.model.cur():
+        if 'source' in e:
             sourcenr = ""
             source = ""
             issue = ""
@@ -2092,35 +2095,58 @@ class LaTeXView(QtWidgets.QSplitter):
 
 
         # pieces
+        pieces = Mainframe.model.board.toLaTeX()
+        self.LaTeXSource.appendPlainText(
+            "  \\pieces[" + Mainframe.model.board.getPiecesCount() + "]{" + pieces + "}%")
 
         # stipulation
         self.LaTeXSource.appendPlainText(
             "  \\stipulation{" +
-            self.string2LaTeX(Mainframe.model.cur()['stipulation']) + "}%")
+            self.string2LaTeX(e['stipulation']) + "}%")
+
+        # conditions
+        if('options' in e):
+            self.LaTeXSource.appendPlainText(
+                "  \\condition{%\n"
+                + self.indent("\\\\\n".join(e['options'])) + "  }%")
+ 
 
         # twins
+        if 'twins' in e:
+            self.LaTeXSource.appendPlainText(
+                "  \\twins{" + model.createPrettyTwinsText(e) + "}%")
 
-        # remarks
+        # remarks = legend
+        legend = Mainframe.model.board.getLaTeXLegend()
+        if len(legend) != 0:
+            self.LaTeXSource.appendPlainText(
+                "  \\remark{%\n" + 
+                self.indent("\\\\\n".join([", ".join(legend[k]) + ': ' + k for k in list(legend.keys())]))
+                + "  }%")
 
-        if 'solution' in Mainframe.model.cur():
+        # solution
+        if 'solution' in e:
             self.LaTeXSource.appendPlainText(
                 "  \\solution{%\n" +
-                self.indent(self.string2LaTeX(Mainframe.model.cur()['solution'])) + "  }%")
+                self.indent(self.string2LaTeX(e['solution'])) + "  }%")
 
-        if('keywords' in Mainframe.model.cur()):
+        # themes = keywords
+        if 'keywords' in e:
             self.LaTeXSource.appendPlainText(
                 "  \\themes{%\n    " +
                 self.string2LaTeX(
-                ', '.join(
-                    Mainframe.model.cur()['keywords'])) +
+                ', '.join(e['keywords'])) +
                 "\n  }%")
 
-        if('comments' in Mainframe.model.cur()):
+        # comment(s)
+        if 'comments' in e:
             self.LaTeXSource.appendPlainText(
                 "  \\comment{%\n" +
-                self.indent(self.string2LaTeX("".join(Mainframe.model.cur()['comments']))) + "  }%")
+                self.indent(self.string2LaTeX("".join(e['comments']))) + "  }%")
 
-        self.LaTeXSource.appendPlainText("\\end{diagram}%")
+        self.LaTeXSource.appendPlainText("\\end{diagram}%\n")
+        self.LaTeXSource.appendPlainText("\\putsol\n")
+        self.LaTeXSource.appendPlainText("\\end{document}%")
 
         self.skipModelChanged = False
 
