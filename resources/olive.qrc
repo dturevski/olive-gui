@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
     <qresource>
+        <file>icons/latex.svg</file>
         <file>icons/add-new-document.svg</file>
         <file>icons/fullscreen.svg</file>
         <file>icons/minus.svg</file>

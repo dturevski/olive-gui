@@ -328,6 +328,12 @@ MI_Export_HTML:
   ru: HTML
   de: HTML
   ro: HTML
+MI_Export_LaTeX:
+  en: Collection to LaTeX
+  rs: Збирку у LaTeX
+  ru: Коллекцию в LaTeX
+  de: Sammlung als LaTeX exportieren
+  ro: Colecție în LaTeX
 MI_Export_PDF:
   en: Collection to PDF
   rs: Збирку у PDF
@@ -622,6 +628,12 @@ MSG_CCV_import_failed:
   ru: Ошибка при чтении формата Fancy
   de: Fehler beim Lesen im Fancy-Format
   ro: Greșala la citirea formatului Fancy
+MSG_LaTeX_export_failed:
+  en: LaTeX export failed.
+  rs: Грешка код извоза у LaTeX.
+  ru: Ошибка при экспорте LaTeX.
+  de: Konnte nicht nach LaTeX exportieren.
+  ru: Greșala de export LaTeX.
 MSG_PDF_export_failed:
   en: |
     PDF export failed.

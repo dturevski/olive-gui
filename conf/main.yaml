@@ -2,8 +2,8 @@ analyzers:
 - trajectories
 - miscellaneous
 auto-compactify: 0
-collections-dir: ''
-default-lang: de
+collections-dir: collections
+default-lang: en
 default-notation: en
 fairy-zoo:
 - - white G

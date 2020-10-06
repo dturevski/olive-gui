@@ -25,6 +25,8 @@ import pdf
 import xfen2img
 import yacpdb.indexer.cruncher
 import yacpdb.entry
+import latex
+
 # indexer
 import yacpdb.indexer.metadata
 from base import read_resource_file, get_write_dir
@@ -164,6 +166,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         logging.debug("Mainframe.initActions()")
 
+        # create new collection
         self.newAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/add-new-document.svg'),
             Lang.value('MI_New'),
@@ -171,6 +174,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.newAction.setShortcut('Ctrl+N')
         self.newAction.triggered.connect(self.onNewFile)
 
+        # open collection
         self.openAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/open-file.svg'),
             Lang.value('MI_Open'),
@@ -178,6 +182,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.openAction.setShortcut('Ctrl+O')
         self.openAction.triggered.connect(self.onOpenFile)
 
+        # save collection
         self.saveAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/save-file.svg'),
             Lang.value('MI_Save'),
@@ -185,29 +190,45 @@ class Mainframe(QtWidgets.QMainWindow):
         self.saveAction.setShortcut('Ctrl+S')
         self.saveAction.triggered.connect(self.onSaveFile)
 
+        # save as collection
         self.saveAsAction = QtWidgets.QAction(
             Lang.value('MI_Save_as'),
             self)
         self.saveAsAction.triggered.connect(self.onSaveFileAs)
 
+        # save template
         self.saveTemplateAction = QtWidgets.QAction(
             Lang.value('MI_Save_template'), self)
         self.saveTemplateAction.triggered.connect(self.onSaveTemplate)
 
+        # import PBM - inactive ?
         self.importPbmAction = QtWidgets.QAction(Lang.value('MI_Import_PBM'), self)
         self.importPbmAction.triggered.connect(self.onImportPbm)
 
+        # import CCV - inactive ?
         self.importCcvAction = QtWidgets.QAction(Lang.value('MI_Import_CCV'), self)
         self.importCcvAction.triggered.connect(self.onImportCcv)
 
+        # export HTML - inactive ?
         self.exportHtmlAction = QtWidgets.QAction(
             Lang.value('MI_Export_HTML'), self)
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
+
+        # export PDF
         self.exportPdfAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/pdf.svg'),
             Lang.value('MI_Export_PDF'),
             self)
         self.exportPdfAction.triggered.connect(self.onExportPdf)
+
+        # export LaTeX
+        self.exportLaTeXAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/latex.svg'),
+            Lang.value('MI_Export_LaTeX'),
+            self)
+        self.exportLaTeXAction.triggered.connect(self.onExportLaTeX)
+
+        # export diagram as PNG
         self.exportImgAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/png.svg'),
             Lang.value('MI_Export_Image'), self)
@@ -220,6 +241,7 @@ class Mainframe(QtWidgets.QMainWindow):
             self)
         self.addEntryAction.triggered.connect(self.onAddEntry)
 
+        # delete entry
         self.deleteEntryAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/minus.svg'),
             Lang.value('MI_Delete_entry'),
@@ -232,12 +254,15 @@ class Mainframe(QtWidgets.QMainWindow):
         self.editSolutionAction.setShortcut('Ctrl+E')
         self.editSolutionAction.triggered.connect(self.popeyeView.onEdit)
 
+        # demo mode
         self.demoModeAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/fullscreen.svg'),
             Lang.value('MI_Demo_mode'),
             self)
+        self.demoModeAction.setShortcut('Ctrl+D')
         self.demoModeAction.triggered.connect(self.onDemoMode)
 
+        # quit/exit
         self.exitAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/logout.svg'),
             Lang.value('MI_Exit'),
@@ -329,6 +354,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.exportMenu = self.fileMenu.addMenu(Lang.value('MI_Export'))
         # self.exportMenu.addAction(self.exportHtmlAction)
         self.exportMenu.addAction(self.exportPdfAction)
+        self.exportMenu.addAction(self.exportLaTeXAction)
         self.exportMenu.addAction(self.exportImgAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.demoModeAction)
@@ -506,6 +532,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.importCcvAction.setText(Lang.value('MI_Import_CCV'))
         self.exportHtmlAction.setText(Lang.value('MI_Export_HTML'))
         self.exportPdfAction.setText(Lang.value('MI_Export_PDF'))
+        self.exportLaTeXAction.setText(Lang.value('MI_Export_LaTeX'))
         self.exportImgAction.setText(Lang.value('MI_Export_Image'))
 
         for i, k in enumerate(Mainframe.transform_names):
@@ -674,6 +701,32 @@ class Mainframe(QtWidgets.QMainWindow):
 
     def onExportHtml(self):
         pass
+
+    def onExportLaTeX(self):
+        head, tail = os.path.split(Mainframe.model.filename)
+        # needs to be adapted...
+        default_dir = './collections/' + tail.replace('.olv', '') + '.tex'
+        fileName = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            Lang.value('MI_Export') +
+            ' ' +
+            Lang.value('MI_Export_LaTeX'),
+            default_dir,
+            "(*.tex)")[0]
+        if not fileName:
+            return
+        try:
+            ed = pdf.ExportDocument(Mainframe.model.entries, Lang)
+            ed.doExport(str(fileName))
+            # QtGui.QDesktopServices.openUrl(QtCore.QUrl(fileName))
+        except IOError:
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
+        except:
+            msg = Lang.value('MSG_LaTeX_export_failed');
+            logging.exception(msg)
+            msgBox(msg)
 
     def onExportPdf(self):
         default_dir = './collections/'
@@ -2004,23 +2057,6 @@ class KeywordsInputWidget(QtWidgets.QTextEdit):
 
 
 class LaTeXView(QtWidgets.QSplitter):
-    def indent(self, s):
-        lines = s.splitlines(False)
-        t = ""
-        for line in lines:
-            if line.strip() == "":
-                continue
-            t = t + "    " + line + "\n"
-        return t
-
-    def string2LaTeX(self, s):
-        # how to indent solution?
-        s = s.replace("#", "\\#")
-        s = s.replace("&", "\\&")
-        s = s.replace("%", "\\%")
-        s = s.replace("*", "{\\x}")
-        return s
-
     def __init__(self):
         super(LaTeXView, self).__init__(QtCore.Qt.Horizontal)
 
@@ -2037,116 +2073,14 @@ class LaTeXView(QtWidgets.QSplitter):
     def onModelChanged(self):
         self.setFont(QtGui.QFont("Courier", 10))
 
-        self.LaTeXSource.setPlainText("")
-        self.LaTeXSource.appendPlainText("\\documentclass{article}%")
-        self.LaTeXSource.appendPlainText("\\usepackage{diagram}%\n")
-        self.LaTeXSource.appendPlainText("\\begin{document}%\n")
-        self.LaTeXSource.appendPlainText("\\begin{diagram}%")
+        self.LaTeXSource.setPlainText(latex.head())
 
         e = Mainframe.model.cur()
-        # authors
-        if 'authors' in e:
-            self.LaTeXSource.appendPlainText(
-                "  \\author{" +
-                '; '.join(e['authors']) +
-                "}%")
+        b = Mainframe.model.board
 
-        # source
-        if 'source' in e:
-            sourcenr = ""
-            source = ""
-            issue = ""
-            day = ""
-            month = ""
-            year = ""
-            s = e['source']
-            if 'name' in s:
-                source = "\\source{" + s['name'] + "}"
-                if 'problemid' in s:
-                    sourcenr = "\\sourcenr{" + s['problemid'] + "}"
-                if 'issue' in s:
-                    issue = "\\issue{" + s['issue'] + "}"
+        self.LaTeXSource.appendPlainText(latex.entry(e, b, Lang))
 
-            if 'date' in s:
-                d = s['date']
-                if 'day' in d:
-                   day = "\\day{" + str(d['day']) + "}"
-                if 'month' in d:
-                   month = "\\month{" + str(d['month']) + "}"
-                if 'year' in d:
-                   year = "\\year{" + str(d['year']) + "}"
-
-            self.LaTeXSource.appendPlainText(
-                "  " + sourcenr + source + issue + day + month + year + "%")
-
-        # distinction
-        if 'award' in e:
-            a = e['award']
-            tourney = ""
-            dist = ""
-            if 'tourney' in a:
-                tourney = "\\tournament{" + a['tourney']['name'] + "}"
-            if 'distinction' in a:
-                d = model.Distinction.fromString(a['distinction'])
-                dist = "\\award{" + d.toStringInLang(Lang) + "}"
-
-            self.LaTeXSource.appendPlainText(
-                "  " + dist + tourney + "%")
-
-
-        # pieces
-        pieces = Mainframe.model.board.toLaTeX()
-        self.LaTeXSource.appendPlainText(
-            "  \\pieces[" + Mainframe.model.board.getPiecesCount() + "]{" + pieces + "}%")
-
-        # stipulation
-        self.LaTeXSource.appendPlainText(
-            "  \\stipulation{" +
-            self.string2LaTeX(e['stipulation']) + "}%")
-
-        # conditions
-        if('options' in e):
-            self.LaTeXSource.appendPlainText(
-                "  \\condition{%\n"
-                + self.indent("\\\\\n".join(e['options'])) + "  }%")
- 
-
-        # twins
-        if 'twins' in e:
-            self.LaTeXSource.appendPlainText(
-                "  \\twins{" + model.createPrettyTwinsText(e) + "}%")
-
-        # remarks = legend
-        legend = Mainframe.model.board.getLaTeXLegend()
-        if len(legend) != 0:
-            self.LaTeXSource.appendPlainText(
-                "  \\remark{%\n" + 
-                self.indent("\\\\\n".join([", ".join(legend[k]) + ': ' + k for k in list(legend.keys())]))
-                + "  }%")
-
-        # solution
-        if 'solution' in e:
-            self.LaTeXSource.appendPlainText(
-                "  \\solution{%\n" +
-                self.indent(self.string2LaTeX(e['solution'])) + "  }%")
-
-        # themes = keywords
-        if 'keywords' in e:
-            self.LaTeXSource.appendPlainText(
-                "  \\themes{%\n    " +
-                self.string2LaTeX(
-                ', '.join(e['keywords'])) +
-                "\n  }%")
-
-        # comment(s)
-        if 'comments' in e:
-            self.LaTeXSource.appendPlainText(
-                "  \\comment{%\n" +
-                self.indent(self.string2LaTeX("".join(e['comments']))) + "  }%")
-
-        self.LaTeXSource.appendPlainText("\\end{diagram}%\n")
-        self.LaTeXSource.appendPlainText("\\putsol\n")
-        self.LaTeXSource.appendPlainText("\\end{document}%")
+        self.LaTeXSource.appendPlainText(latex.tail())
 
         self.skipModelChanged = False
 

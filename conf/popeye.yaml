@@ -1,4 +1,4 @@
-memory: 1
+memory: 1024
 path: /home/torsten/chess/popeye/py
 sticky-options:
 - Variation
