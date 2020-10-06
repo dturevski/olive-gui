@@ -45,7 +45,7 @@ def head():
         "\\usepackage{diagram}%\n\n" +
         "\\begin{document}%\n\n")
 
-def entry(e, b, Lang):
+def entry(e, Lang):
     text = "\\begin{diagram}%\n"
     # authors
     if 'authors' in e:
@@ -90,13 +90,15 @@ def entry(e, b, Lang):
             d = model.Distinction.fromString(a['distinction'])
             dist = "\\award{" + d.toStringInLang(Lang) + "}"
 
-        text = text + "  " + dist + tourney + "%"
-
+        text = text + "  " + dist + tourney + "%\n"
 
     # pieces
-    pieces = b.toLaTeX()
-    text = (text +
-        "  \\pieces[" + b.getPiecesCount() + "]{" + pieces + "}%\n")
+    b = model.Board()
+    if 'algebraic' in e:
+        b.fromAlgebraic(e['algebraic'])
+        pieces = b.toLaTeX()
+        text = (text +
+            "  \\pieces[" + b.getPiecesCount() + "]{" + pieces + "}%\n")
 
     # stipulation
     text = (text + "  \\stipulation{" + string2LaTeX(e['stipulation']) + "}%\n")
@@ -110,10 +112,10 @@ def entry(e, b, Lang):
     # twins
     if 'twins' in e:
         text = (text +
-            "  \\twins{" + model.createPrettyTwinsText(e) + "}%")
+            "  \\twins{%\n" + indent(model.createPrettyTwinsText(e, True)) + "  }%\n")
 
     # remarks = legend
-    legend = b.getLaTeXLegend()
+    legend = b.getLegend(True)
     if len(legend) != 0:
         text = (text +
             "  \\remark{%\n" + 

@@ -390,32 +390,15 @@ class Board:
 
         return pieces
 
-    def getLegend(self):
+    def getLegend(self, latex = False):
         legend = {}
         for square, piece in Pieces(self):
             t = []
             if len(piece.specs) > 0:
                 t.append(" ".join(piece.specs))
-            if piece.color == 'neutral':
-                t.append('Neutral')
-            if (not piece.name.lower() in [
-                'k', 'q', 'r', 'b', 's', 'p']) or (len(t) > 0):
-                t.append(
-                        (FairyHelper.glyphs[
-                             piece.name.lower()]['name']).title())
-            if len(t) > 0:
-                str = " ".join(t)
-                if str not in legend:
-                    legend[str] = []
-                legend[str].append(idxToAlgebraic(square))
-        return legend
-
-    def getLaTeXLegend(self):
-        legend = {}
-        for square, piece in Pieces(self):
-            t = []
-            if len(piece.specs) > 0:
-                t.append(" ".join(piece.specs))
+            if latex == False:
+                if piece.color == 'neutral':
+                    t.append('Neutral')
             if (not piece.name.lower() in [
                 'k', 'q', 'r', 'b', 's', 'p']) or (len(t) > 0):
                 t.append(

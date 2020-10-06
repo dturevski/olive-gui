@@ -324,7 +324,7 @@ class Model:
         self.markDirty()
 
 
-def createPrettyTwinsText(e):
+def createPrettyTwinsText(e, latex = False):
     if 'twins' not in e:
         return ''
     formatted, prev_twin = [], None
@@ -336,7 +336,11 @@ def createPrettyTwinsText(e):
         else:
             formatted.append(twin.as_text())
             prev_twin = twin
-    return "<br/>".join(formatted)
+    if latex:
+        nl = " \\newline\n"
+    else:
+        nl = "<br/>"
+    return nl.join(formatted)
 
 
 def hasFairyConditions(e):

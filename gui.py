@@ -704,7 +704,6 @@ class Mainframe(QtWidgets.QMainWindow):
 
     def onExportLaTeX(self):
         head, tail = os.path.split(Mainframe.model.filename)
-        # needs to be adapted...
         default_dir = './collections/' + tail.replace('.olv', '') + '.tex'
         fileName = QtWidgets.QFileDialog.getSaveFileName(
             self,
@@ -716,8 +715,19 @@ class Mainframe(QtWidgets.QMainWindow):
         if not fileName:
             return
         try:
-            ed = pdf.ExportDocument(Mainframe.model.entries, Lang)
-            ed.doExport(str(fileName))
+            f = open(str(fileName), 'w', encoding='utf-8')
+            f.write(latex.head())
+
+            for i in range(0, len(Mainframe.model.entries)):
+                f.write(latex.entry(Mainframe.model.entries[i], Lang))
+                if i % 3 == 2:
+                    if i != len(Mainframe.model.entries):
+                        f.write("\n\putsol\n\n")
+                else:
+                    f.write("\\hfill\n")
+
+            f.write(latex.tail())
+            f.close()
             # QtGui.QDesktopServices.openUrl(QtCore.QUrl(fileName))
         except IOError:
             msg = Lang.value('MSG_IO_failed');
@@ -729,7 +739,9 @@ class Mainframe(QtWidgets.QMainWindow):
             msgBox(msg)
 
     def onExportPdf(self):
-        default_dir = './collections/'
+        # default_dir = './collections/'
+        head, tail = os.path.split(Mainframe.model.filename)
+        default_dir = './collections/' + tail.replace('.olv', '') + '.pdf'
         fileName = QtWidgets.QFileDialog.getSaveFileName(
             self,
             Lang.value('MI_Export') +
@@ -2076,9 +2088,8 @@ class LaTeXView(QtWidgets.QSplitter):
         self.LaTeXSource.setPlainText(latex.head())
 
         e = Mainframe.model.cur()
-        b = Mainframe.model.board
 
-        self.LaTeXSource.appendPlainText(latex.entry(e, b, Lang))
+        self.LaTeXSource.appendPlainText(latex.entry(e, Lang))
 
         self.LaTeXSource.appendPlainText(latex.tail())
 
