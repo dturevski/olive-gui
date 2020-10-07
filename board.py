@@ -378,17 +378,8 @@ class Board:
         return fen
 
     def toLaTeX(self):
-        pieces = ''
-        first = True
-        for i in range(64):
-            if(self.board[i] is not None):
-                if first:
-                    first = False
-                else:
-                    pieces = pieces + ", "
-                pieces = pieces + self.board[i].toLaTeX() + idxToAlgebraic(i)
-
-        return pieces
+        return ", ".join([self.board[i].toLaTeX() + idxToAlgebraic(i)
+                       for i in range(64) if self.board[i] is not None])
 
     def getLegend(self, latex = False):
         legend = {}
@@ -396,7 +387,7 @@ class Board:
             t = []
             if len(piece.specs) > 0:
                 t.append(" ".join(piece.specs))
-            if latex == False:
+            if not latex:
                 if piece.color == 'neutral':
                     t.append('Neutral')
             if (not piece.name.lower() in [

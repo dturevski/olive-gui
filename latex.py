@@ -4,38 +4,23 @@
 import model
 import board
 import gui
+import logging
 
 # 3rd party
 import yaml
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-# 3rd party
-# import reportlab.rl_config
-# reportlab.rl_config.warnOnMissingFontGlyphs = 0
-# from reportlab.pdfbase import pdfmetrics
-# from reportlab.pdfbase.ttfonts import TTFont
-# import reportlab.platypus
-# from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-# from reportlab.lib.pagesizes import A4
-# from PyQt5 import QtGui
-
 def string2LaTeX(s):
-    # how to indent solution?
     s = s.replace("#", "\\#")
     s = s.replace("&", "\\&")
     s = s.replace("%", "\\%")
     s = s.replace("*", "{\\x}")
+    s = s.replace("->", "$\\to$")
     return s
 
 def indent(s):
-    lines = s.splitlines(False)
-    t = ""
-    for line in lines:
-        if line.strip() == "":
-            continue
-        t = t + "    " + line + "\n"
-    return t
+    return "    " + "\n    ".join([line for line in s.splitlines(False) if line.strip() != ""]) + "\n"
 
 def head():
     return ("\\documentclass{article}\n\n" +
@@ -101,13 +86,29 @@ def entry(e, Lang):
             "  \\pieces[" + b.getPiecesCount() + "]{" + pieces + "}%\n")
 
     # stipulation
-    text = (text + "  \\stipulation{" + string2LaTeX(e['stipulation']) + "}%\n")
+    text = text + "  \\stipulation{" + string2LaTeX(e['stipulation'])
+
+    # add number of solutions
+    if model.notEmpty(e, 'intended-solutions'):
+        text = text + " \ " + e['intended-solutions']
+        if '.' not in e['intended-solutions']:
+            text = text + " " + Lang.value('EP_Intended_solutions_shortened')
+
+    # add duplex
+    if 'options' in e:
+        if 'Duplex' in e['options']:
+            text = text + " \ Duplex"
+    text = text + "}%\n"
 
     # conditions
-    if('options' in e):
-        text = (text +
-            "  \\condition{%\n"
-            + indent("\\newline\n".join(e['options'])) + "  }%\n")
+    if 'options' in e:
+        # extract conditions by excluding Popeye options
+        conditions = [cond for cond in e['options']
+                       if not board.FairyHelper.is_popeye_option(cond)]
+        if conditions != []:
+            text = (text +
+                "  \\condition{%\n"
+                + indent("\\newline\n".join(conditions)) + "  }%\n")
 
     # twins
     if 'twins' in e:
@@ -115,6 +116,7 @@ def entry(e, Lang):
             "  \\twins{%\n" + indent(model.createPrettyTwinsText(e, True)) + "  }%\n")
 
     # remarks = legend
+    # list fairy pieces
     legend = b.getLegend(True)
     if len(legend) != 0:
         text = (text +
@@ -139,7 +141,7 @@ def entry(e, Lang):
     if 'comments' in e:
         text = (text +
             "  \\comment{%\n" +
-            indent(string2LaTeX("".join(e['comments']))) + "  }%\n")
+            indent(string2LaTeX("\\\\\n".join(e['comments']))) + "  }%\n")
 
     text = text + "\\end{diagram}%\n"
 

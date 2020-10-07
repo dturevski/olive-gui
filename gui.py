@@ -201,15 +201,15 @@ class Mainframe(QtWidgets.QMainWindow):
             Lang.value('MI_Save_template'), self)
         self.saveTemplateAction.triggered.connect(self.onSaveTemplate)
 
-        # import PBM - inactive ?
+        # import PBM - inactive
         self.importPbmAction = QtWidgets.QAction(Lang.value('MI_Import_PBM'), self)
         self.importPbmAction.triggered.connect(self.onImportPbm)
 
-        # import CCV - inactive ?
+        # import CCV - inactive
         self.importCcvAction = QtWidgets.QAction(Lang.value('MI_Import_CCV'), self)
         self.importCcvAction.triggered.connect(self.onImportCcv)
 
-        # export HTML - inactive ?
+        # export HTML - inactive
         self.exportHtmlAction = QtWidgets.QAction(
             Lang.value('MI_Export_HTML'), self)
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
