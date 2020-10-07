@@ -248,19 +248,19 @@ MI_Rotate_CCW:
   en: Rotate position 90° counterclockwise
   rs: Ротирај позицију за +90°
   ru: Повернуть позицию на 90° против часовой стрелки
-  de: Stellung 90° entgegen dem Urzeigersin drehen
+  de: Stellung 90° entgegen dem Uhrzeigersinn drehen
   ro: Mișcă poziția cu 90° în sens orar
 MI_Rotate_CW:
   en: Rotate position 90° clockwise
   rs: Ротирај позицију за  -90°
   ru: Повернуть позицию на 90° по часовой стрелке
-  de: Stellung 90° im Urzeigersin drehen
+  de: Stellung 90° im Uhrzeigersinn drehen
   ro: Mișcă poziția cu 90° în sens antiorar
 MI_Mirror_vertical:
   en: Mirror position vertically
   rs: Вертикална ротација 180°
   ru: Отразить позицию относительно вертикальной оси
-  de: Stellung 180° im Urzeigersin drehen
+  de: vertikal spiegeln
   ro: Oglindește poziția vertical
 MI_Mirror_horizontal:
   en: Mirror position horizontally
@@ -328,6 +328,12 @@ MI_Export_HTML:
   ru: HTML
   de: HTML
   ro: HTML
+MI_Export_LaTeX:
+  en: Collection to LaTeX
+  rs: Збирку у LaTeX
+  ru: Коллекцию в LaTeX
+  de: Sammlung als LaTeX exportieren
+  ro: Colecție în LaTeX
 MI_Export_PDF:
   en: Collection to PDF
   rs: Збирку у PDF
@@ -550,13 +556,13 @@ PS_Hashtables:
   en: Hashtables (Mb)
   rs: Hashtables (Mb)
   ru: Таблицы транспозиций (Мб)
-  de: Hashtables (Mb)
+  de: Hashtabellen (MB)
   ro: Tabele hash (Mb)
 PS_AXR:
   en: Auto Indexer
   rs: Auto Indexer
   ru: Auto Indexer
-  de: Auto Indexer
+  de: Autoindizierer
   ro: Indexare automată
 
 # Solution screen
@@ -622,6 +628,12 @@ MSG_CCV_import_failed:
   ru: Ошибка при чтении формата Fancy
   de: Fehler beim Lesen im Fancy-Format
   ro: Greșala la citirea formatului Fancy
+MSG_LaTeX_export_failed:
+  en: LaTeX export failed.
+  rs: Грешка код извоза у LaTeX.
+  ru: Ошибка при экспорте LaTeX.
+  de: Konnte nicht nach LaTeX exportieren.
+  ru: Greșala de export LaTeX.
 MSG_PDF_export_failed:
   en: |
     PDF export failed.
@@ -734,7 +746,7 @@ PU_Memo:
     вашему выбору.
   de: |
     Die ausgewählten Fonts müssen installiert sein.
-    Diagramme und Lösungen können mittel Copy+Paste
+    Diagramme und Lösungen können mittels Copy+Paste
     aus Olive in einen RTF-fähiges Textverarbeitungssytem
     übernommen werden.
   ro: |
@@ -743,6 +755,14 @@ PU_Memo:
     și copia diagrame și soluții din Olive
     și insera în editor textual care suportă
     RTF.
+
+# LaTeX
+TC_LaTeX:
+  en: LaTeX
+  rs: LaTeX
+  ru: LaTeX
+  de: LaTeX
+  ro: LaTeX
 
 # Chest
 TC_Chest:

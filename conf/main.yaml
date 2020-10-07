@@ -2,31 +2,31 @@ analyzers:
 - trajectories
 - miscellaneous
 auto-compactify: 0
-collections-dir: ./
+collections-dir: collections
 default-lang: en
 default-notation: en
 fairy-zoo:
-- - ''
-  - black L
-  - ''
-  - white L
-  - ''
-  - ''
-  - ''
-- - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-- - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
+- - white G
+  - white RH
+  - white BH
+  - white NH
+  - white NE
+  - white RP
+  - white CH
+- - black G
+  - black RH
+  - black BH
+  - black NH
+  - black NE
+  - black RP
+  - black CH
+- - neutral G
+  - neutral RH
+  - neutral BH
+  - neutral NH
+  - neutral NE
+  - neutral RP
+  - neutral CH
 font-size: 24
 horsehead-glyph: N
 import-post-decode:

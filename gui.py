@@ -25,6 +25,8 @@ import pdf
 import xfen2img
 import yacpdb.indexer.cruncher
 import yacpdb.entry
+import latex
+
 # indexer
 import yacpdb.indexer.metadata
 from base import read_resource_file, get_write_dir
@@ -135,6 +137,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.popeyeView = PopeyeView()
         self.yamlView = YamlView()
         self.publishingView = PublishingView()
+        self.texView = LaTeXView()
         self.chestView = chest.ChestView(Conf, Lang, Mainframe)
         self.tabBar2 = QtWidgets.QTabWidget()
         self.tabBar2.addTab(self.popeyeView, Lang.value('TC_Popeye'))
@@ -143,6 +146,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.addTab(self.yamlView, Lang.value('TC_YAML'))
         self.tabBar2.addTab(self.publishingView, Lang.value('TC_Publishing'))
         self.tabBar2.addTab(self.chestView, Lang.value('TC_Chest'))
+        self.tabBar2.addTab(self.texView, Lang.value('TC_LaTeX'))
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
         self.overview = OverviewList()
         self.overview.init()
@@ -162,6 +166,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         logging.debug("Mainframe.initActions()")
 
+        # create new collection
         self.newAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/add-new-document.svg'),
             Lang.value('MI_New'),
@@ -169,6 +174,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.newAction.setShortcut('Ctrl+N')
         self.newAction.triggered.connect(self.onNewFile)
 
+        # open collection
         self.openAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/open-file.svg'),
             Lang.value('MI_Open'),
@@ -176,6 +182,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.openAction.setShortcut('Ctrl+O')
         self.openAction.triggered.connect(self.onOpenFile)
 
+        # save collection
         self.saveAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/save-file.svg'),
             Lang.value('MI_Save'),
@@ -183,29 +190,45 @@ class Mainframe(QtWidgets.QMainWindow):
         self.saveAction.setShortcut('Ctrl+S')
         self.saveAction.triggered.connect(self.onSaveFile)
 
+        # save as collection
         self.saveAsAction = QtWidgets.QAction(
             Lang.value('MI_Save_as'),
             self)
         self.saveAsAction.triggered.connect(self.onSaveFileAs)
 
+        # save template
         self.saveTemplateAction = QtWidgets.QAction(
             Lang.value('MI_Save_template'), self)
         self.saveTemplateAction.triggered.connect(self.onSaveTemplate)
 
+        # import PBM - inactive
         self.importPbmAction = QtWidgets.QAction(Lang.value('MI_Import_PBM'), self)
         self.importPbmAction.triggered.connect(self.onImportPbm)
 
+        # import CCV - inactive
         self.importCcvAction = QtWidgets.QAction(Lang.value('MI_Import_CCV'), self)
         self.importCcvAction.triggered.connect(self.onImportCcv)
 
+        # export HTML - inactive
         self.exportHtmlAction = QtWidgets.QAction(
             Lang.value('MI_Export_HTML'), self)
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
+
+        # export PDF
         self.exportPdfAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/pdf.svg'),
             Lang.value('MI_Export_PDF'),
             self)
         self.exportPdfAction.triggered.connect(self.onExportPdf)
+
+        # export LaTeX
+        self.exportLaTeXAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/latex.svg'),
+            Lang.value('MI_Export_LaTeX'),
+            self)
+        self.exportLaTeXAction.triggered.connect(self.onExportLaTeX)
+
+        # export diagram as PNG
         self.exportImgAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/png.svg'),
             Lang.value('MI_Export_Image'), self)
@@ -218,6 +241,7 @@ class Mainframe(QtWidgets.QMainWindow):
             self)
         self.addEntryAction.triggered.connect(self.onAddEntry)
 
+        # delete entry
         self.deleteEntryAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/minus.svg'),
             Lang.value('MI_Delete_entry'),
@@ -230,12 +254,15 @@ class Mainframe(QtWidgets.QMainWindow):
         self.editSolutionAction.setShortcut('Ctrl+E')
         self.editSolutionAction.triggered.connect(self.popeyeView.onEdit)
 
+        # demo mode
         self.demoModeAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/fullscreen.svg'),
             Lang.value('MI_Demo_mode'),
             self)
+        self.demoModeAction.setShortcut('Ctrl+D')
         self.demoModeAction.triggered.connect(self.onDemoMode)
 
+        # quit/exit
         self.exitAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/logout.svg'),
             Lang.value('MI_Exit'),
@@ -327,6 +354,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.exportMenu = self.fileMenu.addMenu(Lang.value('MI_Export'))
         # self.exportMenu.addAction(self.exportHtmlAction)
         self.exportMenu.addAction(self.exportPdfAction)
+        self.exportMenu.addAction(self.exportLaTeXAction)
         self.exportMenu.addAction(self.exportImgAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.demoModeAction)
@@ -480,6 +508,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.setTabText(3, Lang.value('TC_YAML'))
         self.tabBar2.setTabText(4, Lang.value('TC_Publishing'))
         self.tabBar2.setTabText(5, Lang.value('TC_Chest'))
+        self.tabBar2.setTabText(6, Lang.value('TC_LaTeX'))
 
         # actions
         self.exitAction.setText(Lang.value('MI_Exit'))
@@ -503,6 +532,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.importCcvAction.setText(Lang.value('MI_Import_CCV'))
         self.exportHtmlAction.setText(Lang.value('MI_Export_HTML'))
         self.exportPdfAction.setText(Lang.value('MI_Export_PDF'))
+        self.exportLaTeXAction.setText(Lang.value('MI_Export_LaTeX'))
         self.exportImgAction.setText(Lang.value('MI_Export_Image'))
 
         for i, k in enumerate(Mainframe.transform_names):
@@ -672,8 +702,46 @@ class Mainframe(QtWidgets.QMainWindow):
     def onExportHtml(self):
         pass
 
+    def onExportLaTeX(self):
+        head, tail = os.path.split(Mainframe.model.filename)
+        default_dir = './collections/' + tail.replace('.olv', '') + '.tex'
+        fileName = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            Lang.value('MI_Export') +
+            ' ' +
+            Lang.value('MI_Export_LaTeX'),
+            default_dir,
+            "(*.tex)")[0]
+        if not fileName:
+            return
+        try:
+            f = open(str(fileName), 'w', encoding='utf-8')
+            f.write(latex.head())
+
+            for i in range(0, len(Mainframe.model.entries)):
+                f.write(latex.entry(Mainframe.model.entries[i], Lang))
+                if i % 3 == 2:
+                    if i != len(Mainframe.model.entries):
+                        f.write("\n\putsol\n\n")
+                else:
+                    f.write("\\hfill\n")
+
+            f.write(latex.tail())
+            f.close()
+            # QtGui.QDesktopServices.openUrl(QtCore.QUrl(fileName))
+        except IOError:
+            msg = Lang.value('MSG_IO_failed');
+            logging.exception(msg)
+            msgBox(msg)
+        except:
+            msg = Lang.value('MSG_LaTeX_export_failed');
+            logging.exception(msg)
+            msgBox(msg)
+
     def onExportPdf(self):
-        default_dir = './collections/'
+        # default_dir = './collections/'
+        head, tail = os.path.split(Mainframe.model.filename)
+        default_dir = './collections/' + tail.replace('.olv', '') + '.pdf'
         fileName = QtWidgets.QFileDialog.getSaveFileName(
             self,
             Lang.value('MI_Export') +
@@ -1998,6 +2066,238 @@ class KeywordsInputWidget(QtWidgets.QTextEdit):
             keywords.append(keyword)
             self.setText("\n".join(keywords))
         return callable
+
+
+class LaTeXView(QtWidgets.QSplitter):
+    def __init__(self):
+        super(LaTeXView, self).__init__(QtCore.Qt.Horizontal)
+
+        self.LaTeXSource = QtWidgets.QPlainTextEdit()
+        self.LaTeXSource.setReadOnly(True)
+
+        self.addWidget(self.LaTeXSource)
+
+        Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigLangChanged.connect(self.onModelChanged)
+
+        self.skipModelChanged = False
+
+    def onModelChanged(self):
+        self.setFont(QtGui.QFont("Courier", 10))
+
+        self.LaTeXSource.setPlainText(latex.head())
+
+        e = Mainframe.model.cur()
+
+        self.LaTeXSource.appendPlainText(latex.entry(e, Lang))
+
+        self.LaTeXSource.appendPlainText(latex.tail())
+
+        self.skipModelChanged = False
+
+class PublishingView(QtWidgets.QSplitter):
+
+    def loadFontInfo(self, filename):
+        fontinfo = {}
+        for entry in [x.strip().split("\t") for x in read_resource_file(filename)]:
+            fontinfo[entry[0]] = {'postfix': entry[1], 'chars': [
+                chr(int(entry[2])), chr(int(entry[3]))]}
+        return fontinfo
+
+    def solution2Html(self, s, config):
+        s = s.replace("\n", "<br/>")
+        if 'kqrbsp' in config:
+            s = s.replace("x", ":")
+            s = s.replace("*", ":")
+            # so both pieces match RE in eg: '1.a1=Q Be5'
+            s = s.replace(" ", "  ")
+            pattern = re.compile('([ \.\(\=\a-z18])([KQRBSP])([^\)\]A-Z])')
+            s = re.sub(
+                pattern,
+                lambda m: self.replaceSolutionChars(
+                    config,
+                    m),
+                s)
+            s = s.replace("  ", " ")
+        return '<b>' + s + '</b>'
+
+    def replaceSolutionChars(self, config, m):
+        return m.group(1) + '</b><font face="' + config['prefix'] + '">' + str(chr(
+            config['kqrbsp']['kqrbsp'.index(m.group(2).lower())])) + '</font><b>' + m.group(3)
+
+    def board2Html(self, board, config):  # mostly copypaste from pdf.py  :( real clumsy
+        # important assumption: empty squares and board edges reside in one font file/face
+        # (poorly designated 'aux-postfix') in case of most chess fonts there's only one file/face
+        # and there's nothing to worry about, in case of GC2004 this is true (they are in GC2004d)
+        # in other fonts - who knows
+        lines = []
+        spans, fonts, prevfont = [], [], config['prefix'] + config['aux-postfix']
+        # top edge
+        fonts.append(prevfont)
+        spans.append([chr(int(config['edges']['NW'])) +
+                      8 * chr(int(config['edges']['N'])) +
+                      chr(int(config['edges']['NE'])) +
+                      "<br/>"])
+        for i in range(64):
+            # left edge
+            if i % 8 == 0:
+                font = config['prefix'] + config['aux-postfix']
+                char = chr(int(config['edges']['W']))
+                if font != prevfont:
+                    fonts.append(font)
+                    spans.append([char])
+                    prevfont = font
+                else:
+                    spans[-1].append(char)
+            # board square
+            font = config['prefix'] + config['aux-postfix']
+            char = [chr(int(config['empty-squares']['light'])),
+                    chr(int(config['empty-squares']['dark']))][((i >> 3) + (i % 8)) % 2]
+            if not board.board[i] is None:
+                glyph = board.board[i].toFen()
+                if len(glyph) > 1:  # removing brackets
+                    glyph = glyph[1:-1]
+                if glyph in config['fontinfo']:
+                    font = config['prefix'] + \
+                        config['fontinfo'][glyph]['postfix']
+                    char = config['fontinfo'][glyph][
+                        'chars'][((i >> 3) + (i % 8)) % 2]
+            if font != prevfont:
+                fonts.append(font)
+                spans.append([char])
+                prevfont = font
+            else:
+                spans[-1].append(char)
+            # right edge
+            if i % 8 == 7:
+                font = config['prefix'] + config['aux-postfix']
+                char = chr(int(config['edges']['E']))
+                if font != prevfont:
+                    fonts.append(font)
+                    spans.append([char])
+                    prevfont = font
+                else:
+                    spans[-1].append(char)
+                spans[-1].append("<br/>")
+        # bottom edge
+        font = config['prefix'] + config['aux-postfix']
+        edge = chr(int(config['edges']['SW'])) + 8 * chr(int(config['edges']
+                                                             ['S'])) + chr(int(config['edges']['SE'])) + "<br/>"
+        if font != prevfont:
+            fonts.append(font)
+            spans.append(edge)
+        else:
+            spans[-1].append(edge)
+        html = ''.join([
+            '<font face="%s">%s</font>' % (fonts[i], ''.join(spans[i]))
+            for i in range(len(fonts))
+        ])
+        return ('<font size="%s">%s</font>') % (config['size'], html)
+        # return html
+
+    def __init__(self):
+        super(PublishingView, self).__init__(QtCore.Qt.Horizontal)
+
+        f = open(get_write_dir() + '/conf/chessfonts.yaml', 'r')
+        self.config = yaml.safe_load(f)
+        f.close()
+        for family in self.config['diagram-fonts']:
+            self.config['config'][family]['fontinfo'] = self.loadFontInfo(
+                self.config['config'][family]['glyphs-tab'])
+
+        self.richText = QtWidgets.QTextEdit()
+        self.richText.setReadOnly(True)
+
+        w = QtWidgets.QWidget()
+        vbox = QtWidgets.QVBoxLayout()
+
+        self.labelDiaFont = QtWidgets.QLabel()
+        vbox.addWidget(self.labelDiaFont)
+        self.diaFontSelect = QtWidgets.QComboBox()
+        self.diaFontSelect.addItems(
+            [self.config['config'][x]['display-name'] for x in self.config['diagram-fonts']])
+        self.diaFontSelect.setCurrentIndex(
+            self.config['diagram-fonts'].index(self.config['defaults']['diagram']))
+        vbox.addWidget(self.diaFontSelect)
+        self.labelSolFont = QtWidgets.QLabel()
+        vbox.addWidget(self.labelSolFont)
+        self.solFontSelect = QtWidgets.QComboBox()
+        self.solFontSelect.addItems(
+            [self.config['config'][x]['display-name'] for x in self.config['inline-fonts']])
+        self.solFontSelect.setCurrentIndex(
+            self.config['inline-fonts'].index(self.config['defaults']['inline']))
+        vbox.addWidget(self.solFontSelect)
+        self.labelMemo = QtWidgets.QLabel()
+        vbox.addWidget(self.labelMemo)
+        vbox.addStretch(1)
+
+        w.setLayout(vbox)
+        self.addWidget(self.richText)
+        self.addWidget(w)
+        self.setStretchFactor(0, 1)
+
+        self.diaFontSelect.currentIndexChanged.connect(self.onModelChanged)
+        self.solFontSelect.currentIndexChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
+
+        self.onLangChanged()
+
+    def onModelChanged(self):
+        self.richText.setText("")
+        self.richText.setFontPointSize(12)
+
+        self.richText.insertHtml(
+            pdf.ExportDocument.header(
+                Mainframe.model.cur(),
+                Lang) + "<br/>\n")
+
+        inline_font = self.config[
+            'inline-fonts'][self.solFontSelect.currentIndex()]
+        diagram_font = self.config[
+            'diagram-fonts'][self.diaFontSelect.currentIndex()]
+
+        self.richText.insertHtml(
+            self.board2Html(
+                Mainframe.model.board,
+                self.config['config'][diagram_font]))
+        self.richText.insertHtml(
+            Mainframe.model.cur()['stipulation'] +
+            ' ' +
+            Mainframe.model.board.getPiecesCount() +
+            "<br/>\n")
+
+        self.richText.insertHtml(
+            pdf.ExportDocument.solver(
+                Mainframe.model.cur(),
+                Lang) + "<br/>\n")
+        self.richText.insertHtml(
+            pdf.ExportDocument.legend(
+                Mainframe.model.board) +
+            "<br/><br/>\n")
+
+        if 'solution' in Mainframe.model.cur():
+            self.richText.insertHtml(
+                self.solution2Html(
+                    Mainframe.model.cur()['solution'],
+                    self.config['config'][inline_font]))
+
+        if('keywords' in Mainframe.model.cur()):
+            self.richText.insertHtml(
+                "<br/>\n" +
+                ', '.join(
+                    Mainframe.model.cur()['keywords']) +
+                "<br/>\n")
+
+        if('comments' in Mainframe.model.cur()):
+            self.richText.insertHtml(
+                "<br/>\n" + "<br/>\n".join(Mainframe.model.cur()['comments']) + "<br/>\n")
+
+    def onLangChanged(self):
+        self.labelDiaFont.setText(Lang.value('PU_Diagram_font') + ':')
+        self.labelSolFont.setText(Lang.value('PU_Inline_font') + ':')
+        self.labelMemo.setText(Lang.value('PU_Memo'))
+        self.onModelChanged()
 
 
 class SolutionView(QtWidgets.QWidget):
