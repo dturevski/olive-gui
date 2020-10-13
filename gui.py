@@ -906,6 +906,15 @@ class Mainframe(QtWidgets.QMainWindow):
         self.show()
 
 
+class PlainTextEdit(QtWidgets.QTextEdit):
+
+    def __init__(self, *__args):
+        super().__init__(*__args)
+
+    def insertFromMimeData(self, data):
+        self.insertPlainText(data.text())
+
+
 class ClickableLabel(QtWidgets.QLabel):
 
     def __init__(self, str):
@@ -1773,7 +1782,7 @@ class MetadataView(QtWidgets.QWidget):
             Lang.value('EP_Authors') +
             ':<br/><br/>' +
             Lang.value('EE_Authors_memo'))
-        self.inputAuthors = QtWidgets.QTextEdit()
+        self.inputAuthors = PlainTextEdit()
         grid.addWidget(self.labelAuthors, 0, 0)
         grid.addWidget(self.inputAuthors, 0, 1)
 
@@ -1834,7 +1843,7 @@ class MetadataView(QtWidgets.QWidget):
         grid.addWidget(self.inputDistinction, 4, 1)
 
         self.labelJudges = QtWidgets.QLabel(Lang.value('EE_Judges') + ':')
-        self.inputJudges = QtWidgets.QTextEdit()
+        self.inputJudges = PlainTextEdit()
         grid.addWidget(self.labelJudges, 5, 0)
         grid.addWidget(self.inputJudges, 5, 1)
 
@@ -2038,10 +2047,10 @@ class DistinctionWidget(QtWidgets.QWidget):
                 self.name.setItemText(i, '')
 
 
-class KeywordsInputWidget(QtWidgets.QTextEdit):
+class KeywordsInputWidget(PlainTextEdit):
 
     def __init__(self):
-        super(KeywordsInputWidget, self).__init__()
+        super(PlainTextEdit, self).__init__()
         self.kwdMenu = QtWidgets.QMenu(Lang.value('MI_Add_keyword'))
         # for section in sorted(Conf.keywords.keys()):
         for section in list(Conf.keywords.keys()):
@@ -2305,11 +2314,11 @@ class SolutionView(QtWidgets.QWidget):
     def __init__(self):
         super(SolutionView, self).__init__()
         grid = QtWidgets.QGridLayout()
-        self.solution = QtWidgets.QTextEdit()
+        self.solution = PlainTextEdit()
         self.solutionLabel = QtWidgets.QLabel(Lang.value('SS_Solution'))
         self.keywords = KeywordsInputWidget()
         self.keywordsLabel = QtWidgets.QLabel(Lang.value('SS_Keywords'))
-        self.comments = QtWidgets.QTextEdit()
+        self.comments = PlainTextEdit()
         self.commentsLabel = QtWidgets.QLabel(Lang.value('SS_Comments'))
 
         grid.addWidget(self.solutionLabel, 0, 0)
@@ -2381,10 +2390,10 @@ class SolutionView(QtWidgets.QWidget):
         self.commentsLabel.setText(Lang.value('SS_Comments'))
 
 
-class PopeyeInputWidget(QtWidgets.QTextEdit):
+class PopeyeInputWidget(PlainTextEdit):
 
     def __init__(self):
-        super(PopeyeInputWidget, self).__init__()
+        super(PlainTextEdit, self).__init__()
 
     def setActions(self, actions):
         self.actions = actions
