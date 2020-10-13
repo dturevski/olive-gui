@@ -2601,9 +2601,10 @@ class PopeyeView(QtWidgets.QSplitter):
         self.process.kill()
         self.output.insertPlainText("\n" + Lang.value('MSG_Terminated'))
 
-    def reset(self):
+    def reset(self, clear_output = True):
         self.stop_requested = False
-        self.output.setText("")
+        if clear_output:
+            self.output.setText("")
         self.raw_output = ''
         self.raw_mode = True
         self.compact_possible = False
@@ -2617,7 +2618,7 @@ class PopeyeView(QtWidgets.QSplitter):
 
     def logPopeyeCommunication(self, text):
         try:
-            file = Conf.value("popeye-log-file")
+            file = Conf.popeye['comlog']
             if file:
                 with open(file, "a") as f:
                     f.write(text)
@@ -2757,7 +2758,7 @@ class PopeyeView(QtWidgets.QSplitter):
             return
 
         if self.current_index != Mainframe.model.current:
-            self.reset()
+            self.reset(Conf.value("clear-popeye-output-on-entry-change"))
 
         self.skipModelChanged = True
 
