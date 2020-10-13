@@ -100,7 +100,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.initFrame()
 
         self.updateTitle()
-        self.overview.rebuild()
+        self.entryList.rebuild()
         self.show()
 
     def initLayout(self):
@@ -148,11 +148,11 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.addTab(self.chestView, Lang.value('TC_Chest'))
         self.tabBar2.addTab(self.texView, Lang.value('TC_LaTeX'))
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
-        self.overview = OverviewList()
-        self.overview.init()
+        self.entryList = EntryListView()
+        self.entryList.init()
 
         splitter.addWidget(self.tabBar2)
-        splitter.addWidget(self.overview)
+        splitter.addWidget(self.entryList)
 
         # putting panes together
         hbox.addWidget(widgetLeftPane)
@@ -436,7 +436,7 @@ class Mainframe(QtWidgets.QMainWindow):
         if settings.value("windowState") != None:
             self.restoreState(settings.value("windowState"))
         if settings.value("overviewColumnWidths") != None:
-            self.overview.setColumnWidthsFromString(
+            self.entryList.setColumnWidthsFromString(
                str(QtCore.QVariant(settings.value("overviewColumnWidths"))))
 
     def updateTitle(self):
@@ -473,7 +473,7 @@ class Mainframe(QtWidgets.QMainWindow):
                 Mainframe.model = model.Model()
             Mainframe.model.filename = str(fileName)
         finally:
-            self.overview.rebuild()
+            self.entryList.rebuild()
             Mainframe.sigWrapper.sigModelChanged.emit()
 
     def factoryDraggableLabel(self, id):
@@ -555,7 +555,7 @@ class Mainframe(QtWidgets.QMainWindow):
         if not self.doDirtyCheck():
             return
         Mainframe.model = model.Model()
-        self.overview.rebuild()
+        self.entryList.rebuild()
         Mainframe.sigWrapper.sigModelChanged.emit()
 
     def onOpenFile(self):
@@ -576,7 +576,7 @@ class Mainframe(QtWidgets.QMainWindow):
                     f.write(yaml.dump(Mainframe.model.entries[i], encoding="utf8", allow_unicode=True))
                     Mainframe.model.dirty_flags[i] = False
                 Mainframe.model.is_dirty = False
-                self.overview.removeDirtyMarks()
+                self.entryList.removeDirtyMarks()
                 Conf.values['collections-dir'] = os.path.split(Mainframe.model.filename)[0]
             finally:
                 f.close()
@@ -668,7 +668,7 @@ class Mainframe(QtWidgets.QMainWindow):
         finally:
             if len(Mainframe.model.entries) == 0:
                 Mainframe.model = model.Model()
-            self.overview.rebuild()
+            self.entryList.rebuild()
             Mainframe.sigWrapper.sigModelChanged.emit()
 
     def onImportCcv(self):
@@ -696,7 +696,7 @@ class Mainframe(QtWidgets.QMainWindow):
         finally:
             if len(Mainframe.model.entries) == 0:
                 Mainframe.model = model.Model()
-            self.overview.rebuild()
+            self.entryList.rebuild()
             Mainframe.sigWrapper.sigModelChanged.emit()
 
     def onExportHtml(self):
@@ -787,25 +787,25 @@ class Mainframe(QtWidgets.QMainWindow):
                 Mainframe.model.defaultEntry),
             True,
             idx)
-        self.overview.insertItem(idx)
+        self.entryList.insertItem(idx)
 
     def onDeleteEntry(self):
         dialog = YesNoDialog(Lang.value('MSG_Confirm_delete_entry'))
         if not dialog.exec_():
             return
-        self.overview.skip_current_item_changed = True
+        self.entryList.skip_current_item_changed = True
         idx = Mainframe.model.current
         Mainframe.model.delete(idx)
-        self.overview.deleteItem(idx)
-        self.overview.skip_current_item_changed = False
+        self.entryList.deleteItem(idx)
+        self.entryList.skip_current_item_changed = False
         if len(Mainframe.model.entries) == 0:
             Mainframe.model.insert(
                 copy.deepcopy(
                     Mainframe.model.defaultEntry), True, 0)
-            self.overview.insertItem(idx)
+            self.entryList.insertItem(idx)
         else:
-            self.overview.setCurrentItem(
-                self.overview.topLevelItem(
+            self.entryList.setCurrentItem(
+                self.entryList.topLevelItem(
                     Mainframe.model.current))
         Mainframe.sigWrapper.sigModelChanged.emit()
 
@@ -861,7 +861,7 @@ class Mainframe(QtWidgets.QMainWindow):
         settings.setValue("windowState", self.saveState())
         settings.setValue(
             "overviewColumnWidths",
-            self.overview.getColumnWidths())
+            self.entryList.getColumnWidths())
 
         self.chessBox.sync()
         Conf.write()
@@ -1098,10 +1098,10 @@ class FenView(QtWidgets.QLineEdit):
         self.skipModelChanged = False
 
 
-class OverviewList(QtWidgets.QTreeWidget):
+class EntryListView(QtWidgets.QTreeWidget):
 
     def __init__(self):
-        super(OverviewList, self).__init__()
+        super(EntryListView, self).__init__()
         self.setAlternatingRowColors(True)
 
         self.clipboard = QtWidgets.QApplication.clipboard()
