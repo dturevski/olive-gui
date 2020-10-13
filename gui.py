@@ -2615,6 +2615,15 @@ class PopeyeView(QtWidgets.QSplitter):
         self.output.setText([self.solutionOutput.solution,
                              self.raw_output][self.raw_mode])
 
+    def logPopeyeCommunication(self, text):
+        try:
+            file = Conf.value("popeye-log-file")
+            if file:
+                with open(file, "a") as f:
+                    f.write(text)
+        except (KeyError, IOError):
+            pass
+
     def runPopeyeInGui(self, input):
         self.setActionEnabled(False)
 
@@ -2627,6 +2636,8 @@ class PopeyeView(QtWidgets.QSplitter):
         handle, self.temp_filename = tempfile.mkstemp()
         os.write(handle, input.encode('utf8'))
         os.close(handle)
+
+        self.logPopeyeCommunication(input + os.linesep)
 
         self.process = QtCore.QProcess()
         self.process.readyReadStandardOutput.connect(self.onOut)
@@ -2654,14 +2665,17 @@ class PopeyeView(QtWidgets.QSplitter):
 
     def onOut(self):
         data = bytes(self.process.readAllStandardOutput()).decode("utf8")
+        self.logPopeyeCommunication(data)
         self.raw_output += data
         self.output.insertPlainText(data)
         if len(self.raw_output) > int(Conf.popeye['stop-max-bytes']):
             self.stopPopeye()
 
     def onError(self):
+        response = str(self.process.readAllStandardError(), encoding="utf8")
+        self.logPopeyeCommunication(response)
         self.output.setTextColor(QtGui.QColor(255, 0, 0))
-        self.output.insertPlainText(str(self.process.readAllStandardError(), encoding="utf8"))
+        self.output.insertPlainText(response)
         self.output.setTextColor(QtGui.QColor(0, 0, 0))
 
     def onFinished(self):
