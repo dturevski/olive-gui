@@ -15,7 +15,7 @@ def render(entry, settings):
     board = Board()
     board.fromAlgebraic(entry["algebraic"])
 
-    html = pdf.ExportDocument.header(entry, settings['lang']) + "<br/>\n"
+    html = pdf.ExportDocument.header(entry, settings['lang'])
     html += board_to_html(board, settings['diagram_font'])
     html += entry['stipulation'] + ' ' + board.getPiecesCount() + "<br/>\n"
     html += pdf.ExportDocument.solver(entry, settings['lang']) + "<br/>\n"
@@ -109,7 +109,8 @@ def board_to_html(board, config):
         '<font face="%s">%s</font>' % (fonts[i], ''.join(spans[i]))
         for i in range(len(fonts))
     ])
-    return '<font size="%s">%s</font>' % (config['size'], html)
+    # 0.93749 is magic line-height number that works fine in browsers
+    return '<p style="line-height:1;"><font size="%s">%s</font></p>' % (config['size'], html)
 
 
 def solution_to_html(s, config):

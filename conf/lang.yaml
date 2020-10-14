@@ -322,12 +322,6 @@ MI_Import_CCV:
   ru: Fancy .CCV
   de: Fancy .CCV
   ro: Fancy .CCV
-MI_Export_HTML:
-  en: HTML
-  rs: HTML
-  ru: HTML
-  de: HTML
-  ro: HTML
 MI_Export_LaTeX:
   en: Collection to LaTeX
   rs: Збирку у LaTeX
@@ -340,6 +334,12 @@ MI_Export_PDF:
   ru: Коллекцию в PDF
   de: Sammlung als PDF exportieren
   ro: Colecție în PDF
+MI_Export_HTML:
+  en: Collection to HTML
+  rs: Збирку у HTML
+  ru: Коллекцию в HTML
+  de: Sammlung als HTML exportieren
+  ro: Colecție în HTML
 MI_Export_Image:
   en: Diagram to image file
   rs: Дијаграм у имиџ фајл
@@ -633,7 +633,7 @@ MSG_LaTeX_export_failed:
   rs: Грешка код извоза у LaTeX.
   ru: Ошибка при экспорте LaTeX.
   de: Konnte nicht nach LaTeX exportieren.
-  ru: Greșala de export LaTeX.
+  ro: Greșala de export LaTeX.
 MSG_PDF_export_failed:
   en: |
     PDF export failed.
@@ -647,7 +647,7 @@ MSG_PDF_export_failed:
   de: |
     Konnte nicht nach PDF exportieren.
     Die Sammlung enthält möglicherweise Datensätze, die nicht in die Vorlage passen (z.B. sehr lange Lösungen)
-  ru: |
+  ro: |
     Greșala de export PDF.
     Posibil că colecția conține înscrieri care nu pot fi corect vizualizate cu ajutorul șablonului utilizat (ex. soluție este prea mare).
 MSG_Image_export_failed:

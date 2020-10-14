@@ -210,8 +210,9 @@ class Mainframe(QtWidgets.QMainWindow):
         self.importCcvAction = QtWidgets.QAction(Lang.value('MI_Import_CCV'), self)
         self.importCcvAction.triggered.connect(self.onImportCcv)
 
-        # export HTML - inactive
+        # export HTML
         self.exportHtmlAction = QtWidgets.QAction(
+            QtGui.QIcon(':/icons/html-5.svg'),
             Lang.value('MI_Export_HTML'), self)
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
 
@@ -234,7 +235,6 @@ class Mainframe(QtWidgets.QMainWindow):
             QtGui.QIcon(':/icons/png.svg'),
             Lang.value('MI_Export_Image'), self)
         self.exportImgAction.triggered.connect(self.onExportImg)
-        self.exportHtmlAction.setEnabled(False)
 
         self.addEntryAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/plus.svg'),
@@ -353,9 +353,9 @@ class Mainframe(QtWidgets.QMainWindow):
         #self.importMenu.addAction(self.importPbmAction)
         #self.importMenu.addAction(self.importCcvAction)
         self.exportMenu = self.fileMenu.addMenu(Lang.value('MI_Export'))
-        # self.exportMenu.addAction(self.exportHtmlAction)
         self.exportMenu.addAction(self.exportPdfAction)
         self.exportMenu.addAction(self.exportLaTeXAction)
+        self.exportMenu.addAction(self.exportHtmlAction)
         self.exportMenu.addAction(self.exportImgAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.demoModeAction)
@@ -701,7 +701,20 @@ class Mainframe(QtWidgets.QMainWindow):
             Mainframe.sigWrapper.sigModelChanged.emit()
 
     def onExportHtml(self):
-        pass
+        head, tail = os.path.split(Mainframe.model.filename)
+        default_dir = './collections/' + tail.replace('.olv', '.html')
+        fileName = QtWidgets.QFileDialog.getSaveFileName(self, Lang.value('MI_Export') + ' ' +
+                                                         Lang.value('MI_Export_HTML'), default_dir, "(*.html)")[0]
+        if not fileName:
+            return
+        try:
+            with open(str(fileName), 'w', encoding='utf-8') as f:
+                f.write(exporters.html.render_many(Mainframe.model.entries, self.publishingView.settings()))
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(fileName))
+        except Exception as ex:
+            msg = Lang.value('MSG_IO_failed')
+            logging.exception(ex)
+            msgBox(msg)
 
     def onExportLaTeX(self):
         head, tail = os.path.split(Mainframe.model.filename)
