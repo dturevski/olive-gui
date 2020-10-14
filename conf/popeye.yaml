@@ -1,5 +1,5 @@
 comlog: ''
 memory: 1024
-path: C:/Program Files/Olive-1.1/pywin64.exe
+path: pywin64.exe
 sticky-options: [Variation, NoBoard]
 stop-max-bytes: 81920
