@@ -1,8 +1,8 @@
 ﻿# -*- coding: utf-8 -*-
 
+# standard
 import copy
 import logging
-# standard
 import os
 import re
 import sys
@@ -21,11 +21,12 @@ import legacy.popeye
 import model
 import options
 import pbm
-import pdf
-import xfen2img
 import yacpdb.indexer.cruncher
 import yacpdb.entry
-import latex
+import exporters.pdf as pdf
+import exporters.xfen2img as xfen2img
+import exporters.latex as latex
+import exporters.html
 
 # indexer
 import yacpdb.indexer.metadata
@@ -756,11 +757,11 @@ class Mainframe(QtWidgets.QMainWindow):
             ed.doExport(str(fileName))
             QtGui.QDesktopServices.openUrl(QtCore.QUrl(fileName))
         except IOError:
-            msg = Lang.value('MSG_IO_failed');
+            msg = Lang.value('MSG_IO_failed')
             logging.exception(msg)
             msgBox(msg)
         except:
-            msg = Lang.value('MSG_PDF_export_failed');
+            msg = Lang.value('MSG_PDF_export_failed')
             logging.exception(msg)
             msgBox(msg)
 
@@ -772,7 +773,7 @@ class Mainframe(QtWidgets.QMainWindow):
         try:
             xfen2img.convert(Mainframe.model.board.toFen(), str(fileName))
         except IOError:
-            msg = Lang.value('MSG_IO_failed');
+            msg = Lang.value('MSG_IO_failed')
             logging.exception(msg)
             msgBox(msg)
         except:
@@ -2602,97 +2603,6 @@ class PublishingView(QtWidgets.QSplitter):
                 chr(int(entry[2])), chr(int(entry[3]))]}
         return fontinfo
 
-    def solution2Html(self, s, config):
-        s = s.replace("\n", "<br/>")
-        if 'kqrbsp' in config:
-            s = s.replace("x", ":")
-            s = s.replace("*", ":")
-            # so both pieces match RE in eg: '1.a1=Q Be5'
-            s = s.replace(" ", "  ")
-            pattern = re.compile('([ \.\(\=\a-z18])([KQRBSP])([^\)\]A-Z])')
-            s = re.sub(
-                pattern,
-                lambda m: self.replaceSolutionChars(
-                    config,
-                    m),
-                s)
-            s = s.replace("  ", " ")
-        return '<b>' + s + '</b>'
-
-    def replaceSolutionChars(self, config, m):
-        return m.group(1) + '</b><font face="' + config['prefix'] + '">' + str(chr(
-            config['kqrbsp']['kqrbsp'.index(m.group(2).lower())])) + '</font><b>' + m.group(3)
-
-    def board2Html(self, board, config):  # mostly copypaste from pdf.py  :( real clumsy
-        # important assumption: empty squares and board edges reside in one font file/face
-        # (poorly designated 'aux-postfix') in case of most chess fonts there's only one file/face
-        # and there's nothing to worry about, in case of GC2004 this is true (they are in GC2004d)
-        # in other fonts - who knows
-        lines = []
-        spans, fonts, prevfont = [], [], config['prefix'] + config['aux-postfix']
-        # top edge
-        fonts.append(prevfont)
-        spans.append([chr(int(config['edges']['NW'])) +
-                      8 * chr(int(config['edges']['N'])) +
-                      chr(int(config['edges']['NE'])) +
-                      "<br/>"])
-        for i in range(64):
-            # left edge
-            if i % 8 == 0:
-                font = config['prefix'] + config['aux-postfix']
-                char = chr(int(config['edges']['W']))
-                if font != prevfont:
-                    fonts.append(font)
-                    spans.append([char])
-                    prevfont = font
-                else:
-                    spans[-1].append(char)
-            # board square
-            font = config['prefix'] + config['aux-postfix']
-            char = [chr(int(config['empty-squares']['light'])),
-                    chr(int(config['empty-squares']['dark']))][((i >> 3) + (i % 8)) % 2]
-            if not board.board[i] is None:
-                glyph = board.board[i].toFen()
-                if len(glyph) > 1:  # removing brackets
-                    glyph = glyph[1:-1]
-                if glyph in config['fontinfo']:
-                    font = config['prefix'] + \
-                        config['fontinfo'][glyph]['postfix']
-                    char = config['fontinfo'][glyph][
-                        'chars'][((i >> 3) + (i % 8)) % 2]
-            if font != prevfont:
-                fonts.append(font)
-                spans.append([char])
-                prevfont = font
-            else:
-                spans[-1].append(char)
-            # right edge
-            if i % 8 == 7:
-                font = config['prefix'] + config['aux-postfix']
-                char = chr(int(config['edges']['E']))
-                if font != prevfont:
-                    fonts.append(font)
-                    spans.append([char])
-                    prevfont = font
-                else:
-                    spans[-1].append(char)
-                spans[-1].append("<br/>")
-        # bottom edge
-        font = config['prefix'] + config['aux-postfix']
-        edge = chr(int(config['edges']['SW'])) + 8 * chr(int(config['edges']
-                                                             ['S'])) + chr(int(config['edges']['SE'])) + "<br/>"
-        if font != prevfont:
-            fonts.append(font)
-            spans.append(edge)
-        else:
-            spans[-1].append(edge)
-        html = ''.join([
-            '<font face="%s">%s</font>' % (fonts[i], ''.join(spans[i]))
-            for i in range(len(fonts))
-        ])
-        return ('<font size="%s">%s</font>') % (config['size'], html)
-        # return html
-
     def __init__(self):
         super(PublishingView, self).__init__(QtCore.Qt.Horizontal)
 
@@ -2741,55 +2651,17 @@ class PublishingView(QtWidgets.QSplitter):
 
         self.onLangChanged()
 
+    def settings(self):
+        return {
+            'lang': Lang,
+            'inline_font': self.config['config'][self.config['inline-fonts'][self.solFontSelect.currentIndex()]],
+            'diagram_font': self.config['config'][self.config['diagram-fonts'][self.diaFontSelect.currentIndex()]]
+        }
+
     def onModelChanged(self):
         self.richText.setText("")
         self.richText.setFontPointSize(12)
-
-        self.richText.insertHtml(
-            pdf.ExportDocument.header(
-                Mainframe.model.cur(),
-                Lang) + "<br/>\n")
-
-        inline_font = self.config[
-            'inline-fonts'][self.solFontSelect.currentIndex()]
-        diagram_font = self.config[
-            'diagram-fonts'][self.diaFontSelect.currentIndex()]
-
-        self.richText.insertHtml(
-            self.board2Html(
-                Mainframe.model.board,
-                self.config['config'][diagram_font]))
-        self.richText.insertHtml(
-            Mainframe.model.cur()['stipulation'] +
-            ' ' +
-            Mainframe.model.board.getPiecesCount() +
-            "<br/>\n")
-
-        self.richText.insertHtml(
-            pdf.ExportDocument.solver(
-                Mainframe.model.cur(),
-                Lang) + "<br/>\n")
-        self.richText.insertHtml(
-            pdf.ExportDocument.legend(
-                Mainframe.model.board) +
-            "<br/><br/>\n")
-
-        if 'solution' in Mainframe.model.cur():
-            self.richText.insertHtml(
-                self.solution2Html(
-                    Mainframe.model.cur()['solution'],
-                    self.config['config'][inline_font]))
-
-        if('keywords' in Mainframe.model.cur()):
-            self.richText.insertHtml(
-                "<br/>\n" +
-                ', '.join(
-                    Mainframe.model.cur()['keywords']) +
-                "<br/>\n")
-
-        if('comments' in Mainframe.model.cur()):
-            self.richText.insertHtml(
-                "<br/>\n" + "<br/>\n".join(Mainframe.model.cur()['comments']) + "<br/>\n")
+        self.richText.insertHtml(exporters.html.render(Mainframe.model.cur(), self.settings()))
 
     def onLangChanged(self):
         self.labelDiaFont.setText(Lang.value('PU_Diagram_font') + ':')

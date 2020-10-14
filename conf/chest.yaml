@@ -1,2 +1,1 @@
-options: -r -LS -M 128
-path: WinChest.exe
+{options: -r -LS -M 128, path: WinChest.exe}
