@@ -212,7 +212,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         # export HTML
         self.exportHtmlAction = QtWidgets.QAction(
-            QtGui.QIcon(':/icons/html-5.svg'),
+            QtGui.QIcon(':/icons/html-document.svg'),
             Lang.value('MI_Export_HTML'), self)
         self.exportHtmlAction.triggered.connect(self.onExportHtml)
 
