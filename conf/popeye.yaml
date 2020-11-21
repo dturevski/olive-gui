@@ -1,6 +1,5 @@
-memory: 1
+comlog: ''
+memory: 1024
 path: pywin64.exe
-sticky-options:
-- Variation
-- NoBoard
+sticky-options: [Variation, NoBoard]
 stop-max-bytes: 81920

@@ -9,3 +9,5 @@ resources.py
 olive.log
 olive.spec
 test.json
+.gitignore
+conf/popeye.yaml

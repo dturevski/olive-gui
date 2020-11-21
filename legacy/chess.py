@@ -1015,9 +1015,9 @@ class MoveNode(Node):
     def as_text(self, board):
         if isinstance(self.move, NullMove):
             if self.is_set:
-                return 'setplay: '
+                return ''
             if self.is_threat:
-                return 'threat: '
+                return ' ~ '
         else:
             self.move.disambiguate(board)
         return str(self.move)
@@ -1186,7 +1186,7 @@ class TwinNode(Node):
                             so.add(" ", board, False)
                         so.add(sibling_move_no + ellipsis, board, False)
                 else:
-                    if (self.ply_no + 1) % 2 == 1:
+                    if (self.ply_no + 1) % 2 == 1 and not sibling.is_set:
                         so.add(sibling_move_no + '.', board, False)
                 sibling.dump(board, so)
         self.unmake(board)
