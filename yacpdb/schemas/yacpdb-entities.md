@@ -30,7 +30,7 @@ foreignids:
 comments:
   - A Grandmaster of Chess Composition, has 666 (or pretty close) FIDE Album points, which is an absolute record
 ```
-The only required fields are `familyname` and `givennames`, note, that the latter is not a list.
+The only required field is `familyname`, `givennames` is optional, note, that the latter is not a list.
 The only possible value for `foreignids.domain` at the moment is **database.wfcc.ch**.
 `foreignids.id` is an integer, it can be found, for example, by clicking the "Export XML" button at the
 [composers's page](https://database.wfcc.ch/index.php?-table=composers&-action=browse&-recordid=composers%3Fid%3D116786).
