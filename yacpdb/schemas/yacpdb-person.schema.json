@@ -8,7 +8,7 @@
     "foreignids": { "type": "array", "items": { "$ref" : "#/definitions/foreignid_type" }, "minItems": 1 },
     "comments": { "$ref": "#/definitions/text_list" }
   },
-  "required": ["familyname", "givennames"],
+  "required": ["familyname"],
   "additionalProperties": false,
 
   "definitions": {
