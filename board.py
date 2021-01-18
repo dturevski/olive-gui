@@ -30,7 +30,7 @@ FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
               'Royal', 'Volage', 'Functionary', 'HalfNeutral',
               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
 
-RE_COMMON_STIPULATION = re.compile('^(?P<intro>[0-9]+->)?(?P<serial>p?h?ser-)?(?P<play>h|s|r|semi-r|hs|pg|)(?P<aim>([#=\+]?)|(==)) *(?P<length>[0-9\.]+)$', re.IGNORECASE)
+RE_COMMON_STIPULATION = re.compile('^(?P<intro>[0-9]+->)?(?P<reci>reci-)?(?P<serial>p?h?ser-)?(?P<play>h|s|r|semi-r|hs|pg|)(?P<aim>([#=\+]?)|(==)) *(?P<length>[0-9\.]+)$', re.IGNORECASE)
 
 def algebraicToIdx(a1):
     return ord(a1[0]) - ord('a') + 8 * (7 + ord('1') - ord(a1[1]))
