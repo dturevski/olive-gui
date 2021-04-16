@@ -4,7 +4,7 @@
 
 An entity is something a chess composition can have a reference to. For example, a composition can reference a
 certain person as one of it authors or a certain magazine as a place of its original publication.
-There are currently 3 supported types of entities: **persons**, **sources**, **tourneys** (that is composing
+There are currently 4 supported types of entities: **persons**, **sources**, **tourneys** (that is composing
 tourneys, solving tourneys are actually sources) and **keywords**.
 
 Just like the compositions, the entities are manipulated as [YAML](http://en.wikipedia.org/wiki/YAML)
