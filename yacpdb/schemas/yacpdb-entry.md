@@ -33,15 +33,16 @@ A typical YACPDB entry may look like this:
     options: 
       - SetPlay
     solution: |
-      "1...Re4-d4 2.Kd1-e2 Rd4-d5 3.Ke2-e3 Rd5-e5 + 4.Ke3-d4 Re5-e4 #       
-      1.Bc3-d4 Re4-e5 2.Bd4-f2 Re5-d5 3.Kd1-e2 Rd5-d4 4.Ke2-e3 Rd4-e4 #"
+      1...Re4-d4 2.Kd1-e2 Rd4-d5 3.Ke2-e3 Rd5-e5 + 4.Ke3-d4 Re5-e4 #       
+      1.Bc3-d4 Re4-e5 2.Bd4-f2 Re5-d5 3.Kd1-e2 Rd5-d4 4.Ke2-e3 Rd4-e4 #
     keywords:
       - Rundlauf
     reprints:
       - 
         name: FIDE Album
+        volume: 1965-1967
         date:
-          year: 1965-1967
+          year: 1976
         problemid: 587
     foreignids:
       -
