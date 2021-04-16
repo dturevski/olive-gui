@@ -103,7 +103,7 @@ Logical operators precedence is NOT > AND > OR, i.e.:
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
 * **DATE**: a date in YYYY[-MM[-DD]] format
 * **INTEGER**: any integer number
-* **REFTYPE**: "author", "judge", "source", "reprint" or "tourney"
+* **REFTYPE**: "author", "judge", "source", "reprint", "tourney" or "keyword"
 * **TRANSFORMATIONS**: "All", "Mirror" or "None"
 * **PIECE**: concatenation of COLOR and PIECENAME
 * **PIECENAME**: one- or two-letter piece code, as defined by the [Popeye](https://github.com/thomas-maeder/popeye) solving software (english input)
