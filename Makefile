@@ -13,6 +13,7 @@ dependencies:
 	$(PIP) install ply
 	$(PIP) install pyinstaller
 	$(PIP) install jsonschema
+	$(PIP) install Unidecode
 
 resources.py: resources/olive.qrc
 	$(RCC) -o resources.py resources/olive.qrc

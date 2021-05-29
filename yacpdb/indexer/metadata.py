@@ -17,7 +17,7 @@ class PredicateStorage:
         'COLOR': Domain('COLOR', '[wbn]'),
         'DATE': Domain('DATE', r'[0-9]{4}(\-[0-9]{2}(\-[0-9]{2})?)?'),
         'INTEGER': Domain('INTEGER', '[0-9]+'),
-        'REFTYPE': Domain('REFTYPE', 'author|judge|source|reprint|tourney'),
+        'REFTYPE': Domain('REFTYPE', 'author|judge|source|reprint|tourney|keyword'),
         'TRANSFORMATIONS': Domain('TRANSFORMATIONS', 'All|Mirror|None'),
         'PIECENAME': Domain('PIECENAME', '[0-9A-Z][0-9A-Z]?'),
         'PIECE': Domain('PIECE', '[wbn][0-9A-Z][0-9A-Z]?'),
@@ -101,7 +101,7 @@ class Matrix(Predicate):
             ((1, 0), (0, -1)),
             ((-1, 0), (0, 1)),
             ((0, 1), (1, 0)),
-            ((0, 1), (1, 0))
+            ((0, -1), (-1, 0))
         ],
 
         "Mirror": [
@@ -333,10 +333,11 @@ class Keyword(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("p2.id in (select problem_id from "
-                     "tags_to_problems tp join "
-                     "tags t on tp.tag_id=t.id "
-                     "where t.name like %s)", [params[0]], [])
+        return Query(
+            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
+            "where e.name like %s and e2p.link_type='keyword') ",
+            [params[0]], []
+        )
 
 
 class PCount(Predicate):

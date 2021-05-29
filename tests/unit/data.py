@@ -340,7 +340,7 @@ problems = {
         solution: "1.e3*f2[+wPf2][+wBd2] f2-f4 2.Bd4-g7"
             """)),
 
-    'simple_anticirce': model.makeSafe(yaml.load("""
+    'simple_anticirce': model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Pc4]
           black: [Kc3]
@@ -348,8 +348,14 @@ problems = {
         solution: "1.Kc3*c4[bKc4->e8] "
             """)),
 
+    'digital': model.makeSafe(yaml.safe_load("""
+        algebraic: 
+          white: [25a1]
+        stipulation: "#1"
+        solution: "1...25a1-c6 "
+            """)),
 
-    '#2 with set-play': model.makeSafe(yaml.load("""
+    '#2 with set-play': model.makeSafe(yaml.safe_load("""
         algebraic: 
           white: [Kc6, Qf3, Sb5, Pa3]
           black: [Kc4, Se4, Pd4]
@@ -365,7 +371,7 @@ problems = {
              1...Se4-c3 2.Sb5-d6 # {(A)}"
             """)),
 
-    'h#2.5 with 4 solutions': model.makeSafe(yaml.load("""
+    'h#2.5 with 4 solutions': model.makeSafe(yaml.safe_load("""
         algebraic:
           black: [Ph5, Sa5, Rh6, Ke6, Ph7, Rb7, Qf8, Bd8]
           white: [Re2, Pd3, Pf4, Be4, Be5, Ka6]
@@ -373,6 +379,18 @@ problems = {
         solution: "1...Be5-a1   2.Qf8*f4 Re2-b2   3.Ke6-e5 + Rb2-b6 # \n1...Be5-h8   2.Bd8-f6\
           \ f4-f5 +   3.Ke6-f7 Be4-d5 # \n1...Be4-h1   2.Qf8-c5 Re2-g2   3.Ke6-d5 + Rg2-g6\
           \ # \n1...Re2-g2   2.Bd8-b6 Be4-d5 +   3.Ke6-f5 Rg2-g5 #"
+            """)),
+
+    'reci-h#': model.makeSafe(yaml.safe_load("""
+        algebraic:
+          white: [Pe4, Pa2, Ra1, Bb1, Ke1]
+          black: [Bc6, Pg4, Pa3, Pe3, Qg2, Kh1]
+        stipulation: reci-h#3
+        solution: |
+          1.Qg2*a2 Ke1-f1   2.Qa2-b3 Ra1-a2   3.Bc6*e4 Bb1*e4 #
+          1.Qg2*a2 Ke1-f1   2.Qa2-b3 Ra1-a2   3.Qb3-d1 #
+          1.Bc6*e4 Bb1*e4   2.Kh1-h2 0-0-0   3.Qg2-g3 Rd1-h1 #
+          1.Bc6*e4 Bb1*e4   2.Kh1-h2 0-0-0   3.Qg2-b2 #
             """)),
 
 

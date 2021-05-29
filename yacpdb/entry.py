@@ -4,6 +4,8 @@ import hashlib
 import yaml
 import re
 
+from unidecode import unidecode
+
 import board
 
 
@@ -71,8 +73,19 @@ def entry(yamltext):
         b = board.Board()
         b.fromAlgebraic(e["algebraic"])
         e["legend"] = b.getLegend()
+    e["transliterations"] = {}
+    if "authors" in e:
+        e["transliterations"] = make_transliterations(e["authors"])
     return e
 
+
+def make_transliterations(names):
+    ts = {}
+    for name in names:
+        t = unidecode(name)
+        if t != name:
+            ts[name] = t
+    return ts
 
 def convert_date_v1_0_v1_1(date_string):
     try:

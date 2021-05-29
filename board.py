@@ -1,4 +1,4 @@
-import re, copy, json
+import re, copy, json, yaml
 from base import read_resource_file, get_write_dir
 
 class Square:
@@ -30,7 +30,7 @@ FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
               'Royal', 'Volage', 'Functionary', 'HalfNeutral',
               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
 
-RE_COMMON_STIPULATION = re.compile('^(?P<intro>[0-9]+->)?(?P<serial>p?h?ser-)?(?P<play>h|s|r|semi-r|hs|pg|)(?P<aim>([#=\+]?)|(==)) *(?P<length>[0-9\.]+)$', re.IGNORECASE)
+RE_COMMON_STIPULATION = re.compile('^(?P<intro>[0-9]+->)?(?P<reci>reci-)?(?P<serial>p?h?ser-)?(?P<play>h|s|r|semi-r|hs|pg|)(?P<aim>([#=\+]?)|(==)) *(?P<length>[0-9\.]+)$', re.IGNORECASE)
 
 def algebraicToIdx(a1):
     return ord(a1[0]) - ord('a') + 8 * (7 + ord('1') - ord(a1[1]))
@@ -95,6 +95,20 @@ class FairyHelper:
     def first_word(s):
         return s.split(" ")[0].lower()
     first_word = staticmethod(first_word)
+
+    with open(get_write_dir() + '/conf/fairy-property-colors.yaml', 'r', encoding="utf8") as f:
+        highlight_colors = yaml.safe_load(f)
+
+    def to_html(glyph, square, specs):
+        html = FairyHelper.fontinfo[glyph]['chars'][((square >> 3) + (square % 8)) % 2]
+        if len(specs) > 0:
+            color = FairyHelper.highlight_colors[hash("".join(specs)) % len(FairyHelper.highlight_colors)]
+            html = '<font color="%s">%s</font>' % (color, html)
+        return html
+    to_html = staticmethod(to_html)
+
+
+
 
 def twinId(twin_index):
     if twin_index < 26:

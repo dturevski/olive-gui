@@ -154,7 +154,7 @@
 
     "person_type": {
       "type": "string",
-      "pattern": "^[^,]+, [^,]+$",
+      "pattern": "^[^,]+(, [^,]+)?$",
       "maxLength": 255
     },
 

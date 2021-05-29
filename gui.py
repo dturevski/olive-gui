@@ -1430,7 +1430,7 @@ class ChessBoxItem(QtWidgets.QLabel):
             self.setFont(
                 Mainframe.fontset()[
                     model.FairyHelper.fontinfo[glyph]['family']])
-            self.setText(model.FairyHelper.fontinfo[glyph]['chars'][0])
+            self.setText(model.FairyHelper.to_html(glyph, 0, piece.specs))
             self.setToolTip(str(piece))
 
         self.piece = piece
@@ -1588,11 +1588,9 @@ class BoardView(QtWidgets.QWidget):
                 glyph = Mainframe.model.board.board[i].toFen()
                 if len(glyph) > 1:
                     glyph = glyph[1:-1]
-                lbl.setFont(
-                    Mainframe.fontset()[
-                        model.FairyHelper.fontinfo[glyph]['family']])
-                lbl.setText(model.FairyHelper.fontinfo[glyph][
-                            'chars'][((i >> 3) + (i % 8)) % 2])
+                lbl.setFont(Mainframe.fontset()[model.FairyHelper.fontinfo[glyph]['family']])
+                text = model.FairyHelper.to_html(glyph, i, Mainframe.model.board.board[i].specs)
+                lbl.setText(text)
         if('stipulation' in Mainframe.model.cur()):
             self.labelStipulation.setText(Mainframe.model.cur()['stipulation'])
         else:
