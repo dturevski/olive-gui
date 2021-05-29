@@ -321,13 +321,14 @@ def p_Body_PawnMove(t):
     t[0] = t[1]
 
 
+def p_Body_EnPassant(t):
+    'Body : Body EN_PASSANT'
+    t[0] = t[1].setEnPassant()
+
+
 def p_PawnMove(t):
-    '''PawnMove : Squares
-        | PawnMove EN_PASSANT'''
-    if len(t) == 2:
-        t[0] = t[1].setv("departant", model.Piece("P", "u", ""))
-    else:
-        t[0] = t[1].setEnPassant()
+    'PawnMove : Squares'
+    t[0] = t[1].setv("departant", model.Piece("P", "u", ""))
 
 
 def p_Squares(t):
