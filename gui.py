@@ -67,10 +67,12 @@ class Mainframe(QtWidgets.QMainWindow):
         'Mirror_vertical',
         'Mirror_horizontal',
         'Invert_colors',
-        'Clear']
+        'Clear',
+        'Game_array']
     transform_icons = ['up-arrow', 'down-arrow', 'left-arrow',
                        'right-arrow', 'redo', 'undo',
-                       'resize-x', 'resize-y', 'shuffle', 'expand']
+                       'resize-x', 'resize-y', 'shuffle', 'expand',
+                       'chess']
     selectedPiece = None
     predicateStorage = yacpdb.indexer.metadata.PredicateStorage('./')
 
@@ -838,13 +840,13 @@ class Mainframe(QtWidgets.QMainWindow):
     def createTransformActions(self):
         self.transforms = []
         for i, k in enumerate(Mainframe.transform_names):
-            self.transforms.append(
-                QtWidgets.QAction(
-                    QtGui.QIcon(':/icons/' + Mainframe.transform_icons[i] + '.svg'),
-                    Lang.value('MI_' + k),
-                    self
-                )
-            )
+            action = QtWidgets.QAction(QtGui.QIcon(':/icons/' + Mainframe.transform_icons[i] + '.svg'),
+                Lang.value('MI_' + k), self)
+            if k == 'Clear':
+                action.setShortcut('Ctrl+Space')
+            elif k == 'Game_array':
+                action.setShortcut('Ctrl+Shift+Space')
+            self.transforms.append(action)
             self.transforms[-1].triggered.connect(
                 self.createTransformsCallable(k))
             self.toolbar.addAction(self.transforms[-1])
@@ -860,6 +862,8 @@ class Mainframe(QtWidgets.QMainWindow):
                 Mainframe.model.board.clear()
             elif command == 'Invert_colors':
                 Mainframe.model.board.invertColors()
+            elif command == 'Game_array':
+                Mainframe.model.board.fromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
             else:
                 pass
             Mainframe.model.onBoardChanged()

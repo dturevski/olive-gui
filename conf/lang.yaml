@@ -274,6 +274,12 @@ MI_Clear:
   ru: Очистить доску
   de: Brett leeren
   ro: Curăță tabla
+MI_Game_array:
+  en: Game array
+  rs: Почетна позиција
+  ru: Начальная позиция
+  de: Grundstellung
+  ro: Poziția de start
 MI_Popeye:
   en: Popeye
   rs: Попај
