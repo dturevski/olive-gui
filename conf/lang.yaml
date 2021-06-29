@@ -280,6 +280,12 @@ MI_Game_array:
   ru: Начальная позиция
   de: Grundstellung
   ro: Poziția de start
+MI_Remove_fairy_conditions:
+  en: Remove fairy conditions
+  rs: Уклони вилињи услови
+  ru: Удалить сказочные условия
+  de: Bedingungen entfernen
+  ro: Șterge condiții feerice
 MI_Popeye:
   en: Popeye
   rs: Попај

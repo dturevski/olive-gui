@@ -257,6 +257,10 @@ class Mainframe(QtWidgets.QMainWindow):
         self.editSolutionAction.setShortcut('Ctrl+E')
         self.editSolutionAction.triggered.connect(self.popeyeView.onEdit)
 
+        self.removeFairyConditionsAction = QtWidgets.QAction(QtGui.QIcon(':/icons/burning-witch.svg'),
+                                                             Lang.value('MI_Remove_fairy_conditions'), self)
+        self.removeFairyConditionsAction.triggered.connect(self.popeyeView.removeFairyConditions)
+
         # demo mode
         self.demoModeAction = QtWidgets.QAction(
             QtGui.QIcon(':/icons/fullscreen.svg'),
@@ -369,6 +373,7 @@ class Mainframe(QtWidgets.QMainWindow):
             self.addEntryAction, self.deleteEntryAction]))
         self.editMenu.addSeparator()
         self.editMenu.addAction(self.editSolutionAction)
+        self.editMenu.addAction(self.removeFairyConditionsAction)
         self.editMenu.addSeparator()
 
         # Popeye menu
@@ -412,6 +417,8 @@ class Mainframe(QtWidgets.QMainWindow):
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.removeFairyConditionsAction)
         self.toolbar.addSeparator()
         self.createTransformActions()
 
@@ -524,6 +531,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.addEntryAction.setText(Lang.value('MI_Add_entry'))
         self.deleteEntryAction.setText(Lang.value('MI_Delete_entry'))
         self.editSolutionAction.setText(Lang.value('PS_Edit'))
+        self.removeFairyConditionsAction.setText(Lang.value('MI_Remove_fairy_conditions'))
         self.startPopeyeAction.setText(Lang.value('MI_Run_Popeye'))
         self.stopPopeyeAction.setText(Lang.value('MI_Stop_Popeye'))
         self.listLegalWhiteMoves.setText(Lang.value('MI_Legal_white_moves'))
@@ -2607,6 +2615,17 @@ class PopeyeView(QtWidgets.QSplitter):
             self.solutionOutput.create_output(self.solution, b)
             self.output.setText(self.solutionOutput.solution)
         return callable
+
+    def removeFairyConditions(self):
+        if 'options' not in Mainframe.model.cur():
+            return
+        opts = Mainframe.model.cur()['options']
+        count = len(opts)
+        opts = list(filter(model.FairyHelper.is_popeye_option, opts))
+        if count != len(opts):
+            Mainframe.model.cur()['options'] = opts
+            Mainframe.model.is_dirty = True
+            Mainframe.sigWrapper.sigModelChanged.emit()
 
 
 class PublishingView(QtWidgets.QSplitter):
