@@ -27,4 +27,4 @@ popeye-toolbar-options:
 - {enabled: false, icon: contrast.svg, option: WhiteToPlay}
 - {enabled: false, icon: checklist.svg, option: NoShortVariations}
 - {enabled: false, icon: no-bombs.svg, option: NoThreat}
-version: '1.3'
+version: '1.4'
