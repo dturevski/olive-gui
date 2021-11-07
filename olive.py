@@ -61,7 +61,7 @@ def main():
     mainframe = gui.Mainframe()
 
     # if invoked with "olive.py filename.olv" - read filename.olv
-    if len(sys.argv) and sys.argv[-1][-4:] == '.olv':
+    if len(sys.argv) and sys.argv[-1][-4:].lower() == '.olv':
         mainframe.openCollection(sys.argv[-1])
 
     # entering main loop
