@@ -1,30 +1,90 @@
-analyzers: [trajectories, miscellaneous]
+analyzers:
+- trajectories
+- miscellaneous
 auto-compactify: 0
 clear-popeye-output-on-entry-change: true
 collections-dir: ./collections
 default-lang: en
 default-notation: en
 fairy-zoo:
-- [white G, white RH, white BH, white NH, white NE, white RP, white CH]
-- [black G, black RH, black BH, black NH, black NE, black RP, black CH]
-- [neutral G, neutral RH, neutral BH, neutral NH, neutral NE, neutral RP, neutral
-    CH]
+- - white G
+  - white RH
+  - white BH
+  - white NH
+  - white NE
+  - white RP
+  - white CH
+- - black G
+  - black RH
+  - black BH
+  - black NH
+  - black NE
+  - black RP
+  - black CH
+- - neutral G
+  - neutral RH
+  - neutral BH
+  - neutral NH
+  - neutral NE
+  - neutral RP
+  - neutral CH
 font-size: 24
 horsehead-glyph: N
-import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
+import-post-decode:
+  ISO-8859-1: Western
+  windows-1251: Cyrillic
 import-post-decode-default: ISO-8859-1
-languages: {de: Deutsch, en: English, ro: Română, rs: Српски, ru: Русский}
+languages:
+  de: Deutsch
+  en: English
+  ro: Română
+  rs: Српски
+  ru: Русский
 notations:
-  en: [K, Q, R, B, S, P]
-  fide: [K, D, T, L, S, B]
-  ru: [Кр, Ф, Л, С, К, п]
+  en:
+  - K
+  - Q
+  - R
+  - B
+  - S
+  - P
+  fide:
+  - K
+  - D
+  - T
+  - L
+  - S
+  - B
+  ru:
+  - Кр
+  - Ф
+  - Л
+  - С
+  - К
+  - п
 popeye-toolbar-options:
-- {enabled: true, icon: miscellaneus.svg, option: SetPlay}
-- {enabled: true, icon: question.svg, option: Defence 1}
-- {enabled: true, icon: more.svg, option: PostKeyPlay}
-- {enabled: true, icon: flash.svg, option: Intelligent}
-- {enabled: true, icon: list.svg, option: MoveNumbers}
-- {enabled: false, icon: contrast.svg, option: WhiteToPlay}
-- {enabled: false, icon: checklist.svg, option: NoShortVariations}
-- {enabled: false, icon: no-bombs.svg, option: NoThreat}
-version: '1.4.1'
+- enabled: true
+  icon: miscellaneus.svg
+  option: SetPlay
+- enabled: true
+  icon: question.svg
+  option: Defence 1
+- enabled: true
+  icon: more.svg
+  option: PostKeyPlay
+- enabled: true
+  icon: flash.svg
+  option: Intelligent
+- enabled: true
+  icon: list.svg
+  option: MoveNumbers
+- enabled: false
+  icon: contrast.svg
+  option: WhiteToPlay
+- enabled: false
+  icon: checklist.svg
+  option: NoShortVariations
+- enabled: false
+  icon: no-bombs.svg
+  option: NoThreat
+version: 1.4.1
