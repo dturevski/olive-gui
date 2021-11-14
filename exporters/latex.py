@@ -47,7 +47,7 @@ def entry(e, Lang):
         year = ""
         s = e['source']
         if 'name' in s:
-            source = "\\source{" + s['name'] + "}"
+            source = "\\source{" + string2LaTeX(s['name']) + "}"
             if 'problemid' in s:
                 sourcenr = "\\sourcenr{" + s['problemid'] + "}"
             if 'issue' in s:
