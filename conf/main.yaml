@@ -3,9 +3,9 @@ analyzers:
 - miscellaneous
 auto-compactify: 0
 clear-popeye-output-on-entry-change: true
-collections-dir: /home/thomas/Schach
-default-lang: de
-default-notation: de
+collections-dir: ./collections
+default-lang: en
+default-notation: en
 fairy-zoo:
 - - white LE
   - black VA
