@@ -169,6 +169,7 @@ class Piece:
         # rest
         glyph= glyph.replace("a", "C")
         glyph= glyph.replace("f", "C")
+        glyph= glyph.replace("x", "C")
 
         # rotation of pieces
         glyph= glyph.replace("1", "R")

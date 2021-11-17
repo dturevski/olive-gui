@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # local
 import model
@@ -82,8 +82,7 @@ def entry(e, Lang):
     if 'algebraic' in e:
         b.fromAlgebraic(e['algebraic'])
         pieces = b.toLaTeX()
-        text = (text +
-            "  \\pieces[" + b.getPiecesCount() + "]{" + pieces + "}%\n")
+        text = (text + "  \\pieces{" + pieces + "}%\n")
 
     # stipulation
     text = text + "  \\stipulation{" + string2LaTeX(e['stipulation'])
