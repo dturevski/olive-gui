@@ -17,6 +17,13 @@
       },
       "additionalProperties": false
     },
+    "glyphs": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9]{1,2}$": { "$ref": "#/definitions/basic_glyph" }
+      },
+      "additionalProperties": false
+    },
     "twins" : {
       "type": "object",
       "patternProperties": {
@@ -178,6 +185,11 @@
       },
       "required": ["domain", "problemid"],
       "additionalProperties": false
+    },
+
+    "basic_glyph": {
+      "type": "string",
+      "pattern": "^[kqrbspeaofwdx][1-3]?$"
     }
 
   }

@@ -81,7 +81,7 @@ def entry(e, Lang):
     b = model.Board()
     if 'algebraic' in e:
         b.fromAlgebraic(e['algebraic'])
-        pieces = b.toLaTeX()
+        pieces = b.toLaTeX(e.get('glyphs', {}))
         text = (text +
             "  \\pieces[" + b.getPiecesCount() + "]{" + pieces + "}%\n")
 

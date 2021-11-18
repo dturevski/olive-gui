@@ -58,6 +58,7 @@ def makePieceFromXfen(fen):
 
 class FairyHelper:
     defaults, overrides, glyphs, fontinfo = {}, {}, {}, {}
+    RE_PROPER_GLYPH = re.compile('^[kqrbspeaofwdx][1-3]?$')
     options, conditions = [], []
     f = open(get_write_dir() + '/conf/fairy-pieces.txt', encoding='utf-8')
     for entry in [x.strip().split("\t") for x in f.readlines()]:
@@ -107,7 +108,14 @@ class FairyHelper:
         return html
     to_html = staticmethod(to_html)
 
+    def get_glyph_by_piece_name(piece_name, overridden_glyphs):
+        key = piece_name.lower()
+        return overridden_glyphs.get(key, FairyHelper.glyphs[key]['glyph'])
+    get_glyph_by_piece_name = staticmethod(get_glyph_by_piece_name)
 
+    def is_proper_glyph(glyph):
+        return bool(FairyHelper.RE_PROPER_GLYPH.match(glyph))
+    is_proper_glyph = staticmethod(is_proper_glyph)
 
 
 def twinId(twin_index):
@@ -130,8 +138,8 @@ class Piece:
         return Piece(parts[-1], parts[0], parts[1:-1])
     fromAlgebraic = staticmethod(fromAlgebraic)
 
-    def toFen(self):
-        glyph = FairyHelper.glyphs[self.name.lower()]['glyph']
+    def toFen(self, overridden_glyphs):
+        glyph = FairyHelper.get_glyph_by_piece_name(self.name, overridden_glyphs)
         if self.color == 'white':
             glyph = glyph.upper()
         else:
@@ -142,8 +150,8 @@ class Piece:
             glyph = '(' + glyph + ')'
         return glyph
 
-    def toLaTeX(self):
-        glyph = FairyHelper.glyphs[self.name.lower()]['glyph']
+    def toLaTeX(self, overridden_glyphs):
+        glyph = FairyHelper.get_glyph_by_piece_name(self.name, overridden_glyphs)
         if self.color == 'white':
             piece = 'w'
         if self.color == 'black':
@@ -372,7 +380,7 @@ class Board:
                 j = j + 1
             i = i + 1
 
-    def toFen(self):
+    def toFen(self, overridden_glyphs):
         fen, blanks = '', 0
         for i in range(64):
             if((i > 0) and (i % 8 == 0)):  # new row
@@ -383,7 +391,7 @@ class Board:
             if(self.board[i] is not None):
                 if(blanks > 0):
                     fen = fen + ("%d" % (blanks))
-                fen = fen + self.board[i].toFen()
+                fen = fen + self.board[i].toFen(overridden_glyphs)
                 blanks = 0
             else:
                 blanks = blanks + 1
@@ -391,8 +399,8 @@ class Board:
             fen = fen + ("%d" % (blanks))
         return fen
 
-    def toLaTeX(self):
-        return ", ".join([self.board[i].toLaTeX() + idxToAlgebraic(i)
+    def toLaTeX(self, overriden_glyphs):
+        return ", ".join([self.board[i].toLaTeX(overriden_glyphs) + idxToAlgebraic(i)
                        for i in range(64) if self.board[i] is not None])
 
     def getLegend(self, latex = False):

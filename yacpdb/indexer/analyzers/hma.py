@@ -25,7 +25,7 @@ class Analyzer:
         if not self.isApplicable(entry):
             return
         try:
-            params = { "a": "3", "fen": board.toFen(), "stip": entry["stipulation"], "sol": entry["solution"] }
+            params = { "a": "3", "fen": board.toFen({}), "stip": entry["stipulation"], "sol": entry["solution"] }
             if 'twins' in entry:
                 params['twins'] = " ".join(["%s) %s" % (k, entry['twins'][k]) for k in sorted(entry['twins'].keys())])
             for predicate in urllib.request.urlopen(urllib.request.Request(GATEWAY, urllib.parse.urlencode(params))).read().split("\n"):

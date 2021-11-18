@@ -36,6 +36,12 @@ TC_Pieces:
   ru: Фигуры
   de: Steine
   ro: Piese
+TC_Glyphs:
+  en: Glyphs
+  rs: Глифи
+  ru: Глифы
+  de: Glyphen
+  ro: Glife
 TC_Pieces_Ortho:
   en: Orthodox
   rs: Обичне

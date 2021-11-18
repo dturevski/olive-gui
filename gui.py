@@ -122,6 +122,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.boardView = BoardView(self)
         self.infoView = InfoView()
         self.chessBox = ChessBox()
+        self.glyphsView = GlyphsView(self)
 
         vboxLeftPane.addWidget(self.fenView)
         vboxLeftPane.addWidget(self.boardView)
@@ -130,6 +131,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar1.setTabPosition(1)
         self.tabBar1.addTab(self.infoView, Lang.value('TC_Info'))
         self.tabBar1.addTab(self.chessBox, Lang.value('TC_Pieces'))
+        self.tabBar1.addTab(self.glyphsView, Lang.value('TC_Glyphs'))
 
         vboxLeftPane.addWidget(self.tabBar1, 1)
         widgetLeftPane.setLayout(vboxLeftPane)
@@ -512,6 +514,7 @@ class Mainframe(QtWidgets.QMainWindow):
         # tab captions
         self.tabBar1.setTabText(0, Lang.value('TC_Info'))
         self.tabBar1.setTabText(1, Lang.value('TC_Pieces'))
+        self.tabBar1.setTabText(2, Lang.value('TC_Glyphs'))
         self.tabBar2.setTabText(0, Lang.value('TC_Popeye'))
         self.tabBar2.setTabText(1, Lang.value('TC_Solution'))
         self.tabBar2.setTabText(2, Lang.value('TC_Edit'))
@@ -794,7 +797,7 @@ class Mainframe(QtWidgets.QMainWindow):
         if not fileName:
             return
         try:
-            xfen2img.convert(Mainframe.model.board.toFen(), str(fileName))
+            xfen2img.convert(Mainframe.model.board.toFen(Mainframe.model.cur().get('glyphs', {})), str(fileName))
         except IOError:
             msg = Lang.value('MSG_IO_failed')
             logging.exception(msg)
@@ -1107,7 +1110,7 @@ class FenView(QtWidgets.QLineEdit):
         if self.skipModelChanged:
             return
         self.skipModelChanged = True
-        fen = Mainframe.model.board.toFen()
+        fen = Mainframe.model.board.toFen(Mainframe.model.cur().get('glyphs', {}))
         fen = fen.replace('S', Conf.value('horsehead-glyph').upper()).\
             replace('s', Conf.value('horsehead-glyph').lower())
         self.setText(fen)
@@ -1426,7 +1429,7 @@ class ChessBoxItem(QtWidgets.QLabel):
         self.changePiece(piece)
 
     def getShortGlyph(piece):
-        glyph = piece.toFen()
+        glyph = piece.toFen({}) # todo: handle properly, support onModelChanged
         if len(glyph) > 1:
             glyph = glyph[1:-1]
         return glyph
@@ -1592,18 +1595,19 @@ class BoardView(QtWidgets.QWidget):
             self.skipModelChanged = False
             return
 
+        overridden_glyphs = Mainframe.model.cur().get('glyphs', {})
         for i, lbl in enumerate(self.labels):
             if Mainframe.model.board.board[i] is None:
                 lbl.setFont(Mainframe.fontset()['d'])
                 lbl.setText(["\xA3", "\xA4"][((i >> 3) + (i % 8)) % 2])
             else:
-                glyph = Mainframe.model.board.board[i].toFen()
+                glyph = Mainframe.model.board.board[i].toFen(overridden_glyphs)
                 if len(glyph) > 1:
                     glyph = glyph[1:-1]
                 lbl.setFont(Mainframe.fontset()[model.FairyHelper.fontinfo[glyph]['family']])
                 text = model.FairyHelper.to_html(glyph, i, Mainframe.model.board.board[i].specs)
                 lbl.setText(text)
-        if('stipulation' in Mainframe.model.cur()):
+        if 'stipulation' in Mainframe.model.cur():
             self.labelStipulation.setText(Mainframe.model.cur()['stipulation'])
         else:
             self.labelStipulation.setText("")
@@ -1663,6 +1667,49 @@ class InfoView(QtWidgets.QTextEdit):
 
     def legend(self):
         return pdf.ExportDocument.legend(Mainframe.model.board)
+
+
+class GlyphsView(PlainTextEdit):
+
+    def __init__(self, mainframe):
+        super(PlainTextEdit, self).__init__()
+        self.parent = mainframe
+        self.skipModelChanged = False
+        Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        self.textChanged.connect(self.onTextChanged)
+
+    def onModelChanged(self):
+        if self.skipModelChanged:
+            return
+        self.skipModelChanged = True
+        e = Mainframe.model.cur()
+        self.setText(yaml.dump(e['glyphs'], default_flow_style=False) if 'glyphs' in e else "")
+        self.skipModelChanged = False
+
+    def onTextChanged(self):
+        if self.skipModelChanged:
+            return
+        glyphs = {}
+        try:
+            parsed = yaml.safe_load(self.toPlainText())
+            if isinstance(parsed, dict):
+                for key, value in parsed.items():
+                    glyph = str(value).lower()
+                    if model.FairyHelper.is_proper_glyph(glyph):
+                        glyphs[str(key).lower()] = glyph
+        except yaml.YAMLError:
+            glyphs = {}
+        if glyphs:
+            Mainframe.model.cur()['glyphs'] = glyphs
+        elif 'glyphs' in Mainframe.model.cur():
+            del Mainframe.model.cur()['glyphs']
+        self.skipModelChanged = True
+        Mainframe.model.onBoardChanged()
+        Mainframe.sigWrapper.sigModelChanged.emit()
+        # todo:
+        #   self.parent.chessBox.updateXFenOverrides() ?
+        #   sigGlyphsChanged to update the piece box?
+        self.skipModelChanged = False
 
 
 class ChessBox(QtWidgets.QWidget):

@@ -16,7 +16,7 @@ def render(entry, settings):
     board.fromAlgebraic(entry["algebraic"])
 
     html = pdf.ExportDocument.header(entry, settings['lang'])
-    html += board_to_html(board, settings['diagram_font'])
+    html += board_to_html(board, settings['diagram_font'], entry.get('glyphs', {}))
     html += entry['stipulation'] + ' ' + board.getPiecesCount() + "<br/>\n"
     html += pdf.ExportDocument.solver(entry, settings['lang']) + "<br/>\n"
     html += pdf.ExportDocument.legend(board) + "<br/><br/>\n"
@@ -42,7 +42,7 @@ def render_many(entries, settings):
         </html>""" % "".join([render(e, settings) for e in entries])
 
 
-def board_to_html(board, config):
+def board_to_html(board, config, overridden_glyphs):
     """mostly copy paste from pdf.py  :( real clumsy
     important assumption: empty squares and board edges reside in one font file/face
     (poorly designated 'aux-postfix') in case of most chess fonts there's only one file/face
@@ -71,7 +71,7 @@ def board_to_html(board, config):
         char = [chr(int(config['empty-squares']['light'])),
                 chr(int(config['empty-squares']['dark']))][((i >> 3) + (i % 8)) % 2]
         if not board.board[i] is None:
-            glyph = board.board[i].toFen()
+            glyph = board.board[i].toFen(overridden_glyphs)
             if len(glyph) > 1:  # removing brackets
                 glyph = glyph[1:-1]
             if glyph in config['fontinfo']:

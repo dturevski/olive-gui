@@ -183,7 +183,7 @@ class ExportDocument:
         b = model.Board()
         if 'algebraic' in e:
             b.fromAlgebraic(e['algebraic'])
-        story.append(self.getBoardTable(b))
+        story.append(self.getBoardTable(b, e.get('glyphs', {})))
         s_left = ''
         if 'stipulation' in e:
             s_left = e['stipulation']
@@ -200,9 +200,8 @@ class ExportDocument:
         story.append(self.subscript(s_left, s_middle, b.getPiecesCount()))
         return story
 
-
-    def fenLine(self, b):
-        t = reportlab.platypus.Table([[b.toFen()]])
+    def fenLine(self, b, overridden_glyphs):
+        t = reportlab.platypus.Table([[b.toFen(overridden_glyphs)]])
         t.setStyle(reportlab.platypus.TableStyle([
             ('TEXTCOLOR', (0, 0), (-1, -1), (0.75, 0.75, 0.75)),
             ('LEFTPADDING', (0, 0), (-1, -1), 0),
@@ -236,7 +235,7 @@ class ExportDocument:
         if 'algebraic' in e:
             b = model.Board()
             b.fromAlgebraic(e['algebraic'])
-            story.append(self.fenLine(b))
+            story.append(self.fenLine(b, e.get('glyphs', {})))
         return story
 
     def header(e, Lang):
@@ -305,7 +304,7 @@ class ExportDocument:
         ExportDocument.fontsStarted = True
     startFonts = staticmethod(startFonts)
 
-    def board2Table(self, board):
+    def board2Table(self, board, overridden_glyphs):
         rows, row = [ExportDocument.topBorder], None
         for i in range(64):
             if i % 8 == 0:
@@ -313,7 +312,7 @@ class ExportDocument:
                 rows.append(row)
             font, char = 'd', ["\xA3", "\xA4"][((i >> 3) + (i % 8)) % 2]
             if not board.board[i] is None:
-                glyph = board.board[i].toFen()
+                glyph = board.board[i].toFen(overridden_glyphs)
                 if len(glyph) > 1:
                     glyph = glyph[1:-1]
                 font = model.FairyHelper.fontinfo[glyph]['family']
@@ -325,39 +324,9 @@ class ExportDocument:
         rows.append(ExportDocument.bottomBorder)
         return rows
 
-    def board2Html(self, board):
-        lines = []
-        spans, fonts, prevfont = [], [], 'z'
-        for i in range(64):
-            font, char = 'd', ["\xA3", "\xA4"][((i >> 3) + (i % 8)) % 2]
-            if not board.board[i] is None:
-                glyph = board.board[i].toFen()
-                if len(glyph) > 1:
-                    glyph = glyph[1:-1]
-                font = model.FairyHelper.fontinfo[glyph]['family']
-                char = model.FairyHelper.fontinfo[glyph][
-                    'chars'][((i >> 3) + (i % 8)) % 2]
-            if font != prevfont:
-                fonts.append(font)
-                spans.append([char])
-                prevfont = font
-            else:
-                spans[-1].append(char)
-            if i != 63 and i % 8 == 7:
-                spans[-1].append("<br/>")
-        return ''.join(
-            [
-                '<font face="%s" size=%d>%s</font>' %
-                (CHESS_FONTS[
-                     fonts[i]][0],
-                 FONT_SIZE['chess'],
-                 ''.join(
-                     spans[i])) for i in range(
-                len(fonts))])
-
-    def getBoardTable(self, b):
+    def getBoardTable(self, b, overridden_glyphs):
         t = reportlab.platypus.Table(
-            self.board2Table(b),
+            self.board2Table(b, overridden_glyphs),
             colWidths = [FONT_SIZE['chess'] for _ in range(10)],
             rowHeights = [FONT_SIZE['chess'] for _ in range(10)]
         )

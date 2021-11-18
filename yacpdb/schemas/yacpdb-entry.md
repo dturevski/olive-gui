@@ -81,7 +81,7 @@ of the composition. May be omitted if the source is unknown.
 
 ### award:
 This field indicates that composition took part in a certain composing competition
-and earned a certain distinction. If the `award` fiels is present the `source` field is required.
+and earned a certain distinction. If the `award` field is present then the `source` field is required.
 ```yaml
     tourney:
         name: feenschach
@@ -107,13 +107,26 @@ Alternatively, when the tourney and the source name are the same, shortcut synta
                                               # the color of the piece it hops over	
 ```
 The diagram position of the composition.
-Note S for the knights as N is reserverd forthe  Nightriders. Fairy pieces are
+Note S for the knights as N is reserved for the Nightriders. Fairy pieces are
 supported and use the same syntax as in the Popeye solving program:
 
 [Popeye manual](https://github.com/thomas-maeder/popeye/blob/master/py-engl.txt)
 
 For convenience the lists of the supported fairy pieces, specifications and conditions
 are available at the edit form via the `Insert' pulldown menu.
+
+### glyphs:
+```yaml
+    glyphs:
+      g: q3 
+```
+Override the pieces default graphical representation. In the example: display grasshoppers (**g**)
+as queens (**q**) rotated 270 (**3***90) deg (default is q2).
+The key must be a valid english popeye piece code in lowercase ("g", "n", "li", "pa", etc). The value must be one of
+"kqrbspeaofwdx" optionally followed by the rotation modifier (1, 2 or 3). Note that the non standard chess glyphs
+possess radial symmetries (e=e2, e1=e3 - that is rotating an equihopper symbol 180 deg
+does not produce a different glyph or a=a1=a2=a3 etc).
+
 
 ### stipulation:
 ```yaml
@@ -160,8 +173,8 @@ using one of these three example formats.
 The solution to the problem in the Popeye output format with optional comments in curly braces
 ```yaml
     solution: |
-      "1...Re4-d4 2.Kd1-e2 Rd4-d5 3.Ke2-e3 Rd5-e5 + 4.Ke3-d4 Re5-e4 # {e4-d4-d5-e5-e4}      
-      1.Bc3-d4 Re4-e5 2.Bd4-f2 Re5-d5 3.Kd1-e2 Rd5-d4 4.Ke2-e3 Rd4-e4 # {e4-e5-d5-d4-e4}"
+      1...Re4-d4 2.Kd1-e2 Rd4-d5 3.Ke2-e3 Rd5-e5 + 4.Ke3-d4 Re5-e4 # {e4-d4-d5-e5-e4}      
+      1.Bc3-d4 Re4-e5 2.Bd4-f2 Re5-d5 3.Kd1-e2 Rd5-d4 4.Ke2-e3 Rd4-e4 # {e4-e5-d5-d4-e4}
 ```
 Note the YAML pipe symbol `|` for a block of text.
 

@@ -166,14 +166,9 @@ class ChestView(QtWidgets.QSplitter):
         e = self.Mainframe.model.cur()
         brd = self.Mainframe.model.board
         # TODO #2: translate messages
-        # self.input.setText(self.Mainframe.model.board.toFen() + " " + self.Mainframe.model.cur()['stipulation'])
+
         if not CHESTSTIPULATION.match(e['stipulation'].lower()):
             self.input.setText('Stipulation is not supported by Chest')
-            self.btnRun.setEnabled(False)
-            return
-
-        if not isOrthodox(brd.toFen()):
-            self.input.setText('Chest can only solve orthodox problems')
             self.btnRun.setEnabled(False)
             return
 
@@ -183,8 +178,7 @@ class ChestView(QtWidgets.QSplitter):
             return
 
         self.btnRun.setEnabled(True)
-        input_str = "LE\nf " + brd.toFen().replace("S", "N").replace("s", "n") + "\n"
-        # input_str += "cws\ncwl\ncbs\ncbl\n" #castling
+        input_str = "LE\nf " + brd.toFen({}).replace("S", "N").replace("s", "n") + "\n"
 
         option = checkOption(e, 'NoCastling')
         if str(
