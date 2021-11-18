@@ -123,9 +123,13 @@ are available at the edit form via the `Insert' pulldown menu.
 Override the pieces default graphical representation. In the example: display grasshoppers (**g**)
 as queens (**q**) rotated 270 (**3***90) deg (default is q2).
 The key must be a valid english popeye piece code in lowercase ("g", "n", "li", "pa", etc). The value must be one of
-"kqrbspeaofwdx" optionally followed by the rotation modifier (1, 2 or 3). Note that the non standard chess glyphs
+"kqrbspeaofwdx" optionally followed by the rotation modifier (1, 2 or 3). Note that the non-standard chess glyphs
 possess radial symmetries (e=e2, e1=e3 - that is rotating an equihopper symbol 180 deg
-does not produce a different glyph or a=a1=a2=a3 etc).
+does not produce a different glyph or a=a1=a2=a3 etc). Also, the non-standard glyphs may not have a neutral
+variant in the Good Companion's fonts file.
+
+[Supported pre-rendered glyphs](../../resources/fonts/gc2.gif)
+
 
 
 ### stipulation:
@@ -165,7 +169,7 @@ so it is `Add white Sa1`, not `Add white Na1` to add a white knight.
     intended-solutions: 2.2.1.1
     intended-solutions: 4.1.1...
 ```
-When author intended more than one solution to his problem, this can be indicated 
+When authors intended more than one solution to their problem, this can be indicated 
 using one of these three example formats.
 
 
