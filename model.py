@@ -243,6 +243,9 @@ class Model:
     def cur(self):
         return self.entries[self.current]
 
+    def overridden_glyphs(self):
+        return self.cur().get('glyphs', {})
+
     def setNewCurrent(self, idx):
         self.current = idx
         if 'algebraic' in self.entries[idx]:

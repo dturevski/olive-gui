@@ -314,9 +314,9 @@ class Mainframe(QtWidgets.QMainWindow):
         self.twinsAction.triggered.connect(self.popeyeView.onTwins)
 
         self.runAxr = QtWidgets.QAction(
-                QtGui.QIcon(':/icons/pointing-right.svg'),
-                Lang.value('PS_AXR'),
-                self)
+            QtGui.QIcon(':/icons/pointing-right.svg'),
+            Lang.value('PS_AXR'),
+            self)
         self.runAxr.triggered.connect(self.onAxr)
 
         self.popeyeView.setActions(
@@ -332,7 +332,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.langActions = []
         for key in sorted(langs.keys()):
             self.langActions.append(
-                QtWidgets.QAction(QtGui.QIcon(':/icons/lang/'+ key +'.svg'), langs[key], self)
+                QtWidgets.QAction(QtGui.QIcon(':/icons/lang/' + key + '.svg'), langs[key], self)
             )
             self.langActions[-1].triggered.connect(self.makeSetNewLang(key))
             self.langActions[-1].setCheckable(True)
@@ -347,19 +347,19 @@ class Mainframe(QtWidgets.QMainWindow):
         # File menu
         self.fileMenu = menubar.addMenu(Lang.value('MI_File'))
         list(map(self.fileMenu.addAction,
-            [self.newAction,
-             self.openAction,
-             self.saveAction,
-             self.saveAsAction,
-             self.saveTemplateAction]))
+                 [self.newAction,
+                  self.openAction,
+                  self.saveAction,
+                  self.saveAsAction,
+                  self.saveTemplateAction]))
         self.fileMenu.addSeparator()
         self.langMenu = self.fileMenu.addMenu(QtGui.QIcon(':/icons/translate.svg'),
                                               Lang.value('MI_Language'))
         list(map(self.langMenu.addAction, self.langActions))
         self.fileMenu.addSeparator()
-        #self.importMenu = self.fileMenu.addMenu(Lang.value('MI_Import'))
-        #self.importMenu.addAction(self.importPbmAction)
-        #self.importMenu.addAction(self.importCcvAction)
+        # self.importMenu = self.fileMenu.addMenu(Lang.value('MI_Import'))
+        # self.importMenu.addAction(self.importPbmAction)
+        # self.importMenu.addAction(self.importCcvAction)
         self.exportMenu = self.fileMenu.addMenu(Lang.value('MI_Export'))
         self.exportMenu.addAction(self.exportPdfAction)
         self.exportMenu.addAction(self.exportLaTeXAction)
@@ -381,12 +381,12 @@ class Mainframe(QtWidgets.QMainWindow):
         # Popeye menu
         self.popeyeMenu = menubar.addMenu(Lang.value('MI_Popeye'))
         list(map(self.popeyeMenu.addAction,
-            [self.startPopeyeAction,
-             self.stopPopeyeAction,
-             self.listLegalBlackMoves,
-             self.listLegalWhiteMoves,
-             self.optionsAction,
-             self.twinsAction]))
+                 [self.startPopeyeAction,
+                  self.stopPopeyeAction,
+                  self.listLegalBlackMoves,
+                  self.listLegalWhiteMoves,
+                  self.optionsAction,
+                  self.twinsAction]))
 
         # help menu
         menubar.addSeparator()
@@ -409,13 +409,13 @@ class Mainframe(QtWidgets.QMainWindow):
             self.addEntryAction, self.deleteEntryAction]))
         self.toolbar.addSeparator()
         list(map(self.toolbar.addAction,
-            [self.startPopeyeAction,
-             self.stopPopeyeAction,
-             self.listLegalBlackMoves,
-             self.listLegalWhiteMoves,
-             self.optionsAction,
-             self.twinsAction,
-             self.runAxr]))
+                 [self.startPopeyeAction,
+                  self.stopPopeyeAction,
+                  self.listLegalBlackMoves,
+                  self.listLegalWhiteMoves,
+                  self.optionsAction,
+                  self.twinsAction,
+                  self.runAxr]))
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
@@ -449,16 +449,16 @@ class Mainframe(QtWidgets.QMainWindow):
             self.restoreState(settings.value("windowState"))
         if settings.value("overviewColumnWidths") != None:
             self.entryList.setColumnWidthsFromString(
-               str(QtCore.QVariant(settings.value("overviewColumnWidths"))))
+                str(QtCore.QVariant(settings.value("overviewColumnWidths"))))
 
     def updateTitle(self):
         docname = Lang.value('WT_New_Collection')
         if Mainframe.model.filename != '':
             head, tail = os.path.split(Mainframe.model.filename)
             docname = tail + ' (' + head + ')'
-        title = docname +\
-            ' [' + [Lang.value('WT_Saved'), Lang.value('WT_Not_saved')][Mainframe.model.is_dirty] + \
-            '] - olive ' + Conf.value('version')
+        title = docname + \
+                ' [' + [Lang.value('WT_Saved'), Lang.value('WT_Not_saved')][Mainframe.model.is_dirty] + \
+                '] - olive ' + Conf.value('version')
         self.setWindowTitle(title)
 
     def openCollection(self, fileName):
@@ -501,6 +501,7 @@ class Mainframe(QtWidgets.QMainWindow):
                 newlang)].setChecked(True)
             Lang.current = newlang
             Mainframe.sigWrapper.sigLangChanged.emit()
+
         return setNewLang
 
     def onModelChanged(self):
@@ -558,7 +559,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.editMenu.setTitle(Lang.value('MI_Edit'))
         self.popeyeMenu.setTitle(Lang.value('MI_Popeye'))
         self.helpMenu.setTitle(Lang.value('MI_Help'))
-        #self.importMenu.setTitle(Lang.value('MI_Import'))
+        # self.importMenu.setTitle(Lang.value('MI_Import'))
         self.exportMenu.setTitle(Lang.value('MI_Export'))
 
         # window title
@@ -619,7 +620,7 @@ class Mainframe(QtWidgets.QMainWindow):
         if not Mainframe.model.is_dirty:
             return True
         dialog = YesNoCancelDialog(Lang.value('MSG_Not_saved'))
-        if(dialog.exec_()):
+        if (dialog.exec_()):
             if 'Yes' == dialog.outcome:
                 self.onSaveFile()
                 return True
@@ -659,7 +660,7 @@ class Mainframe(QtWidgets.QMainWindow):
         default_dir = './collections/'
         if Mainframe.model.filename != '':
             default_dir, tail = os.path.split(Mainframe.model.filename)
-        #fileName = QtWidgets.QFileDialog.getOpenFileName(self, Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
+        # fileName = QtWidgets.QFileDialog.getOpenFileName(self, Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
         fileName, encoding = self.getOpenFileNameAndEncoding(
             Lang.value('MI_Import_PBM'), default_dir, "(*.pbm)")
         if not fileName:
@@ -797,7 +798,7 @@ class Mainframe(QtWidgets.QMainWindow):
         if not fileName:
             return
         try:
-            xfen2img.convert(Mainframe.model.board.toFen(Mainframe.model.cur().get('glyphs', {})), str(fileName))
+            xfen2img.convert(Mainframe.model.board.toFen(Mainframe.model.overridden_glyphs()), str(fileName))
         except IOError:
             msg = Lang.value('MSG_IO_failed')
             logging.exception(msg)
@@ -852,7 +853,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.transforms = []
         for i, k in enumerate(Mainframe.transform_names):
             action = QtWidgets.QAction(QtGui.QIcon(':/icons/' + Mainframe.transform_icons[i] + '.svg'),
-                Lang.value('MI_' + k), self)
+                                       Lang.value('MI_' + k), self)
             if k == 'Clear':
                 action.setShortcut('Ctrl+Space')
             elif k == 'Game_array':
@@ -879,6 +880,7 @@ class Mainframe(QtWidgets.QMainWindow):
                 pass
             Mainframe.model.onBoardChanged()
             Mainframe.sigWrapper.sigModelChanged.emit()
+
         return callable
 
     def closeEvent(self, event):
@@ -919,9 +921,9 @@ class Mainframe(QtWidgets.QMainWindow):
         if 'demo' not in Mainframe.fonts:
             fontSize = (Mainframe.app.desktop().screenGeometry().height() - 400) >> 3
             Mainframe.fonts['demo'] = {
-              'd': QtGui.QFont('GC2004D', fontSize),
-              'y': QtGui.QFont('GC2004Y', fontSize),
-              'x': QtGui.QFont('GC2004X', fontSize)}
+                'd': QtGui.QFont('GC2004D', fontSize),
+                'y': QtGui.QFont('GC2004Y', fontSize),
+                'x': QtGui.QFont('GC2004X', fontSize)}
         Mainframe.currentFontSet = 'demo'
         self.hide()
         self.demoFrame = DemoFrame()
@@ -971,6 +973,7 @@ class QuickOptionsView():  # for clarity this View is not a widget
             self.skipModelChanged = True
             Mainframe.sigWrapper.sigModelChanged.emit()
             self.skipModelChanged = False
+
         return toggleOption
 
     def embedTo(self, toolbar):
@@ -1000,9 +1003,8 @@ class AboutDialog(QtWidgets.QDialog):
         vbox.addWidget(lblLogo, QtCore.Qt.AlignCenter)
         grid = QtWidgets.QGridLayout()
 
-
         grid.addWidget(ClickableLabel('Version:'))
-        grid.addWidget(ClickableLabel("Olive %s (%s)" % (Conf.value('version'),  os.name)), 0, 1)
+        grid.addWidget(ClickableLabel("Olive %s (%s)" % (Conf.value('version'), os.name)), 0, 1)
 
         grid.addWidget(ClickableLabel(''))
         grid.addWidget(ClickableLabel("Python %d.%d.%d" % (sys.version_info.major,
@@ -1054,7 +1056,6 @@ class YesNoDialog(QtWidgets.QDialog):
         self.setLayout(vbox)
 
         self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
-
 
 
 class YesNoCancelDialog(QtWidgets.QDialog):
@@ -1110,8 +1111,8 @@ class FenView(QtWidgets.QLineEdit):
         if self.skipModelChanged:
             return
         self.skipModelChanged = True
-        fen = Mainframe.model.board.toFen(Mainframe.model.cur().get('glyphs', {}))
-        fen = fen.replace('S', Conf.value('horsehead-glyph').upper()).\
+        fen = Mainframe.model.board.toFen(Mainframe.model.overridden_glyphs())
+        fen = fen.replace('S', Conf.value('horsehead-glyph').upper()). \
             replace('s', Conf.value('horsehead-glyph').lower())
         self.setText(fen)
         self.skipModelChanged = False
@@ -1177,11 +1178,11 @@ class EntryListView(QtWidgets.QTreeWidget):
         menu.exec_(e.globalPos())
 
     def keyPressEvent(self, event):
-        if event.key()==(QtCore.Qt.Key_Control and QtCore.Qt.Key_C):
+        if event.key() == (QtCore.Qt.Key_Control and QtCore.Qt.Key_C):
             self.onCopy()
-        elif event.key()==(QtCore.Qt.Key_Control and QtCore.Qt.Key_V):
+        elif event.key() == (QtCore.Qt.Key_Control and QtCore.Qt.Key_V):
             self.onPaste()
-        elif event.key()==(QtCore.Qt.Key_Control and QtCore.Qt.Key_X):
+        elif event.key() == (QtCore.Qt.Key_Control and QtCore.Qt.Key_X):
             self.onCut()
         else:
             super().keyPressEvent(event)
@@ -1256,7 +1257,7 @@ class EntryListView(QtWidgets.QTreeWidget):
             intList = [int(s) for s in widths.split(";")]
             for i, w in enumerate(intList):
                 self.setColumnWidth(i, w)
-        except :
+        except:
             pass
 
     def onLangChanged(self):
@@ -1336,7 +1337,8 @@ class EntryListView(QtWidgets.QTreeWidget):
         for i, text in enumerate(self.createItem(Mainframe.model.current)):
             try:
                 self.topLevelItem(Mainframe.model.current).setText(i, text)
-            except AttributeError: pass
+            except AttributeError:
+                pass
 
     def onCurrentItemChanged(self, current, prev):
         if current is None:  # happens when deleting
@@ -1346,7 +1348,7 @@ class EntryListView(QtWidgets.QTreeWidget):
 
         # stupid hack:
         text = current.text(0)
-        if(text[-1] == '*'):
+        if (text[-1] == '*'):
             text = text[:-1]
         Mainframe.model.setNewCurrent(int(text) - 1)
 
@@ -1400,7 +1402,7 @@ class DraggableLabel(QtWidgets.QLabel):
         drag = QtGui.QDrag(self)
         drag.setMimeData(mimeData)
         drag.setHotSpot(e.pos() - self.rect().topLeft())
-        dropAction = drag.exec_ (QtCore.Qt.MoveAction)
+        dropAction = drag.exec_(QtCore.Qt.MoveAction)
         Mainframe.currentlyDragged = None
 
     def dragEnterEvent(self, e):
@@ -1429,10 +1431,11 @@ class ChessBoxItem(QtWidgets.QLabel):
         self.changePiece(piece)
 
     def getShortGlyph(piece):
-        glyph = piece.toFen({}) # todo: handle properly, support onModelChanged
+        glyph = piece.toFen(Mainframe.model.overridden_glyphs())
         if len(glyph) > 1:
             glyph = glyph[1:-1]
         return glyph
+
     getShortGlyph = staticmethod(getShortGlyph)
 
     def changePiece(self, piece):
@@ -1512,7 +1515,7 @@ class ChessBoxItemManagable(ChessBoxItem):
 
     def choose(self):
         dialog = AddFairyPieceDialog(Lang)
-        if(dialog.exec_()):
+        if (dialog.exec_()):
             self.changePiece(dialog.getPiece())
 
 
@@ -1595,7 +1598,7 @@ class BoardView(QtWidgets.QWidget):
             self.skipModelChanged = False
             return
 
-        overridden_glyphs = Mainframe.model.cur().get('glyphs', {})
+        overridden_glyphs = Mainframe.model.overridden_glyphs()
         for i, lbl in enumerate(self.labels):
             if Mainframe.model.board.board[i] is None:
                 lbl.setFont(Mainframe.fontset()['d'])
@@ -1623,7 +1626,7 @@ class BoardView(QtWidgets.QWidget):
             if e.buttons() == QtCore.Qt.LeftButton:
                 dialog = BoardView.StipulationLabel.Dialog(Lang)
                 dialog.move(self.mapToGlobal(e.pos()))
-                if(dialog.exec_()):
+                if (dialog.exec_()):
                     if self.skipModelChanged:
                         return
                     Mainframe.model.cur()['stipulation'] = dialog.input.currentText().strip()
@@ -1644,7 +1647,6 @@ class BoardView(QtWidgets.QWidget):
                 super(BoardView.StipulationLabel.Dialog, self).__init__(Lang)
                 self.setWindowTitle(Lang.value('EP_Stipulation'))
                 self.input.setFocus()
-
 
 
 class InfoView(QtWidgets.QTextEdit):
@@ -1724,6 +1726,7 @@ class ChessBox(QtWidgets.QWidget):
         self.gridFairy.setVerticalSpacing(0)
         self.gridFairy.setHorizontalSpacing(0)
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
+        Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
 
         self.items = []
 
@@ -1761,13 +1764,13 @@ class ChessBox(QtWidgets.QWidget):
 
     def deleteAll(self):
         for item in self.items:
-            if not item.piece is None:
+            if item.piece is not None:
                 item.changePiece(None)
 
     def updateXFenOverrides(self):
         model.FairyHelper.overrides = {}
         for item in self.items:
-            if not item.piece is None:
+            if item.piece is not None:
                 glyph = ChessBoxItem.getShortGlyph(item.piece).lower()
                 model.FairyHelper.overrides[glyph] = {
                     'name': item.piece.name, 'specs': item.piece.specs}
@@ -1775,6 +1778,7 @@ class ChessBox(QtWidgets.QWidget):
     def makeChangeZooCallable(self, zoo_idx):
         def callable():
             self.changeZoo(Conf.zoos[zoo_idx]['pieces'])
+
         return callable
 
     def changeZoo(self, zoo):
@@ -1804,6 +1808,11 @@ class ChessBox(QtWidgets.QWidget):
                 unique[k] = True
                 self.items[i].changePiece(piece)
                 i += 1
+
+    def onModelChanged(self):
+        # we care only about the glyphs overrides, but let's repaint everything for simplicity
+        for item in self.items:
+            item.changePiece(item.piece)
 
 
 class AddFairyPieceDialog(options.OkCancelDialog):
@@ -1957,7 +1966,6 @@ class MetadataView(QtWidgets.QWidget):
             else:
                 return QtGui.QValidator.Invalid, s, pos
 
-
     def onModelChanged(self):
         if self.skipModelChanged:
             return
@@ -1997,7 +2005,7 @@ class MetadataView(QtWidgets.QWidget):
 
         year = self.inputDateYear.text().strip()
         if year != '':
-            date = { 'year': model.parseYear(year) }
+            date = {'year': model.parseYear(year)}
             if self.inputDateMonth.currentIndex() != 0:
                 date['month'] = self.inputDateMonth.currentIndex()
                 if self.inputDateDay.currentIndex() != 0:
@@ -2009,7 +2017,7 @@ class MetadataView(QtWidgets.QWidget):
         tourney = self.inputTourney.text().strip()
         e['award'] = model.mergeInto(e.get('award', {}), {
             'tourney': {'name': tourney} if tourney != '' else {},
-            'judges':  model.splitAndStrip(self.inputJudges.toPlainText()),
+            'judges': model.splitAndStrip(self.inputJudges.toPlainText()),
         })
 
         for k in ['authors', 'source', 'award']:
@@ -2145,6 +2153,7 @@ class KeywordsInputWidget(PlainTextEdit):
                     self.toPlainText()).split("\n") if x.strip() != '']
             keywords.append(keyword)
             self.setText("\n".join(keywords))
+
         return callable
 
 
@@ -2323,6 +2332,7 @@ class PopeyeView(QtWidgets.QSplitter):
         comboBox.setEditable(True)
         comboBox.addItems(PopeyeView.stipulations)
         return comboBox
+
     createStipulationInput = staticmethod(createStipulationInput)
 
     def __init__(self):
@@ -2342,9 +2352,10 @@ class PopeyeView(QtWidgets.QSplitter):
 
         self.labelPopeye = QtWidgets.QLabel(Lang.value('TC_Popeye') + ':')
         grid.addWidget(self.labelPopeye, row, 0)
-        row +=1
+        row += 1
 
-        self.inputPyPath = options.SelectFileWidget(Lang.value('TC_Popeye'), Conf.popeye['path'], self.onPopeyePathChanged)
+        self.inputPyPath = options.SelectFileWidget(Lang.value('TC_Popeye'), Conf.popeye['path'],
+                                                    self.onPopeyePathChanged)
         grid.addWidget(self.inputPyPath, row, 0, 1, 2)
         row += 1
 
@@ -2364,7 +2375,7 @@ class PopeyeView(QtWidgets.QSplitter):
             Lang.value('EP_Stipulation') + ':')
         grid.addWidget(self.labelStipulation, row, 0)
         self.labelIntended = QtWidgets.QLabel(
-                Lang.value('EP_Intended_solutions') + ':')
+            Lang.value('EP_Intended_solutions') + ':')
         grid.addWidget(self.labelIntended, row, 1)
         row += 1
 
@@ -2412,8 +2423,10 @@ class PopeyeView(QtWidgets.QSplitter):
         self.skipModelChanged = False
 
     def onMemoryChanged(self):
-        try: Conf.popeye['memory'] = model.myint(str(self.inputMemory.text()))
-        except: pass
+        try:
+            Conf.popeye['memory'] = model.myint(str(self.inputMemory.text()))
+        except:
+            pass
 
     def onPopeyePathChanged(self, newPath):
         Conf.popeye['path'] = newPath
@@ -2424,7 +2437,7 @@ class PopeyeView(QtWidgets.QSplitter):
             entry_options = Mainframe.model.cur()['options']
         dialog = options.OptionsDialog(model.FairyHelper.options, sorted(
             model.FairyHelper.conditions), 14, 3, entry_options, Lang)
-        if(dialog.exec_()):
+        if (dialog.exec_()):
             Mainframe.model.cur()['options'] = dialog.getOptions()
             self.skipModelChanged = True
             Mainframe.model.markDirty()
@@ -2436,7 +2449,7 @@ class PopeyeView(QtWidgets.QSplitter):
         if 'twins' in Mainframe.model.cur():
             twins = Mainframe.model.cur()['twins']
         dialog = options.TwinsDialog(Mainframe.model.twinsAsText(), Lang)
-        if(dialog.exec_()):
+        if (dialog.exec_()):
             new_twins = dialog.getTwins()
             if len(new_twins):
                 Mainframe.model.cur()['twins'] = new_twins
@@ -2468,7 +2481,7 @@ class PopeyeView(QtWidgets.QSplitter):
         self.process.kill()
         self.output.insertPlainText("\n" + Lang.value('MSG_Terminated'))
 
-    def reset(self, clear_output = True):
+    def reset(self, clear_output=True):
         self.stop_requested = False
         if clear_output:
             self.output.setText("")
@@ -2515,7 +2528,7 @@ class PopeyeView(QtWidgets.QSplitter):
         py_exe = Conf.popeye['path']
         params = ['-maxmem', str(Conf.popeye['memory']) + 'M']
         params.append(self.temp_filename)
-        #print py_exe, params
+        # print py_exe, params
         self.process.error.connect(self.onFailed)
         self.process.start(py_exe, params)
 
@@ -2589,7 +2602,6 @@ class PopeyeView(QtWidgets.QSplitter):
             msgBox(Lang.value('MSG_Not_supported') % str(e))
             self.compact_possible = False
 
-
     def trimIndented(text):
 
         def countLeadingSpaces(line):
@@ -2609,7 +2621,6 @@ class PopeyeView(QtWidgets.QSplitter):
                 minIndent = ls
 
         return ("\n".join([line[minIndent:] if line.strip() != "" else "" for line in lines])).strip()
-
 
     trimIndented = staticmethod(trimIndented)
 
@@ -2661,6 +2672,7 @@ class PopeyeView(QtWidgets.QSplitter):
             b.from_algebraic(self.entry_copy['algebraic'])
             self.solutionOutput.create_output(self.solution, b)
             self.output.setText(self.solutionOutput.solution)
+
         return callable
 
     def removeFairyConditions(self):
@@ -2800,6 +2812,7 @@ class YamlView(QtWidgets.QTextEdit):
                 encoding=None,
                 allow_unicode=True))
 
+
 class DemoFrame(QtWidgets.QWidget):
 
     def __init__(self):
@@ -2809,7 +2822,6 @@ class DemoFrame(QtWidgets.QWidget):
         self.showFullScreen()
 
     def initLayout(self):
-
         # left pane
         widgetLeftPane = QtWidgets.QWidget()
         vboxLeftPane = QtWidgets.QVBoxLayout()
@@ -2852,10 +2864,10 @@ class DraggableLabelWithHoverEffect(DraggableLabel):
         super(DraggableLabelWithHoverEffect, self).__init__(id)
         self.setMouseTracking(True)
 
-    def enterEvent(self,event):
+    def enterEvent(self, event):
         self.setStyleSheet('QLabel { background-color: #42bff4; }')
 
-    def leaveEvent(self,event):
+    def leaveEvent(self, event):
         self.setStyleSheet('QLabel { background-color: #ffffff; }')
 
 
@@ -2864,7 +2876,7 @@ class DemoBoardToolbar(QtWidgets.QWidget):
     def __init__(self):
         super(DemoBoardToolbar, self).__init__()
 
-        hl =  QtWidgets.QHBoxLayout()
+        hl = QtWidgets.QHBoxLayout()
         self.setLayout(hl)
 
         btnClear = QtWidgets.QPushButton(Lang.value('MI_Clear'))
@@ -2893,17 +2905,16 @@ class DemoBoardToolbar(QtWidgets.QWidget):
 
     def onNext(self):
         c = len(Mainframe.model.entries)
-        Mainframe.model.setNewCurrent((Mainframe.model.current+1)%c)
+        Mainframe.model.setNewCurrent((Mainframe.model.current + 1) % c)
         Mainframe.sigWrapper.sigModelChanged.emit()
 
     def onPrev(self):
         c = len(Mainframe.model.entries)
-        Mainframe.model.setNewCurrent((Mainframe.model.current+c-1)%c)
+        Mainframe.model.setNewCurrent((Mainframe.model.current + c - 1) % c)
         Mainframe.sigWrapper.sigModelChanged.emit()
 
     def onClose(self):
         Mainframe.sigWrapper.sigDemoModeExit.emit()
-
 
 
 class Conf:
@@ -2914,7 +2925,6 @@ class Conf:
     chest_file = get_write_dir() + '/conf/chest.yaml'
 
     def read():
-
         with open(Conf.file, 'r', encoding="utf8") as f:
             Conf.values = yaml.safe_load(f)
 
@@ -2941,14 +2951,17 @@ class Conf:
             f.write(Conf.dump(Conf.popeye))
         with open(Conf.chest_file, 'wb') as f:
             f.write(Conf.dump(Conf.chest))
+
     write = staticmethod(write)
 
     def value(v):
         return Conf.values[v]
+
     value = staticmethod(value)
 
     def dump(object):
         return yaml.dump(object, encoding="utf8", allow_unicode=True)
+
     dump = staticmethod(dump)
 
 
@@ -2962,8 +2975,10 @@ class Lang:
         finally:
             f.close()
         Lang.current = Conf.value('default-lang')
+
     read = staticmethod(read)
 
     def value(v):
         return Lang.values[v][Lang.current]
+
     value = staticmethod(value)
