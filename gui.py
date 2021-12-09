@@ -2553,7 +2553,7 @@ class PopeyeView(QtWidgets.QSplitter):
         data = bytes(self.process.readAllStandardOutput()).decode("utf8")
         self.logPopeyeCommunication(data)
         self.raw_output += data
-        self.output.insertPlainText(data)
+        self.output.append(data)
         if len(self.raw_output) > int(Conf.popeye['stop-max-bytes']):
             self.stopPopeye()
 
@@ -2561,7 +2561,7 @@ class PopeyeView(QtWidgets.QSplitter):
         response = str(self.process.readAllStandardError(), encoding="utf8")
         self.logPopeyeCommunication(response)
         self.output.setTextColor(QtGui.QColor(255, 0, 0))
-        self.output.insertPlainText(response)
+        self.output.append(response)
         self.output.setTextColor(QtGui.QColor(0, 0, 0))
 
     def onFinished(self):
