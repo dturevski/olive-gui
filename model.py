@@ -384,7 +384,8 @@ def transformEntryOptionsAndTwins(e, transform):
         for twinId, twin in e['twins'].items():
             e['twins'][twinId] = transformPopeyeInput(twin, transform)
 
-RE_ALGEBRAIC_SQUARE = re.compile("([a-h][1-8])")
+# exclude cases like Type1 -> Typf1 etc
+RE_ALGEBRAIC_SQUARE = re.compile("((?<!Typ)[a-h][1-8])")
 def transformPopeyeInput(input, transform):
     return re.sub(RE_ALGEBRAIC_SQUARE, lambda m: transformAlgebraicSquare(m.group(1), transform), input)
 
