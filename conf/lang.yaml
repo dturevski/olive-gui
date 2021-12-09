@@ -388,6 +388,12 @@ MI_Save_selection_as:
   ru: Сохранить выбранное как
   de: Speichern als
   ro: Sălvează selecție ca
+MI_Validate_YACPDB:
+  en: Test (YACPDB)
+  rs: Test (YACPDB)
+  ru: Test (YACPDB)
+  de: Test (YACPDB)
+  ro: Test (YACPDB)
 
 # Piece properties
 PP_Color:

@@ -21,7 +21,7 @@ notations:
   en: [K, Q, R, B, S, P]
   fide: [K, D, T, L, S, B]
   ru: [Кр, Ф, Л, С, К, п]
-version: "1.4.1"
+version: "1.5"
 popeye-toolbar-options:
 - {icon: miscellaneus.svg, option: SetPlay, enabled: true}
 - {icon: question.svg, option: Defence 1, enabled: true}
@@ -32,3 +32,5 @@ popeye-toolbar-options:
 - {icon: checklist.svg, option: NoShortVariations, enabled: false}
 - {icon: no-bombs.svg, option: NoThreat, enabled: false}
 clear-popeye-output-on-entry-change: true
+yacpdb:
+  home: https://www.yacpdb.org/

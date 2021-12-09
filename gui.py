@@ -11,6 +11,7 @@ import tempfile
 # 3rd party
 import yaml
 from PyQt5 import QtCore, QtGui, QtWidgets
+import requests
 
 # local
 import board
@@ -153,7 +154,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.addTab(self.chestView, Lang.value('TC_Chest'))
         self.tabBar2.addTab(self.texView, Lang.value('TC_LaTeX'))
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
-        self.entryList = EntryListView()
+        self.entryList = EntryListView(self.yamlView)
         self.entryList.init()
 
         splitter.addWidget(self.tabBar2)
@@ -1130,8 +1131,9 @@ class FenView(QtWidgets.QLineEdit):
 
 class EntryListView(QtWidgets.QTreeWidget):
 
-    def __init__(self):
+    def __init__(self, yamlView):
         super(EntryListView, self).__init__()
+        self.yamlView = yamlView
         self.setAlternatingRowColors(True)
 
         self.clipboard = QtWidgets.QApplication.clipboard()
@@ -1174,6 +1176,9 @@ class EntryListView(QtWidgets.QTreeWidget):
         saveSelection.triggered.connect(self.onSaveSelectionAs)
         saveSelection.setEnabled(hasSelection)
         menu.addAction(saveSelection)
+
+        menu.addSeparator()
+        menu.addAction(Lang.value('MI_Validate_YACPDB'), self.yamlView.onValidate)
 
         menu.exec_(e.globalPos())
 
@@ -2812,6 +2817,28 @@ class YamlView(QtWidgets.QTextEdit):
                 encoding=None,
                 allow_unicode=True))
 
+    def contextMenuEvent(self, e):
+        menu = self.createStandardContextMenu()
+        menu.addSeparator()
+        menu.addAction(Lang.value('MI_Validate_YACPDB'), self.onValidate)
+        menu.exec_(e.globalPos())
+
+    def onValidate(self):
+        try:
+            r = requests.post(Conf.value('yacpdb')['home'] + 'json.php',
+                              data={'checkedit': 1,
+                                    'id': -1,
+                                    'yamlText': self.toPlainText(),
+                                    'readonly': 1})
+            if r.status_code != 200:
+                message = "HTTP error " + str(r.status_code)
+            elif r.json()['success']:
+                message = "Success"
+            else:
+                message = "Errors:<ul>" + "".join(["<li>" + err + "</li>" for err in r.json()['errors']]) + "</ul>"
+        except requests.exceptions.RequestException as ex:
+            message = str(ex)
+        msgBox(message)
 
 class DemoFrame(QtWidgets.QWidget):
 

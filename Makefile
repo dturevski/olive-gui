@@ -14,6 +14,7 @@ dependencies:
 	$(PIP) install pyinstaller
 	$(PIP) install jsonschema
 	$(PIP) install Unidecode
+	$(PIP) install requests
 
 resources.py: resources/olive.qrc
 	$(RCC) -o resources.py resources/olive.qrc
