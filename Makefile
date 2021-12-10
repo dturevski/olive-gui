@@ -15,6 +15,7 @@ dependencies:
 	$(PIP) install jsonschema
 	$(PIP) install Unidecode
 	$(PIP) install requests
+	$(PIP) install pystache
 
 resources.py: resources/olive.qrc
 	$(RCC) -o resources.py resources/olive.qrc

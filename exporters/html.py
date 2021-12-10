@@ -15,7 +15,7 @@ def render(entry, settings):
     board = Board()
     board.fromAlgebraic(entry["algebraic"])
 
-    html = pdf.ExportDocument.header(entry, settings['lang'])
+    html = pdf.ExportDocument.header(entry, settings['lang'], settings['conf'])
     html += board_to_html(board, settings['diagram_font'], entry.get('glyphs', {}))
     html += entry['stipulation'] + ' ' + board.getPiecesCount() + "<br/>\n"
     html += pdf.ExportDocument.solver(entry, settings['lang']) + "<br/>\n"

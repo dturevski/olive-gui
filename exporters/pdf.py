@@ -11,7 +11,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 import reportlab.platypus
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
-from PyQt5 import QtGui
+import pystache
 
 # local
 import model
@@ -85,9 +85,9 @@ def getPieceParagraph(font, char):
 
 class ExportDocument:
 
-    def __init__(self, records, Lang):
+    def __init__(self, records, Lang, Conf):
         ExportDocument.startFonts()
-        self.records, self.Lang = records, Lang
+        self.records, self.Lang, self.Conf = records, Lang, Conf
         register_fonts()
         styles = getSampleStyleSheet()
         styles.add(ParagraphStyle(name='Justify', wordWrap=True))
@@ -168,7 +168,7 @@ class ExportDocument:
             return ''
         header = reportlab.platypus.Paragraph(
             '<font face="%s" size=%d>%s</font><br/>' % (FONT_FAMILY, FONT_SIZE['header'],
-             ExportDocument.header(e, self.Lang)), self.style
+             ExportDocument.header(e, self.Lang, self.Conf)), self.style
         )
         return reportlab.platypus.Table(
             [['', header]],
@@ -238,27 +238,32 @@ class ExportDocument:
             story.append(self.fenLine(b, e.get('glyphs', {})))
         return story
 
-    def header(e, Lang):
-        parts = []
-        if'authors' in e:
-            parts.append("<b>" + "<br/>".join(e['authors']) + "</b>")
+    def header(e, Lang, Conf):
+        data = {}
+
+        if 'authors' in e:
+            data['author'] = [{'name': name} for name in e['authors']]
+
         if 'source' in e and 'name' in e['source']:
-            s = "<i>" + e['source']['name'] + "</i>"
-            sourceid = model.formatIssueAndProblemId(e['source'])
-            if sourceid != '':
-                s = s + "<i> (" + sourceid + ")</i>"
-            if 'date' in e['source']:
-                s = s + "<i>, " + model.formatDate(e['source']['date']) + "</i>"
-            parts.append(s)
-        if 'award' in e:
+            source = e['source']
+            data['source'] = {'name': source['name'], 'date': {}}
+            if 'issue' in source:
+                data['source']['issue'] = {'value': source['issue']}
+            if 'problemid' in source:
+                data['source']['problemid'] = {'value': source['problemid']}
+            if 'date' in source:
+                for key in ['day', 'month', 'year']:
+                    if key in source['date']:
+                        data['source']['date'][key] = {'value': source['date'][key]}
+
+        if 'award' in e and 'distinction' in e['award']:
+            data['award'] = {'distinction': model.Distinction.fromString(e['award']['distinction']).toStringInLang(Lang)}
             tourney = e.get('award', {}).get('tourney', {}).get('name', '')
             source = e.get('source', {}).get('name', '')
             if tourney != '' and tourney != source:
-                parts.append(tourney)
-            if 'distinction' in e['award']:
-                d = model.Distinction.fromString(e['award']['distinction'])
-                parts.append(d.toStringInLang(Lang))
-        return ExportDocument.escapeHtml("<br/>".join(parts))
+                data['award']['tourney'] = {'name': tourney}
+
+        return ExportDocument.escapeHtml(pystache.render(Conf.templates['entry-header'], data))
     header = staticmethod(header)
 
     def solver(e, Lang):

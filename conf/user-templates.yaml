@@ -1,0 +1,12 @@
+entry-header: |
+  {{#author}}
+    <b>{{name}}</b><br/>
+  {{/author}}
+  {{#source}}
+    {{#problemid}}{{value}} {{/problemid}}<i>{{name}}</i>{{#issue}} <i>{{value}}</i>{{/issue}}
+    {{#date}}{{#day}}{{value}}/{{/day}}{{#month}}{{value}}/{{/month}}{{#year}}{{value}}{{/year}}{{/date}}
+  {{/source}}
+  {{#award}}
+    {{#tourney}}<br/>{{name}}{{/tourney}}
+    <br/>{{distinction}}
+  {{/award}}

@@ -781,7 +781,7 @@ class Mainframe(QtWidgets.QMainWindow):
         if not fileName:
             return
         try:
-            ed = pdf.ExportDocument(Mainframe.model.entries, Lang)
+            ed = pdf.ExportDocument(Mainframe.model.entries, Lang, Conf)
             ed.doExport(str(fileName))
             QtGui.QDesktopServices.openUrl(QtCore.QUrl(fileName))
         except IOError:
@@ -1667,7 +1667,7 @@ class InfoView(QtWidgets.QTextEdit):
         self.setText("<br/><br/>".join([x for x in chunks if x != '']))
 
     def meta(self):
-        return pdf.ExportDocument.header(Mainframe.model.cur(), Lang)
+        return pdf.ExportDocument.header(Mainframe.model.cur(), Lang, Conf)
 
     def solver(self):
         return pdf.ExportDocument.solver(Mainframe.model.cur(), Lang)
@@ -2779,6 +2779,7 @@ class PublishingView(QtWidgets.QSplitter):
     def settings(self):
         return {
             'lang': Lang,
+            'conf': Conf,
             'inline_font': self.config['config'][self.config['inline-fonts'][self.solFontSelect.currentIndex()]],
             'diagram_font': self.config['config'][self.config['diagram-fonts'][self.diaFontSelect.currentIndex()]]
         }
@@ -2977,6 +2978,7 @@ class Conf:
     zoo_file = get_write_dir() + '/conf/zoos.yaml'
     popeye_file = get_write_dir() + '/conf/popeye.yaml'
     chest_file = get_write_dir() + '/conf/chest.yaml'
+    templates_file = get_write_dir() + '/conf/user-templates.yaml'
 
     def read():
         with open(Conf.file, 'r', encoding="utf8") as f:
@@ -2995,6 +2997,9 @@ class Conf:
 
         with open(Conf.chest_file, 'r', encoding="utf8") as f:
             Conf.chest = yaml.safe_load(f)
+
+        with open(Conf.templates_file, 'r', encoding="utf8") as f:
+            Conf.templates = yaml.safe_load(f)
 
     read = staticmethod(read)
 
