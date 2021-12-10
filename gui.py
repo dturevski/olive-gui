@@ -2190,12 +2190,39 @@ class LaTeXView(QtWidgets.QSplitter):
         self.skipModelChanged = False
 
 
+class SolutionPlainTextEdit(PlainTextEdit):
+
+    def __init__(self):
+        self.translations = [('KDTLS → KQRBS', 'KDTLS'), ('RDTFC → KQRBS', 'RDTFC')]
+        super(PlainTextEdit, self).__init__()
+
+    def contextMenuEvent(self, e):
+        menu = self.createStandardContextMenu()
+        menu.addSeparator()
+        for t in self.translations:
+            menu.addAction(t[0], self.makeTranslation(t[1]))
+        menu.exec_(e.globalPos())
+
+    def makeTranslation(self, chars):
+        patterns = [re.compile('\\b(?P<code>[' + chars + '])(?=[a-h1-8]?[:x*]?[a-h][1-8]\\b)'), # regular or capture (Le4, Tf:e4)
+                    re.compile('\\b(?<=[a-h][18]=)(?P<code>[' + chars + '])\\b'), # promotion (e8=D)
+                    re.compile('\\b(?P<code>[' + chars + '])(?=[a-h1-8]?\~)\\b') # random (D~, Te~, T4~)
+                    ]
+
+        def translate():
+            text = self.toPlainText()
+            for pattern in patterns:
+                text = pattern.sub(lambda m: "KQRBS"[chars.index(m.group('code'))], text)
+            self.setText(text)
+
+        return translate
+
 class SolutionView(QtWidgets.QWidget):
 
     def __init__(self):
         super(SolutionView, self).__init__()
         grid = QtWidgets.QGridLayout()
-        self.solution = PlainTextEdit()
+        self.solution = SolutionPlainTextEdit()
         self.solutionLabel = QtWidgets.QLabel(Lang.value('SS_Solution'))
         self.keywords = KeywordsInputWidget()
         self.keywordsLabel = QtWidgets.QLabel(Lang.value('SS_Keywords'))
