@@ -351,9 +351,9 @@ def p_Castling(t):
 
 def p_error(t):
     if not t is None:
-        raise Exception("Syntax error at '%s', line %d, char %d" % (t.value, t.lineno, t.lexpos))
+        raise Exception("Solution syntax error at '%s', (non-whitespace char %d)" % (t.value, t.lexpos))
     else:
-        raise Exception("Terminating syntax error")
+        raise Exception("Solution terminating syntax error")
 
 
 from .lexer import *
