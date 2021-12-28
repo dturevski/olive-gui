@@ -2853,7 +2853,7 @@ class YamlView(QtWidgets.QTextEdit):
 
     def onValidate(self):
         try:
-            r = requests.post(Conf.value('yacpdb')['home'] + 'json.php',
+            r = requests.post(Conf.value('yacpdb')['home'] + 'json.php', verify=False,
                               data={'checkedit': 1,
                                     'id': -1,
                                     'yamlText': self.toPlainText(),

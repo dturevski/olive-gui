@@ -87,4 +87,4 @@ popeye-toolbar-options:
 - enabled: false
   icon: no-bombs.svg
   option: NoThreat
-version: 1.4.1
+version: 1.5.1
