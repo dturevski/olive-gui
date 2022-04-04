@@ -21,7 +21,7 @@ notations:
   en: [K, Q, R, B, S, P]
   fide: [K, D, T, L, S, B]
   ru: [Кр, Ф, Л, С, К, п]
-version: "1.5.1"
+version: "1.5.2"
 popeye-toolbar-options:
 - {icon: miscellaneus.svg, option: SetPlay, enabled: true}
 - {icon: question.svg, option: Defence 1, enabled: true}
