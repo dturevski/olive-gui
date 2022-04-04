@@ -1,4 +1,3 @@
-PYTHON = python3
 PIP = pip3
 PYINST = pyinstaller
 INNOSETUP = "c:\Program Files (x86)\Inno Setup 6\ISCC.exe"

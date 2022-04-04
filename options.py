@@ -84,7 +84,10 @@ class Option(QtWidgets.QWidget):
                 option = 'Intelligent 0'
             parts = option.split(" ")
             if parts[0].lower() == self.command.lower():
-                for i, param_value in enumerate(parts[1:]):
+                parts = parts[1:]
+                if len(parts) > len(self.params):
+                    parts = parts[0:len(self.params)-1] + [" ".join(parts[len(self.params)-1:])]
+                for i, param_value in enumerate(parts):
                     if i < len(self.params):
                         self.params[i].set(param_value)
                 self.checkbox.setChecked(True)
@@ -256,7 +259,7 @@ class SelectFileWidget(QtWidgets.QLineEdit):
     def __init__(self, title, value, onChanged):
         super(SelectFileWidget, self).__init__()
         self.title = title
-        self.value = value;
+        self.value = value
         self.onChanged = onChanged
         self.setText(value)
         self.setReadOnly(True)
