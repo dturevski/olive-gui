@@ -191,7 +191,7 @@ FaceToFace
 Disparate
 SnekChess
 SnekCircleChess
-Breton <select{|Adverse}>
+Breton <select{|Adverse|PY}>
 LeseMajeste
 Rokagogo
 MasandGeneralised
