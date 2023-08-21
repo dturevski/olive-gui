@@ -201,3 +201,5 @@ BoleroInverse
 Influencer
 RoleExchange
 RoleExchange <int>
+SeriesCapture
+
