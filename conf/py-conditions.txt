@@ -202,4 +202,8 @@ Influencer
 RoleExchange
 RoleExchange <int>
 SeriesCapture
+BlackMaxDister
+BlackMinDister
+WhiteMaxDister
+WhiteMinDister
 
