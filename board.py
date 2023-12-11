@@ -34,8 +34,8 @@ RE_COMMON_STIPULATION = re.compile(
     '^(?P<intro>[0-9]+->)?' +
     '(?P<exact>exact-)?' +
     '(?P<mod>ser-|pser-|phser-|semi-|reci-)?' +
-    '(?P<play>h|s|r|hs|hr|pg|dia)?' +
-    '(?P<aim>#=|!=|!#|00|%|~|ep|#|=|==|\\+|(z[a-h][1-8])|x|##|##!|ct|<>|ctr|<>r|c81|(k[a-h][1-8])) *' +
+    '(?P<play>(h|s|r|hs|hr|pg|dia))?' +
+    '(?P<aim>(#=|!=|!#|00|%|~|ep|#|=|==|\\+|(z[a-h][1-8])|x|##|##!|ct|<>|ctr|<>r|c81|(k[a-h][1-8]))) *' +
     '(?P<length>[0-9.]+)$',
     re.IGNORECASE
 )
