@@ -469,7 +469,7 @@ class Board:
         matches = RE_COMMON_STIPULATION.match(stipulation.lower())
         if not matches:
             return 'white'
-        if matches.group('serial') == 'ser-' and matches.group("play") == "hs":
+        if matches.group('mod') == 'ser-' and matches.group("play") == "hs":
             return "black" # it even has some sense :)
         if matches.group('play') == "h":
             return "black"
