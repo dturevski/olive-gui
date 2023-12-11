@@ -61,8 +61,8 @@ def validateStipulation(stip):
     matches = model.RE_COMMON_STIPULATION.match(stip)
     if not matches:
         raise StipulationError("Unrecognized stipulation. Accepted are: simple popeye stipulations, PG, '+/= [Black to move]' and 'See text'")
-    #if matches.group("aim") == "" and matches.group("play").lower() != "pg":
-    #    raise StipulationError("Incorrect stipulation, no aim specified, but play type is not ProofGame'")
+    if matches.group("aim") == "" and matches.group("play").lower() != "pg":
+        raise StipulationError("Incorrect stipulation, no aim specified, but play type is not ProofGame'")
 
 
 class SemanticValidationVisitor:
