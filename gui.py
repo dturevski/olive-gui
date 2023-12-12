@@ -7,6 +7,7 @@ import os
 import re
 import sys
 import tempfile
+import string
 
 # 3rd party
 import yaml
@@ -450,7 +451,7 @@ class Mainframe(QtWidgets.QMainWindow):
             self.restoreState(settings.value("windowState"))
         if settings.value("overviewColumnWidths") != None:
             self.entryList.setColumnWidthsFromString(
-                str(QtCore.QVariant(settings.value("overviewColumnWidths"))))
+                settings.value("overviewColumnWidths"))
 
     def updateTitle(self):
         docname = Lang.value('WT_New_Collection')
@@ -1023,7 +1024,7 @@ class AboutDialog(QtWidgets.QDialog):
         w.setLayout(grid)
         vbox.addWidget(w)
 
-        vbox.addWidget(ClickableLabel('© 2011-2022'))
+        vbox.addWidget(ClickableLabel('© 2011-2023'))
 
         vbox.addStretch(1)
         buttonOk = QtWidgets.QPushButton(Lang.value('CO_OK'), self)
@@ -1251,7 +1252,7 @@ class EntryListView(QtWidgets.QTreeWidget):
             f.close()
 
     def init(self):
-        self.setColumnCount(6)
+        self.setColumnCount(len(self.getHeaderLabels()))
         self.onLangChanged()
 
     def getColumnWidths(self):
@@ -1265,14 +1266,18 @@ class EntryListView(QtWidgets.QTreeWidget):
         except:
             pass
 
+    def getHeaderLabels(self):
+        return ['',
+                Lang.value('EP_Authors'),
+                Lang.value('EP_Source'),
+                Lang.value('EP_Date'),
+                Lang.value('EP_Distinction'),
+                Lang.value('EP_Stipulation'),
+                Lang.value('EP_Pieces_count'),
+                Lang.value('SS_Comments').strip(string.punctuation),]
+
     def onLangChanged(self):
-        self.setHeaderLabels(['',
-                              Lang.value('EP_Authors'),
-                              Lang.value('EP_Source'),
-                              Lang.value('EP_Date'),
-                              Lang.value('EP_Distinction'),
-                              Lang.value('EP_Stipulation'),
-                              Lang.value('EP_Pieces_count')])
+        self.setHeaderLabels(self.getHeaderLabels())
         for i in range(len(Mainframe.model.entries)):
             if 'distinction' in Mainframe.model.entries[i]:
                 d = model.Distinction.fromString(
@@ -1331,6 +1336,7 @@ class EntryListView(QtWidgets.QTreeWidget):
         item.append(d.toStringInLang(Lang))
         item.append(e.get('stipulation', ''))
         item.append(Mainframe.model.pieces_counts[idx])
+        item.append(self.getSingleCommentsLine(e))
 
         return item
 
@@ -1359,6 +1365,11 @@ class EntryListView(QtWidgets.QTreeWidget):
 
         self.skipModelChanged = True
         Mainframe.sigWrapper.sigModelChanged.emit()
+
+    def getSingleCommentsLine(self, entry):
+        if not "comments" in entry:
+            return ""
+        return re.sub(r'\s+', ' ', ' '.join(entry["comments"]))
 
 
 class DraggableLabel(QtWidgets.QLabel):
@@ -1932,8 +1943,13 @@ class MetadataView(QtWidgets.QWidget):
         grid.addWidget(self.labelJudges, 5, 0)
         grid.addWidget(self.inputJudges, 5, 1)
 
+        self.labelComments = QtWidgets.QLabel(Lang.value('SS_Comments'))
+        self.inputComments = PlainTextEdit()
+        grid.addWidget(self.labelComments, 6, 0)
+        grid.addWidget(self.inputComments, 6, 1)
+
         # stretcher
-        grid.addWidget(QtWidgets.QWidget(), 6, 1)
+        grid.addWidget(QtWidgets.QWidget(), 7, 1)
         grid.setRowStretch(6, 1)
 
         self.setLayout(grid)
@@ -1951,6 +1967,7 @@ class MetadataView(QtWidgets.QWidget):
         self.inputDateDay.currentIndexChanged.connect(self.onChanged)
         self.inputTourney.textChanged.connect(self.onChanged)
         self.inputJudges.textChanged.connect(self.onChanged)
+        self.inputComments.textChanged.connect(self.onChanged)
 
     class ValidYear(QtGui.QValidator):
 
@@ -1991,6 +2008,11 @@ class MetadataView(QtWidgets.QWidget):
         award = e.get('award', {})
         self.inputTourney.setText(award.get('tourney', {}).get('name', ''))
         self.inputJudges.setText("\n".join(award.get('judges', [])))
+        if 'comments' in Mainframe.model.cur():
+            self.inputComments.setText("\n\n".join(
+                Mainframe.model.cur()['comments']))
+        else:
+            self.inputComments.setText("")
 
         self.skipModelChanged = False
 
@@ -2029,6 +2051,11 @@ class MetadataView(QtWidgets.QWidget):
             if k in e and len(e[k]) == 0:
                 del e[k]
 
+        e['comments'] = [x.strip() for x in str(
+            self.inputComments.toPlainText()).split("\n\n") if x.strip() != '']
+        if len(e['comments']) == 0:
+            del e['comments']
+
         self.skipModelChanged = True
         Mainframe.model.markDirty()
         Mainframe.sigWrapper.sigModelChanged.emit()
@@ -2047,6 +2074,7 @@ class MetadataView(QtWidgets.QWidget):
         self.labelDistinction.setText(Lang.value('EP_Distinction') + ':')
         self.labelTourney.setText(Lang.value('EE_Tourney') + ':')
         self.labelJudges.setText(Lang.value('EE_Judges') + ':')
+        self.labelComments.setText(Lang.value('SS_Comments'))
 
 
 class DistinctionWidget(QtWidgets.QWidget):
