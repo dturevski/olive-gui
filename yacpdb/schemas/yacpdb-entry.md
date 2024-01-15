@@ -182,6 +182,21 @@ The solution to the problem in the Popeye output format with optional comments i
 ```
 Note the YAML pipe symbol `|` for a block of text.
 
+There are three special comments that change the move representation in short algebraic
+notation:
+* `Sa1-c2` → `Sc2`
+* `Sa1-c2 {display-departure-file}` → `Sac2`
+* `Sa1-c2 {display-departure-rank}` → `S1c2`
+* `Sa1-c2 {display-departure-square}` → `Sa1-c2`
+
+Multiple comments are allowed:
+```yaml
+    solution: |
+      1.Sa1-c2! {display-departure-file} {some meaningful comment here}
+```
+
+
+
 ### keywords:
 A list of applicable keywords:
 ```yaml
