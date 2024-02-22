@@ -161,12 +161,14 @@ def create_input(problem, sstip, sticky, pieces_clause, is_py_option):
     options, conditions = sticky, []
     if 'options' in problem:
         for option in problem['options']:
-            if not option in options and is_py_option(option):
+            if option in options:
+                continue
+            elif is_py_option(option):
                 options.append(option)
             else:
                 conditions.append(option)
-
-    lines.append("Option " + " ".join(options))
+    if len(options) > 0:
+        lines.append("Option " + " ".join(options))
     if len(conditions) > 0:
         lines.append("Condition " + " ".join(conditions))
     # pieces
