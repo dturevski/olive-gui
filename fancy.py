@@ -20,7 +20,8 @@ FANCY_PIECES = [
 ]
 FANCY_SPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
                'Royal', 'Volage', 'Beamtet', 'Functionary', 'HalfNeutral',
-               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
+               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable',
+               'Bul', 'Dob']
 
 
 def fancyCodeToPiece(code):

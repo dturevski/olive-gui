@@ -28,7 +28,8 @@ COLORS = ['black', 'white', 'neutral']
 COLORS_SHORT = {'b': 'black', 'w': 'white', 'n': 'neutral'}
 FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
               'Royal', 'Volage', 'Functionary', 'HalfNeutral',
-              'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
+              'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable',
+              'Bul', 'Dob']
 
 RE_COMMON_STIPULATION = re.compile(
     '^(?P<intro>[0-9]+->)?' +
