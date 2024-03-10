@@ -208,4 +208,5 @@ WhiteMaxDister
 WhiteMinDister
 DarkSide
 Pepo
+CASTChess
 
