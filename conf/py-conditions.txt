@@ -208,5 +208,5 @@ WhiteMaxDister
 WhiteMinDister
 DarkSide
 Pepo
-CASTChess
+CASTChess <select{|Inverse}>
 
