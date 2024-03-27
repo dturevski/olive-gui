@@ -209,4 +209,7 @@ WhiteMinDister
 DarkSide
 Pepo
 CASTChess <select{|Inverse}>
+FuddledMen
+Bicaptures
+TransmissionMenace
 
