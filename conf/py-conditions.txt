@@ -212,4 +212,5 @@ CASTChess <select{|Inverse}>
 FuddledMen
 Bicaptures
 TransmissionMenace
+PowerTransfer <select{|RexInclusive}>
 
