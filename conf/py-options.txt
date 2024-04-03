@@ -30,3 +30,5 @@ WriteGrid
 KeepMatingPiece
 LastCapture <str>
 NullMoves
+MatesIn1
+TrivialTriesAvoid
