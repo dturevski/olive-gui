@@ -213,4 +213,5 @@ FuddledMen
 Bicaptures
 TransmissionMenace
 PowerTransfer <select{|RexInclusive}>
+MultiCaptures
 
