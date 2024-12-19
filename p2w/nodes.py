@@ -217,9 +217,8 @@ class MoveNode(Node):
                 self.promotion.color = b.stm
 
         # capturing
-        captureOrigin = -1
         if self.capture != -1:
-            captureOrigin = b.board[self.capture].origin
+            self.captureOrigin = b.board[self.capture].origin
             b.drop(self.capture)
 
         # moving and promoting
@@ -231,6 +230,7 @@ class MoveNode(Node):
 
         self.assertSemantics(b)
         self.oldBoard = b.serialize()
+        self.captureOrigin = -1
         self.makeBasicMovement(b)
         b.flip()
 
@@ -250,8 +250,8 @@ class MoveNode(Node):
         # rebirths
         for rb in self.rebirths:
             piece = rb["unit"] if rb["prom"] is None else rb["prom"]
-            if captureOrigin != -1:
-                piece.origin = captureOrigin
+            if self.captureOrigin != -1:
+                piece.origin = self.captureOrigin
             else: # sentinels, etc
                 piece.origin = "%d/%d" % (rb["at"], self.depth)
             b.add(piece, rb["at"])
