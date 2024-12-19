@@ -204,11 +204,7 @@ class MoveNode(Node):
         self.capture = Square(arr.x, dep.y).value
         return self
 
-    def make(self, b):
-
-        self.assertSemantics(b)
-        self.oldBoard = b.serialize()
-
+    def makeBasicMovement(self, b):
         if self.promotion == None:
             self.promotion = b.board[self.departure]
         else:
@@ -229,6 +225,13 @@ class MoveNode(Node):
         # moving and promoting
         b.drop(self.departure)
         b.add(self.promotion, self.arrival)
+
+
+    def make(self, b):
+
+        self.assertSemantics(b)
+        self.oldBoard = b.serialize()
+        self.makeBasicMovement(b)
         b.flip()
 
         # recoloring
@@ -297,9 +300,7 @@ class CastlingNode(MoveNode):
         self.kingside = kingside
         super(CastlingNode, self).__init__(-1, -1, -1)
 
-    def make(self, b):
-        self.oldBoard = b.serialize()
-
+    def makeBasicMovement(self, b):
         shift = 0 if b.stm == 'black' else 56
 
         a8, c8, d8, e8, f8, g8, h8 = 0, 2, 3, 4, 5, 6, 7
@@ -312,8 +313,6 @@ class CastlingNode(MoveNode):
             b.move(e8 + shift, c8 + shift)
             b.move(a8 + shift, d8 + shift)
             self.departure, self.arrival = e8 + shift, c8 + shift
-
-        b.flip()
 
     def assertSemantics(self, b):
 
