@@ -6,10 +6,15 @@
   "properties": {
     "foreignids": { "type": "array", "items": { "$ref" : "#/definitions/foreignid_type" }, "minItems": 1 },
     "authors": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1, "uniqueItems": true },
+    "versionists": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1, "uniqueItems": true },
+    "correctors": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1, "uniqueItems": true },
+    "after": { "$ref" : "#/definitions/yacpdb_problem_id" },
+    "version-of": { "$ref" : "#/definitions/yacpdb_problem_id" },
     "source": { "$ref" : "#/definitions/source_type" },
     "award": { "$ref" : "#/definitions/award_type" },
     "reprints": { "type": "array", "items": { "$ref" : "#/definitions/source_type" }, "minItems": 1, "uniqueItems": true },
     "stipulation": { "$ref": "#/definitions/label" },
+    "non-standard-stipulation": { "$ref": "#/definitions/label" },
     "algebraic" : {
       "type": "object",
       "patternProperties": {
@@ -46,7 +51,8 @@
 
   "required": ["stipulation", "algebraic", "solution"],
   "dependencies": {
-    "award": { "required": ["source"] }
+    "award": { "required": ["source"] },
+    "versionists": { "required": ["version-of"] }
   },
   "additionalProperties": false,
 
@@ -190,7 +196,11 @@
     "basic_glyph": {
       "type": "string",
       "pattern": "^[kqrbspeaofwdx][1-3]?$"
-    }
+    },
 
+    "yacpdb_problem_id": {
+      "type": "integer",
+      "minimum": 4
+    }
   }
 }
