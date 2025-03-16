@@ -72,6 +72,18 @@ class SemanticValidationVisitor:
     def visit(self, node, board): node.assertSemantics(board)
 
 
+class DiaExtractorVisitor:
+
+    def __init__(self):
+        self.dia = None
+
+    def visit(self, node, board):
+        if self.dia is None and "dia" in node.comments:
+            node.make(board)
+            self.dia = board.toAlgebraic()
+            node.unmake(board)
+
+
 class DummyVisitor:
 
     def __init__(self):
@@ -84,6 +96,8 @@ class DummyVisitor:
 
 def validate(entry, propagate_exceptions=True):
 
+    extractor = DiaExtractorVisitor()
+
     try:
         jsonschema.validate(instance=entry, schema=json_schema)
         validateStipulation(entry["stipulation"])
@@ -92,6 +106,8 @@ def validate(entry, propagate_exceptions=True):
         b.fromAlgebraic(entry["algebraic"])
         b.stm = b.getStmByStipulation(entry["stipulation"])
         solution.traverse(b, SemanticValidationVisitor())
+        solution.traverse(b, extractor)
+
     except (jsonschema.ValidationError, StipulationError) as ex:
         if propagate_exceptions:
             raise ex
@@ -101,7 +117,13 @@ def validate(entry, propagate_exceptions=True):
             raise ex
         return {'success': False, "errors": [str(ex)]}
 
-    return {'success': True, 'orthodox': not model.hasFairyElements(entry)}
+    return {
+        'success': True,
+        'meta': {
+            'orthodox': not model.hasFairyElements(entry),
+            'dia': extractor.dia
+        }
+    }
 
 
 def validateEntity(type, data):
