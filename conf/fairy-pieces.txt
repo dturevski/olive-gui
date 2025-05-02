@@ -47,9 +47,11 @@ dr	dragon
 ds	("Diagonalspiralspringer")				
 du	dummy				
 ea	eagle	q3			Moves like a Grasshopper, but deflects 90° either way on passing over the hurdle. The arrival square is adjacent to the hurdle.
+ee	eagle equihopper	q3
 eh	edgehog	q1			
 ek	erlking				
 em	empress				
+en	eagle nonstop equihopper	q3
 eq	equihopper	e	d		
 et	elephant				0,1+1,1+1,2 rider
 f	friend	o			Dummy piece which, when it is controlled, moves only like the controlling unit(s).

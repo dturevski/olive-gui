@@ -167,7 +167,7 @@
 
     "piece_decl": {
       "type": "string",
-      "pattern": "^((Chameleon|Jigger|Kamikaze|Paralysing|Royal|Volage|Functionary|HalfNeutral|HurdleColourChanging|Protean|Magic|Uncapturable|Bul|Dob) )*[A-Za-z0-9]{1,2}[a-h][1-8]$"
+      "pattern": "^((Chameleon|Jigger|Kamikaze|Paralysing|Royal|Volage|Functionary|HalfNeutral|HurdleColourChanging|Protean|Magic|Uncapturable|Bul|Dob|Anda|AndaInverse) )*[A-Za-z0-9]{1,2}[a-h][1-8]$"
     },
 
     "piece_decl_list": {
