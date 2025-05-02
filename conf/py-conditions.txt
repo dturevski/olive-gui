@@ -149,7 +149,7 @@ SwappingKings
 RoyalDynasty
 SAT
 StrictSAT
-Take&MakeChess
+Take&MakeChess <select{|Absolute}>
 Make&TakeChess
 BlackSynchronMover
 WhiteSynchronMover
@@ -207,4 +207,19 @@ BlackMinDister
 WhiteMaxDister
 WhiteMinDister
 DarkSide
+Pepo
+CASTChess <select{|Inverse}>
+FuddledMen
+Bicaptures
+TransmissionMenace
+PowerTransfer <select{|RexInclusive}>
+MultiCaptures
+Anda
+AndaInverse
+AllInChess
+HalfInChess
+MainlyInChess
+FrankfurtChess
+AntiGuards
+Leffie
 

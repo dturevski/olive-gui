@@ -6,6 +6,7 @@ WhiteToPlay
 Variation
 MoveNumbers
 StartMoveNumber <int>
+UpToMoveNumber <int>
 NoWk
 NoBk
 Duplex
@@ -30,3 +31,5 @@ WriteGrid
 KeepMatingPiece
 LastCapture <str>
 NullMoves
+MatesIn1
+TrivialTriesAvoid
