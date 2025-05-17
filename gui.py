@@ -46,9 +46,9 @@ class SigWrapper(QtCore.QObject):
 
 
 class Mainframe(QtWidgets.QMainWindow):
-
     sigWrapper = SigWrapper()
-    fontSize = 24
+    fontSize = 32
+    guiFontSize = 24
 
     fonts = {
         'normal': {
@@ -86,6 +86,8 @@ class Mainframe(QtWidgets.QMainWindow):
         super(Mainframe, self).__init__()
         if 'font-size' in Conf.values:
             Mainframe.fontSize = Conf.value('font-size')
+        if 'gui-font-size' in Conf.values:
+            Mainframe.guifontSize = Conf.value('gui-font-size')
 
         Mainframe.fonts = {
             'normal': {
@@ -117,6 +119,11 @@ class Mainframe(QtWidgets.QMainWindow):
 
         # left pane
         widgetLeftPane = QtWidgets.QWidget()
+
+        font = widgetLeftPane.font()
+        font.setPixelSize(Mainframe.guiFontSize)
+        widgetLeftPane.setFont(font)
+
         vboxLeftPane = QtWidgets.QVBoxLayout()
         vboxLeftPane.setSpacing(0)
         vboxLeftPane.setContentsMargins(0, 0, 0, 0)
@@ -147,6 +154,11 @@ class Mainframe(QtWidgets.QMainWindow):
         self.texView = LaTeXView()
         self.chestView = chest.ChestView(Conf, Lang, Mainframe)
         self.tabBar2 = QtWidgets.QTabWidget()
+
+        font = self.tabBar2.font()
+        font.setPixelSize(Mainframe.guiFontSize)
+        self.tabBar2.setFont(font)
+
         self.tabBar2.addTab(self.popeyeView, Lang.value('TC_Popeye'))
         self.tabBar2.addTab(self.solutionView, Lang.value('TC_Solution'))
         self.tabBar2.addTab(self.easyEditView, Lang.value('TC_Edit'))
@@ -752,7 +764,7 @@ class Mainframe(QtWidgets.QMainWindow):
                 f.write(latex.entry(Mainframe.model.entries[i], Lang))
                 if i % 3 == 2:
                     if i != len(Mainframe.model.entries):
-                        f.write("\n\putsol\n\n")
+                        f.write("\n\\putsol\n\n")
                 else:
                     f.write("\\hfill\n")
 
