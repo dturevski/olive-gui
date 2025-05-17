@@ -103,9 +103,18 @@ class Option(QtWidgets.QWidget):
 
 
 class OkCancelDialog(QtWidgets.QDialog):
-
     def __init__(self, Lang):
         super(OkCancelDialog, self).__init__()
+
+        from gui import Conf
+
+        guiFontSize = 12
+        if 'gui-font-size' in Conf.values:
+            guiFontSize = Conf.value('gui-font-size')
+
+        font = self.font()
+        font.setPixelSize(guiFontSize)
+        self.setFont(font)
 
         vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(self.mainWidget)

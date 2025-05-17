@@ -28,7 +28,8 @@ fairy-zoo:
   - neutral NE
   - neutral RP
   - neutral CH
-font-size: 24
+font-size: 28
+gui-font-size: 24
 horsehead-glyph: N
 import-post-decode:
   ISO-8859-1: Western
