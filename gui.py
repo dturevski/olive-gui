@@ -47,7 +47,7 @@ class SigWrapper(QtCore.QObject):
 
 class Mainframe(QtWidgets.QMainWindow):
     sigWrapper = SigWrapper()
-    fontSize = 32
+    fontSize = 24
     guiFontSize = 24
 
     fonts = {
