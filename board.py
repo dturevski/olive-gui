@@ -28,7 +28,8 @@ COLORS = ['black', 'white', 'neutral']
 COLORS_SHORT = {'b': 'black', 'w': 'white', 'n': 'neutral'}
 FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
               'Royal', 'Volage', 'Functionary', 'HalfNeutral',
-              'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
+              'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable',
+              'Bul', 'Dob', 'Anda', 'AndaInverse']
 
 RE_COMMON_STIPULATION = re.compile(
     '^(?P<intro>[0-9]+->)?' +
@@ -327,7 +328,7 @@ class Board:
         transform = {'a1<-->h1': lambda x_y2: (7 - x_y2[0], x_y2[1]),
                      'a1<-->a8': lambda x_y3: (x_y3[0], 7 - x_y3[1]),
                      'a1<-->h8': lambda x_y4: (x_y4[1], x_y4[0]),
-                     'h1<-->a8': lambda x_y5: (7 - x_y5[1], 7 - x_y5[0])}
+                     'a8<-->h1': lambda x_y5: (7 - x_y5[1], 7 - x_y5[0])}
         self.transform(transform[axis])
 
     def shift(self, x, y):

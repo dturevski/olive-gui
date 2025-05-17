@@ -204,11 +204,7 @@ class MoveNode(Node):
         self.capture = Square(arr.x, dep.y).value
         return self
 
-    def make(self, b):
-
-        self.assertSemantics(b)
-        self.oldBoard = b.serialize()
-
+    def makeBasicMovement(self, b):
         if self.promotion == None:
             self.promotion = b.board[self.departure]
         else:
@@ -221,14 +217,21 @@ class MoveNode(Node):
                 self.promotion.color = b.stm
 
         # capturing
-        captureOrigin = -1
         if self.capture != -1:
-            captureOrigin = b.board[self.capture].origin
+            self.captureOrigin = b.board[self.capture].origin
             b.drop(self.capture)
 
         # moving and promoting
         b.drop(self.departure)
         b.add(self.promotion, self.arrival)
+
+
+    def make(self, b):
+
+        self.assertSemantics(b)
+        self.oldBoard = b.serialize()
+        self.captureOrigin = -1
+        self.makeBasicMovement(b)
         b.flip()
 
         # recoloring
@@ -247,8 +250,8 @@ class MoveNode(Node):
         # rebirths
         for rb in self.rebirths:
             piece = rb["unit"] if rb["prom"] is None else rb["prom"]
-            if captureOrigin != -1:
-                piece.origin = captureOrigin
+            if self.captureOrigin != -1:
+                piece.origin = self.captureOrigin
             else: # sentinels, etc
                 piece.origin = "%d/%d" % (rb["at"], self.depth)
             b.add(piece, rb["at"])
@@ -297,9 +300,7 @@ class CastlingNode(MoveNode):
         self.kingside = kingside
         super(CastlingNode, self).__init__(-1, -1, -1)
 
-    def make(self, b):
-        self.oldBoard = b.serialize()
-
+    def makeBasicMovement(self, b):
         shift = 0 if b.stm == 'black' else 56
 
         a8, c8, d8, e8, f8, g8, h8 = 0, 2, 3, 4, 5, 6, 7
@@ -312,8 +313,6 @@ class CastlingNode(MoveNode):
             b.move(e8 + shift, c8 + shift)
             b.move(a8 + shift, d8 + shift)
             self.departure, self.arrival = e8 + shift, c8 + shift
-
-        b.flip()
 
     def assertSemantics(self, b):
 
