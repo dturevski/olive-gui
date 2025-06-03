@@ -74,7 +74,7 @@ def parseConditions(words):
 
 def isConditionStartWord(word):
     word = word.lower()
-    for c in model.FairyHelper.conditions:
+    for c in model.FairyHelper.instance.conditions:
         if len(c) >= len(word) and word == (c[0:len(word)]).lower():
             return True
     return False

@@ -103,7 +103,7 @@ def entry(e, Lang):
     if 'options' in e:
         # extract conditions by excluding Popeye options
         conditions = [cond for cond in e['options']
-                       if not board.FairyHelper.is_popeye_option(cond)]
+                       if not board.FairyHelper.instance.is_popeye_option(cond)]
         if conditions != []:
             text = (text +
                 "  \\condition{%\n"

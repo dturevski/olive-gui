@@ -350,7 +350,7 @@ def hasFairyConditions(e):
     if 'options' not in e:
         return False
     for option in e['options']:
-        if not FairyHelper.is_popeye_option(option):
+        if not FairyHelper.instance.is_popeye_option(option):
             return True
     return False
 

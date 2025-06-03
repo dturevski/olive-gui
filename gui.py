@@ -1463,8 +1463,8 @@ class ChessBoxItem(QtWidgets.QLabel):
             glyph = ChessBoxItem.getShortGlyph(piece)
             self.setFont(
                 Mainframe.fontset()[
-                    model.FairyHelper.fontinfo[glyph]['family']])
-            self.setText(model.FairyHelper.to_html(glyph, 0, piece.specs))
+                    model.FairyHelper.instance.fontinfo[glyph]['family']])
+            self.setText(model.FairyHelper.instance.to_html(glyph, 0, piece.specs))
             self.setToolTip(str(piece))
 
         self.piece = piece
@@ -1623,8 +1623,8 @@ class BoardView(QtWidgets.QWidget):
                 glyph = Mainframe.model.board.board[i].toFen(overridden_glyphs)
                 if len(glyph) > 1:
                     glyph = glyph[1:-1]
-                lbl.setFont(Mainframe.fontset()[model.FairyHelper.fontinfo[glyph]['family']])
-                text = model.FairyHelper.to_html(glyph, i, Mainframe.model.board.board[i].specs)
+                lbl.setFont(Mainframe.fontset()[model.FairyHelper.instance.fontinfo[glyph]['family']])
+                text = model.FairyHelper.instance.to_html(glyph, i, Mainframe.model.board.board[i].specs)
                 lbl.setText(text)
         if 'stipulation' in Mainframe.model.cur():
             self.labelStipulation.setText(Mainframe.model.cur()['stipulation'])
@@ -1713,7 +1713,7 @@ class GlyphsView(PlainTextEdit):
             if isinstance(parsed, dict):
                 for key, value in parsed.items():
                     glyph = str(value).lower()
-                    if model.FairyHelper.is_proper_glyph(glyph):
+                    if model.FairyHelper.instance.is_proper_glyph(glyph):
                         glyphs[str(key).lower()] = glyph
         except yaml.YAMLError:
             glyphs = {}
@@ -1784,11 +1784,11 @@ class ChessBox(QtWidgets.QWidget):
                 item.changePiece(None)
 
     def updateXFenOverrides(self):
-        model.FairyHelper.overrides = {}
+        model.FairyHelper.instance.overrides = {}
         for item in self.items:
             if item.piece is not None:
                 glyph = ChessBoxItem.getShortGlyph(item.piece).lower()
-                model.FairyHelper.overrides[glyph] = {
+                model.FairyHelper.instance.overrides[glyph] = {
                     'name': item.piece.name, 'specs': item.piece.specs}
 
     def makeChangeZooCallable(self, zoo_idx):
@@ -1839,10 +1839,11 @@ class AddFairyPieceDialog(options.OkCancelDialog):
         self.comboColor.addItems(model.COLORS)
         form.addRow(Lang.value('PP_Color'), self.comboColor)
 
-        self.piece_types = sorted(model.FairyHelper.glyphs.keys())
+        glyphs = model.FairyHelper.instance.glyphs
+        self.piece_types = sorted(glyphs.keys())
         self.comboType = QtWidgets.QComboBox()
         self.comboType.addItems(
-            [x + ' (' + model.FairyHelper.glyphs[x]['name'] + ')' for x in self.piece_types])
+            [x + ' (' + glyphs[x]['name'] + ')' for x in self.piece_types])
         form.addRow(Lang.value('PP_Type'), self.comboType)
 
         vbox = QtWidgets.QVBoxLayout()
@@ -2376,7 +2377,7 @@ class PopeyeView(QtWidgets.QSplitter):
                 False,
                 copy.deepcopy(Conf.popeye['sticky-options']),
                 Mainframe.model.board.toPopeyePiecesClause(),
-                model.FairyHelper.is_popeye_option
+                model.FairyHelper.instance
             )
             self.runPopeyeInGui(input)
 
@@ -2495,8 +2496,8 @@ class PopeyeView(QtWidgets.QSplitter):
         entry_options = []
         if 'options' in Mainframe.model.cur():
             entry_options = Mainframe.model.cur()['options']
-        dialog = options.OptionsDialog(model.FairyHelper.options, sorted(
-            model.FairyHelper.conditions), 14, 3, entry_options, Lang)
+        dialog = options.OptionsDialog(model.FairyHelper.instance.options, sorted(
+            model.FairyHelper.instance.conditions), 14, 3, entry_options, Lang)
         if (dialog.exec_()):
             Mainframe.model.cur()['options'] = dialog.getOptions()
             self.skipModelChanged = True
@@ -2691,7 +2692,7 @@ class PopeyeView(QtWidgets.QSplitter):
                 self.sstip.isChecked(),
                 copy.deepcopy(Conf.popeye['sticky-options']),
                 Mainframe.model.board.toPopeyePiecesClause(),
-                model.FairyHelper.is_popeye_option))
+                model.FairyHelper.instance))
         if self.skipModelChanged:
             return
 
@@ -2740,7 +2741,7 @@ class PopeyeView(QtWidgets.QSplitter):
             return
         opts = Mainframe.model.cur()['options']
         count = len(opts)
-        opts = list(filter(model.FairyHelper.is_popeye_option, opts))
+        opts = list(filter(model.FairyHelper.instance.is_popeye_option, opts))
         if count != len(opts):
             Mainframe.model.cur()['options'] = opts
             Mainframe.model.is_dirty = True
