@@ -57,74 +57,88 @@ def makePieceFromXfen(fen):
         color = 'black'
     name = 'P'
     base_glyph = fen.replace('!', '').lower()
-    if base_glyph in FairyHelper.overrides:
-        name = FairyHelper.overrides[base_glyph]['name'].upper()
-        specs = FairyHelper.overrides[base_glyph]['specs']
-    elif base_glyph in FairyHelper.defaults:
-        name = FairyHelper.defaults[base_glyph].upper()
+    fh = FairyHelper.instance
+    if base_glyph in fh.overrides:
+        name = fh.overrides[base_glyph]['name'].upper()
+        specs = fh.overrides[base_glyph]['specs']
+    elif base_glyph in fh.defaults:
+        name = fh.defaults[base_glyph].upper()
     return Piece(name, color, specs)
 
 
+def first_word_in_lowercase(s):
+    return s.split(" ")[0].lower()
+
+
 class FairyHelper:
-    defaults, overrides, glyphs, fontinfo = {}, {}, {}, {}
-    RE_PROPER_GLYPH = re.compile('^[kqrbspeaofwdx][1-3]?$')
-    options, conditions = [], []
-    f = open(get_write_dir() + '/conf/fairy-pieces.txt', encoding='utf-8')
-    for entry in [x.strip().split("\t") for x in f.readlines()]:
-        glyphs[entry[0]] = {'name': entry[1]}
-        if len(entry) > 2:
-            if '' != entry[2].strip():
-                glyphs[entry[0]]['glyph'] = entry[2]
+
+    def __init__(self):
+        self.defaults, self.overrides, self.glyphs, self.fontinfo = {}, {}, {}, {}
+        self.RE_PROPER_GLYPH = re.compile('^[kqrbspeaofwdx][1-3]?$')
+        self.options, self.conditions = [], []
+        f = open(get_write_dir() + '/conf/fairy-pieces.txt', encoding='utf-8')
+        for entry in [x.strip().split("\t") for x in f.readlines()]:
+            self.glyphs[entry[0]] = {'name': entry[1]}
+            if len(entry) > 2:
+                if '' != entry[2].strip():
+                    self.glyphs[entry[0]]['glyph'] = entry[2]
+                else:
+                    self.glyphs[entry[0]]['glyph'] = 'x'
             else:
-                glyphs[entry[0]]['glyph'] = 'x'
-        else:
-            glyphs[entry[0]]['glyph'] = 'x'
-        if len(entry) > 3:
-            if 'd' == entry[3]:
-                defaults[entry[2]] = entry[0]
-    f.close()
+                self.glyphs[entry[0]]['glyph'] = 'x'
+            if len(entry) > 3:
+                if 'd' == entry[3]:
+                    self.defaults[entry[2]] = entry[0]
+        f.close()
 
-    for entry in [x.strip().split("\t") for x in read_resource_file(':/fonts/xfen.txt')]:
-        fontinfo[entry[0]] = {'family': entry[1], 'chars': [
-            chr(int(entry[2])), chr(int(entry[3]))]}
-    f.close()
+        for entry in [x.strip().split("\t") for x in read_resource_file(':/fonts/xfen.txt')]:
+            self.fontinfo[entry[0]] = {'family': entry[1], 'chars': [
+                chr(int(entry[2])), chr(int(entry[3]))]}
+        f.close()
 
-    f = open(get_write_dir() + '/conf/py-options.txt')
-    options = [x.strip() for x in f.readlines()]
-    f.close()
+        f = open(get_write_dir() + '/conf/py-options.txt')
+        self.options = [x.strip() for x in f.readlines()]
+        f.close()
 
-    f = open(get_write_dir() + '/conf/py-conditions.txt')
-    conditions = [x.strip() for x in f.readlines()]
-    f.close()
+        f = open(get_write_dir() + '/conf/py-conditions.txt')
+        self.conditions = [x.strip() for x in f.readlines()]
+        f.close()
 
-    def is_popeye_option(s):
-        command = FairyHelper.first_word(s)
-        return any([FairyHelper.first_word(o) == command for o in FairyHelper.options])
-    is_popeye_option = staticmethod(is_popeye_option)
+        with open(get_write_dir() + '/conf/fairy-property-colors.yaml', 'r', encoding="utf8") as f:
+            self.highlight_colors = yaml.safe_load(f)
 
-    def first_word(s):
-        return s.split(" ")[0].lower()
-    first_word = staticmethod(first_word)
+    def is_popeye_option(self, s):
+        command = first_word_in_lowercase(s)
+        return any([first_word_in_lowercase(o) == command for o in self.options])
 
-    with open(get_write_dir() + '/conf/fairy-property-colors.yaml', 'r', encoding="utf8") as f:
-        highlight_colors = yaml.safe_load(f)
+    def is_special_condition(self, s):
+        # TotalInvisible is special in a sense that it is implemented as "pseudo color" (sic)
+        # in popeye which somewhat breaks the input logic
+        return first_word_in_lowercase(s) == "totalinvisible"
 
-    def to_html(glyph, square, specs):
-        html = FairyHelper.fontinfo[glyph]['chars'][((square >> 3) + (square % 8)) % 2]
+    # add more workarounds here if needed (hopefully not)
+    def handle_special_condition(self, s, pieces_clause):
+        if self.is_special_condition(s):
+            pieces_clause = "\n".join([p for p in [pieces_clause, "  " + s] if p != ''])  # total invisible
+        return pieces_clause
+
+    def to_html(self, glyph, square, specs):
+        html = self.fontinfo[glyph]['chars'][((square >> 3) + (square % 8)) % 2]
         if len(specs) > 0:
-            color = FairyHelper.highlight_colors[hash("".join(specs)) % len(FairyHelper.highlight_colors)]
+            color = self.highlight_colors[hash("".join(specs)) % len(self.highlight_colors)]
             html = '<font color="%s">%s</font>' % (color, html)
         return html
-    to_html = staticmethod(to_html)
 
-    def get_glyph_by_piece_name(piece_name, overridden_glyphs):
+    def get_glyph_by_piece_name(self, piece_name, overridden_glyphs):
         key = piece_name.lower()
-        return overridden_glyphs.get(key, FairyHelper.glyphs[key]['glyph'])
-    get_glyph_by_piece_name = staticmethod(get_glyph_by_piece_name)
+        return overridden_glyphs.get(key, self.glyphs[key]['glyph'])
 
-    def is_proper_glyph(glyph):
-        return bool(FairyHelper.RE_PROPER_GLYPH.match(glyph))
-    is_proper_glyph = staticmethod(is_proper_glyph)
+    def is_proper_glyph(self, glyph):
+        return bool(self.RE_PROPER_GLYPH.match(glyph))
+
+
+FairyHelper.instance = FairyHelper()
+
 
 
 def twinId(twin_index):
@@ -148,7 +162,7 @@ class Piece:
     fromAlgebraic = staticmethod(fromAlgebraic)
 
     def toFen(self, overridden_glyphs):
-        glyph = FairyHelper.get_glyph_by_piece_name(self.name, overridden_glyphs)
+        glyph = FairyHelper.instance.get_glyph_by_piece_name(self.name, overridden_glyphs)
         if self.color == 'white':
             glyph = glyph.upper()
         else:
@@ -160,7 +174,7 @@ class Piece:
         return glyph
 
     def toLaTeX(self, overridden_glyphs):
-        glyph = FairyHelper.get_glyph_by_piece_name(self.name, overridden_glyphs)
+        glyph = FairyHelper.instance.get_glyph_by_piece_name(self.name, overridden_glyphs)
         if self.color == 'white':
             piece = 'w'
         if self.color == 'black':
@@ -205,7 +219,7 @@ class Piece:
         return self.color[0] + self.name.upper()
 
     def __str__(self):
-        retval = FairyHelper.glyphs[self.name.lower()]['name']
+        retval = FairyHelper.instance.glyphs[self.name.lower()]['name']
         if len(self.specs) > 0:
             retval = ' '.join(sorted(self.specs)) + ' ' + retval
         return self.color + ' ' + retval
@@ -425,7 +439,7 @@ class Board:
             if (not piece.name.lower() in [
                 'k', 'q', 'r', 'b', 's', 'p']) or (len(t) > 0):
                 t.append(
-                        (FairyHelper.glyphs[
+                        (FairyHelper.instance.glyphs[
                              piece.name.lower()]['name']).title())
             if len(t) > 0:
                 str = " ".join(t)
