@@ -41,6 +41,12 @@ pieces:
   - [black DG, black DK, black DB, black KA, black KL, black RT, '']
   - [neutral DG, neutral DK, neutral DB, neutral KA, neutral KL, neutral RT, '']
 ---
+name: Alice chess
+pieces:
+  - [white AliceB K, white AliceB Q, white AliceB R, white AliceB B, white AliceB S, white AliceB P, white AliceB DU]
+  - [black AliceB K, black AliceB Q, black AliceB R, black AliceB B, black AliceB S, black AliceB P, black AliceB DU]
+  - [neutral AliceB K, neutral AliceB Q, neutral AliceB R, neutral AliceB B, neutral AliceB S, neutral AliceB P, '']
+---
 name: Old olive default
 pieces:
   - [white LE, white PA, white VA, white NA, black DU, white G, white N]
