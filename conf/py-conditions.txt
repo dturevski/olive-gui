@@ -1,5 +1,6 @@
 ActuatedRevolvingBoard
 ActuatedRevolvingCentre
+AliceChess
 AllInChess
 AlphabeticChess
 AMU
@@ -115,6 +116,7 @@ Isardam <select{|TypeB}>
 KoBulKings
 KoeKo
 Leffie
+<<<<<<< Updated upstream
 Leofamily
 LeseMajeste
 LineChameleonChess
