@@ -26,10 +26,23 @@ class Square:
 
 COLORS = ['black', 'white', 'neutral']
 COLORS_SHORT = {'b': 'black', 'w': 'white', 'n': 'neutral'}
-FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
-              'Royal', 'Volage', 'Functionary', 'HalfNeutral',
-              'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable',
-              'Bul', 'Dob', 'Anda', 'AndaInverse']
+FAIRYSPECS = ['AliceB',
+              'Anda',
+              'AndaInverse',
+              'Bul',
+              'Chameleon',
+              'Dob',
+              'Functionary',
+              'HalfNeutral',
+              'HurdleColourChanging',
+              'Jigger',
+              'Kamikaze',
+              'Magic',
+              'Paralysing',
+              'Protean',
+              'Royal',
+              'Uncapturable',
+              'Volage',]
 
 RE_COMMON_STIPULATION = re.compile(
     '^(?P<intro>[0-9]+->)?' +

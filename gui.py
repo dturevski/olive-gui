@@ -1850,9 +1850,19 @@ class AddFairyPieceDialog(options.OkCancelDialog):
         vbox.addLayout(form, 1)
         vbox.addWidget(QtWidgets.QLabel(Lang.value('PP_Fairy_properties')))
 
+        hbox = QtWidgets.QHBoxLayout()
         self.checkboxes = [QtWidgets.QCheckBox(x) for x in model.FAIRYSPECS]
-        for box in self.checkboxes:
-            vbox.addWidget(box)
+        def split_list(lst, n):
+            k, m = divmod(len(lst), n)
+            return [lst[i*k + min(i, m):(i+1)*k + min(i+1, m)] for i in range(n)]
+        columns = 3
+        for column in split_list(self.checkboxes, columns):
+            vbox_column = QtWidgets.QVBoxLayout()
+            for checkbox in column:
+                vbox_column.addWidget(checkbox)
+            vbox_column.addWidget(QtWidgets.QWidget(), 1) # stretcher
+            hbox.addLayout(vbox_column)
+        vbox.addLayout(hbox)
 
         self.mainWidget = QtWidgets.QWidget()
         self.mainWidget.setLayout(vbox)

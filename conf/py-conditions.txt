@@ -1,5 +1,6 @@
 ActuatedRevolvingBoard
 ActuatedRevolvingCentre
+Alice
 AllInChess
 AlphabeticChess
 AMU
