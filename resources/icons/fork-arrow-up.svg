@@ -1,33 +1,3 @@
-<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
-
- <g>
-  <title>background</title>
-  <rect fill="none" id="canvas_background" height="402" width="582" y="-1" x="-1"/>
- </g>
- <g>
-  <title>Layer 1</title>
-  <g transform="rotate(180 15.999999999999998,16) " id="svg_1">
-   <g id="fork">
-    <g id="svg_2">
-     <path id="svg_3" fill="#030104" d="m22,0l0,3.875c0,1.602 -0.625,3.109 -1.754,4.238l-11.316,11.254c-1.789,1.785 -2.774,4.129 -2.883,6.633l-4.047,0l6,6l6,-6l-3.957,0c0.105,-1.438 0.684,-2.773 1.711,-3.805l11.316,-11.25c1.891,-1.89 2.93,-4.398 2.93,-7.07l0,-3.875l-4,0z"/>
-     <path id="svg_4" fill="#030104" d="m25.953,26c-0.109,-2.504 -1.098,-4.848 -2.887,-6.641l-2.23,-2.215l-2.836,2.821l2.242,2.23c1.031,1.027 1.609,2.367 1.715,3.805l-3.957,0l6,6l6,-6l-4.047,0z"/>
-    </g>
-   </g>
-  </g>
-  <g id="svg_5"/>
-  <g id="svg_6"/>
-  <g id="svg_7"/>
-  <g id="svg_8"/>
-  <g id="svg_9"/>
-  <g id="svg_10"/>
-  <g id="svg_11"/>
-  <g id="svg_12"/>
-  <g id="svg_13"/>
-  <g id="svg_14"/>
-  <g id="svg_15"/>
-  <g id="svg_16"/>
-  <g id="svg_17"/>
-  <g id="svg_18"/>
-  <g id="svg_19"/>
- </g>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <path d="M32 60 V28 M32 28 L16 12 M32 28 L48 12" fill="none" stroke="#836953" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -417,12 +417,11 @@ class Mainframe(QtWidgets.QMainWindow):
                   self.listLegalWhiteMoves,
                   self.optionsAction,
                   self.twinsAction,
+                  self.removeFairyConditionsAction,
                   self.runAxr]))
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
-        self.toolbar.addSeparator()
-        self.toolbar.addAction(self.removeFairyConditionsAction)
         self.toolbar.addSeparator()
         self.createTransformActions()
 
