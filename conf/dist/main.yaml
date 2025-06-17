@@ -1,15 +1,38 @@
-analyzers: [trajectories, miscellaneous]
+analyzers:
+- trajectories
+- miscellaneous
 auto-compactify: 0
-collections-dir: ./
+clear-popeye-output-on-entry-change: false
+collections-dir: ./collections
 default-lang: en
 default-notation: en
 fairy-zoo:
-- ['', black L, '', white L, '', '', '']
-- ['', '', '', '', '', '', '']
-- ['', '', '', '', '', '', '']
+- - white LE
+  - white PA
+  - white VA
+  - white NA
+  - black DU
+  - white G
+  - white N
+- - black LE
+  - black PA
+  - black VA
+  - black NA
+  - white DU
+  - black G
+  - black N
+- - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - neutral G
+  - neutral N
 font-size: 24
 horsehead-glyph: N
-import-post-decode: {ISO-8859-1: Western, windows-1251: Cyrillic}
+import-post-decode:
+  ISO-8859-1: Western
+  windows-1251: Cyrillic
 import-post-decode-default: ISO-8859-1
 languages:
   de: Deutsch
@@ -18,19 +41,50 @@ languages:
   rs: Српски
   ru: Русский
 notations:
-  en: [K, Q, R, B, S, P]
-  fide: [K, D, T, L, S, B]
-  ru: [Кр, Ф, Л, С, К, п]
-version: "1.5.4"
+  en:
+  - K
+  - Q
+  - R
+  - B
+  - S
+  - P
+  fide:
+  - K
+  - D
+  - T
+  - L
+  - S
+  - B
+  ru:
+  - Кр
+  - Ф
+  - Л
+  - С
+  - К
+  - п
 popeye-toolbar-options:
-- {icon: miscellaneus.svg, option: SetPlay, enabled: true}
-- {icon: question.svg, option: Defence 1, enabled: true}
-- {icon: more.svg, option: PostKeyPlay, enabled: true}
-- {icon: flash.svg, option: Intelligent, enabled: true}
-- {icon: list.svg, option: MoveNumbers, enabled: true}
-- {icon: contrast.svg, option: WhiteToPlay, enabled: false}
-- {icon: checklist.svg, option: NoShortVariations, enabled: false}
-- {icon: no-bombs.svg, option: NoThreat, enabled: false}
-clear-popeye-output-on-entry-change: true
-yacpdb:
-  home: https://www.yacpdb.org/
+- enabled: true
+  icon: miscellaneus.svg
+  option: SetPlay
+- enabled: true
+  icon: question.svg
+  option: Defence 1
+- enabled: true
+  icon: more.svg
+  option: PostKeyPlay
+- enabled: true
+  icon: flash.svg
+  option: Intelligent
+- enabled: true
+  icon: list.svg
+  option: MoveNumbers
+- enabled: false
+  icon: contrast.svg
+  option: WhiteToPlay
+- enabled: false
+  icon: checklist.svg
+  option: NoShortVariations
+- enabled: false
+  icon: no-bombs.svg
+  option: NoThreat
+version: 1.5.5

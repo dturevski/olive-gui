@@ -45,7 +45,7 @@ dk	doublerookhopper	r1
 do	dolphin	q3			grasshopper + kangaroo
 dr	dragon				
 ds	("Diagonalspiralspringer")				
-du	dummy				
+du	dummy	o
 ea	eagle	q3			Moves like a Grasshopper, but deflects 90° either way on passing over the hurdle. The arrival square is adjacent to the hurdle.
 ee	eagle equihopper	q3
 eh	edgehog	q1			

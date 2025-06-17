@@ -377,7 +377,6 @@ class Mainframe(QtWidgets.QMainWindow):
             self.addEntryAction, self.deleteEntryAction]))
         self.editMenu.addSeparator()
         self.editMenu.addAction(self.editSolutionAction)
-        self.editMenu.addAction(self.removeFairyConditionsAction)
         self.editMenu.addSeparator()
 
         # Popeye menu
@@ -388,7 +387,9 @@ class Mainframe(QtWidgets.QMainWindow):
                   self.listLegalBlackMoves,
                   self.listLegalWhiteMoves,
                   self.optionsAction,
-                  self.twinsAction]))
+                  self.twinsAction,
+                  self.removeFairyConditionsAction],
+                 ))
 
         # help menu
         menubar.addSeparator()
