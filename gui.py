@@ -8,6 +8,7 @@ import re
 import sys
 import tempfile
 import string
+import psutil
 
 # 3rd party
 import yaml
@@ -889,6 +890,10 @@ class Mainframe(QtWidgets.QMainWindow):
         if not self.doDirtyCheck():
             event.ignore()
             return
+
+        if not self.popeyeView.areActionsEnabled():
+            self.popeyeView.stopPopeye()
+
         settings = QtCore.QSettings()
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowState", self.saveState())
@@ -1024,7 +1029,7 @@ class AboutDialog(QtWidgets.QDialog):
         w.setLayout(grid)
         vbox.addWidget(w)
 
-        vbox.addWidget(ClickableLabel('© 2011-2023'))
+        vbox.addWidget(ClickableLabel('© 2011-2025'))
 
         vbox.addStretch(1)
         buttonOk = QtWidgets.QPushButton(Lang.value('CO_OK'), self)
@@ -1869,6 +1874,7 @@ class AddFairyPieceDialog(options.OkCancelDialog):
         super(AddFairyPieceDialog, self).__init__(Lang)
 
         self.setWindowTitle(Lang.value('MI_Add_piece'))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/chess.svg')))
 
     def getPiece(self):
         color = self.comboColor.currentText()
@@ -2547,9 +2553,23 @@ class PopeyeView(QtWidgets.QSplitter):
         Mainframe.sigWrapper.sigModelChanged.emit()
         Mainframe.sigWrapper.sigFocusOnSolution.emit()
 
+    def kill_process_tree(self, pid):
+        try:
+            parent = psutil.Process(pid)
+            children = parent.children(recursive=True)
+            parent.terminate()
+            parent.wait(timeout=5)
+            for child in children:
+                child.terminate()
+            gone, alive = psutil.wait_procs(children, timeout=5)
+            for child in alive:
+                child.kill()
+        except psutil.NoSuchProcess:
+            pass
+
     def stopPopeye(self):
         self.stop_requested = True
-        self.process.kill()
+        self.kill_process_tree(self.process.processId())
         self.output.insertPlainText("\n" + Lang.value('MSG_Terminated'))
 
     def reset(self, clear_output=True):
@@ -2650,6 +2670,9 @@ class PopeyeView(QtWidgets.QSplitter):
         self.actions['start'].setEnabled(status)
         self.actions['legalb'].setEnabled(status)
         self.actions['legalw'].setEnabled(status)
+
+    def areActionsEnabled(self) -> bool:
+        return self.actions['start'].isEnabled()
 
     def setLegacyNotation(self, notation):
         legacy_notation = {}
