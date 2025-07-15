@@ -18,7 +18,9 @@ import requests
 # local
 import board
 import chest
+from conf import Conf
 import fancy
+from lang import Lang
 import legacy.chess
 import legacy.popeye
 import model
@@ -26,6 +28,8 @@ import options
 import pbm
 import yacpdb.indexer.cruncher
 import yacpdb.entry
+from widgets import (PlainTextEdit, ClickableLabel, YesNoDialog, YesNoCancelDialog, 
+                     DraggableLabel, DraggableLabelWithHoverEffect)
 import exporters.pdf as pdf
 import exporters.xfen2img as xfen2img
 import exporters.latex as latex
@@ -944,22 +948,6 @@ class Mainframe(QtWidgets.QMainWindow):
         self.show()
 
 
-class PlainTextEdit(QtWidgets.QTextEdit):
-
-    def __init__(self, *__args):
-        super().__init__(*__args)
-
-    def insertFromMimeData(self, data):
-        self.insertPlainText(data.text())
-
-
-class ClickableLabel(QtWidgets.QLabel):
-
-    def __init__(self, str):
-        super(ClickableLabel, self).__init__(str)
-        self.setOpenExternalLinks(True)
-
-
 class QuickOptionsView():  # for clarity this View is not a widget
 
     def __init__(self, mainframeInstance):
@@ -1041,68 +1029,7 @@ class AboutDialog(QtWidgets.QDialog):
         self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/information.svg')))
 
 
-class YesNoDialog(QtWidgets.QDialog):
 
-    def __init__(self, msg):
-        super(YesNoDialog, self).__init__()
-
-        vbox = QtWidgets.QVBoxLayout()
-        vbox.addWidget(QtWidgets.QLabel(msg))
-        vbox.addStretch(1)
-
-        hbox = QtWidgets.QHBoxLayout()
-        hbox.addStretch(1)
-        buttonYes = QtWidgets.QPushButton(Lang.value('CO_Yes'), self)
-        buttonYes.clicked.connect(self.accept)
-        buttonNo = QtWidgets.QPushButton(Lang.value('CO_No'), self)
-        buttonNo.clicked.connect(self.reject)
-
-        hbox.addWidget(buttonYes)
-        hbox.addWidget(buttonNo)
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
-
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
-
-
-class YesNoCancelDialog(QtWidgets.QDialog):
-
-    def __init__(self, msg):
-        super(YesNoCancelDialog, self).__init__()
-
-        vbox = QtWidgets.QVBoxLayout()
-        vbox.addWidget(QtWidgets.QLabel(msg))
-        vbox.addStretch(1)
-
-        hbox = QtWidgets.QHBoxLayout()
-        hbox.addStretch(1)
-        buttonYes = QtWidgets.QPushButton(Lang.value('CO_Yes'), self)
-        buttonYes.clicked.connect(self.yes)
-        buttonNo = QtWidgets.QPushButton(Lang.value('CO_No'), self)
-        buttonNo.clicked.connect(self.no)
-        buttonCancel = QtWidgets.QPushButton(Lang.value('CO_Cancel'), self)
-        buttonCancel.clicked.connect(self.cancel)
-
-        hbox.addWidget(buttonYes)
-        hbox.addWidget(buttonNo)
-        hbox.addWidget(buttonCancel)
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
-
-        self.choice = 'Yes'
-
-    def yes(self):
-        self.outcome = 'Yes'
-        self.accept()
-
-    def no(self):
-        self.outcome = 'No'
-        self.accept()
-
-    def cancel(self):
-        self.outcome = 'Cancel'
-        self.reject()
 
 
 class FenView(QtWidgets.QLineEdit):
@@ -1375,74 +1302,6 @@ class EntryListView(QtWidgets.QTreeWidget):
         if not "comments" in entry:
             return ""
         return re.sub(r'\s+', ' ', ' '.join(entry["comments"]))
-
-
-class DraggableLabel(QtWidgets.QLabel):
-
-    def __init__(self, id):
-        super(DraggableLabel, self).__init__()
-        self.id = id
-
-    def setTextAndFont(self, text, font):
-        self.setText(text)
-        self.setFont(Mainframe.fontset()[font])
-
-    # mouseMoveEvent works as well but with slightly different mechanics
-    def mousePressEvent(self, e):
-        Mainframe.sigWrapper.sigFocusOnPieces.emit()
-        if e.buttons() != QtCore.Qt.LeftButton:
-            # On right click
-            # if the square is empty, add the selected piece
-            # if the square is non-empty, remove it
-            if Mainframe.model.board.board[self.id] is None:
-                if Mainframe.selectedPiece is not None:
-                    Mainframe.model.board.add(model.Piece(Mainframe.selectedPiece.name,
-                                                          Mainframe.selectedPiece.color,
-                                                          Mainframe.selectedPiece.specs),
-                                              self.id)
-                else:
-                    return
-            else:
-                Mainframe.selectedPiece = Mainframe.model.board.board[self.id]
-                Mainframe.model.board.drop(self.id)
-            Mainframe.model.onBoardChanged()
-            Mainframe.sigWrapper.sigModelChanged.emit()
-            return
-        if Mainframe.model.board.board[self.id] is None:
-            return
-
-        # ctrl-drag copies existing piece
-        modifiers = QtWidgets.QApplication.keyboardModifiers()
-        Mainframe.currentlyDragged = Mainframe.model.board.board[self.id]
-        if not (modifiers & QtCore.Qt.ControlModifier):
-            Mainframe.model.board.drop(self.id)
-            Mainframe.model.onBoardChanged()
-            Mainframe.sigWrapper.sigModelChanged.emit()
-
-        mimeData = QtCore.QMimeData()
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
-        drag.setHotSpot(e.pos() - self.rect().topLeft())
-        dropAction = drag.exec_(QtCore.Qt.MoveAction)
-        Mainframe.currentlyDragged = None
-
-    def dragEnterEvent(self, e):
-        e.accept()
-
-    def dropEvent(self, e):
-        e.setDropAction(QtCore.Qt.MoveAction)
-        e.accept()
-
-        if Mainframe.currentlyDragged is None:
-            return
-        Mainframe.model.board.add(
-            model.Piece(
-                Mainframe.currentlyDragged.name,
-                Mainframe.currentlyDragged.color,
-                Mainframe.currentlyDragged.specs),
-            self.id)
-        Mainframe.model.onBoardChanged()
-        Mainframe.sigWrapper.sigModelChanged.emit()
 
 
 class ChessBoxItem(QtWidgets.QLabel):
@@ -2975,19 +2834,6 @@ class DemoFrame(QtWidgets.QWidget):
         return DraggableLabelWithHoverEffect(id)
 
 
-class DraggableLabelWithHoverEffect(DraggableLabel):
-
-    def __init__(self, id):
-        super(DraggableLabelWithHoverEffect, self).__init__(id)
-        self.setMouseTracking(True)
-
-    def enterEvent(self, event):
-        self.setStyleSheet('QLabel { background-color: #42bff4; }')
-
-    def leaveEvent(self, event):
-        self.setStyleSheet('QLabel { background-color: #ffffff; }')
-
-
 class DemoBoardToolbar(QtWidgets.QWidget):
 
     def __init__(self):
@@ -3033,73 +2879,3 @@ class DemoBoardToolbar(QtWidgets.QWidget):
     def onClose(self):
         Mainframe.sigWrapper.sigDemoModeExit.emit()
 
-
-class Conf:
-    file = get_write_dir() + '/conf/main.yaml'
-    keywords_file = get_write_dir() + '/conf/keywords.yaml'
-    zoo_file = get_write_dir() + '/conf/zoos.yaml'
-    popeye_file = get_write_dir() + '/conf/popeye.yaml'
-    chest_file = get_write_dir() + '/conf/chest.yaml'
-    templates_file = get_write_dir() + '/conf/user-templates.yaml'
-
-    def read():
-        with open(Conf.file, 'r', encoding="utf8") as f:
-            Conf.values = yaml.safe_load(f)
-
-        Conf.zoos = []
-        with open(Conf.zoo_file, 'r', encoding="utf8") as f:
-            for zoo in yaml.safe_load_all(f):
-                Conf.zoos.append(zoo)
-
-        with open(Conf.keywords_file, 'r', encoding="utf8") as f:
-            Conf.keywords = yaml.safe_load(f)
-
-        with open(Conf.popeye_file, 'r', encoding="utf8") as f:
-            Conf.popeye = yaml.safe_load(f)
-
-        with open(Conf.chest_file, 'r', encoding="utf8") as f:
-            Conf.chest = yaml.safe_load(f)
-
-        with open(Conf.templates_file, 'r', encoding="utf8") as f:
-            Conf.templates = yaml.safe_load(f)
-
-    read = staticmethod(read)
-
-    def write():
-        with open(Conf.file, 'wb') as f:
-            f.write(Conf.dump(Conf.values))
-        with open(Conf.popeye_file, 'wb') as f:
-            f.write(Conf.dump(Conf.popeye))
-        with open(Conf.chest_file, 'wb') as f:
-            f.write(Conf.dump(Conf.chest))
-
-    write = staticmethod(write)
-
-    def value(v):
-        return Conf.values[v]
-
-    value = staticmethod(value)
-
-    def dump(object):
-        return yaml.dump(object, encoding="utf8", allow_unicode=True)
-
-    dump = staticmethod(dump)
-
-
-class Lang:
-    file = get_write_dir() + '/conf/lang.yaml'
-
-    def read():
-        f = open(Lang.file, 'r', encoding="utf8")
-        try:
-            Lang.values = yaml.safe_load(f)
-        finally:
-            f.close()
-        Lang.current = Conf.value('default-lang')
-
-    read = staticmethod(read)
-
-    def value(v):
-        return Lang.values[v][Lang.current]
-
-    value = staticmethod(value)
