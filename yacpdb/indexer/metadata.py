@@ -1,6 +1,5 @@
-import os
-
 import markdown
+from datetime import datetime, timedelta
 
 from .predicate import *
 try:
@@ -299,7 +298,27 @@ class PublishedAfter(Predicate):
         Predicate.__init__(self, name, params)
 
     def sql(self, params, cmp, ord):
-        return Query("p2.published_after > %s", [params[0]], [])
+        return Query("p2.published_after > %s", [self.normalize_date(params[0])], [])
+
+    def normalize_date(self, date_str: str) -> str:
+        # Case 1: Full date "YYYY-MM-DD"
+        if len(date_str) == 10 and "-" in date_str:
+            return date_str
+
+        # Case 2: Year-Month "YYYY-MM"
+        if len(date_str) == 7:
+            # Parse first day of the given month
+            dt = datetime.strptime(date_str, "%Y-%m")
+            # Subtract one day from the first day of this month
+            prev_month_last_day = dt - timedelta(days=1)
+            return prev_month_last_day.strftime("%Y-%m-%d")
+
+        # Case 3: Year only "YYYY"
+        if len(date_str) == 4:
+            year = int(date_str) - 1
+            return f"{year}-12-31"
+
+        raise ValueError(f"Invalid date format: {date_str}")
 
 
 
