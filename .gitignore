@@ -11,3 +11,5 @@ olive.spec
 test.json
 .gitignore
 conf/popeye.yaml
+*.venv
+__pycache__

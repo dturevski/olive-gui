@@ -28,6 +28,13 @@ must be installed separately.
 
 ### Binaries
 
+For single binary complilation pyrcc5 library for your distribution is required to manage Qt5 resources
+Example for Ubuntu/Debian:
+- pyqt5-dev-tools
+
+Example for MacOS (Brew):
+- ...
+
 The binary packages for Windows are available under the
 [Releases](https://github.com/dturevski/olive-gui/releases).
 They already include the compiled windows version of Popeye and WinChest.
