@@ -2681,6 +2681,8 @@ class PublishingView(QtWidgets.QSplitter):
         self.solFontSelect.setCurrentIndex(
             self.config['inline-fonts'].index(self.config['defaults']['inline']))
         vbox.addWidget(self.solFontSelect)
+        self.checkboxEdgeLabels = QtWidgets.QCheckBox()
+        vbox.addWidget(self.checkboxEdgeLabels)
         self.labelMemo = QtWidgets.QLabel()
         vbox.addWidget(self.labelMemo)
         vbox.addStretch(1)
@@ -2692,6 +2694,7 @@ class PublishingView(QtWidgets.QSplitter):
 
         self.diaFontSelect.currentIndexChanged.connect(self.onModelChanged)
         self.solFontSelect.currentIndexChanged.connect(self.onModelChanged)
+        self.checkboxEdgeLabels.stateChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
 
@@ -2708,11 +2711,16 @@ class PublishingView(QtWidgets.QSplitter):
     def onModelChanged(self):
         self.richText.setText("")
         self.richText.setFontPointSize(12)
-        self.richText.insertHtml(exporters.html.render(Mainframe.model.cur(), self.settings()))
+        settings = self.settings()
+        can_show_labels = "edge-labels" in settings["diagram_font"]
+        self.checkboxEdgeLabels.setVisible(can_show_labels)
+        self.richText.insertHtml(exporters.html.render(
+            Mainframe.model.cur(), settings, can_show_labels and self.checkboxEdgeLabels.isChecked()))
 
     def onLangChanged(self):
         self.labelDiaFont.setText(Lang.value('PU_Diagram_font') + ':')
         self.labelSolFont.setText(Lang.value('PU_Inline_font') + ':')
+        self.checkboxEdgeLabels.setText(Lang.value('PU_Edge_labels'))
         self.labelMemo.setText(Lang.value('PU_Memo'))
         self.onModelChanged()
 

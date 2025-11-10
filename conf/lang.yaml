@@ -745,6 +745,12 @@ PU_Inline_font:
   ru: Шрифт фигур в решении
   de: Figurinefont
   ro: Font piese în soluție
+PU_Edge_labels:
+  en: Edge labels
+  rs: Oznake ivica
+  ru: Метки по краям
+  de: Randbeschriftungen
+  ro: Etichete la margini
 PU_Memo:
   en: |
     For proper functionality the
