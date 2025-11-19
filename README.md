@@ -32,6 +32,11 @@ For single binary complilation pyrcc5 library for your distribution is required 
 Example for Ubuntu/Debian:
 - pyqt5-dev-tools
 
+#### Commands:
+- pyrcc5 -o resources.py resources/olive.qrc
+- pyinstaller olive.spec --clean
+- Place matching `py` popeye (Linux x86-64 ELF) binary into the `build` directory: `build/py`
+
 Example for MacOS (Brew):
 - ...
 
