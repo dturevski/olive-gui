@@ -33,12 +33,13 @@ Example for Ubuntu/Debian:
 - pyqt5-dev-tools
 
 #### Commands:
+- (Optionally setup venv)
+- pip install -r requirements.txt
 - pyrcc5 -o resources.py resources/olive.qrc
-- pyinstaller olive.spec --clean
-- Place matching `py` popeye (Linux x86-64 ELF) binary into the `build` directory: `build/py`
+- pyinstaller olive.unx.spec --clean
+- pyinstaller olive.mac.spec --clean
+- Place matching `py` popeye (Linux x86-64 ELF / Darwin ARM64) binary into the `build` directory: `build/py`
 
-Example for MacOS (Brew):
-- ...
 
 The binary packages for Windows are available under the
 [Releases](https://github.com/dturevski/olive-gui/releases).
