@@ -21,7 +21,7 @@ AntipodeanAntiCirce <select{|Cheylan|Calvet}>
 AntipodeanCirce
 AntipodeanImmunChess <select{|RexInclusiv}>
 AntiSuperCirce
-AprilChess
+AprilChess <str>
 ArgentinianChess
 BackToBack
 BGL
@@ -110,9 +110,10 @@ Heffalumps <select{|RexExclusiv}>
 Hole <str>
 Hypervolage
 Imitator <str>
+Immobilio <str>
 ImmunChess <select{|RexInclusiv}>
 Influencer
-Isardam <select{|TypeB}>
+Isardam <select{|TypeB}> <select{|RexInclusiv}>
 KoBulKings
 KoeKo
 Leffie
