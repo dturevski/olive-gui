@@ -101,7 +101,10 @@ class Analyzer0:
         except RuntimeError as rerr:
             dao.ixr_updateCruncherLog(entry["ash"], str(rerr))
         except Exception as ex:
-            print(traceback.format_exc(ex))
+            try:
+                print(traceback.format_exc(ex))
+            except:
+                pass
             dao.ixr_updateCruncherLog(entry["ash"], str(ex))
 
     def runBatch(self, size):
