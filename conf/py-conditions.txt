@@ -136,7 +136,7 @@ MasandGeneralised
 Maximummer <select{|Ultra}>
 MessignyChess <select{|RexExclusiv}>
 MirrorAntiCirce <select{|Cheylan|Calvet}>
-MirrorCirce 
+MirrorCirce
 MirrorCirceClone
 MirrorCouscousCirce
 MirrorFileCirce
