@@ -10,13 +10,13 @@ import exporters.pdf as pdf
 # todo: use chevron/mustache templating (someday)
 
 
-def render(entry, settings):
+def render(entry, settings, edge_labels = False):
 
     board = Board()
     board.fromAlgebraic(entry["algebraic"])
 
     html = pdf.ExportDocument.header(entry, settings['lang'], settings['conf'])
-    html += board_to_html(board, settings['diagram_font'], entry.get('glyphs', {}))
+    html += board_to_html(board, settings['diagram_font'], entry.get('glyphs', {}), edge_labels)
     html += entry['stipulation'] + ' ' + board.getPiecesCount() + "<br/>\n"
     html += pdf.ExportDocument.solver(entry, settings['lang']) + "<br/>\n"
     html += pdf.ExportDocument.legend(board) + "<br/><br/>\n"
@@ -42,7 +42,7 @@ def render_many(entries, settings):
         </html>""" % "".join([render(e, settings) for e in entries])
 
 
-def board_to_html(board, config, overridden_glyphs):
+def board_to_html(board, config, overridden_glyphs, edge_labels = False):
     """mostly copy paste from pdf.py  :( real clumsy
     important assumption: empty squares and board edges reside in one font file/face
     (poorly designated 'aux-postfix') in case of most chess fonts there's only one file/face
@@ -59,7 +59,10 @@ def board_to_html(board, config, overridden_glyphs):
         # left edge
         if i % 8 == 0:
             font = config['prefix'] + config['aux-postfix']
-            char = chr(int(config['edges']['W']))
+            if edge_labels:
+                char = chr(int(config['edge-labels']['ranks'][i // 8]))
+            else:
+                char = chr(int(config['edges']['W']))
             if font != font_:
                 fonts.append(font)
                 spans.append([char])
@@ -98,8 +101,11 @@ def board_to_html(board, config, overridden_glyphs):
             spans[-1].append("<br/>")
     # bottom edge
     font = config['prefix'] + config['aux-postfix']
-    edge = chr(int(config['edges']['SW'])) + 8 * chr(int(config['edges']
-                                                         ['S'])) + chr(int(config['edges']['SE'])) + "<br/>"
+    if edge_labels:
+        bottom_ruler = "".join([chr(int(x)) for x in config['edge-labels']['files']])
+    else:
+        bottom_ruler = 8 * chr(int(config['edges']['S']))
+    edge = chr(int(config['edges']['SW'])) + bottom_ruler + chr(int(config['edges']['SE'])) + "<br/>"
     if font != font_:
         fonts.append(font)
         spans.append(edge)

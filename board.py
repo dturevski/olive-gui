@@ -26,15 +26,29 @@ class Square:
 
 COLORS = ['black', 'white', 'neutral']
 COLORS_SHORT = {'b': 'black', 'w': 'white', 'n': 'neutral'}
-FAIRYSPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
-              'Royal', 'Volage', 'Functionary', 'HalfNeutral',
-              'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable',
-              'Bul', 'Dob', 'Anda', 'AndaInverse', 'AliceB']
+FAIRYSPECS = ['AliceB',
+              'Anda',
+              'AndaInverse',
+              'Bul',
+              'Chameleon',
+              'Dob',
+              'Functionary',
+              'HalfNeutral',
+              'HurdleColourChanging',
+              'Jigger',
+              'Kamikaze',
+              'Magic',
+              'Paralysing',
+              'Protean',
+              'Royal',
+              'Uncapturable',
+              'Volage',]
 
 RE_COMMON_STIPULATION = re.compile(
     '^(?P<intro>[0-9]+->)?' +
     '(?P<exact>exact-)?' +
-    '(?P<mod>ser-|pser-|phser-|semi-|reci-)?' +
+    '(?P<mod>ser-|pser-|phser-)?' +
+    '(?P<recisemi>semi-|reci-)?' +
     '(?P<play>(h|s|r|hs|hr|)?)' +
     '(?P<aim>(#=|!=|!#|00|%|~|ep|#|=|==|\\+|(z[a-h][1-8])|x|##|##!|ct|<>|ctr|<>r|c81|(k[a-h][1-8])|pg|dia)) *' +
     '(?P<length>[0-9.]+)$',

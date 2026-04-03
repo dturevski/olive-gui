@@ -200,7 +200,7 @@ class Dao:
         for p in params:
            logging.debug(str(p) + ", " + str(type(params[0])))
         c.execute(query + limits, params)
-        lastExecuted = c._last_executed
+        #lastExecuted = c._last_executed
         for row in c:
             try:
                 e = entry.entry(row["yaml"])

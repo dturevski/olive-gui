@@ -2,32 +2,32 @@ analyzers:
 - trajectories
 - miscellaneous
 auto-compactify: 0
-clear-popeye-output-on-entry-change: true
+clear-popeye-output-on-entry-change: false
 collections-dir: ./collections
 default-lang: en
 default-notation: en
 fairy-zoo:
-- - white G
-  - white RH
-  - white BH
-  - white NH
-  - white NE
-  - white RP
-  - white CH
-- - black G
-  - black RH
-  - black BH
-  - black NH
-  - black NE
-  - black RP
-  - black CH
-- - neutral G
-  - neutral RH
-  - neutral BH
-  - neutral NH
-  - neutral NE
-  - neutral RP
-  - neutral CH
+- - white LE
+  - white PA
+  - white VA
+  - white NA
+  - black DU
+  - white G
+  - white N
+- - black LE
+  - black PA
+  - black VA
+  - black NA
+  - white DU
+  - black G
+  - black N
+- - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - neutral G
+  - neutral N
 font-size: 24
 horsehead-glyph: N
 import-post-decode:
@@ -87,4 +87,4 @@ popeye-toolbar-options:
 - enabled: false
   icon: no-bombs.svg
   option: NoThreat
-version: 1.5.4
+version: 1.5.5

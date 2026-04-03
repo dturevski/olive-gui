@@ -179,10 +179,11 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
     Search by internal integer identifier.
 
-* `Text(STRING needle)`
+* `Text(STRING pattern)`
 
-    Textual representation of the problem contains **needle**. In YACPDB the textual representation
-    is the entry's YAML (which includes solution, comments, etc).
+    Textual representation of the problem matches the **pattern**. In YACPDB the textual representation
+    is the entry's YAML (which includes solution, comments, etc), you will probably need to use 
+    wildcards, e.g. `Text('%dedicated to%mother%')`.
 
 
 

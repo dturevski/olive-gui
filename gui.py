@@ -8,6 +8,7 @@ import re
 import sys
 import tempfile
 import string
+import psutil
 
 # 3rd party
 import yaml
@@ -17,7 +18,9 @@ import requests
 # local
 import board
 import chest
+from conf import Conf
 import fancy
+from lang import Lang
 import legacy.chess
 import legacy.popeye
 import model
@@ -25,6 +28,8 @@ import options
 import pbm
 import yacpdb.indexer.cruncher
 import yacpdb.entry
+from widgets import (PlainTextEdit, ClickableLabel, YesNoDialog, YesNoCancelDialog, 
+                     DraggableLabel, DraggableLabelWithHoverEffect)
 import exporters.pdf as pdf
 import exporters.xfen2img as xfen2img
 import exporters.latex as latex
@@ -377,7 +382,6 @@ class Mainframe(QtWidgets.QMainWindow):
             self.addEntryAction, self.deleteEntryAction]))
         self.editMenu.addSeparator()
         self.editMenu.addAction(self.editSolutionAction)
-        self.editMenu.addAction(self.removeFairyConditionsAction)
         self.editMenu.addSeparator()
 
         # Popeye menu
@@ -388,7 +392,9 @@ class Mainframe(QtWidgets.QMainWindow):
                   self.listLegalBlackMoves,
                   self.listLegalWhiteMoves,
                   self.optionsAction,
-                  self.twinsAction]))
+                  self.twinsAction,
+                  self.removeFairyConditionsAction],
+                 ))
 
         # help menu
         menubar.addSeparator()
@@ -417,12 +423,11 @@ class Mainframe(QtWidgets.QMainWindow):
                   self.listLegalWhiteMoves,
                   self.optionsAction,
                   self.twinsAction,
+                  self.removeFairyConditionsAction,
                   self.runAxr]))
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
-        self.toolbar.addSeparator()
-        self.toolbar.addAction(self.removeFairyConditionsAction)
         self.toolbar.addSeparator()
         self.createTransformActions()
 
@@ -889,6 +894,10 @@ class Mainframe(QtWidgets.QMainWindow):
         if not self.doDirtyCheck():
             event.ignore()
             return
+
+        if not self.popeyeView.areActionsEnabled():
+            self.popeyeView.stopPopeye()
+
         settings = QtCore.QSettings()
         settings.setValue("geometry", self.saveGeometry())
         settings.setValue("windowState", self.saveState())
@@ -937,22 +946,6 @@ class Mainframe(QtWidgets.QMainWindow):
         Mainframe.sigWrapper.sigModelChanged.emit()
         self.update()
         self.show()
-
-
-class PlainTextEdit(QtWidgets.QTextEdit):
-
-    def __init__(self, *__args):
-        super().__init__(*__args)
-
-    def insertFromMimeData(self, data):
-        self.insertPlainText(data.text())
-
-
-class ClickableLabel(QtWidgets.QLabel):
-
-    def __init__(self, str):
-        super(ClickableLabel, self).__init__(str)
-        self.setOpenExternalLinks(True)
 
 
 class QuickOptionsView():  # for clarity this View is not a widget
@@ -1024,7 +1017,7 @@ class AboutDialog(QtWidgets.QDialog):
         w.setLayout(grid)
         vbox.addWidget(w)
 
-        vbox.addWidget(ClickableLabel('© 2011-2023'))
+        vbox.addWidget(ClickableLabel('© 2011-2025'))
 
         vbox.addStretch(1)
         buttonOk = QtWidgets.QPushButton(Lang.value('CO_OK'), self)
@@ -1036,68 +1029,7 @@ class AboutDialog(QtWidgets.QDialog):
         self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/information.svg')))
 
 
-class YesNoDialog(QtWidgets.QDialog):
 
-    def __init__(self, msg):
-        super(YesNoDialog, self).__init__()
-
-        vbox = QtWidgets.QVBoxLayout()
-        vbox.addWidget(QtWidgets.QLabel(msg))
-        vbox.addStretch(1)
-
-        hbox = QtWidgets.QHBoxLayout()
-        hbox.addStretch(1)
-        buttonYes = QtWidgets.QPushButton(Lang.value('CO_Yes'), self)
-        buttonYes.clicked.connect(self.accept)
-        buttonNo = QtWidgets.QPushButton(Lang.value('CO_No'), self)
-        buttonNo.clicked.connect(self.reject)
-
-        hbox.addWidget(buttonYes)
-        hbox.addWidget(buttonNo)
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
-
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
-
-
-class YesNoCancelDialog(QtWidgets.QDialog):
-
-    def __init__(self, msg):
-        super(YesNoCancelDialog, self).__init__()
-
-        vbox = QtWidgets.QVBoxLayout()
-        vbox.addWidget(QtWidgets.QLabel(msg))
-        vbox.addStretch(1)
-
-        hbox = QtWidgets.QHBoxLayout()
-        hbox.addStretch(1)
-        buttonYes = QtWidgets.QPushButton(Lang.value('CO_Yes'), self)
-        buttonYes.clicked.connect(self.yes)
-        buttonNo = QtWidgets.QPushButton(Lang.value('CO_No'), self)
-        buttonNo.clicked.connect(self.no)
-        buttonCancel = QtWidgets.QPushButton(Lang.value('CO_Cancel'), self)
-        buttonCancel.clicked.connect(self.cancel)
-
-        hbox.addWidget(buttonYes)
-        hbox.addWidget(buttonNo)
-        hbox.addWidget(buttonCancel)
-        vbox.addLayout(hbox)
-        self.setLayout(vbox)
-        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/info.svg')))
-
-        self.choice = 'Yes'
-
-    def yes(self):
-        self.outcome = 'Yes'
-        self.accept()
-
-    def no(self):
-        self.outcome = 'No'
-        self.accept()
-
-    def cancel(self):
-        self.outcome = 'Cancel'
-        self.reject()
 
 
 class FenView(QtWidgets.QLineEdit):
@@ -1370,74 +1302,6 @@ class EntryListView(QtWidgets.QTreeWidget):
         if not "comments" in entry:
             return ""
         return re.sub(r'\s+', ' ', ' '.join(entry["comments"]))
-
-
-class DraggableLabel(QtWidgets.QLabel):
-
-    def __init__(self, id):
-        super(DraggableLabel, self).__init__()
-        self.id = id
-
-    def setTextAndFont(self, text, font):
-        self.setText(text)
-        self.setFont(Mainframe.fontset()[font])
-
-    # mouseMoveEvent works as well but with slightly different mechanics
-    def mousePressEvent(self, e):
-        Mainframe.sigWrapper.sigFocusOnPieces.emit()
-        if e.buttons() != QtCore.Qt.LeftButton:
-            # On right click
-            # if the square is empty, add the selected piece
-            # if the square is non-empty, remove it
-            if Mainframe.model.board.board[self.id] is None:
-                if Mainframe.selectedPiece is not None:
-                    Mainframe.model.board.add(model.Piece(Mainframe.selectedPiece.name,
-                                                          Mainframe.selectedPiece.color,
-                                                          Mainframe.selectedPiece.specs),
-                                              self.id)
-                else:
-                    return
-            else:
-                Mainframe.selectedPiece = Mainframe.model.board.board[self.id]
-                Mainframe.model.board.drop(self.id)
-            Mainframe.model.onBoardChanged()
-            Mainframe.sigWrapper.sigModelChanged.emit()
-            return
-        if Mainframe.model.board.board[self.id] is None:
-            return
-
-        # ctrl-drag copies existing piece
-        modifiers = QtWidgets.QApplication.keyboardModifiers()
-        Mainframe.currentlyDragged = Mainframe.model.board.board[self.id]
-        if not (modifiers & QtCore.Qt.ControlModifier):
-            Mainframe.model.board.drop(self.id)
-            Mainframe.model.onBoardChanged()
-            Mainframe.sigWrapper.sigModelChanged.emit()
-
-        mimeData = QtCore.QMimeData()
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
-        drag.setHotSpot(e.pos() - self.rect().topLeft())
-        dropAction = drag.exec_(QtCore.Qt.MoveAction)
-        Mainframe.currentlyDragged = None
-
-    def dragEnterEvent(self, e):
-        e.accept()
-
-    def dropEvent(self, e):
-        e.setDropAction(QtCore.Qt.MoveAction)
-        e.accept()
-
-        if Mainframe.currentlyDragged is None:
-            return
-        Mainframe.model.board.add(
-            model.Piece(
-                Mainframe.currentlyDragged.name,
-                Mainframe.currentlyDragged.color,
-                Mainframe.currentlyDragged.specs),
-            self.id)
-        Mainframe.model.onBoardChanged()
-        Mainframe.sigWrapper.sigModelChanged.emit()
 
 
 class ChessBoxItem(QtWidgets.QLabel):
@@ -1850,15 +1714,26 @@ class AddFairyPieceDialog(options.OkCancelDialog):
         vbox.addLayout(form, 1)
         vbox.addWidget(QtWidgets.QLabel(Lang.value('PP_Fairy_properties')))
 
+        hbox = QtWidgets.QHBoxLayout()
         self.checkboxes = [QtWidgets.QCheckBox(x) for x in model.FAIRYSPECS]
-        for box in self.checkboxes:
-            vbox.addWidget(box)
+        def split_list(lst, n):
+            k, m = divmod(len(lst), n)
+            return [lst[i*k + min(i, m):(i+1)*k + min(i+1, m)] for i in range(n)]
+        columns = 3
+        for column in split_list(self.checkboxes, columns):
+            vbox_column = QtWidgets.QVBoxLayout()
+            for checkbox in column:
+                vbox_column.addWidget(checkbox)
+            vbox_column.addWidget(QtWidgets.QWidget(), 1) # stretcher
+            hbox.addLayout(vbox_column)
+        vbox.addLayout(hbox)
 
         self.mainWidget = QtWidgets.QWidget()
         self.mainWidget.setLayout(vbox)
         super(AddFairyPieceDialog, self).__init__(Lang)
 
         self.setWindowTitle(Lang.value('MI_Add_piece'))
+        self.setWindowIcon(QtGui.QIcon(QtGui.QPixmap(':/icons/chess.svg')))
 
     def getPiece(self):
         color = self.comboColor.currentText()
@@ -2537,9 +2412,23 @@ class PopeyeView(QtWidgets.QSplitter):
         Mainframe.sigWrapper.sigModelChanged.emit()
         Mainframe.sigWrapper.sigFocusOnSolution.emit()
 
+    def kill_process_tree(self, pid):
+        try:
+            parent = psutil.Process(pid)
+            children = parent.children(recursive=True)
+            parent.terminate()
+            parent.wait(timeout=5)
+            for child in children:
+                child.terminate()
+            gone, alive = psutil.wait_procs(children, timeout=5)
+            for child in alive:
+                child.kill()
+        except psutil.NoSuchProcess:
+            pass
+
     def stopPopeye(self):
         self.stop_requested = True
-        self.process.kill()
+        self.kill_process_tree(self.process.processId())
         self.output.insertPlainText("\n" + Lang.value('MSG_Terminated'))
 
     def reset(self, clear_output=True):
@@ -2640,6 +2529,9 @@ class PopeyeView(QtWidgets.QSplitter):
         self.actions['start'].setEnabled(status)
         self.actions['legalb'].setEnabled(status)
         self.actions['legalw'].setEnabled(status)
+
+    def areActionsEnabled(self) -> bool:
+        return self.actions['start'].isEnabled()
 
     def setLegacyNotation(self, notation):
         legacy_notation = {}
@@ -2789,6 +2681,8 @@ class PublishingView(QtWidgets.QSplitter):
         self.solFontSelect.setCurrentIndex(
             self.config['inline-fonts'].index(self.config['defaults']['inline']))
         vbox.addWidget(self.solFontSelect)
+        self.checkboxEdgeLabels = QtWidgets.QCheckBox()
+        vbox.addWidget(self.checkboxEdgeLabels)
         self.labelMemo = QtWidgets.QLabel()
         vbox.addWidget(self.labelMemo)
         vbox.addStretch(1)
@@ -2800,6 +2694,7 @@ class PublishingView(QtWidgets.QSplitter):
 
         self.diaFontSelect.currentIndexChanged.connect(self.onModelChanged)
         self.solFontSelect.currentIndexChanged.connect(self.onModelChanged)
+        self.checkboxEdgeLabels.stateChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
         Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
 
@@ -2816,11 +2711,16 @@ class PublishingView(QtWidgets.QSplitter):
     def onModelChanged(self):
         self.richText.setText("")
         self.richText.setFontPointSize(12)
-        self.richText.insertHtml(exporters.html.render(Mainframe.model.cur(), self.settings()))
+        settings = self.settings()
+        can_show_labels = "edge-labels" in settings["diagram_font"]
+        self.checkboxEdgeLabels.setVisible(can_show_labels)
+        self.richText.insertHtml(exporters.html.render(
+            Mainframe.model.cur(), settings, can_show_labels and self.checkboxEdgeLabels.isChecked()))
 
     def onLangChanged(self):
         self.labelDiaFont.setText(Lang.value('PU_Diagram_font') + ':')
         self.labelSolFont.setText(Lang.value('PU_Inline_font') + ':')
+        self.checkboxEdgeLabels.setText(Lang.value('PU_Edge_labels'))
         self.labelMemo.setText(Lang.value('PU_Memo'))
         self.onModelChanged()
 
@@ -2942,19 +2842,6 @@ class DemoFrame(QtWidgets.QWidget):
         return DraggableLabelWithHoverEffect(id)
 
 
-class DraggableLabelWithHoverEffect(DraggableLabel):
-
-    def __init__(self, id):
-        super(DraggableLabelWithHoverEffect, self).__init__(id)
-        self.setMouseTracking(True)
-
-    def enterEvent(self, event):
-        self.setStyleSheet('QLabel { background-color: #42bff4; }')
-
-    def leaveEvent(self, event):
-        self.setStyleSheet('QLabel { background-color: #ffffff; }')
-
-
 class DemoBoardToolbar(QtWidgets.QWidget):
 
     def __init__(self):
@@ -3000,73 +2887,3 @@ class DemoBoardToolbar(QtWidgets.QWidget):
     def onClose(self):
         Mainframe.sigWrapper.sigDemoModeExit.emit()
 
-
-class Conf:
-    file = get_write_dir() + '/conf/main.yaml'
-    keywords_file = get_write_dir() + '/conf/keywords.yaml'
-    zoo_file = get_write_dir() + '/conf/zoos.yaml'
-    popeye_file = get_write_dir() + '/conf/popeye.yaml'
-    chest_file = get_write_dir() + '/conf/chest.yaml'
-    templates_file = get_write_dir() + '/conf/user-templates.yaml'
-
-    def read():
-        with open(Conf.file, 'r', encoding="utf8") as f:
-            Conf.values = yaml.safe_load(f)
-
-        Conf.zoos = []
-        with open(Conf.zoo_file, 'r', encoding="utf8") as f:
-            for zoo in yaml.safe_load_all(f):
-                Conf.zoos.append(zoo)
-
-        with open(Conf.keywords_file, 'r', encoding="utf8") as f:
-            Conf.keywords = yaml.safe_load(f)
-
-        with open(Conf.popeye_file, 'r', encoding="utf8") as f:
-            Conf.popeye = yaml.safe_load(f)
-
-        with open(Conf.chest_file, 'r', encoding="utf8") as f:
-            Conf.chest = yaml.safe_load(f)
-
-        with open(Conf.templates_file, 'r', encoding="utf8") as f:
-            Conf.templates = yaml.safe_load(f)
-
-    read = staticmethod(read)
-
-    def write():
-        with open(Conf.file, 'wb') as f:
-            f.write(Conf.dump(Conf.values))
-        with open(Conf.popeye_file, 'wb') as f:
-            f.write(Conf.dump(Conf.popeye))
-        with open(Conf.chest_file, 'wb') as f:
-            f.write(Conf.dump(Conf.chest))
-
-    write = staticmethod(write)
-
-    def value(v):
-        return Conf.values[v]
-
-    value = staticmethod(value)
-
-    def dump(object):
-        return yaml.dump(object, encoding="utf8", allow_unicode=True)
-
-    dump = staticmethod(dump)
-
-
-class Lang:
-    file = get_write_dir() + '/conf/lang.yaml'
-
-    def read():
-        f = open(Lang.file, 'r', encoding="utf8")
-        try:
-            Lang.values = yaml.safe_load(f)
-        finally:
-            f.close()
-        Lang.current = Conf.value('default-lang')
-
-    read = staticmethod(read)
-
-    def value(v):
-        return Lang.values[v][Lang.current]
-
-    value = staticmethod(value)

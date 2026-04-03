@@ -1,45 +1,9 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- Generator: Adobe Illustrator 18.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 32 32" style="enable-background:new 0 0 32 32;" xml:space="preserve">
-<g>
-	<g id="fork">
-		<g>
-			<path style="fill:#030104;" d="M22,0v3.875c0,1.602-0.625,3.109-1.754,4.238L8.93,19.367C7.141,21.152,6.156,23.496,6.047,26H2
-				l6,6l6-6h-3.957c0.105-1.438,0.684-2.773,1.711-3.805l11.316-11.25C24.961,9.055,26,6.547,26,3.875V0H22z"/>
-			<path style="fill:#030104;" d="M25.953,26c-0.109-2.504-1.098-4.848-2.887-6.641l-2.23-2.215L18,19.965l2.242,2.23
-				c1.031,1.027,1.609,2.367,1.715,3.805H18l6,6l6-6H25.953z"/>
-		</g>
-	</g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" xmlns:bx="https://boxy-svg.com">
+  <g style="" transform="matrix(1, 0, 0, -1, 0, 500)">
+    <rect x="92.852" y="300" width="314.296" height="25.96" style="fill: rgb(0,0,0); stroke: rgb(0, 0, 0);"/>
+    <path d="M 239.68 793.65 H 592.402 L 592.402 756.874 L 669.265 806.479 L 592.402 856.084 L 592.402 819.308 H 239.68 V 793.65 Z" bx:shape="arrow 239.68 756.874 429.585 99.211 25.658 76.863 0 1@f452acbc" style="fill: rgb(0,0,0); stroke: rgb(0, 0, 0);" transform="matrix(-0.003333, -0.999994, 0.999994, -0.003333, -554.9599, 707.157776)"/>
+    <path d="M 108.003 496.935 H 239.238 L 239.238 460.408 L 320.238 509.676 L 239.238 558.945 L 239.238 522.418 H 108.003 V 496.935 Z" bx:shape="arrow 108.003 460.408 212.235 98.537 25.483 81 0 1@38dee8a0" style="fill: rgb(0,0,0); stroke: rgb(0, 0, 0);" transform="matrix(-0.004835, -0.999988, 0.999988, -0.004835, -403.69043, 410.227753)"/>
+    <path d="M 108.003 496.935 H 239.238 L 239.238 460.408 L 320.238 509.676 L 239.238 558.945 L 239.238 522.418 H 108.003 V 496.935 Z" bx:shape="arrow 108.003 460.408 212.235 98.537 25.483 81 0 1@38dee8a0" style="fill: rgb(0,0,0); stroke: rgb(0, 0, 0); stroke-width: 1;" transform="matrix(-0.004835, -0.999988, 0.999988, -0.004835, -114.753036, 410.227753)"/>
+  </g>
 </svg>
