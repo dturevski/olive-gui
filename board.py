@@ -327,6 +327,8 @@ class Board:
                 retval[piece.color] = []
             s = piece.serialize2() if withOrigins else piece.toAlgebraic()
             retval[piece.color].append(s + idxToAlgebraic(square))
+        for color in retval:
+            retval[color].sort()
         return retval
 
     def getPiecesCount(self):

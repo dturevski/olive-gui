@@ -17,6 +17,11 @@ def module_path():
     """ This will get us the program's directory,
     even if we are frozen using py2exe or PyInstaller"""
 
+    if hasattr(sys, "frozen"):
+        exe_dir = os.path.dirname(sys.executable)
+        if os.path.exists(os.path.join(exe_dir, "yacpdb", "schemas")):
+            return exe_dir
+
     if hasattr(sys, '_MEIPASS'):
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         return sys._MEIPASS
