@@ -12,14 +12,19 @@ Olive is named after the fictional character Olive Oyl, girlfriend of Popeye the
 
 ### Installing from Git (Windows/Linux/MacOS)
 
-The prerequisites are Python3 (with pip), git and make. Clone the repository and from the repository
-root run
-
-`sudo make dependencies`
-
-`make resources.py`
-
-Then olive can be started with
+The prerequisites are Python3 (with pip), git and make. Clone the repository and create a virtual environment:
+```
+git clone https://github.com/dturevski/olive-gui.git
+cd olive-gui
+python3 -m venv venv
+source venv/bin/activate
+```
+Then
+```
+make dependencies
+make resources.py
+```
+Then start olive with
 
 `python3 olive.py`
 
