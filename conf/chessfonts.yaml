@@ -9,6 +9,10 @@ config:
     prefix: GC2004
     empty-squares: {light: 79, dark: 80}
     edges: {W: 78, NW: 75, N: 76, NE: 77, E: 81, SE: 84, S: 83, SW: 82}
+    edge-labels: {
+       ranks: [211, 210, 209, 208, 207, 206, 205, 204],
+       files: [230, 231, 232, 233, 234, 235, 236, 237]
+    }
     aux-postfix: y
     glyphs-tab: :/fonts/xfen.txt
     size: 8

@@ -20,7 +20,8 @@ FANCY_PIECES = [
 ]
 FANCY_SPECS = ['Chameleon', 'Jigger', 'Kamikaze', 'Paralysing',
                'Royal', 'Volage', 'Beamtet', 'Functionary', 'HalfNeutral',
-               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable']
+               'HurdleColourChanging', 'Protean', 'Magic', 'Uncapturable',
+               'Bul', 'Dob', 'Anda', 'AndaInverse', 'AliceB']
 
 
 def fancyCodeToPiece(code):
@@ -73,7 +74,7 @@ def parseConditions(words):
 
 def isConditionStartWord(word):
     word = word.lower()
-    for c in model.FairyHelper.conditions:
+    for c in model.FairyHelper.instance.conditions:
         if len(c) >= len(word) and word == (c[0:len(word)]).lower():
             return True
     return False

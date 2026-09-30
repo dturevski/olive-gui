@@ -151,7 +151,7 @@ def parse_ply(text, side_to_move):
                 :3]))
 
 
-def create_input(problem, sstip, sticky, pieces_clause, is_py_option):
+def create_input(problem, sstip, sticky, pieces_clause, fairy_helper):
     lines = ["BeginProblem"]
     # stipulation
     if 'stipulation' in problem:
@@ -163,8 +163,10 @@ def create_input(problem, sstip, sticky, pieces_clause, is_py_option):
         for option in problem['options']:
             if option in options:
                 continue
-            elif is_py_option(option):
+            elif fairy_helper.is_popeye_option(option):
                 options.append(option)
+            elif fairy_helper.is_special_condition(option):
+                pieces_clause = fairy_helper.handle_special_condition(option, pieces_clause)
             else:
                 conditions.append(option)
     if len(options) > 0:

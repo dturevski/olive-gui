@@ -320,8 +320,8 @@ class ExportDocument:
                 glyph = board.board[i].toFen(overridden_glyphs)
                 if len(glyph) > 1:
                     glyph = glyph[1:-1]
-                font = model.FairyHelper.fontinfo[glyph]['family']
-                char = model.FairyHelper.to_html(glyph, i, board.board[i].specs)
+                font = model.FairyHelper.instance.fontinfo[glyph]['family']
+                char = model.FairyHelper.instance.to_html(glyph, i, board.board[i].specs)
             row.append(getPieceParagraph(font, char))
             if i % 8 == 7:
                 row.append(ExportDocument.rightBorder)

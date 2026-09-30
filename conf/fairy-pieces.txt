@@ -45,11 +45,13 @@ dk	doublerookhopper	r1
 do	dolphin	q3			grasshopper + kangaroo
 dr	dragon				
 ds	("Diagonalspiralspringer")				
-du	dummy				
+du	dummy	o
 ea	eagle	q3			Moves like a Grasshopper, but deflects 90° either way on passing over the hurdle. The arrival square is adjacent to the hurdle.
+ee	eagle equihopper	q3
 eh	edgehog	q1			
 ek	erlking				
 em	empress				
+en	eagle nonstop equihopper	q3
 eq	equihopper	e	d		
 et	elephant				0,1+1,1+1,2 rider
 f	friend	o			Dummy piece which, when it is controlled, moves only like the controlling unit(s).
@@ -134,6 +136,7 @@ s2	(2,0)-Zigzag Nightrider	s2			(e.g. a1-b3-c1-d3-e1...)
 s3	(3,3)-Zigzag Nightrider	s2			(e.g. a1-b3-d4-e6-g7...)
 s4	(4,0)-Zigzag Nightrider	s2			(e.g. a1-c2-e1-g2...)
 sa	saltador	s3		
+sc	scarabeus	a
 se	senora	q3
 sh	ship				
 si	sirene	q3			
