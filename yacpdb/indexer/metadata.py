@@ -16,7 +16,7 @@ class PredicateStorage:
         'COLOR': Domain('COLOR', '[wbn]'),
         'DATE': Domain('DATE', r'[0-9]{4}(\-[0-9]{2}(\-[0-9]{2})?)?'),
         'INTEGER': Domain('INTEGER', '[0-9]+'),
-        'REFTYPE': Domain('REFTYPE', 'author|judge|source|reprint|tourney|keyword'),
+        'REFTYPE': Domain('REFTYPE', 'author|judge|versionist|corrector|source|reprint|tourney|keyword'),
         'TRANSFORMATIONS': Domain('TRANSFORMATIONS', 'All|Mirror|None'),
         'PIECENAME': Domain('PIECENAME', '[0-9A-Z][0-9A-Z]?'),
         'PIECE': Domain('PIECE', '[wbn][0-9A-Z][0-9A-Z]?'),
@@ -230,8 +230,9 @@ class Author(Predicate):
 
     def sql(self, params, cmp, ord):
         return Query(
-            "p2.id in (select problem_id from entities_to_problems e2p join entities e on (e2p.entity_id = e.entity_id) " +
-            "where e.name like %s and e2p.link_type='author') ",
+            "p2.id in (select e2p.problem_id from entities_to_problems e2p "
+            "join entities e on e.entity_id=e2p.entity_id "
+            "where e.type='person' and e.name like %s)",
             [params[0]], []
         )
 
