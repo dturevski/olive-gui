@@ -18,7 +18,8 @@ import requests
 # local
 import board
 import chest
-from conf import Conf
+from conf import Conf, ConfigurationError
+from configuration import ConfigurationController, format_errors
 import fancy
 from lang import Lang
 import legacy.chess
@@ -104,6 +105,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         self.initLayout()
         self.initActions()
+        self.configuration = ConfigurationController(self)
         self.initMenus()
         self.initToolbar()
         self.initSignals()
@@ -360,6 +362,7 @@ class Mainframe(QtWidgets.QMainWindow):
                   self.saveAsAction,
                   self.saveTemplateAction]))
         self.fileMenu.addSeparator()
+        self.configurationMenu = self.configuration.add_menu(self.fileMenu)
         self.langMenu = self.fileMenu.addMenu(QtGui.QIcon(':/icons/translate.svg'),
                                               Lang.value('MI_Language'))
         list(map(self.langMenu.addAction, self.langActions))
@@ -428,7 +431,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
-        self.toolbar.addSeparator()
+        self.quickOptionsAnchor = self.toolbar.addSeparator()
         self.createTransformActions()
 
     def initSignals(self):
@@ -562,6 +565,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         # menus
         self.fileMenu.setTitle(Lang.value('MI_File'))
+        self.configuration.retranslate()
         self.langMenu.setTitle(Lang.value('MI_Language'))
         self.editMenu.setTitle(Lang.value('MI_Edit'))
         self.popeyeMenu.setTitle(Lang.value('MI_Popeye'))
@@ -890,6 +894,79 @@ class Mainframe(QtWidgets.QMainWindow):
 
         return callable
 
+    def validateConfiguration(self, name, values):
+        if name != 'values':
+            return
+        for language in values['languages']:
+            if any(language not in translations for translations in Lang.values.values()):
+                raise ConfigurationError('CFG_Translation_missing', language)
+        try:
+            for row in values['fairy-zoo']:
+                for declaration in row:
+                    if declaration:
+                        piece = model.Piece.fromAlgebraic(declaration)
+                        if piece.color not in ('white', 'black', 'neutral'):
+                            raise ConfigurationError('CFG_Zoo_piece', declaration)
+                        glyph = ChessBoxItem.getShortGlyph(piece)
+                        model.FairyHelper.instance.fontinfo[glyph]['family']
+        except (KeyError, ValueError, IndexError, AttributeError) as error:
+            raise ConfigurationError('CFG_Zoo_piece', declaration) from error
+
+    def applyConfiguration(self, changed, previous):
+        if 'values' in changed:
+            Mainframe.fontSize = Conf.values.get('font-size', 24)
+            for font in Mainframe.fonts['normal'].values():
+                font.setPointSize(Mainframe.fontSize)
+            self.chessBox.changeZoo(Conf.value('fairy-zoo'))
+            self.chessBox.updateXFenOverrides()
+            for item in self.chessBox.findChildren(ChessBoxItem):
+                item.changePiece(item.piece)
+            self.langMenu.clear()
+            for action in self.langActions:
+                action.deleteLater()
+            self.langActions = []
+            Lang.current = Conf.value('default-lang')
+            for key, label in sorted(Conf.value('languages').items()):
+                action = QtWidgets.QAction(QtGui.QIcon(':/icons/lang/' + key + '.svg'), label, self)
+                action.setCheckable(True)
+                action.setChecked(key == Lang.current)
+                action.triggered.connect(self.makeSetNewLang(key))
+                self.langActions.append(action)
+                self.langMenu.addAction(action)
+            Mainframe.sigWrapper.sigLangChanged.emit()
+            old = self.quickOptionsView
+            Mainframe.sigWrapper.sigModelChanged.disconnect(old.onModelChanged)
+            # Keep the quick options at their original place in the toolbar.
+            for action in old.actions:
+                self.toolbar.removeAction(action)
+                action.deleteLater()
+            self.quickOptionsView = QuickOptionsView(self)
+            for action in self.quickOptionsView.actions:
+                self.toolbar.insertAction(self.quickOptionsAnchor, action)
+            self.quickOptionsView.onModelChanged()
+            self.updateTitle()
+            # Repaint without emitting model changes (which regenerate solver input).
+            for view in self.findChildren(BoardView):
+                view.onModelChanged()
+            self.fenView.onModelChanged()
+        if 'popeye' in changed:
+            old_input = self.popeyeView.generatedInput(previous['popeye']['sticky-options'])
+            if self.popeyeView.input.toPlainText() == old_input:
+                self.popeyeView.input.setPlainText(self.popeyeView.generatedInput())
+            widget = self.popeyeView.inputPyPath
+            widget.value = Conf.popeye['path']
+            widget.setText(widget.value)
+            blocker = QtCore.QSignalBlocker(self.popeyeView.inputMemory)
+            self.popeyeView.inputMemory.setText(str(Conf.popeye['memory']))
+            del blocker
+        if 'chest' in changed:
+            widget = self.chestView.inputChestPath
+            widget.value = Conf.chest['path']
+            widget.setText(widget.value)
+            blocker = QtCore.QSignalBlocker(self.chestView.inputOptions)
+            self.chestView.inputOptions.setText(Conf.chest['options'])
+            del blocker
+
     def closeEvent(self, event):
         if not self.doDirtyCheck():
             event.ignore()
@@ -906,7 +983,11 @@ class Mainframe(QtWidgets.QMainWindow):
             self.entryList.getColumnWidths())
 
         self.chessBox.sync()
-        Conf.write()
+        errors = Conf.write(self.validateConfiguration)
+        if errors:
+            QtWidgets.QMessageBox.warning(
+                self, Lang.value('MI_Configuration'),
+                Lang.value('MSG_Configuration_save_failed') + '\n\n' + format_errors(errors))
         event.accept()
 
     def onAxr(self):
@@ -979,10 +1060,8 @@ class QuickOptionsView():  # for clarity this View is not a widget
         if self.skipModelChanged:
             return
 
-        for i, o in enumerate(Conf.value("popeye-toolbar-options")):
-            if o['enabled']:
-                self.actions[i].setChecked('options' in Mainframe.model.cur()
-                                           and o['option'] in Mainframe.model.cur()['options'])
+        for action in self.actions:
+            action.setChecked(action.text() in Mainframe.model.cur().get('options', []))
 
 
 class AboutDialog(QtWidgets.QDialog):
@@ -2448,7 +2527,7 @@ class PopeyeView(QtWidgets.QSplitter):
 
     def logPopeyeCommunication(self, text):
         try:
-            file = Conf.popeye['comlog']
+            file = getattr(self, 'runConfiguration', Conf.popeye)['comlog']
             if file:
                 with open(file, "a") as f:
                     f.write(text)
@@ -2456,6 +2535,7 @@ class PopeyeView(QtWidgets.QSplitter):
             pass
 
     def runPopeyeInGui(self, input):
+        self.runConfiguration = copy.deepcopy(Conf.popeye)
         self.setActionEnabled(False)
 
         self.reset()
@@ -2492,14 +2572,14 @@ class PopeyeView(QtWidgets.QSplitter):
             pass
         self.setActionEnabled(True)
         if not self.stop_requested:
-            msgBox(Lang.value('MSG_Popeye_failed') % Conf.popeye['path'])
+            msgBox(Lang.value('MSG_Popeye_failed') % self.runConfiguration['path'])
 
     def onOut(self):
         data = bytes(self.process.readAllStandardOutput()).decode("utf8")
         self.logPopeyeCommunication(data)
         self.raw_output += data
         self.output.append(data)
-        if len(self.raw_output) > int(Conf.popeye['stop-max-bytes']):
+        if len(self.raw_output) > int(self.runConfiguration['stop-max-bytes']):
             self.stopPopeye()
 
     def onError(self):
@@ -2577,14 +2657,14 @@ class PopeyeView(QtWidgets.QSplitter):
 
     trimIndented = staticmethod(trimIndented)
 
+    def generatedInput(self, sticky_options=None):
+        return legacy.popeye.create_input(
+            Mainframe.model.cur(), self.sstip.isChecked(),
+            copy.deepcopy(Conf.popeye['sticky-options'] if sticky_options is None else sticky_options),
+            Mainframe.model.board.toPopeyePiecesClause(), model.FairyHelper.instance)
+
     def onModelChanged(self):
-        self.input.setText(
-            legacy.popeye.create_input(
-                Mainframe.model.cur(),
-                self.sstip.isChecked(),
-                copy.deepcopy(Conf.popeye['sticky-options']),
-                Mainframe.model.board.toPopeyePiecesClause(),
-                model.FairyHelper.instance))
+        self.input.setText(self.generatedInput())
         if self.skipModelChanged:
             return
 
