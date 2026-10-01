@@ -146,7 +146,7 @@
 
     "distinction" : {
       "type": "string",
-      "pattern": "^(?i)(((Special)|([0-9]*1st)|([0-9]*2nd)|([0-9]*3rd)|([0-9]*[0456789]th)|([0-9]*1[123]th))(-(([0-9]*1st)|([0-9]*2nd)|([0-9]*3rd)|([0-9]*[0456789]th)|([0-9]*1[123]th)))? )?(Special )?((Prize)|(Place)|(HM)|(Honorable Mention)|(Commendation)|(Comm\\.)|(cm))(, .*)?$"
+      "pattern": "(?i)^(((Special)|([0-9]*1st)|([0-9]*2nd)|([0-9]*3rd)|([0-9]*[0456789]th)|([0-9]*1[123]th))(-(([0-9]*1st)|([0-9]*2nd)|([0-9]*3rd)|([0-9]*[0456789]th)|([0-9]*1[123]th)))? )?(Special )?((Prize)|(Place)|(HM)|(Honorable Mention)|(Commendation)|(Comm\\.)|(cm))(, .*)?$"
     },
 
     "award_type": {
