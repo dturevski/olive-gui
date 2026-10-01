@@ -73,6 +73,7 @@ class ChestView(QtWidgets.QSplitter):
                 self.Lang.value('TC_Chest'),
                 self.Conf.chest['path'],
                 self.onPathChanged)
+        self.inputChestPath = pathWidget
         grid.addWidget(pathWidget, row, 0, 1, 2)
         row += 1
 
