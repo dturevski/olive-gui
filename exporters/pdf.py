@@ -2,6 +2,7 @@
 
 # local
 import model
+from html import escape
 
 # 3rd party
 import reportlab.rl_config
@@ -184,9 +185,9 @@ class ExportDocument:
         if 'algebraic' in e:
             b.fromAlgebraic(e['algebraic'])
         story.append(self.getBoardTable(b, e.get('glyphs', {})))
-        s_left = ''
-        if 'stipulation' in e:
-            s_left = e['stipulation']
+        s_left = model.displayStipulation(e)
+        if e.get('non-standard-stipulation'):
+            s_left = reportlab.platypus.Paragraph(escape(s_left), self.style)
         s_middle = reportlab.platypus.Paragraph(
             '<font face="%s" size=%d>%s</font>' %
             (FONT_FAMILY,
@@ -244,6 +245,7 @@ class ExportDocument:
         if 'authors' in e:
             data['author'] = [{'name': name} for name in e['authors']]
 
+        data['attribution'] = model.attribution(e, Lang)
         if 'source' in e and 'name' in e['source']:
             source = e['source']
             data['source'] = {'name': source['name'], 'date': {}}
@@ -263,7 +265,7 @@ class ExportDocument:
             if tourney != '' and tourney != source:
                 data['award']['tourney'] = {'name': tourney}
 
-        return ExportDocument.escapeHtml(pystache.render(Conf.templates['entry-header'], data))
+        return pystache.render(Conf.templates['entry-header'], data)
     header = staticmethod(header)
 
     def solver(e, Lang):

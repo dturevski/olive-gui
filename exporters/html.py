@@ -2,9 +2,11 @@
 
 # standard
 import re
+from html import escape
 
 # local
 from model import Board
+import model
 import exporters.pdf as pdf
 
 # todo: use chevron/mustache templating (someday)
@@ -17,7 +19,10 @@ def render(entry, settings, edge_labels = False):
 
     html = pdf.ExportDocument.header(entry, settings['lang'], settings['conf'])
     html += board_to_html(board, settings['diagram_font'], entry.get('glyphs', {}), edge_labels)
-    html += entry['stipulation'] + ' ' + board.getPiecesCount() + "<br/>\n"
+    stipulation = escape(model.displayStipulation(entry))
+    if entry.get('non-standard-stipulation'):
+        stipulation = '<span title="%s">%s</span>' % (escape(entry.get('stipulation', ''), quote=True), stipulation)
+    html += stipulation + ' ' + board.getPiecesCount() + "<br/>\n"
     html += pdf.ExportDocument.solver(entry, settings['lang']) + "<br/>\n"
     html += pdf.ExportDocument.legend(board) + "<br/><br/>\n"
     if 'solution' in entry:

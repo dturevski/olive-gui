@@ -145,6 +145,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         # right pane
         self.easyEditView = MetadataView()
+        self.versionsView = VersionsView()
         self.solutionView = SolutionView()
         self.popeyeView = PopeyeView()
         self.yamlView = YamlView()
@@ -155,6 +156,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.addTab(self.popeyeView, Lang.value('TC_Popeye'))
         self.tabBar2.addTab(self.solutionView, Lang.value('TC_Solution'))
         self.tabBar2.addTab(self.easyEditView, Lang.value('TC_Edit'))
+        self.tabBar2.addTab(self.versionsView, Lang.value('TC_Versions'))
         self.tabBar2.addTab(self.yamlView, Lang.value('TC_YAML'))
         self.tabBar2.addTab(self.publishingView, Lang.value('TC_Publishing'))
         self.tabBar2.addTab(self.chestView, Lang.value('TC_Chest'))
@@ -526,10 +528,11 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.setTabText(0, Lang.value('TC_Popeye'))
         self.tabBar2.setTabText(1, Lang.value('TC_Solution'))
         self.tabBar2.setTabText(2, Lang.value('TC_Edit'))
-        self.tabBar2.setTabText(3, Lang.value('TC_YAML'))
-        self.tabBar2.setTabText(4, Lang.value('TC_Publishing'))
-        self.tabBar2.setTabText(5, Lang.value('TC_Chest'))
-        self.tabBar2.setTabText(6, Lang.value('TC_LaTeX'))
+        self.tabBar2.setTabText(3, Lang.value('TC_Versions'))
+        self.tabBar2.setTabText(4, Lang.value('TC_YAML'))
+        self.tabBar2.setTabText(5, Lang.value('TC_Publishing'))
+        self.tabBar2.setTabText(6, Lang.value('TC_Chest'))
+        self.tabBar2.setTabText(7, Lang.value('TC_LaTeX'))
 
         # actions
         self.exitAction.setText(Lang.value('MI_Exit'))
@@ -1459,6 +1462,7 @@ class BoardView(QtWidgets.QWidget):
         spacer = QtWidgets.QLabel("\xA3")
         spacer.setFont(Mainframe.fontset()['d'])
         self.labelStipulation = BoardView.StipulationLabel()
+        self.labelStipulation.setWordWrap(True)
         self.labelPiecesCount = QtWidgets.QLabel("")
         # hboxExtra.addWidget(spacer)
         hboxExtra.addWidget(self.labelStipulation)
@@ -1490,10 +1494,11 @@ class BoardView(QtWidgets.QWidget):
                 lbl.setFont(Mainframe.fontset()[model.FairyHelper.instance.fontinfo[glyph]['family']])
                 text = model.FairyHelper.instance.to_html(glyph, i, Mainframe.model.board.board[i].specs)
                 lbl.setText(text)
-        if 'stipulation' in Mainframe.model.cur():
-            self.labelStipulation.setText(Mainframe.model.cur()['stipulation'])
-        else:
-            self.labelStipulation.setText("")
+        entry = Mainframe.model.cur()
+        self.labelStipulation.setTextFormat(QtCore.Qt.PlainText)
+        self.labelStipulation.setText(model.displayStipulation(entry))
+        self.labelStipulation.setToolTip(entry.get('stipulation', '')
+                                       if entry.get('non-standard-stipulation') else '')
         self.labelPiecesCount.setText(Mainframe.model.board.getPiecesCount())
 
     class StipulationLabel(QtWidgets.QLabel):
@@ -1953,6 +1958,88 @@ class MetadataView(QtWidgets.QWidget):
         self.labelComments.setText(Lang.value('SS_Comments'))
 
 
+class VersionsView(QtWidgets.QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.skipModelChanged = False
+        grid = QtWidgets.QGridLayout()
+        self.labels, self.inputs = {}, {}
+        self.fields = (
+            ('version-of', 'EP_Version_of'),
+            ('versionists', 'EP_Versionists'),
+            ('correctors', 'EP_Correctors'),
+            ('after', 'EP_After'),
+        )
+        for row, (field, caption) in enumerate(self.fields):
+            label = QtWidgets.QLabel()
+            if field in ('versionists', 'correctors'):
+                widget = PlainTextEdit()
+            else:
+                widget = QtWidgets.QLineEdit()
+                widget.setValidator(QtGui.QRegularExpressionValidator(
+                    QtCore.QRegularExpression('[0-9]*'), widget))
+            self.labels[field], self.inputs[field] = label, widget
+            grid.addWidget(label, row, 0)
+            grid.addWidget(widget, row, 1)
+            widget.textChanged.connect(self.onChanged)
+        self.memo = QtWidgets.QLabel()
+        self.memo.setWordWrap(True)
+        grid.addWidget(self.memo, len(self.fields), 0, 1, 2)
+        grid.setRowStretch(1, 1)
+        grid.setRowStretch(2, 1)
+        grid.setColumnStretch(1, 1)
+        self.setLayout(grid)
+        self.onLangChanged()
+        Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
+
+    def onModelChanged(self):
+        if self.skipModelChanged:
+            return
+        self.skipModelChanged = True
+        try:
+            entry = Mainframe.model.cur()
+            for field, widget in self.inputs.items():
+                if field in ('versionists', 'correctors'):
+                    widget.setPlainText('\n'.join(entry.get(field, [])))
+                else:
+                    widget.setText(str(entry.get(field, '')))
+        finally:
+            self.skipModelChanged = False
+
+    def onChanged(self):
+        if self.skipModelChanged:
+            return
+        entry = Mainframe.model.cur()
+        for field, widget in self.inputs.items():
+            if field in ('versionists', 'correctors'):
+                value = model.splitAndStrip(widget.toPlainText())
+            else:
+                text = widget.text().strip()
+                # Keep any nonnumeric value loaded from a local file intact.
+                value = int(text) if text.isascii() and text.isdigit() else text
+            if value != '' and value != []:
+                entry[field] = value
+            else:
+                entry.pop(field, None)
+        self.skipModelChanged = True
+        try:
+            Mainframe.model.markDirty()
+            Mainframe.sigWrapper.sigModelChanged.emit()
+        finally:
+            self.skipModelChanged = False
+
+    def onLangChanged(self):
+        for field, caption in self.fields:
+            self.labels[field].setText(Lang.value(caption) + ':')
+            hint = Lang.value('EE_Persons_memo' if field in ('versionists', 'correctors')
+                              else 'EE_Reference_memo')
+            self.inputs[field].setPlaceholderText(hint)
+            self.inputs[field].setToolTip(hint)
+        self.memo.setText(Lang.value('EE_Versions_memo'))
+
+
 class DistinctionWidget(QtWidgets.QWidget):
     names = ['', 'Place', 'Prize', 'HM', 'Comm.']
     lang_entries = ['', 'DSTN_Place', 'DSTN_Prize', 'DSTN_HM', 'DSTN_Comm']
@@ -2321,6 +2408,13 @@ class PopeyeView(QtWidgets.QSplitter):
         grid.addWidget(self.inputIntended, row, 1)
         row += 1
 
+        self.labelNonStandardStipulation = QtWidgets.QLabel()
+        grid.addWidget(self.labelNonStandardStipulation, row, 0, 1, 2)
+        row += 1
+        self.inputNonStandardStipulation = QtWidgets.QLineEdit()
+        grid.addWidget(self.inputNonStandardStipulation, row, 0, 1, 2)
+        row += 1
+
         grid.addWidget(self.btnEdit, row, 0)
         row += 1
 
@@ -2342,15 +2436,18 @@ class PopeyeView(QtWidgets.QSplitter):
 
         self.inputIntended.textChanged.connect(self.onChanged)
         self.inputStipulation.editTextChanged.connect(self.onChanged)
+        self.inputNonStandardStipulation.textChanged.connect(self.onChanged)
 
         self.skipModelChanged = False
+        self.onLangChanged()
 
     def onChanged(self):
         if self.skipModelChanged:
             return
         Mainframe.model.cur()['stipulation'] = self.inputStipulation.currentText().strip()
         Mainframe.model.cur()['intended-solutions'] = self.inputIntended.text().strip()
-        for k in ['stipulation', 'intended-solutions']:
+        Mainframe.model.cur()['non-standard-stipulation'] = self.inputNonStandardStipulation.text().strip()
+        for k in ['stipulation', 'intended-solutions', 'non-standard-stipulation']:
             if Mainframe.model.cur()[k] == '':
                 del Mainframe.model.cur()[k]
         self.skipModelChanged = True
@@ -2608,12 +2705,17 @@ class PopeyeView(QtWidgets.QSplitter):
         else:
             self.inputIntended.setText("")
 
+        self.inputNonStandardStipulation.setText(
+            Mainframe.model.cur().get('non-standard-stipulation', ''))
+
         self.skipModelChanged = False
 
     def onLangChanged(self):
         self.labelPopeye.setText(Lang.value('TC_Popeye') + ':')
         self.labelMemory.setText(Lang.value('PS_Hashtables') + ':')
         self.labelStipulation.setText(Lang.value('EP_Stipulation') + ':')
+        self.labelNonStandardStipulation.setText(Lang.value('EP_Non_standard_stipulation') + ':')
+        self.inputNonStandardStipulation.setToolTip(Lang.value('EE_Non_standard_stipulation_memo'))
         self.labelIntended.setText(Lang.value('EP_Intended_solutions') + ':')
         self.btnEdit.setText(Lang.value('PS_Edit'))
 
@@ -2768,7 +2870,7 @@ class YamlView(QtWidgets.QTextEdit):
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
 
     def onModelChanged(self):
-        self.setText(
+        self.setPlainText(
             yaml.dump(
                 Mainframe.model.cur(),
                 encoding=None,
@@ -2886,4 +2988,3 @@ class DemoBoardToolbar(QtWidgets.QWidget):
 
     def onClose(self):
         Mainframe.sigWrapper.sigDemoModeExit.emit()
-

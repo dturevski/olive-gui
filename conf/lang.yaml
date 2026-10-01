@@ -60,6 +60,12 @@ TC_Edit:
   ru: Метаданные
   de: Metadaten
   ro: Metadate
+TC_Versions:
+  en: Versions
+  rs: Верзије
+  ru: Версии
+  de: Versionen
+  ro: Versiuni
 TC_Solution:
   en: Solution
   rs: Решење
@@ -466,6 +472,78 @@ EP_Intended_solutions_shortened:
   ro: Sol.
 
 # EE labels
+EP_Version_of:
+  en: Version of
+  rs: Верзија композиције
+  ru: Версия задачи
+  de: Version von
+  ro: Versiune a
+EP_Version:
+  en: Version
+  rs: Верзија
+  ru: Версия
+  de: Version
+  ro: Versiune
+EP_Versionists:
+  en: Versionists
+  rs: Аутори верзије
+  ru: Авторы версии
+  de: Verfasser der Version
+  ro: Autorii versiunii
+EP_Correctors:
+  en: Correctors
+  rs: Аутори исправке
+  ru: Авторы исправления
+  de: Verfasser der Korrektur
+  ro: Autorii corecției
+EP_Correction_by:
+  en: Correction by
+  rs: Исправка од
+  ru: Исправление от
+  de: Korrektur von
+  ro: Corecție de
+EP_After:
+  en: After
+  rs: По узору на
+  ru: По мотивам
+  de: Nach
+  ro: După
+CO_By:
+  en: by
+  rs: од
+  ru: от
+  de: von
+  ro: de
+EP_Non_standard_stipulation:
+  en: Non-standard stipulation
+  rs: Нестандардни услов
+  ru: Нестандартное задание
+  de: Nichtstandardforderung
+  ro: Condiție nestandard
+EE_Persons_memo:
+  en: One person per line
+  rs: Једна особа у сваком реду
+  ru: Каждый человек с новой строки
+  de: Eine Person pro Zeile
+  ro: O persoană pe linie
+EE_Reference_memo:
+  en: YACPDB ID
+  rs: YACPDB број
+  ru: Номер в YACPDB
+  de: YACPDB-ID
+  ro: ID YACPDB
+EE_Versions_memo:
+  en: "Version of: the original composition. Versionists: people responsible for this version, if different from the authors. Correctors: people responsible for a correction; a parent reference is optional. After: the composition acknowledged as inspiration. References are YACPDB IDs and are not checked online. For YACPDB submission, versionists require a Version of reference."
+  rs: "Верзија композиције: изворна композиција. Аутори верзије: особе одговорне за верзију, ако се разликују од аутора. Аутори исправке: особе одговорне за исправку; веза са изворном композицијом није обавезна. По узору на: композиција наведена као инспирација. Везе су YACPDB бројеви и не проверавају се на мрежи. За слање у YACPDB, аутори верзије захтевају везу са изворном композицијом."
+  ru: "Версия задачи: исходная композиция. Авторы версии: создатели версии, если они отличаются от авторов. Авторы исправления: создатели исправления; ссылка на исходную задачу необязательна. По мотивам: композиция, указанная как источник вдохновения. Ссылки — номера в YACPDB, без проверки в сети. Для отправки в YACPDB авторам версии нужна ссылка на исходную задачу."
+  de: "Version von: die ursprüngliche Komposition. Verfasser der Version: Personen, die diese Version erstellt haben, falls sie sich von den Autoren unterscheiden. Verfasser der Korrektur: Personen, die eine Korrektur erstellt haben; ein Verweis ist optional. Nach: die als Anregung genannte Komposition. Verweise sind YACPDB-IDs und werden nicht online geprüft. Für YACPDB benötigen Verfasser einer Version einen Verweis auf das Original."
+  ro: "Versiune a: compoziția originală. Autorii versiunii: persoanele responsabile pentru versiune, dacă diferă de autori. Autorii corecției: persoanele responsabile pentru o corecție; referința la original este opțională. După: compoziția menționată ca inspirație. Referințele sunt ID-uri YACPDB și nu sunt verificate online. Pentru trimiterea la YACPDB, autorii versiunii necesită o referință la original."
+EE_Non_standard_stipulation_memo:
+  en: "Actual stipulation when Popeye cannot express it. Keep a standard stipulation above for solver input. For YACPDB, use English and at most 255 characters."
+  rs: "Стварни услов када га Popeye не подржава. Задржите стандардни услов изнад за програм за решавање. За YACPDB користите енглески и највише 255 знакова."
+  ru: "Настоящее задание, если Popeye его не поддерживает. Сохраните стандартное задание выше для решателя. Для YACPDB используйте английский и не более 255 символов."
+  de: "Tatsächliche Forderung, wenn Popeye sie nicht ausdrücken kann. Die Standardforderung oben bleibt für den Löser erhalten. Für YACPDB: Englisch, höchstens 255 Zeichen."
+  ro: "Condiția reală când Popeye nu o poate exprima. Păstrați condiția standard de mai sus pentru programul de rezolvare. Pentru YACPDB: în engleză, cel mult 255 de caractere."
 EE_Authors_memo:
   en: <b>Lastname,&nbsp;Firstname</b><br/>each with a newline
   rs: <b>Презиме,&nbsp;Име</b><br/>свако у новом реду

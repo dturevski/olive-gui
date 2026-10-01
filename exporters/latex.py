@@ -22,6 +22,12 @@ def string2LaTeX(s):
 def indent(s):
     return "    " + "\n    ".join([line for line in s.splitlines(False) if line.strip() != ""]) + "\n"
 
+def text2LaTeX(text):
+    escapes = {'\\': r'\textbackslash{}', '{': r'\{', '}': r'\}',
+               '$': r'\$', '&': r'\&', '#': r'\#', '%': r'\%', '_': r'\_',
+               '^': r'\textasciicircum{}', '~': r'\textasciitilde{}'}
+    return ''.join(escapes.get(char, char) for char in text)
+
 def head():
     return ("\\documentclass{article}\n\n" +
         "\\usepackage[T2A,T1]{fontenc}\n" +
@@ -85,7 +91,9 @@ def entry(e, Lang):
         text = (text + "  \\pieces{" + pieces + "}%\n")
 
     # stipulation
-    text = text + "  \\stipulation{" + string2LaTeX(e['stipulation'])
+    stipulation = (text2LaTeX(e['non-standard-stipulation']) if e.get('non-standard-stipulation')
+                   else string2LaTeX(e.get('stipulation', '')))
+    text = text + "  \\stipulation{" + stipulation
 
     # add number of solutions
     if model.notEmpty(e, 'intended-solutions'):
@@ -117,10 +125,12 @@ def entry(e, Lang):
     # remarks = legend
     # list fairy pieces
     legend = b.getLegend(True)
-    if len(legend) != 0:
+    remarks = [text2LaTeX(line) for line in model.attributionLines(e, Lang)]
+    remarks.extend([", ".join(legend[k]) + ': ' + k for k in list(legend.keys())])
+    if remarks:
         text = (text +
             "  \\remark{%\n" + 
-            indent("\\newline\n".join([", ".join(legend[k]) + ': ' + k for k in list(legend.keys())]))
+            indent("\\newline\n".join(remarks))
             + "  }%\n")
 
     # solution
@@ -149,4 +159,3 @@ def entry(e, Lang):
 def tail():
     return ("\\putsol\n\n" +
         "\\end{document}%")
-

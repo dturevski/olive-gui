@@ -58,6 +58,34 @@ def splitAndStrip(text):
     return [x.strip() for x in str(text).split("\n") if x.strip() != '']
 
 
+def displayStipulation(entry):
+    return entry.get('non-standard-stipulation') or entry.get('stipulation', '')
+
+
+def attribution(entry, Lang):
+    details = []
+    has_version = notEmpty(entry, 'version-of')
+    if has_version or entry.get('versionists'):
+        details.append({
+            'label': Lang.value('EP_Version_of' if has_version else 'EP_Version'),
+            'reference': '>>' + str(entry['version-of']) if has_version else '',
+            'names': ' & '.join(entry.get('versionists', [])),
+            'by': Lang.value('CO_By'),
+        })
+    if notEmpty(entry, 'after'):
+        details.append({'label': Lang.value('EP_After'), 'reference': '>>' + str(entry['after'])})
+    if entry.get('correctors'):
+        details.append({'label': Lang.value('EP_Correction_by'),
+                        'names': ' & '.join(entry['correctors'])})
+    return details
+
+
+def attributionLines(entry, Lang):
+    return [' '.join(str(detail[key]) for key in ('label', 'reference', 'by', 'names')
+                     if detail.get(key) and (key != 'by' or detail.get('names')))
+            for detail in attribution(entry, Lang)]
+
+
 def formatDate(dict):
     return filterAndJoin(dict, ['year', 'month', 'day'], '/')
 
@@ -195,7 +223,7 @@ def makeSafe(e):
     if not isinstance(e, dict):
         return {}
     # string scalars
-    unquoteKeys(e, ['intended-solutions', 'stipulation', 'solution'])
+    unquoteKeys(e, ['intended-solutions', 'stipulation', 'non-standard-stipulation', 'solution'])
     # string dicts
     if 'source' in e:
         unquoteKeys(e['source'], ['name', 'issue', 'volume', 'round', 'problemid'])
@@ -204,7 +232,7 @@ def makeSafe(e):
         if 'tourney' in e['award']:
             unquoteKeys(e['award']['tourney'], ['name'])
     # string lists
-    for k in ['keywords', 'options', 'authors', 'comments']:
+    for k in ['keywords', 'options', 'authors', 'versionists', 'correctors', 'comments']:
         if k in e and isinstance(e[k], list):
             e[k] = [unquote(str(x)) for x in e[k]]
         elif k in e:
