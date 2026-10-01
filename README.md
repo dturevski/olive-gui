@@ -4,21 +4,6 @@ Olive is a free, open-source, cross-platform graphical front end for
 [Popeye](https://github.com/thomas-maeder/popeye) and
 Chest with strong support for typesetting chess diagrams and solutions.
 
-The **Versions** tab records versionists, correctors, the original composition's
-YACPDB ID (`version-of`), and an inspiration's YACPDB ID (`after`). Enter one
-person per line in any name format. Both references may coexist, and correctors
-can be entered without a parent reference. Olive saves local drafts without
-checking people or referenced compositions online. For submission to YACPDB,
-versionists require a `version-of` reference and the wiki's format rules apply.
-
-On the **Popeye** tab, **Non-standard stipulation** records the actual stipulation
-when Popeye cannot express it. It appears below the diagram (with the standard
-stipulation in a tooltip) and in publishing exports. The standard stipulation
-continues to drive solver input. YACPDB expects English text of at most 255
-characters; Olive allows longer local drafts. All these optional fields are
-preserved in `.olv` files and YAML copies.
-
-
 ## Name
 
 Olive is named after the fictional character Olive Oyl, the girlfriend of Popeye the Sailor.
