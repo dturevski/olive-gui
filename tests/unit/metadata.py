@@ -22,7 +22,8 @@ class TestPersonPredicates(unittest.TestCase):
             INSERT INTO entities_to_problems VALUES
                 (1, 1, 'author'), (2, 1, 'judge'), (3, 1, 'versionist'),
                 (4, 1, 'corrector'), (5, 1, 'author'), (5, 1, 'judge'),
-                (5, 1, 'versionist'), (5, 1, 'corrector'), (6, 2, 'source');
+                (5, 1, 'versionist'), (5, 1, 'corrector'), (6, 2, 'source'),
+                (6, 2, 'author');
         ''')
 
     def query(self, text):
@@ -51,11 +52,17 @@ class TestPersonPredicates(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.query("Entity('unknown', 'Name')")
 
-    def test_author_matches_all_person_roles_once(self):
+    def test_author_matches_included_roles_once(self):
         for name in ('Name', 'Na%', 'N_me'):
             with self.subTest(name=name):
-                self.assertEqual(self.matches("Author('%s')" % name), [1, 2, 3, 4, 5])
+                self.assertEqual(self.matches("Author('%s')" % name), [1, 3, 4, 5])
         self.assertEqual(self.matches("Author('Missing')"), [])
+
+    def test_judge_only_excluded_and_mixed_judge_author_included(self):
+        matches = self.matches("Author('Name')")
+        self.assertNotIn(2, matches)
+        self.assertIn(5, matches)
+        self.assertEqual(self.matches("Entity('judge', 'Name')"), [2, 5])
 
     def test_names_remain_bound_parameters(self):
         query = self.query('Author("Name\' OR 1=1 --%")')
@@ -66,7 +73,7 @@ class TestPersonPredicates(unittest.TestCase):
         self.assertEqual(query.preExecute, [])
 
     def test_entity_remains_role_specific(self):
-        expected = {'author': [1, 5], 'judge': [2, 5], 'versionist': [3, 5],
+        expected = {'author': [1, 5, 6], 'judge': [2, 5], 'versionist': [3, 5],
                     'corrector': [4, 5], 'source': [6]}
         for role, ids in expected.items():
             with self.subTest(role=role):
@@ -74,7 +81,7 @@ class TestPersonPredicates(unittest.TestCase):
 
     def test_legacy_data_needs_no_new_roles(self):
         self.db.execute("DELETE FROM entities_to_problems WHERE link_type IN ('versionist', 'corrector')")
-        self.assertEqual(self.matches("Author('Name')"), [1, 2, 5])
+        self.assertEqual(self.matches("Author('Name')"), [1, 5])
         for role in ('versionist', 'corrector'):
             self.assertEqual(self.matches("Entity('%s', 'Name')" % role), [])
 
@@ -84,9 +91,12 @@ class TestPersonPredicates(unittest.TestCase):
             docs = storage.getDocumentation()
             self.assertEqual(docs['Author']['declaration'], 'Author(STRING name)')
             self.assertEqual(docs['Entity']['declaration'], 'Entity(REFTYPE type, STRING name)')
-            for role in ('author', 'judge', 'versionist', 'corrector'):
+            for role in ('author', 'versionist', 'corrector'):
                 self.assertIn(role, docs['Author']['doc'])
                 self.assertTrue(storage.ds['REFTYPE'].test(role))
+            self.assertTrue(storage.ds['REFTYPE'].test('judge'))
+            self.assertIn('Judge-only links do not match', docs['Author']['doc'])
+            self.assertNotIn('any role', docs['Author']['doc'])
             self.assertIn('role-specific', docs['Entity']['doc'])
             self.assertNotIn('Same as', docs['Author']['doc'])
             self.assertIs(storage.get(1, 'Author').sql.__func__, Author.sql)

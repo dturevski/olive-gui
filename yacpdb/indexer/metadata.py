@@ -232,7 +232,8 @@ class Author(Predicate):
         return Query(
             "p2.id in (select e2p.problem_id from entities_to_problems e2p "
             "join entities e on e.entity_id=e2p.entity_id "
-            "where e.type='person' and e.name like %s)",
+            "where e.type='person' and e.name like %s "
+            "and e2p.link_type in ('author', 'versionist', 'corrector'))",
             [params[0]], []
         )
 

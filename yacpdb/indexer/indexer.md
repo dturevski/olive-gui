@@ -133,7 +133,8 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 
 * `Author(STRING name)`
 
-	Matches a person named **name** in any role: author, judge, versionist or corrector.
+	Matches a person named **name** as an author, versionist or corrector.
+	Judge-only links do not match; use `Entity("judge", name)` to search judges.
 	The name supports SQL LIKE wildcards (`%` and `_`). Each matching entry is returned
 	once even when the person has several roles. For role-specific searches, use `Entity`.
 
