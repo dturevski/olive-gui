@@ -63,9 +63,35 @@ pattern: "Family name, Given names". If the authorship is unknown
 this field may be omitted, usage of the names like "Unknown" and
 "Anonymous" should be avoided. 
 
+### version-of:, versionists: 
+```yaml
+    version-of: 347013
+    versionists: 
+      - Buchanan, Andrew
+```
+In case when a composition is a version of another composition, this prior
+composition's YACPDB ID can be supplied in the `version-of` field. Additionally, if the
+version is by someone other than the original authors, the `versionists` can be listed in
+the same format as `authors`.
+
+### after: 
+```yaml
+    after: 347013
+```
+If the original publication references the source of inspiration in the "After NN, 19XX"
+format or similar and the YACPDB ID of the referenced composition is known, the ID can be
+supplied in the `after` field.
+
+### correctors: 
+```yaml
+    correctors: 
+      - Buchanan, Andrew
+```
+Same logic as for `versionists`, except the `version-of` reference to the incorrect entry is optional. 
+
 ### source:
 This is a collection of fields that reference the exact original publication source
-of the composition. May be omitted if the source is unknown.
+of the composition or version. May be omitted if the source is unknown.
 ```yaml
     name: Source name as on the cover
     volume: 2 # in case of multi volume publication
@@ -130,8 +156,6 @@ variant in the Good Companion's fonts file.
 
 [Supported pre-rendered glyphs](../../resources/fonts/gc2.gif)
 
-
-
 ### stipulation:
 ```yaml
     stipulation: h#4
@@ -173,6 +197,31 @@ When authors intended more than one solution to their problem, this can be indic
 using one of these three example formats.
 
 
+### non-standard-stipulation:
+```yaml
+    stipulation: ~1
+    non-standard-stipulation: Last move?
+```
+```yaml
+    stipulation: "#1"
+    non-standard-stipulation: "Proca -9 & #1"
+```
+This field should be used to indicate that the actual stipulation is not supported by Popeye. 
+The `stipulation` field is still required in this case (use the best judgement, in the case of 
+`Last move?` the solver is asked to play any legal move `~1` by retraction rules).
+Non standard stipulations are limited to 255 characters and should be in English.
+Their usage requires good level of familiarity with Popeye capabilities, for example:
+```yaml
+    stipulation: "#2"
+    # incorrect:
+    non-standard-stipulation: "#2 promotions to Nightrider allowed"
+    # correct:
+    options:
+      - PromOnly Q R B S N
+```
+This field is not intended for mottoes, dedications, hints for solver or other `comments`.
+
+
 ### solution:
 The solution to the problem in the Popeye output format with optional comments in curly braces
 ```yaml
@@ -194,8 +243,6 @@ Multiple comments are allowed:
     solution: |
       1.Sa1-c2! {display-departure-file} {some meaningful comment here}
 ```
-
-
 
 ### keywords:
 A list of applicable keywords:

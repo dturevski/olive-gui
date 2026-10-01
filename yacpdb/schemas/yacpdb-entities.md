@@ -19,7 +19,7 @@ formal [JSON schema](https://json-schema.org/)s for each of the entity types can
 Below is informal documentation-by-example.
 
 ## Person
-A composition can reference a **person** as an author or as a judge (who awarded the distinction).
+A composition can reference a **person** as an author, versionist, corrector or as a judge (who awarded the distinction).
 ```yaml
 familyname: Петков
 givennames: Петко Андонов

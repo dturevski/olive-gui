@@ -18,7 +18,8 @@ import requests
 # local
 import board
 import chest
-from conf import Conf
+from conf import Conf, ConfigurationError
+from configuration import ConfigurationController, format_errors
 import fancy
 from lang import Lang
 import legacy.chess
@@ -104,6 +105,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         self.initLayout()
         self.initActions()
+        self.configuration = ConfigurationController(self)
         self.initMenus()
         self.initToolbar()
         self.initSignals()
@@ -145,6 +147,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         # right pane
         self.easyEditView = MetadataView()
+        self.versionsView = VersionsView()
         self.solutionView = SolutionView()
         self.popeyeView = PopeyeView()
         self.yamlView = YamlView()
@@ -155,6 +158,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.addTab(self.popeyeView, Lang.value('TC_Popeye'))
         self.tabBar2.addTab(self.solutionView, Lang.value('TC_Solution'))
         self.tabBar2.addTab(self.easyEditView, Lang.value('TC_Edit'))
+        self.tabBar2.addTab(self.versionsView, Lang.value('TC_Versions'))
         self.tabBar2.addTab(self.yamlView, Lang.value('TC_YAML'))
         self.tabBar2.addTab(self.publishingView, Lang.value('TC_Publishing'))
         self.tabBar2.addTab(self.chestView, Lang.value('TC_Chest'))
@@ -360,6 +364,7 @@ class Mainframe(QtWidgets.QMainWindow):
                   self.saveAsAction,
                   self.saveTemplateAction]))
         self.fileMenu.addSeparator()
+        self.configurationMenu = self.configuration.add_menu(self.fileMenu)
         self.langMenu = self.fileMenu.addMenu(QtGui.QIcon(':/icons/translate.svg'),
                                               Lang.value('MI_Language'))
         list(map(self.langMenu.addAction, self.langActions))
@@ -428,7 +433,7 @@ class Mainframe(QtWidgets.QMainWindow):
         self.toolbar.addSeparator()
         self.quickOptionsView = QuickOptionsView(self)
         self.quickOptionsView.embedTo(self.toolbar)
-        self.toolbar.addSeparator()
+        self.quickOptionsAnchor = self.toolbar.addSeparator()
         self.createTransformActions()
 
     def initSignals(self):
@@ -526,10 +531,11 @@ class Mainframe(QtWidgets.QMainWindow):
         self.tabBar2.setTabText(0, Lang.value('TC_Popeye'))
         self.tabBar2.setTabText(1, Lang.value('TC_Solution'))
         self.tabBar2.setTabText(2, Lang.value('TC_Edit'))
-        self.tabBar2.setTabText(3, Lang.value('TC_YAML'))
-        self.tabBar2.setTabText(4, Lang.value('TC_Publishing'))
-        self.tabBar2.setTabText(5, Lang.value('TC_Chest'))
-        self.tabBar2.setTabText(6, Lang.value('TC_LaTeX'))
+        self.tabBar2.setTabText(3, Lang.value('TC_Versions'))
+        self.tabBar2.setTabText(4, Lang.value('TC_YAML'))
+        self.tabBar2.setTabText(5, Lang.value('TC_Publishing'))
+        self.tabBar2.setTabText(6, Lang.value('TC_Chest'))
+        self.tabBar2.setTabText(7, Lang.value('TC_LaTeX'))
 
         # actions
         self.exitAction.setText(Lang.value('MI_Exit'))
@@ -562,6 +568,7 @@ class Mainframe(QtWidgets.QMainWindow):
 
         # menus
         self.fileMenu.setTitle(Lang.value('MI_File'))
+        self.configuration.retranslate()
         self.langMenu.setTitle(Lang.value('MI_Language'))
         self.editMenu.setTitle(Lang.value('MI_Edit'))
         self.popeyeMenu.setTitle(Lang.value('MI_Popeye'))
@@ -890,6 +897,79 @@ class Mainframe(QtWidgets.QMainWindow):
 
         return callable
 
+    def validateConfiguration(self, name, values):
+        if name != 'values':
+            return
+        for language in values['languages']:
+            if any(language not in translations for translations in Lang.values.values()):
+                raise ConfigurationError('CFG_Translation_missing', language)
+        try:
+            for row in values['fairy-zoo']:
+                for declaration in row:
+                    if declaration:
+                        piece = model.Piece.fromAlgebraic(declaration)
+                        if piece.color not in ('white', 'black', 'neutral'):
+                            raise ConfigurationError('CFG_Zoo_piece', declaration)
+                        glyph = ChessBoxItem.getShortGlyph(piece)
+                        model.FairyHelper.instance.fontinfo[glyph]['family']
+        except (KeyError, ValueError, IndexError, AttributeError) as error:
+            raise ConfigurationError('CFG_Zoo_piece', declaration) from error
+
+    def applyConfiguration(self, changed, previous):
+        if 'values' in changed:
+            Mainframe.fontSize = Conf.values.get('font-size', 24)
+            for font in Mainframe.fonts['normal'].values():
+                font.setPointSize(Mainframe.fontSize)
+            self.chessBox.changeZoo(Conf.value('fairy-zoo'))
+            self.chessBox.updateXFenOverrides()
+            for item in self.chessBox.findChildren(ChessBoxItem):
+                item.changePiece(item.piece)
+            self.langMenu.clear()
+            for action in self.langActions:
+                action.deleteLater()
+            self.langActions = []
+            Lang.current = Conf.value('default-lang')
+            for key, label in sorted(Conf.value('languages').items()):
+                action = QtWidgets.QAction(QtGui.QIcon(':/icons/lang/' + key + '.svg'), label, self)
+                action.setCheckable(True)
+                action.setChecked(key == Lang.current)
+                action.triggered.connect(self.makeSetNewLang(key))
+                self.langActions.append(action)
+                self.langMenu.addAction(action)
+            Mainframe.sigWrapper.sigLangChanged.emit()
+            old = self.quickOptionsView
+            Mainframe.sigWrapper.sigModelChanged.disconnect(old.onModelChanged)
+            # Keep the quick options at their original place in the toolbar.
+            for action in old.actions:
+                self.toolbar.removeAction(action)
+                action.deleteLater()
+            self.quickOptionsView = QuickOptionsView(self)
+            for action in self.quickOptionsView.actions:
+                self.toolbar.insertAction(self.quickOptionsAnchor, action)
+            self.quickOptionsView.onModelChanged()
+            self.updateTitle()
+            # Repaint without emitting model changes (which regenerate solver input).
+            for view in self.findChildren(BoardView):
+                view.onModelChanged()
+            self.fenView.onModelChanged()
+        if 'popeye' in changed:
+            old_input = self.popeyeView.generatedInput(previous['popeye']['sticky-options'])
+            if self.popeyeView.input.toPlainText() == old_input:
+                self.popeyeView.input.setPlainText(self.popeyeView.generatedInput())
+            widget = self.popeyeView.inputPyPath
+            widget.value = Conf.popeye['path']
+            widget.setText(widget.value)
+            blocker = QtCore.QSignalBlocker(self.popeyeView.inputMemory)
+            self.popeyeView.inputMemory.setText(str(Conf.popeye['memory']))
+            del blocker
+        if 'chest' in changed:
+            widget = self.chestView.inputChestPath
+            widget.value = Conf.chest['path']
+            widget.setText(widget.value)
+            blocker = QtCore.QSignalBlocker(self.chestView.inputOptions)
+            self.chestView.inputOptions.setText(Conf.chest['options'])
+            del blocker
+
     def closeEvent(self, event):
         if not self.doDirtyCheck():
             event.ignore()
@@ -906,7 +986,11 @@ class Mainframe(QtWidgets.QMainWindow):
             self.entryList.getColumnWidths())
 
         self.chessBox.sync()
-        Conf.write()
+        errors = Conf.write(self.validateConfiguration)
+        if errors:
+            QtWidgets.QMessageBox.warning(
+                self, Lang.value('MI_Configuration'),
+                Lang.value('MSG_Configuration_save_failed') + '\n\n' + format_errors(errors))
         event.accept()
 
     def onAxr(self):
@@ -979,10 +1063,8 @@ class QuickOptionsView():  # for clarity this View is not a widget
         if self.skipModelChanged:
             return
 
-        for i, o in enumerate(Conf.value("popeye-toolbar-options")):
-            if o['enabled']:
-                self.actions[i].setChecked('options' in Mainframe.model.cur()
-                                           and o['option'] in Mainframe.model.cur()['options'])
+        for action in self.actions:
+            action.setChecked(action.text() in Mainframe.model.cur().get('options', []))
 
 
 class AboutDialog(QtWidgets.QDialog):
@@ -1459,6 +1541,7 @@ class BoardView(QtWidgets.QWidget):
         spacer = QtWidgets.QLabel("\xA3")
         spacer.setFont(Mainframe.fontset()['d'])
         self.labelStipulation = BoardView.StipulationLabel()
+        self.labelStipulation.setWordWrap(True)
         self.labelPiecesCount = QtWidgets.QLabel("")
         # hboxExtra.addWidget(spacer)
         hboxExtra.addWidget(self.labelStipulation)
@@ -1490,10 +1573,11 @@ class BoardView(QtWidgets.QWidget):
                 lbl.setFont(Mainframe.fontset()[model.FairyHelper.instance.fontinfo[glyph]['family']])
                 text = model.FairyHelper.instance.to_html(glyph, i, Mainframe.model.board.board[i].specs)
                 lbl.setText(text)
-        if 'stipulation' in Mainframe.model.cur():
-            self.labelStipulation.setText(Mainframe.model.cur()['stipulation'])
-        else:
-            self.labelStipulation.setText("")
+        entry = Mainframe.model.cur()
+        self.labelStipulation.setTextFormat(QtCore.Qt.PlainText)
+        self.labelStipulation.setText(model.displayStipulation(entry))
+        self.labelStipulation.setToolTip(entry.get('stipulation', '')
+                                       if entry.get('non-standard-stipulation') else '')
         self.labelPiecesCount.setText(Mainframe.model.board.getPiecesCount())
 
     class StipulationLabel(QtWidgets.QLabel):
@@ -1953,6 +2037,88 @@ class MetadataView(QtWidgets.QWidget):
         self.labelComments.setText(Lang.value('SS_Comments'))
 
 
+class VersionsView(QtWidgets.QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.skipModelChanged = False
+        grid = QtWidgets.QGridLayout()
+        self.labels, self.inputs = {}, {}
+        self.fields = (
+            ('version-of', 'EP_Version_of'),
+            ('versionists', 'EP_Versionists'),
+            ('correctors', 'EP_Correctors'),
+            ('after', 'EP_After'),
+        )
+        for row, (field, caption) in enumerate(self.fields):
+            label = QtWidgets.QLabel()
+            if field in ('versionists', 'correctors'):
+                widget = PlainTextEdit()
+            else:
+                widget = QtWidgets.QLineEdit()
+                widget.setValidator(QtGui.QRegularExpressionValidator(
+                    QtCore.QRegularExpression('[0-9]*'), widget))
+            self.labels[field], self.inputs[field] = label, widget
+            grid.addWidget(label, row, 0)
+            grid.addWidget(widget, row, 1)
+            widget.textChanged.connect(self.onChanged)
+        self.memo = QtWidgets.QLabel()
+        self.memo.setWordWrap(True)
+        grid.addWidget(self.memo, len(self.fields), 0, 1, 2)
+        grid.setRowStretch(1, 1)
+        grid.setRowStretch(2, 1)
+        grid.setColumnStretch(1, 1)
+        self.setLayout(grid)
+        self.onLangChanged()
+        Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
+        Mainframe.sigWrapper.sigLangChanged.connect(self.onLangChanged)
+
+    def onModelChanged(self):
+        if self.skipModelChanged:
+            return
+        self.skipModelChanged = True
+        try:
+            entry = Mainframe.model.cur()
+            for field, widget in self.inputs.items():
+                if field in ('versionists', 'correctors'):
+                    widget.setPlainText('\n'.join(entry.get(field, [])))
+                else:
+                    widget.setText(str(entry.get(field, '')))
+        finally:
+            self.skipModelChanged = False
+
+    def onChanged(self):
+        if self.skipModelChanged:
+            return
+        entry = Mainframe.model.cur()
+        for field, widget in self.inputs.items():
+            if field in ('versionists', 'correctors'):
+                value = model.splitAndStrip(widget.toPlainText())
+            else:
+                text = widget.text().strip()
+                # Keep any nonnumeric value loaded from a local file intact.
+                value = int(text) if text.isascii() and text.isdigit() else text
+            if value != '' and value != []:
+                entry[field] = value
+            else:
+                entry.pop(field, None)
+        self.skipModelChanged = True
+        try:
+            Mainframe.model.markDirty()
+            Mainframe.sigWrapper.sigModelChanged.emit()
+        finally:
+            self.skipModelChanged = False
+
+    def onLangChanged(self):
+        for field, caption in self.fields:
+            self.labels[field].setText(Lang.value(caption) + ':')
+            hint = Lang.value('EE_Persons_memo' if field in ('versionists', 'correctors')
+                              else 'EE_Reference_memo')
+            self.inputs[field].setPlaceholderText(hint)
+            self.inputs[field].setToolTip(hint)
+        self.memo.setText(Lang.value('EE_Versions_memo'))
+
+
 class DistinctionWidget(QtWidgets.QWidget):
     names = ['', 'Place', 'Prize', 'HM', 'Comm.']
     lang_entries = ['', 'DSTN_Place', 'DSTN_Prize', 'DSTN_HM', 'DSTN_Comm']
@@ -2321,6 +2487,13 @@ class PopeyeView(QtWidgets.QSplitter):
         grid.addWidget(self.inputIntended, row, 1)
         row += 1
 
+        self.labelNonStandardStipulation = QtWidgets.QLabel()
+        grid.addWidget(self.labelNonStandardStipulation, row, 0, 1, 2)
+        row += 1
+        self.inputNonStandardStipulation = QtWidgets.QLineEdit()
+        grid.addWidget(self.inputNonStandardStipulation, row, 0, 1, 2)
+        row += 1
+
         grid.addWidget(self.btnEdit, row, 0)
         row += 1
 
@@ -2342,15 +2515,18 @@ class PopeyeView(QtWidgets.QSplitter):
 
         self.inputIntended.textChanged.connect(self.onChanged)
         self.inputStipulation.editTextChanged.connect(self.onChanged)
+        self.inputNonStandardStipulation.textChanged.connect(self.onChanged)
 
         self.skipModelChanged = False
+        self.onLangChanged()
 
     def onChanged(self):
         if self.skipModelChanged:
             return
         Mainframe.model.cur()['stipulation'] = self.inputStipulation.currentText().strip()
         Mainframe.model.cur()['intended-solutions'] = self.inputIntended.text().strip()
-        for k in ['stipulation', 'intended-solutions']:
+        Mainframe.model.cur()['non-standard-stipulation'] = self.inputNonStandardStipulation.text().strip()
+        for k in ['stipulation', 'intended-solutions', 'non-standard-stipulation']:
             if Mainframe.model.cur()[k] == '':
                 del Mainframe.model.cur()[k]
         self.skipModelChanged = True
@@ -2448,7 +2624,7 @@ class PopeyeView(QtWidgets.QSplitter):
 
     def logPopeyeCommunication(self, text):
         try:
-            file = Conf.popeye['comlog']
+            file = getattr(self, 'runConfiguration', Conf.popeye)['comlog']
             if file:
                 with open(file, "a") as f:
                     f.write(text)
@@ -2456,6 +2632,7 @@ class PopeyeView(QtWidgets.QSplitter):
             pass
 
     def runPopeyeInGui(self, input):
+        self.runConfiguration = copy.deepcopy(Conf.popeye)
         self.setActionEnabled(False)
 
         self.reset()
@@ -2492,14 +2669,14 @@ class PopeyeView(QtWidgets.QSplitter):
             pass
         self.setActionEnabled(True)
         if not self.stop_requested:
-            msgBox(Lang.value('MSG_Popeye_failed') % Conf.popeye['path'])
+            msgBox(Lang.value('MSG_Popeye_failed') % self.runConfiguration['path'])
 
     def onOut(self):
         data = bytes(self.process.readAllStandardOutput()).decode("utf8")
         self.logPopeyeCommunication(data)
         self.raw_output += data
         self.output.append(data)
-        if len(self.raw_output) > int(Conf.popeye['stop-max-bytes']):
+        if len(self.raw_output) > int(self.runConfiguration['stop-max-bytes']):
             self.stopPopeye()
 
     def onError(self):
@@ -2577,14 +2754,14 @@ class PopeyeView(QtWidgets.QSplitter):
 
     trimIndented = staticmethod(trimIndented)
 
+    def generatedInput(self, sticky_options=None):
+        return legacy.popeye.create_input(
+            Mainframe.model.cur(), self.sstip.isChecked(),
+            copy.deepcopy(Conf.popeye['sticky-options'] if sticky_options is None else sticky_options),
+            Mainframe.model.board.toPopeyePiecesClause(), model.FairyHelper.instance)
+
     def onModelChanged(self):
-        self.input.setText(
-            legacy.popeye.create_input(
-                Mainframe.model.cur(),
-                self.sstip.isChecked(),
-                copy.deepcopy(Conf.popeye['sticky-options']),
-                Mainframe.model.board.toPopeyePiecesClause(),
-                model.FairyHelper.instance))
+        self.input.setText(self.generatedInput())
         if self.skipModelChanged:
             return
 
@@ -2608,12 +2785,17 @@ class PopeyeView(QtWidgets.QSplitter):
         else:
             self.inputIntended.setText("")
 
+        self.inputNonStandardStipulation.setText(
+            Mainframe.model.cur().get('non-standard-stipulation', ''))
+
         self.skipModelChanged = False
 
     def onLangChanged(self):
         self.labelPopeye.setText(Lang.value('TC_Popeye') + ':')
         self.labelMemory.setText(Lang.value('PS_Hashtables') + ':')
         self.labelStipulation.setText(Lang.value('EP_Stipulation') + ':')
+        self.labelNonStandardStipulation.setText(Lang.value('EP_Non_standard_stipulation') + ':')
+        self.inputNonStandardStipulation.setToolTip(Lang.value('EE_Non_standard_stipulation_memo'))
         self.labelIntended.setText(Lang.value('EP_Intended_solutions') + ':')
         self.btnEdit.setText(Lang.value('PS_Edit'))
 
@@ -2768,7 +2950,7 @@ class YamlView(QtWidgets.QTextEdit):
         Mainframe.sigWrapper.sigModelChanged.connect(self.onModelChanged)
 
     def onModelChanged(self):
-        self.setText(
+        self.setPlainText(
             yaml.dump(
                 Mainframe.model.cur(),
                 encoding=None,
@@ -2886,4 +3068,3 @@ class DemoBoardToolbar(QtWidgets.QWidget):
 
     def onClose(self):
         Mainframe.sigWrapper.sigDemoModeExit.emit()
-

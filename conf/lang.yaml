@@ -1,3 +1,178 @@
+# configuration editing
+MI_Configuration:
+  en: Configuration
+  rs: Подешавања
+  ru: Настройки
+  de: Konfiguration
+  ro: Configurare
+MI_Configuration_folder:
+  en: Open configuration folder
+  rs: Отвори фасциклу са подешавањима
+  ru: Открыть папку настроек
+  de: Konfigurationsordner öffnen
+  ro: Deschide dosarul de configurare
+MI_Configuration_reload:
+  en: Reload configuration
+  rs: Поново учитај подешавања
+  ru: Перезагрузить настройки
+  de: Konfiguration neu laden
+  ro: Reîncarcă configurația
+MSG_Configuration_open_failed:
+  en: "Could not open %s. Associate .yaml files with a text editor, or use Open configuration folder."
+  rs: "Није могуће отворити %s. Повежите .yaml датотеке са уређивачем текста или користите ставку Отвори фасциклу са подешавањима."
+  ru: "Не удалось открыть %s. Назначьте текстовый редактор для файлов .yaml или выберите «Открыть папку настроек»."
+  de: "%s konnte nicht geöffnet werden. Verknüpfen Sie .yaml-Dateien mit einem Texteditor oder wählen Sie „Konfigurationsordner öffnen“."
+  ro: "Nu s-a putut deschide %s. Asociați fișierele .yaml cu un editor de text sau folosiți Deschide dosarul de configurare."
+MSG_Configuration_not_loaded:
+  en: "Some configuration files could not be loaded; their previous settings were retained. Use File > Configuration > Reload configuration for details."
+  rs: "Неке датотеке са подешавањима нису могле бити учитане; задржана су претходна подешавања. За детаље изаберите Фајл > Подешавања > Поново учитај подешавања."
+  ru: "Не удалось загрузить некоторые файлы настроек; сохранены предыдущие значения. Подробности: Файл > Настройки > Перезагрузить настройки."
+  de: "Einige Konfigurationsdateien konnten nicht geladen werden; die bisherigen Einstellungen wurden beibehalten. Details unter Datei > Konfiguration > Konfiguration neu laden."
+  ro: "Unele fișiere de configurare nu au putut fi încărcate; setările anterioare au fost păstrate. Pentru detalii, alegeți Fișier > Configurare > Reîncarcă configurația."
+MSG_Configuration_reloaded:
+  en: Configuration reloaded.
+  rs: Подешавања су поново учитана.
+  ru: Настройки перезагружены.
+  de: Konfiguration neu geladen.
+  ro: Configurația a fost reîncărcată.
+MSG_Configuration_save_failed:
+  en: "Some GUI settings could not be saved. The affected configuration files were left intact:"
+  rs: "Нека подешавања из интерфејса нису могла бити сачувана. Одговарајуће датотеке са подешавањима нису измењене:"
+  ru: "Не удалось сохранить некоторые настройки интерфейса. Соответствующие файлы настроек оставлены без изменений:"
+  de: "Einige Einstellungen der Benutzeroberfläche konnten nicht gespeichert werden. Die betroffenen Konfigurationsdateien blieben unverändert:"
+  ro: "Unele setări din interfață nu au putut fi salvate. Fișierele de configurare afectate au rămas nemodificate:"
+CFG_Expected_mapping:
+  en: Expected a YAML mapping of keys to values.
+  rs: Очекује се YAML мапа кључева и вредности.
+  ru: Ожидается YAML-словарь ключей и значений.
+  de: Eine YAML-Zuordnung von Schlüsseln zu Werten wird erwartet.
+  ro: Se așteaptă o mapare YAML de chei la valori.
+CFG_Field_type:
+  en: "%s: missing or incorrect type."
+  rs: "%s: недостаје или је погрешног типа."
+  ru: "%s: отсутствует или имеет неверный тип."
+  de: "%s: fehlt oder hat den falschen Typ."
+  ro: "%s: lipsește sau are un tip incorect."
+CFG_Positive_integer:
+  en: "%s must be a positive integer."
+  rs: "%s мора бити позитиван цео број."
+  ru: "%s должно быть положительным целым числом."
+  de: "%s muss eine positive ganze Zahl sein."
+  ro: "%s trebuie să fie un număr întreg pozitiv."
+CFG_String_list:
+  en: "%s must contain strings."
+  rs: "%s мора садржати текстуалне вредности."
+  ru: "%s должно содержать строки."
+  de: "%s muss Zeichenketten enthalten."
+  ro: "%s trebuie să conțină șiruri de caractere."
+CFG_Font_size:
+  en: font-size must be an integer between 1 and 200.
+  rs: font-size мора бити цео број између 1 и 200.
+  ru: font-size должно быть целым числом от 1 до 200.
+  de: font-size muss eine ganze Zahl zwischen 1 und 200 sein.
+  ro: font-size trebuie să fie un număr întreg între 1 și 200.
+CFG_String_mapping:
+  en: "%s must map names to strings."
+  rs: "%s мора повезивати називе са текстуалним вредностима."
+  ru: "%s должно сопоставлять названия со строками."
+  de: "%s muss Namen Zeichenketten zuordnen."
+  ro: "%s trebuie să asocieze nume cu șiruri de caractere."
+CFG_Unknown_value:
+  en: "Unknown value for %s."
+  rs: "Непозната вредност за %s."
+  ru: "Неизвестное значение %s."
+  de: "Unbekannter Wert für %s."
+  ro: "Valoare necunoscută pentru %s."
+CFG_Required_notations:
+  en: notations must include en and the value of default-notation.
+  rs: notations мора садржати en и вредност default-notation.
+  ru: notations должно содержать en и значение default-notation.
+  de: notations muss en und den Wert von default-notation enthalten.
+  ro: notations trebuie să includă en și valoarea default-notation.
+CFG_Notation_shape:
+  en: Each notation must contain six nonempty strings.
+  rs: Свака нотација мора садржати шест непразних текстуалних вредности.
+  ru: Каждая нотация должна содержать шесть непустых строк.
+  de: Jede Notation muss sechs nicht leere Zeichenketten enthalten.
+  ro: Fiecare notație trebuie să conțină șase șiruri de caractere nevide.
+CFG_Horsehead_glyph:
+  en: horsehead-glyph must be one character.
+  rs: horsehead-glyph мора бити један знак.
+  ru: horsehead-glyph должно состоять из одного символа.
+  de: horsehead-glyph muss aus einem Zeichen bestehen.
+  ro: horsehead-glyph trebuie să fie un singur caracter.
+CFG_Zoo_shape:
+  en: fairy-zoo must contain three rows of seven strings.
+  rs: fairy-zoo мора садржати три реда са по седам текстуалних вредности.
+  ru: fairy-zoo должно содержать три ряда по семь строк.
+  de: fairy-zoo muss drei Zeilen mit je sieben Zeichenketten enthalten.
+  ro: fairy-zoo trebuie să conțină trei rânduri a câte șapte șiruri de caractere.
+CFG_Toolbar_shape:
+  en: "Toolbar options require enabled (boolean), icon and option (strings)."
+  rs: "Опције траке са алаткама захтевају enabled (логичка вредност), icon и option (текстуалне вредности)."
+  ru: "Для кнопок панели нужны enabled (логическое значение), icon и option (строки)."
+  de: "Symbolleistenoptionen benötigen enabled (Wahrheitswert), icon und option (Zeichenketten)."
+  ro: "Opțiunile barei de instrumente necesită enabled (valoare booleană), icon și option (șiruri de caractere)."
+CFG_Translation_missing:
+  en: "No complete translation available for language: %s."
+  rs: "Није доступан потпун превод за језик: %s."
+  ru: "Нет полного перевода для языка: %s."
+  de: "Keine vollständige Übersetzung für die Sprache verfügbar: %s."
+  ro: "Nu există o traducere completă pentru limba: %s."
+CFG_Zoo_piece:
+  en: "Invalid fairy-zoo piece: %s."
+  rs: "Неисправна фигура у fairy-zoo: %s."
+  ru: "Недопустимая фигура в fairy-zoo: %s."
+  de: "Ungültiger Stein in fairy-zoo: %s."
+  ro: "Piesă nevalidă în fairy-zoo: %s."
+CFG_Changed_during_save:
+  en: File changed during save; GUI settings were not written.
+  rs: Датотека је измењена током чувања; подешавања из интерфејса нису уписана.
+  ru: Файл изменился во время сохранения; настройки интерфейса не записаны.
+  de: Die Datei wurde während des Speicherns geändert; die Einstellungen der Benutzeroberfläche wurden nicht geschrieben.
+  ro: Fișierul a fost modificat în timpul salvării; setările din interfață nu au fost scrise.
+CFG_Temporary_cleanup:
+  en: Could not remove the temporary configuration file.
+  rs: Није могуће уклонити привремену датотеку са подешавањима.
+  ru: Не удалось удалить временный файл настроек.
+  de: Die temporäre Konfigurationsdatei konnte nicht entfernt werden.
+  ro: Fișierul temporar de configurare nu a putut fi șters.
+CFG_Yaml_location:
+  en: "Invalid YAML at line %s, column %s."
+  rs: "Неисправан YAML у реду %s, колони %s."
+  ru: "Ошибка YAML в строке %s, столбце %s."
+  de: "Ungültiges YAML in Zeile %s, Spalte %s."
+  ro: "YAML nevalid la linia %s, coloana %s."
+CFG_Invalid_yaml:
+  en: Invalid YAML. Check the file's syntax and encoding.
+  rs: Неисправан YAML. Проверите синтаксу и кодирање датотеке.
+  ru: Некорректный YAML. Проверьте синтаксис и кодировку файла.
+  de: Ungültiges YAML. Prüfen Sie Syntax und Kodierung der Datei.
+  ro: YAML nevalid. Verificați sintaxa și codificarea fișierului.
+CFG_File_missing:
+  en: Configuration file not found.
+  rs: Датотека са подешавањима није пронађена.
+  ru: Файл настроек не найден.
+  de: Konfigurationsdatei nicht gefunden.
+  ro: Fișierul de configurare nu a fost găsit.
+CFG_Access_denied:
+  en: Access to the configuration file was denied. Check its permissions.
+  rs: Приступ датотеци са подешавањима је одбијен. Проверите дозволе.
+  ru: Доступ к файлу настроек запрещён. Проверьте права доступа.
+  de: Zugriff auf die Konfigurationsdatei verweigert. Prüfen Sie die Zugriffsrechte.
+  ro: Accesul la fișierul de configurare a fost refuzat. Verificați permisiunile.
+CFG_File_error:
+  en: Could not access the configuration file. Check its location and permissions.
+  rs: Није могуће приступити датотеци са подешавањима. Проверите путању и дозволе.
+  ru: Не удалось обратиться к файлу настроек. Проверьте путь и права доступа.
+  de: Auf die Konfigurationsdatei konnte nicht zugegriffen werden. Prüfen Sie Pfad und Zugriffsrechte.
+  ro: Fișierul de configurare nu a putut fi accesat. Verificați calea și permisiunile.
+CFG_Invalid_settings:
+  en: Invalid configuration settings. Check the values in this file.
+  rs: Неисправна подешавања. Проверите вредности у овој датотеци.
+  ru: Некорректные настройки. Проверьте значения в этом файле.
+  de: Ungültige Konfigurationseinstellungen. Prüfen Sie die Werte in dieser Datei.
+  ro: Setări de configurare nevalide. Verificați valorile din acest fișier.
 # common
 CO_OK:
   en: OK
@@ -60,6 +235,12 @@ TC_Edit:
   ru: Метаданные
   de: Metadaten
   ro: Metadate
+TC_Versions:
+  en: Versions
+  rs: Верзије
+  ru: Версии
+  de: Versionen
+  ro: Versiuni
 TC_Solution:
   en: Solution
   rs: Решење
@@ -466,6 +647,78 @@ EP_Intended_solutions_shortened:
   ro: Sol.
 
 # EE labels
+EP_Version_of:
+  en: Version of
+  rs: Верзија композиције
+  ru: Версия задачи
+  de: Version von
+  ro: Versiune a
+EP_Version:
+  en: Version
+  rs: Верзија
+  ru: Версия
+  de: Version
+  ro: Versiune
+EP_Versionists:
+  en: Versionists
+  rs: Аутори верзије
+  ru: Авторы версии
+  de: Verfasser der Version
+  ro: Autorii versiunii
+EP_Correctors:
+  en: Correctors
+  rs: Аутори исправке
+  ru: Авторы исправления
+  de: Verfasser der Korrektur
+  ro: Autorii corecției
+EP_Correction_by:
+  en: Correction by
+  rs: Исправка од
+  ru: Исправление от
+  de: Korrektur von
+  ro: Corecție de
+EP_After:
+  en: After
+  rs: По узору на
+  ru: По мотивам
+  de: Nach
+  ro: După
+CO_By:
+  en: by
+  rs: од
+  ru: от
+  de: von
+  ro: de
+EP_Non_standard_stipulation:
+  en: Non-standard stipulation
+  rs: Нестандардни услов
+  ru: Нестандартное задание
+  de: Nichtstandardforderung
+  ro: Condiție nestandard
+EE_Persons_memo:
+  en: One person per line
+  rs: Једна особа у сваком реду
+  ru: Каждый человек с новой строки
+  de: Eine Person pro Zeile
+  ro: O persoană pe linie
+EE_Reference_memo:
+  en: YACPDB ID
+  rs: YACPDB број
+  ru: Номер в YACPDB
+  de: YACPDB-ID
+  ro: ID YACPDB
+EE_Versions_memo:
+  en: "Version of: the original composition. Versionists: people responsible for this version, if different from the authors. Correctors: people responsible for a correction; a parent reference is optional. After: the composition acknowledged as inspiration. References are YACPDB IDs and are not checked online. For YACPDB submission, versionists require a Version of reference."
+  rs: "Верзија композиције: изворна композиција. Аутори верзије: особе одговорне за верзију, ако се разликују од аутора. Аутори исправке: особе одговорне за исправку; веза са изворном композицијом није обавезна. По узору на: композиција наведена као инспирација. Везе су YACPDB бројеви и не проверавају се на мрежи. За слање у YACPDB, аутори верзије захтевају везу са изворном композицијом."
+  ru: "Версия задачи: исходная композиция. Авторы версии: создатели версии, если они отличаются от авторов. Авторы исправления: создатели исправления; ссылка на исходную задачу необязательна. По мотивам: композиция, указанная как источник вдохновения. Ссылки — номера в YACPDB, без проверки в сети. Для отправки в YACPDB авторам версии нужна ссылка на исходную задачу."
+  de: "Version von: die ursprüngliche Komposition. Verfasser der Version: Personen, die diese Version erstellt haben, falls sie sich von den Autoren unterscheiden. Verfasser der Korrektur: Personen, die eine Korrektur erstellt haben; ein Verweis ist optional. Nach: die als Anregung genannte Komposition. Verweise sind YACPDB-IDs und werden nicht online geprüft. Für YACPDB benötigen Verfasser einer Version einen Verweis auf das Original."
+  ro: "Versiune a: compoziția originală. Autorii versiunii: persoanele responsabile pentru versiune, dacă diferă de autori. Autorii corecției: persoanele responsabile pentru o corecție; referința la original este opțională. După: compoziția menționată ca inspirație. Referințele sunt ID-uri YACPDB și nu sunt verificate online. Pentru trimiterea la YACPDB, autorii versiunii necesită o referință la original."
+EE_Non_standard_stipulation_memo:
+  en: "Actual stipulation when Popeye cannot express it. Keep a standard stipulation above for solver input. For YACPDB, use English and at most 255 characters."
+  rs: "Стварни услов када га Popeye не подржава. Задржите стандардни услов изнад за програм за решавање. За YACPDB користите енглески и највише 255 знакова."
+  ru: "Настоящее задание, если Popeye его не поддерживает. Сохраните стандартное задание выше для решателя. Для YACPDB используйте английский и не более 255 символов."
+  de: "Tatsächliche Forderung, wenn Popeye sie nicht ausdrücken kann. Die Standardforderung oben bleibt für den Löser erhalten. Für YACPDB: Englisch, höchstens 255 Zeichen."
+  ro: "Condiția reală când Popeye nu o poate exprima. Păstrați condiția standard de mai sus pentru programul de rezolvare. Pentru YACPDB: în engleză, cel mult 255 de caractere."
 EE_Authors_memo:
   en: <b>Lastname,&nbsp;Firstname</b><br/>each with a newline
   rs: <b>Презиме,&nbsp;Име</b><br/>свако у новом реду

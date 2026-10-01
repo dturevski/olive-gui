@@ -103,7 +103,7 @@ Logical operators precedence is NOT > AND > OR, i.e.:
 * **COLOR**: a single character 'w', 'b' or 'n' for white, black and neutral, respectively
 * **DATE**: a date in YYYY[-MM[-DD]] format
 * **INTEGER**: any integer number
-* **REFTYPE**: "author", "judge", "source", "reprint", "tourney" or "keyword"
+* **REFTYPE**: "author", "judge", "versionist", "corrector", "source", "reprint", "tourney" or "keyword"
 * **TRANSFORMATIONS**: "All", "Mirror" or "None"
 * **PIECE**: concatenation of COLOR and PIECENAME
 * **PIECENAME**: one- or two-letter piece code, as defined by the [Popeye](https://github.com/thomas-maeder/popeye) solving software (english input)
@@ -128,12 +128,15 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 * `Entity(REFTYPE type, STRING name)`
 
 	Matches entries that are linked to the entity (person, publication source, composing tourney)
-	named `name` with the link type of `type`
+	named `name` with the link type of `type`. Use this predicate for role-specific
+	person searches, for example `Entity("author", name)` for authors only.
 
 * `Author(STRING name)`
 
-	Meaning that at least one of the authors matches **name**.
-	Same as `Entity("author", name)`
+	Matches a person named **name** as an author, versionist or corrector.
+	Judge-only links do not match; use `Entity("judge", name)` to search judges.
+	The name supports SQL LIKE wildcards (`%` and `_`). Each matching entry is returned
+	once even when the person has several roles. For role-specific searches, use `Entity`.
 
 * `Source(STRING name)`
 
