@@ -1,4 +1,4 @@
-import model
+from yacpdb import model
 
 class Analyzer:
 

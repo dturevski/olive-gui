@@ -2,10 +2,18 @@ import markdown
 from datetime import datetime, timedelta
 
 from .predicate import *
-try:
-    from board import *
-except ImportError as e:
-    from olive.board import *
+from yacpdb.board import *
+from pathlib import Path
+
+
+_CREATIVE_ROLES_SQL = "'author', 'versionist', 'corrector'"
+
+
+def _validate_entity_id(predicate, params, position):
+    Predicate.validate(predicate, params)
+    value = params[position]
+    if re.fullmatch(r'[0-9]+', str(value)) is None or int(value) <= 0:
+        raise ValueError('%s requires a positive concrete entity ID' % predicate.name)
 
 
 class PredicateStorage:
@@ -23,10 +31,11 @@ class PredicateStorage:
         'STRING': Domain('STRING', '.*'),
     }
 
-    def __init__(self, dir):
+    def __init__(self, dir=None):
         self.ds = PredicateStorage.domains
         self.ps = {}
-        self.load(dir + PredicateStorage.markdownFilename)
+        self.load(Path(dir) / PredicateStorage.markdownFilename if dir is not None
+                  else Path(__file__).with_name("indexer.md"))
 
     fmt1 = re.compile('^\* `(' + titleCase + ')\((.*)\)`$') # non-zero arity
     fmt2 = re.compile('^\* `(' + titleCase + ')`$') # zero arity
@@ -233,7 +242,7 @@ class Author(Predicate):
             "p2.id in (select e2p.problem_id from entities_to_problems e2p "
             "join entities e on e.entity_id=e2p.entity_id "
             "where e.type='person' and e.name like %s "
-            "and e2p.link_type in ('author', 'versionist', 'corrector'))",
+            "and e2p.link_type in (" + _CREATIVE_ROLES_SQL + "))",
             [params[0]], []
         )
 
@@ -249,6 +258,48 @@ class Entity(Predicate):
             "where e.name like %s and e2p.link_type=%s) ",
             [params[1], params[0]], []
         )
+
+
+class EntityId(Predicate):
+
+    def validate(self, params):
+        _validate_entity_id(self, params, 1)
+        if self.params[0].domain.regexp.fullmatch(str(params[0])) is None:
+            raise ValueError('EntityId requires a supported concrete role')
+
+    def sql(self, params, cmp, ord):
+        return Query(
+            "p2.id in (select problem_id from entities_to_problems "
+            "where link_type=%s and entity_id=%s)",
+            [params[0], int(params[1])], [])
+
+
+class ContributorId(Predicate):
+
+    def validate(self, params):
+        _validate_entity_id(self, params, 0)
+
+    def sql(self, params, cmp, ord):
+        return Query(
+            "p2.id in (select e2p.problem_id from entities_to_problems e2p "
+            "join entities e on e.entity_id=e2p.entity_id "
+            "where e.type='person' and e.entity_id=%s "
+            "and e2p.link_type in (" + _CREATIVE_ROLES_SQL + "))",
+            [int(params[0])], [])
+
+
+class PublishedInId(Predicate):
+
+    def validate(self, params):
+        _validate_entity_id(self, params, 0)
+
+    def sql(self, params, cmp, ord):
+        return Query(
+            "p2.id in (select e2p.problem_id from entities_to_problems e2p "
+            "join entities e on e.entity_id=e2p.entity_id "
+            "where e.type='source' and e.entity_id=%s "
+            "and e2p.link_type in ('source', 'reprint'))",
+            [int(params[0])], [])
 
 
 class ReprintType(Predicate):

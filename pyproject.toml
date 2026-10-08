@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yacpdb-common"
+version = "0.1.0"
+readme = "yacpdb/README.md"
+license = {file = "LICENSE.txt"}
+description = "Shared chess composition model, schemas, validation and query language"
+requires-python = ">=3.8"
+dependencies = ["PyYAML>=5.3", "jsonschema>=3.2", "ply>=3.11", "Unidecode>=1.1", "Markdown>=3.2", "PyMySQL>=0.9"]
+
+[project.scripts]
+yacpdb-validate = "yacpdb.validation:main"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["yacpdb", "yacpdb.*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+yacpdb = ["README.md", "schemas/*.json", "schemas/*.md", "resources/*.txt", "resources/*.yaml"]
+"yacpdb.indexer" = ["indexer.md"]

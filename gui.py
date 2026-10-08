@@ -16,14 +16,14 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import requests
 
 # local
-import board
+from yacpdb import board
 import chest
 from conf import Conf, ConfigurationError
 from configuration import ConfigurationController, format_errors
 import fancy
 from lang import Lang
-import legacy.chess
-import legacy.popeye
+import yacpdb.legacy.chess
+import yacpdb.legacy.popeye
 import model
 import options
 import pbm
@@ -82,7 +82,7 @@ class Mainframe(QtWidgets.QMainWindow):
                        'resize-x', 'resize-y', 'shuffle', 'expand',
                        'chess']
     selectedPiece = None
-    predicateStorage = yacpdb.indexer.metadata.PredicateStorage('./')
+    predicateStorage = yacpdb.indexer.metadata.PredicateStorage()
 
     def fontset():
         return Mainframe.fonts[Mainframe.currentFontSet]
@@ -2413,7 +2413,7 @@ class PopeyeView(QtWidgets.QSplitter):
             if 'black' == color:
                 entry['options'].append('HalfDuplex')
 
-            input = legacy.popeye.create_input(
+            input = yacpdb.legacy.popeye.create_input(
                 entry,
                 False,
                 copy.deepcopy(Conf.popeye['sticky-options']),
@@ -2698,7 +2698,7 @@ class PopeyeView(QtWidgets.QSplitter):
 
         try:
             self.compact_possible = True
-        except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as e:
+        except (yacpdb.legacy.popeye.ParseError, yacpdb.legacy.chess.UnsupportedError) as e:
             self.compact_possible = False
 
     def setActionEnabled(self, status):
@@ -2715,20 +2715,20 @@ class PopeyeView(QtWidgets.QSplitter):
         notations = Conf.value('notations')
         for a, b in zip(notations['en'], notations[notation]):
             legacy_notation[a] = b
-        legacy.chess.NOTATION = legacy_notation
+        yacpdb.legacy.chess.NOTATION = legacy_notation
 
     def onCompact(self):
         try:
             self.setLegacyNotation(Conf.value('default-notation'))
-            self.solution = legacy.popeye.parse_output(
+            self.solution = yacpdb.legacy.popeye.parse_output(
                 self.entry_copy, self.raw_output)
-            self.solutionOutput = legacy.chess.SolutionOutput(False)
-            b = legacy.chess.Board()
+            self.solutionOutput = yacpdb.legacy.chess.SolutionOutput(False)
+            b = yacpdb.legacy.chess.Board()
             b.from_algebraic(self.entry_copy['algebraic'])
             self.solutionOutput.create_output(self.solution, b)
             self.solutionOutput.solution = PopeyeView.trimIndented(self.solutionOutput.solution)
             self.toggleCompact()
-        except (legacy.popeye.ParseError, legacy.chess.UnsupportedError) as e:
+        except (yacpdb.legacy.popeye.ParseError, yacpdb.legacy.chess.UnsupportedError) as e:
             msgBox(Lang.value('MSG_Not_supported') % str(e))
             self.compact_possible = False
 
@@ -2755,7 +2755,7 @@ class PopeyeView(QtWidgets.QSplitter):
     trimIndented = staticmethod(trimIndented)
 
     def generatedInput(self, sticky_options=None):
-        return legacy.popeye.create_input(
+        return yacpdb.legacy.popeye.create_input(
             Mainframe.model.cur(), self.sstip.isChecked(),
             copy.deepcopy(Conf.popeye['sticky-options'] if sticky_options is None else sticky_options),
             Mainframe.model.board.toPopeyePiecesClause(), model.FairyHelper.instance)
@@ -2801,9 +2801,9 @@ class PopeyeView(QtWidgets.QSplitter):
 
     def createChangeNotationCallable(self, notation):
         def callable():
-            self.solutionOutput = legacy.chess.SolutionOutput(False)
+            self.solutionOutput = yacpdb.legacy.chess.SolutionOutput(False)
             self.setLegacyNotation(notation)
-            b = legacy.chess.Board()
+            b = yacpdb.legacy.chess.Board()
             b.from_algebraic(self.entry_copy['algebraic'])
             self.solutionOutput.create_output(self.solution, b)
             self.output.setText(self.solutionOutput.solution)

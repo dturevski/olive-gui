@@ -1,5 +1,6 @@
 import copy
-import p2w.nodes, model
+import yacpdb.p2w.nodes
+from yacpdb import model
 
 # Phases+Twins+Zilahi
 
@@ -46,7 +47,7 @@ class ZilahiTraverser:
             # in eg. #2 all set lines are a single phase, in h#n.5 each set line is a distinct phase
             # so we differentiate by if there is anything else beside the set lines
             # still not ideal (2 set + 2 actual helpmate would be counted as 3 phases)
-            if len(node.children) == 1 and isinstance(node.children[0], p2w.nodes.NullNode):
+            if len(node.children) == 1 and isinstance(node.children[0], yacpdb.p2w.nodes.NullNode):
                 self.phases += len(node.children[0].children) - 1 # -1 because +1 will be added on the next level
         if node.depth == 2:
             self.phases += 1

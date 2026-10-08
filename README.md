@@ -74,3 +74,5 @@ saving on exit. External edits win when both have changed the same setting;
 unrelated GUI changes are retained. Files are only rewritten if GUI changes need
 saving, so comments and formatting survive when no write is needed. A rewritten
 file uses Olive's YAML formatting and does not preserve comments.
+
+Shared Python library packaging and APIs: [yacpdb-common](yacpdb/README.md).

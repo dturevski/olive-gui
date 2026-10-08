@@ -1,6 +1,6 @@
 import unittest
 
-from board import Board, Piece, algebraicToIdx
+from yacpdb.board import Board, Piece, algebraicToIdx
 
 
 class TestBoardSerialization(unittest.TestCase):

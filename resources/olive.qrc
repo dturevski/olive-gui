@@ -57,7 +57,7 @@
         <file>icons/lang/rs.svg</file>
         <file>icons/lang/ru.svg</file>
         <file>fonts/gc2004y_.ttf</file>
-        <file>fonts/xfen.txt</file>
+        <file alias="fonts/xfen.txt">../yacpdb/resources/xfen.txt</file>
         <file>fonts/xfen-common.txt</file>
         <file>fonts/gc2004d_.ttf</file>
         <file>fonts/gc2004x_.ttf</file>

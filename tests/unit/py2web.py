@@ -1,7 +1,7 @@
 import unittest
 
 import model
-import p2w
+import yacpdb.p2w
 import tests.unit.data
 import validate
 
@@ -10,7 +10,7 @@ class TestParser(unittest.TestCase):
 
     def validate(self, key, validator):
         e = tests.unit.data.problems[key]
-        solution = p2w.parser.parser.parse(e["solution"], debug=0, lexer=p2w.lexer.lexer)
+        solution = yacpdb.p2w.parser.parser.parse(e["solution"], debug=0, lexer=yacpdb.p2w.lexer.lexer)
         b = model.Board()
         b.fromAlgebraic(e["algebraic"])
         b.stm = b.getStmByStipulation(e["stipulation"])

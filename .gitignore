@@ -13,3 +13,5 @@ test.json
 conf/popeye.yaml
 *.venv
 __pycache__
+
+*.egg-info/

@@ -4,7 +4,7 @@ import urllib.request, urllib.error, urllib.parse
 import logging
 import traceback
 
-import model
+from yacpdb import model
 
 GATEWAY = "http://88.119.26.162/helpman/HelpmAn.exe/"
 

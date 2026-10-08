@@ -1,5 +1,7 @@
 import re, copy, json, yaml
-from base import read_resource_file, get_write_dir
+from pathlib import Path
+
+RESOURCE_DIR = Path(__file__).resolve().parent / "resources"
 
 class Square:
 
@@ -86,11 +88,15 @@ def first_word_in_lowercase(s):
 
 class FairyHelper:
 
-    def __init__(self):
+    def __init__(self, config_dir=None):
+        def resource(name):
+            override = Path(config_dir) / name if config_dir else None
+            return override if override and override.is_file() else RESOURCE_DIR / name
+
         self.defaults, self.overrides, self.glyphs, self.fontinfo = {}, {}, {}, {}
         self.RE_PROPER_GLYPH = re.compile('^[kqrbspeaofwdx][1-3]?$')
         self.options, self.conditions = [], []
-        f = open(get_write_dir() + '/conf/fairy-pieces.txt', encoding='utf-8')
+        f = open(resource('fairy-pieces.txt'), encoding='utf-8')
         for entry in [x.strip().split("\t") for x in f.readlines()]:
             self.glyphs[entry[0]] = {'name': entry[1]}
             if len(entry) > 2:
@@ -105,20 +111,20 @@ class FairyHelper:
                     self.defaults[entry[2]] = entry[0]
         f.close()
 
-        for entry in [x.strip().split("\t") for x in read_resource_file(':/fonts/xfen.txt')]:
+        for entry in [x.strip().split("\t") for x in (RESOURCE_DIR / 'xfen.txt').read_text(encoding='utf-8').splitlines()]:
             self.fontinfo[entry[0]] = {'family': entry[1], 'chars': [
                 chr(int(entry[2])), chr(int(entry[3]))]}
         f.close()
 
-        f = open(get_write_dir() + '/conf/py-options.txt')
+        f = open(resource('py-options.txt'))
         self.options = [x.strip() for x in f.readlines()]
         f.close()
 
-        f = open(get_write_dir() + '/conf/py-conditions.txt')
+        f = open(resource('py-conditions.txt'))
         self.conditions = [x.strip() for x in f.readlines()]
         f.close()
 
-        with open(get_write_dir() + '/conf/fairy-property-colors.yaml', 'r', encoding="utf8") as f:
+        with open(resource('fairy-property-colors.yaml'), 'r', encoding="utf8") as f:
             self.highlight_colors = yaml.safe_load(f)
 
     def is_popeye_option(self, s):

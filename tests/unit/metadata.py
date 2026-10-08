@@ -6,7 +6,7 @@ from yacpdb.indexer import ql
 from yacpdb.indexer.metadata import Author, PredicateStorage
 
 
-class TestPersonPredicates(unittest.TestCase):
+class MetadataQueryTestCase(unittest.TestCase):
 
     def setUp(self):
         self.directory = str(Path(__file__).resolve().parents[2]) + '/'
@@ -42,6 +42,9 @@ class TestPersonPredicates(unittest.TestCase):
                                 query.ps).fetchone()[0]
         self.assertEqual(count, len(rows))
         return sorted(row[0] for row in rows)
+
+
+class TestPersonPredicates(MetadataQueryTestCase):
 
     def test_roles_parse_and_validate(self):
         for role in ('author', 'judge', 'versionist', 'corrector',
@@ -102,6 +105,127 @@ class TestPersonPredicates(unittest.TestCase):
             self.assertIs(storage.get(1, 'Author').sql.__func__, Author.sql)
             self.assertIn('Author()', storage.getEditorTypeAheads())
         self.assertEqual(self.storage.getDocumentation(), other.getDocumentation())
+
+
+class TestEntityIdPredicates(MetadataQueryTestCase):
+
+    def setUp(self):
+        super().setUp()
+        # These names cannot be represented literally by the query language's
+        # quoted name strings and would have special meaning in LIKE patterns.
+        special_name = "Both '\" quotes %_\\ name"
+        self.db.executemany('INSERT INTO entities VALUES (?, ?, ?)', [
+            (3, 'person', special_name), (4, 'source', special_name),
+            (5, 'keyword', special_name), (6, 'tourney', special_name)])
+        self.db.executemany('INSERT INTO entities_to_problems VALUES (?, ?, ?)', [
+            (1, 3, 'author'), (3, 3, 'author'), (5, 3, 'author'),
+            (1, 4, 'source'), (3, 4, 'reprint'),
+            (5, 4, 'source'), (5, 4, 'reprint'),
+            (1, 5, 'keyword'), (3, 5, 'keyword'), (5, 5, 'keyword'),
+            (4, 6, 'tourney'), (2, 1, 'source')])
+
+    def test_entity_id_searches_every_supported_role(self):
+        cases = [('author', 1, [1, 5]), ('judge', 1, [2, 5]),
+                 ('versionist', 1, [3, 5]), ('corrector', 1, [4, 5]),
+                 ('source', 4, [1, 5]), ('reprint', 4, [3, 5]),
+                 ('tourney', 6, [4]), ('keyword', 5, [1, 3, 5])]
+        for role, entity_id, expected in cases:
+            with self.subTest(role=role):
+                self.assertEqual(self.matches("EntityId('%s', %d)" % (role, entity_id)), expected)
+        self.assertEqual(self.matches("EntityId('author', 999)"), [])
+
+    def test_contributor_id_creative_roles_type_and_duplicates(self):
+        self.assertEqual(self.matches('ContributorId(1)'), [1, 3, 4, 5])
+        self.assertEqual(self.matches('ContributorId(3)'), [1, 3, 5])
+        self.assertEqual(self.matches('ContributorId(2)'), [])
+        self.assertEqual(self.matches('ContributorId(999)'), [])
+        self.assertEqual(self.matches("EntityId('judge', 1)"), [2, 5])
+
+    def test_entity_id_membership_does_not_duplicate_matching_links(self):
+        self.db.execute("INSERT INTO entities_to_problems VALUES (5, 1, 'author')")
+        self.assertEqual(self.matches("EntityId('author', 1)"), [1, 5])
+
+    def test_published_in_id_source_reprint_type_and_duplicates(self):
+        self.assertEqual(self.matches('PublishedInId(4)'), [1, 3, 5])
+        self.assertEqual(self.matches('PublishedInId(2)'), [6])
+        self.assertEqual(self.matches('PublishedInId(1)'), [])
+        self.assertEqual(self.matches('PublishedInId(999)'), [])
+
+    def test_invalid_and_wildcard_ids_and_roles_are_rejected(self):
+        for declaration in ("EntityId('author', %s)", 'ContributorId(%s)', 'PublishedInId(%s)'):
+            for value in ("'*'", '*', '0', '-1', "'1.5'", "'invalid'", "'1 OR 1=1'", "'1\n'"):
+                text = declaration % value
+                with self.subTest(query=text), self.assertRaises(ValueError):
+                    self.query(text)
+        for role in ('*', 'unknown', 'author-extra', 'extra-keyword', 'author\n'):
+            with self.subTest(role=role), self.assertRaises(ValueError):
+                self.query("EntityId('%s', 1)" % role)
+
+    def test_exact_ids_do_not_depend_on_names_or_patterns(self):
+        before = {text: self.matches(text) for text in (
+            'ContributorId(3)', 'PublishedInId(4)', "EntityId('keyword', 5)")}
+        self.db.execute("UPDATE entities SET name='Unrelated name'")
+        for text, expected in before.items():
+            self.assertEqual(self.matches(text), expected)
+            query = self.query(text)
+            self.assertNotIn('name', query.q)
+            self.assertNotIn('like', query.q.lower())
+
+    def test_ids_and_roles_are_bound_parameters(self):
+        for text, parameters in (("EntityId('keyword', '005')", ['keyword', 5]),
+                                 ('ContributorId(3)', [3]), ('PublishedInId(4)', [4])):
+            with self.subTest(query=text):
+                query = self.query(text)
+                self.assertEqual(query.ps, parameters)
+                self.assertEqual(query.q.count('%s'), len(parameters))
+                self.assertEqual(query.ts, [])
+                self.assertEqual(query.preExecute, [])
+
+    @staticmethod
+    def role_union(roles, entity_id):
+        return '(' + ' OR '.join("EntityId('%s', %d)" % (role, entity_id) for role in roles) + ')'
+
+    def test_pairwise_shortcuts_agree_with_explicit_role_unions(self):
+        person1 = self.role_union(('author', 'versionist', 'corrector'), 1)
+        person3 = self.role_union(('author', 'versionist', 'corrector'), 3)
+        source4 = self.role_union(('source', 'reprint'), 4)
+        keyword5 = "EntityId('keyword', 5)"
+        cases = [('ContributorId(1) AND ContributorId(3)', person1 + ' AND ' + person3),
+                 ('ContributorId(1) AND PublishedInId(4)', person1 + ' AND ' + source4),
+                 ('ContributorId(1) AND ' + keyword5, person1 + ' AND ' + keyword5),
+                 ('PublishedInId(4) AND ContributorId(1)', source4 + ' AND ' + person1)]
+        for shortcut, explicit in cases:
+            with self.subTest(query=shortcut):
+                self.assertEqual(self.matches(shortcut), [1, 3, 5])
+                self.assertEqual(self.matches(shortcut), self.matches(explicit))
+
+    def test_legacy_roles_remain_searchable(self):
+        self.db.execute("DELETE FROM entities_to_problems WHERE link_type IN ('versionist', 'corrector')")
+        self.assertEqual(self.matches('ContributorId(1)'), [1, 5])
+        self.assertEqual(self.matches('PublishedInId(4)'), [1, 3, 5])
+        self.assertEqual(self.matches("EntityId('judge', 1)"), [2, 5])
+        self.assertEqual(self.matches("EntityId('versionist', 1)"), [])
+        self.assertEqual(self.matches("EntityId('corrector', 1)"), [])
+
+    def test_documentation_and_typeaheads_need_no_registration(self):
+        for storage in (self.storage, PredicateStorage(self.directory)):
+            docs = storage.getDocumentation()
+            declarations = {'EntityId': 'EntityId(REFTYPE role, INTEGER id)',
+                            'ContributorId': 'ContributorId(INTEGER id)',
+                            'PublishedInId': 'PublishedInId(INTEGER id)'}
+            for name, declaration in declarations.items():
+                self.assertEqual(docs[name]['declaration'], declaration)
+                self.assertIn(name + '()', storage.getEditorTypeAheads())
+                self.assertIn('positive integer', docs[name]['doc'])
+                self.assertIn('wildcards', docs[name]['doc'])
+                self.assertIn('once', docs[name]['doc'])
+            self.assertIn('judge', docs['EntityId']['doc'])
+            self.assertIn('transliterations', docs['EntityId']['doc'])
+            for role in ('author', 'versionist', 'corrector'):
+                self.assertIn(role, docs['ContributorId']['doc'])
+            self.assertIn('Judge-only', docs['ContributorId']['doc'])
+            for role in ('source', 'reprint'):
+                self.assertIn(role, docs['PublishedInId']['doc'])
 
 
 if __name__ == '__main__':

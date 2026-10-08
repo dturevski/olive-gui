@@ -1,5 +1,5 @@
 import ply.lex as lex
-import model
+from yacpdb import model
 
 # A string containing ignored characters
 t_ignore = " \t\r\n"

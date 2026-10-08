@@ -27,7 +27,7 @@ Source: "conf\*"; DestDir: "{localappdata}\{#AppName}\conf\"
 Source: "conf\dist\*"; DestDir: "{localappdata}\{#AppName}\conf"
 Source: "yacpdb\indexer\indexer.md"; DestDir: "{app}\yacpdb\indexer"; Flags: ignoreversion
 Source: "yacpdb\schemas\*"; DestDir: "{app}\yacpdb\schemas"; Flags: ignoreversion
-Source: "p2w\parser.out"; DestDir: "{app}\p2w"; Flags: ignoreversion
+Source: "yacpdb\resources\*"; DestDir: "{app}\yacpdb\resources"; Flags: ignoreversion
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
