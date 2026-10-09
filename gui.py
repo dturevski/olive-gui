@@ -2047,8 +2047,10 @@ class VersionsView(QtWidgets.QWidget):
         self.fields = (
             ('version-of', 'EP_Version_of'),
             ('versionists', 'EP_Versionists'),
+            ('correction-of', 'EP_Correction_of'),
             ('correctors', 'EP_Correctors'),
             ('after', 'EP_After'),
+            ('anticipated-by', 'EP_Anticipated_by'),
         )
         for row, (field, caption) in enumerate(self.fields):
             label = QtWidgets.QLabel()
@@ -2062,11 +2064,11 @@ class VersionsView(QtWidgets.QWidget):
             grid.addWidget(label, row, 0)
             grid.addWidget(widget, row, 1)
             widget.textChanged.connect(self.onChanged)
+            if field in ('versionists', 'correctors'):
+                grid.setRowStretch(row, 1)
         self.memo = QtWidgets.QLabel()
         self.memo.setWordWrap(True)
         grid.addWidget(self.memo, len(self.fields), 0, 1, 2)
-        grid.setRowStretch(1, 1)
-        grid.setRowStretch(2, 1)
         grid.setColumnStretch(1, 1)
         self.setLayout(grid)
         self.onLangChanged()
@@ -2091,6 +2093,14 @@ class VersionsView(QtWidgets.QWidget):
         if self.skipModelChanged:
             return
         entry = Mainframe.model.cur()
+        # Choosing either parent through the controls replaces the other parent.
+        # Loading a local draft never silently removes its fields.
+        for field, other in (('version-of', 'correction-of'), ('correction-of', 'version-of')):
+            if self.sender() is self.inputs[field] and self.inputs[field].text().strip():
+                widget = self.inputs[other]
+                previous = widget.blockSignals(True)
+                widget.clear()
+                widget.blockSignals(previous)
         for field, widget in self.inputs.items():
             if field in ('versionists', 'correctors'):
                 value = model.splitAndStrip(widget.toPlainText())

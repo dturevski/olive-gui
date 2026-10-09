@@ -63,26 +63,32 @@ def displayStipulation(entry):
 
 def attribution(entry, Lang):
     details = []
+
+    def relationship(label, field=None, names=None):
+        names = ' & '.join(names or [])
+        reference = '>>' + str(entry[field]) if field and notEmpty(entry, field) else ''
+        details.append({'label': Lang.value(label), 'names': names,
+                        'reference': reference, 'by': Lang.value('CO_By') if names else '',
+                        'of': Lang.value('CO_Of') if reference else ''})
+
     has_version = notEmpty(entry, 'version-of')
-    if has_version or entry.get('versionists'):
-        details.append({
-            'label': Lang.value('EP_Version_of' if has_version else 'EP_Version'),
-            'reference': '>>' + str(entry['version-of']) if has_version else '',
-            'names': ' & '.join(entry.get('versionists', [])),
-            'by': Lang.value('CO_By'),
-        })
+    # Retain the established display of corrections recorded with version-of.
+    if entry.get('versionists') or (has_version and not entry.get('correctors')):
+        relationship('EP_Version', 'version-of', entry.get('versionists'))
     if notEmpty(entry, 'after'):
         details.append({'label': Lang.value('EP_After'), 'reference': '>>' + str(entry['after'])})
-    if entry.get('correctors'):
-        details.append({'label': Lang.value('EP_Correction_by'),
-                        'names': ' & '.join(entry['correctors'])})
+    if entry.get('correctors') or notEmpty(entry, 'correction-of'):
+        parent = 'correction-of' if notEmpty(entry, 'correction-of') else 'version-of'
+        relationship('EP_Correction', parent, entry.get('correctors'))
+    if notEmpty(entry, 'anticipated-by'):
+        details.append({'label': Lang.value('EP_Anticipated_by'),
+                        'reference': '>>' + str(entry['anticipated-by'])})
     return details
 
 
 def attributionLines(entry, Lang):
-    return [' '.join(str(detail[key]) for key in ('label', 'reference', 'by', 'names')
-                     if detail.get(key) and (key != 'by' or detail.get('names')))
-            for detail in attribution(entry, Lang)]
+    return [' '.join(str(detail[key]) for key in ('label', 'by', 'names', 'of', 'reference')
+                     if detail.get(key)) for detail in attribution(entry, Lang)]
 
 
 def formatDate(dict):

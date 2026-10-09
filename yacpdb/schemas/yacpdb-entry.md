@@ -87,7 +87,36 @@ supplied in the `after` field.
     correctors: 
       - Buchanan, Andrew
 ```
-Same logic as for `versionists`, except the `version-of` reference to the incorrect entry is optional. 
+People responsible for a correction, using the same person format as `authors`.
+A `correction-of` reference to the incorrect composition can be supplied when known;
+correctors can also be listed without a reference.
+
+### correction-of:
+```yaml
+    correction-of: 347013
+    correctors:
+      - Buchanan, Andrew
+```
+YACPDB ID of the incorrect composition corrected by this entry. The reference does
+not require a list of correctors; use `correctors` when their attribution is known.
+`correction-of` and `version-of` are mutually exclusive: supply one or neither.
+`versionists` continues to require `version-of` for YACPDB submission.
+
+### anticipated-by:
+```yaml
+    anticipated-by: 347013
+```
+YACPDB ID of an earlier composition that anticipates this entry, for example by
+presenting the same essential idea. This documents anticipation rather than an
+acknowledged source of inspiration (`after`) or an intentional version/correction.
+It may coexist with `after` and either `version-of` or `correction-of`.
+
+All four composition references (`version-of`, `correction-of`, `after`, and
+`anticipated-by`) are integer YACPDB IDs of at least 4. The wiki checks that the
+referenced compositions exist. Olive local drafts remain lenient; explicit YACPDB
+validation checks these submission requirements. Existing corrections recorded
+with `correctors` and `version-of` remain readable; this change does not rewrite
+older entries or their history. Use `correction-of` for new correction references.
 
 ### source:
 This is a collection of fields that reference the exact original publication source

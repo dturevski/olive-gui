@@ -37,6 +37,12 @@ assert not os.listdir(cwd), os.listdir(cwd)
         del bad['version-of']
         self.assertFalse(validate(bad, propagate_exceptions=False)['success'])
         self.assertTrue(validateEntity('person', {'familyname': 'Person'})['success'])
+        correction = copy.deepcopy(entry)
+        del correction['version-of'], correction['versionists']
+        correction.update({'correction-of': 4, 'anticipated-by': 5})
+        self.assertTrue(validate(correction)['success'])
+        correction['version-of'] = 5
+        self.assertFalse(validate(correction, propagate_exceptions=False)['success'])
         with self.assertRaises(ValueError):
             load_schema('../entry')
         with tempfile.TemporaryDirectory() as directory:

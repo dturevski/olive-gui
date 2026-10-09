@@ -165,18 +165,18 @@ class TestVersionFields(unittest.TestCase):
         gui.Mainframe.sigWrapper.sigModelChanged.emit()
         self.assertEqual(yaml.safe_load(self.frame.yamlView.toPlainText()), entry)
         header = exporters.pdf.ExportDocument.header(entry, Lang, Conf)
-        self.assertIn('Version of &gt;&gt;99999999', header)
+        self.assertIn('of &gt;&gt;99999999', header)
         self.assertIn('After &gt;&gt;88888888', header)
         self.assertIn('Correction by', header)
         self.assertIn('&lt;Jane&gt; &amp;', header)
         self.assertNotIn('&amp;amp;', header)
         self.assertNotIn('<Jane>', header)
-        self.assertLess(header.index('Original Author'), header.index('Version of'))
+        self.assertLess(header.index('Original Author'), header.index('Version by'))
         rendered = exporters.html.render(entry, self.frame.publishingView.settings())
         self.assertIn('<span title="#2">&lt;Last move?&gt; &amp; &quot;text&quot;</span>', rendered)
         self.assertIn('<Last move?> & "text"', self.frame.publishingView.richText.toPlainText())
         tex = exporters.latex.entry(entry, Lang)
-        self.assertIn('Version of >>99999999', tex)
+        self.assertIn(r'Version by <Jane> \& "Sam" \& Last, First of >>99999999', tex)
         self.assertIn('After >>88888888', tex)
         self.assertIn('Correction by Alex \\& Sam', tex)
         self.assertIn('\\stipulation{<Last move?> \\& "text"}', tex)
@@ -188,6 +188,72 @@ class TestVersionFields(unittest.TestCase):
             with open(filename, 'rb') as result:
                 self.assertEqual(result.read(4), b'%PDF')
 
+    def test_new_references_and_exclusive_parent_controls(self):
+        with patch('requests.post', side_effect=AssertionError('Unexpected online validation')):
+            self.versions.inputs['version-of'].setText('4')
+            self.versions.inputs['correction-of'].setText('5')
+            self.versions.inputs['anticipated-by'].setText('6')
+        entry = gui.Mainframe.model.cur()
+        self.assertNotIn('version-of', entry)
+        self.assertEqual(self.versions.inputs['version-of'].text(), '')
+        self.assertEqual(entry['correction-of'], 5)
+        self.assertEqual(entry['anticipated-by'], 6)
+        self.assertEqual(model.attributionLines(entry, Lang), ['Correction of >>5', 'Anticipated by >>6'])
+        self.versions.inputs['version-of'].setText('7')
+        self.assertNotIn('correction-of', entry)
+        self.assertEqual(entry['version-of'], 7)
+        self.assertEqual(entry['anticipated-by'], 6)
+        self.assertEqual(self.versions.inputs['correction-of'].text(), '')
+
+    def test_new_reference_file_yaml_and_clipboard_round_trip(self):
+        self.editFields()
+        self.versions.inputs['correction-of'].setText('77777777')
+        self.versions.inputs['anticipated-by'].setText('66666666')
+        expected = copy.deepcopy(gui.Mainframe.model.cur())
+        self.assertNotIn('version-of', expected)
+        # Keep locally unfinished person attribution; do not silently remove it.
+        self.assertIn('versionists', expected)
+        with tempfile.TemporaryDirectory() as directory:
+            filename = os.path.join(directory, 'new-links.olv')
+            gui.Mainframe.model.filename = filename
+            self.frame.onSaveFile()
+            self.frame.openCollection(filename)
+            self.assertEqual(gui.Mainframe.model.cur(), expected)
+            self.assertEqual(yaml.safe_load(self.frame.yamlView.toPlainText()), expected)
+            self.frame.entryList.setCurrentItem(self.frame.entryList.topLevelItem(0))
+            self.frame.entryList.onCopy()
+            self.frame.entryList.onPaste()
+            self.assertEqual(gui.Mainframe.model.cur(), expected)
+
+    def test_loading_local_conflicting_parents_preserves_draft(self):
+        entry = gui.Mainframe.model.cur()
+        entry.update({'version-of': 4, 'correction-of': 5, 'anticipated-by': 'Draft note'})
+        gui.Mainframe.sigWrapper.sigModelChanged.emit()
+        self.assertEqual(entry['version-of'], 4)
+        self.assertEqual(entry['correction-of'], 5)
+        self.assertEqual(self.versions.inputs['anticipated-by'].text(), 'Draft note')
+        self.assertFalse(gui.Mainframe.model.is_dirty)
+        self.versions.inputs['correctors'].setPlainText('Corrector')
+        self.assertEqual(entry['anticipated-by'], 'Draft note')
+
+    def test_new_attribution_exports_and_correct_word_order(self):
+        entry = gui.Mainframe.model.cur()
+        entry.update({'version-of': 4, 'versionists': ['Jane'], 'anticipated-by': 6})
+        self.assertEqual(model.attributionLines(entry, Lang),
+                         ['Version by Jane of >>4', 'Anticipated by >>6'])
+        header = exporters.pdf.ExportDocument.header(entry, Lang, Conf)
+        self.assertIn('Version by <b>Jane</b> of &gt;&gt;4', header)
+        self.assertIn('Version by Jane of >>4', exporters.latex.entry(entry, Lang))
+        del entry['version-of'], entry['versionists']
+        entry.update({'correction-of': 5, 'correctors': ['<Jane>']})
+        self.assertEqual(model.attributionLines(entry, Lang),
+                         ['Correction by <Jane> of >>5', 'Anticipated by >>6'])
+        header = exporters.pdf.ExportDocument.header(entry, Lang, Conf)
+        self.assertIn('Correction by <b>&lt;Jane&gt;</b> of &gt;&gt;5', header)
+        self.assertIn('Anticipated by &gt;&gt;6', header)
+        self.assertIn('Correction by <Jane> of >>5', exporters.latex.entry(entry, Lang))
+        self.assertNotIn('<Jane>', header)
+
     def test_languages_and_tab_placement(self):
         self.assertEqual(self.frame.tabBar2.indexOf(self.versions),
                          self.frame.tabBar2.indexOf(self.frame.easyEditView) + 1)
@@ -195,7 +261,11 @@ class TestVersionFields(unittest.TestCase):
             Lang.current = language
             gui.Mainframe.sigWrapper.sigLangChanged.emit()
             self.assertEqual(self.frame.tabBar2.tabText(3), Lang.value('TC_Versions'))
-            self.assertEqual(self.versions.labels['versionists'].text(), Lang.value('EP_Versionists') + ':')
+            for field, label in self.versions.fields:
+                self.assertEqual(self.versions.labels[field].text(), Lang.value(label) + ':')
+                self.assertTrue(self.versions.inputs[field].toolTip())
+            self.assertIn(Lang.value('EP_Anticipated_by'),
+                          model.attributionLines({'anticipated-by': 4}, Lang)[0])
             self.assertEqual(self.popeye.labelNonStandardStipulation.text(),
                              Lang.value('EP_Non_standard_stipulation') + ':')
         Lang.current = 'en'
