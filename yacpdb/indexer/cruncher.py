@@ -14,7 +14,7 @@ import yacpdb.indexer.analyzers.hma
 import yacpdb.indexer.predicate
 import yacpdb.indexer.metadata
 from yacpdb.p2w.parser import parser
-from yacpdb.storage import dao
+from yacpdb.storage import Connection, dao
 
 
 def calculateAshGlobally():
@@ -34,12 +34,18 @@ def calculateAshGlobally():
 
 
 def calculateOrthoGlobally():
+    connection = Connection.get()
     i = 0
-    for e in dao.allEntries():
-        dao.ixr_updateEntryOrtho(e["id"], not model.hasFairyElements(e))
-        i += 1
-        if i % 10000 == 0:
-            print(i)
+    try:
+        for e in dao.allEntries():
+            dao.ixr_updateEntryOrtho(e["id"], not model.hasFairyElements(e))
+            i += 1
+            if i % 10000 == 0:
+                print(i)
+        connection.commit()
+    except BaseException:
+        connection.rollback()
+        raise
 
 
 def crunch(count):

@@ -33,6 +33,14 @@ yacpdb-validate --validate request.json
 python -m yacpdb.indexer.cruncher --crunch
 ```
 
+To rebuild the stored orthodox/fairy flags from YAML, use
+`python -m yacpdb.indexer.cruncher --calculate-ortho-globally`.
+The rebuild commits its updates together on success and rolls them back on failure
+or interruption. It changes the derived `problems2.orthodox` flags, not YAML or
+revision history. Run against an inactive deployment database to avoid concurrent
+entry edits. The focused MySQL regression check is
+`python -m unittest tests.integration.orthodox_rebuild`; it uses a disposable database.
+
 The validator retains the existing JSON response format and conversion command.
 Schemas and their format documentation remain in `yacpdb/schemas/`.
 Olive's root `model.py` retains collection state and reexports shared helpers;
