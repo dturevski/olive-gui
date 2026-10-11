@@ -1,5 +1,5 @@
 #define AppName "Olive"
-#define AppVersion "1.6"
+#define AppVersion "1.6.1"
 #define AppExeName "olive.exe"
 
 [Setup]

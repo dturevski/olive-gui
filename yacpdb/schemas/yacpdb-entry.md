@@ -106,9 +106,8 @@ not require a list of correctors; use `correctors` when their attribution is kno
 ```yaml
     anticipated-by: 347013
 ```
-YACPDB ID of an earlier composition that anticipates this entry, for example by
-presenting the same essential idea. This documents anticipation rather than an
-acknowledged source of inspiration (`after`) or an intentional version/correction.
+YACPDB ID of an earlier composition that anticipates this entry. This documents anticipation rather than an acknowledged source of inspiration (`after`)
+or an intentional version/correction.
 It may coexist with `after` and either `version-of` or `correction-of`.
 
 All four composition references (`version-of`, `correction-of`, `after`, and
