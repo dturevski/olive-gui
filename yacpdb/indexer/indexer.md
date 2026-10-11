@@ -138,6 +138,35 @@ Same meaning as in the YACPDB search form. Metadata predicates do not involve an
 	The name supports SQL LIKE wildcards (`%` and `_`). Each matching entry is returned
 	once even when the person has several roles. For role-specific searches, use `Entity`.
 
+* `EntityId(REFTYPE role, INTEGER id)`
+
+	Matches entries linked to the exact entity **id** in the specified **role**.
+	All REFTYPE roles are supported, including judge. Unlike `Entity`, this predicate
+	does not match names, transliterations or SQL LIKE patterns. Both parameters must
+	be concrete: the role must be supported and the ID must be a positive integer;
+	wildcards are not accepted. A missing entity ID returns no matches. Each entry
+	is returned once even if several links match.
+
+* `ContributorId(INTEGER id)`
+
+	Matches entries linked to the exact person entity **id** as an author, versionist
+	or corrector, the same creative roles searched by `Author(name)`. Judge-only
+	links are excluded; use `EntityId("judge", id)` to search judges. These are
+	composition people, not wiki accounts or revision authors. The ID must be a
+	positive integer; wildcards are not accepted. Missing IDs and IDs of non-person
+	entities return no matches. Each entry is returned once even if the person has
+	several qualifying roles.
+
+* `PublishedInId(INTEGER id)`
+
+	Matches entries linked to the exact source entity **id** as an original
+	publication (source) or a reprint (reprint). The ID must be a positive integer;
+	wildcards are not accepted. Missing IDs and IDs of non-source entities return
+	no matches. Each entry is returned once even if the source has both roles.
+	Combine exact-ID predicates with AND for associations, for example
+	`ContributorId(123) AND PublishedInId(789)` or
+	`ContributorId(123) AND EntityId("keyword", 321)`.
+
 * `Source(STRING name)`
 
 	Same as `Entity("source", name)`

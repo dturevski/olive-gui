@@ -48,6 +48,9 @@ def read_resource_file(path):
         f.close()
         return lines
     else:
+        if path == ':/fonts/xfen.txt':
+            from yacpdb.board import RESOURCE_DIR
+            return (RESOURCE_DIR / 'xfen.txt').read_text(encoding='utf-8').splitlines(True)
         path = "resources/" + path[1:]
         f, lines = open(path), []
         lines = f.readlines()

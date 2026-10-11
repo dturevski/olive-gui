@@ -21,7 +21,7 @@ resources.py: resources/olive.qrc
 	$(RCC) -o resources.py resources/olive.qrc
 
 dist/olive.exe: clean resources.py
-	$(PYINST) -p ./ --onefile --noconsole --icon resources/icons/olive.ico olive.py
+	$(PYINST) -p ./ --onefile --collect-data yacpdb --noconsole --icon resources/icons/olive.ico olive.py
 
 clean:
 	rm -rf dist/

@@ -10,6 +10,8 @@
     "correctors": { "type": "array", "items": { "$ref" : "#/definitions/person_type" }, "minItems": 1, "uniqueItems": true },
     "after": { "$ref" : "#/definitions/yacpdb_problem_id" },
     "version-of": { "$ref" : "#/definitions/yacpdb_problem_id" },
+    "correction-of": { "$ref" : "#/definitions/yacpdb_problem_id" },
+    "anticipated-by": { "$ref" : "#/definitions/yacpdb_problem_id" },
     "source": { "$ref" : "#/definitions/source_type" },
     "award": { "$ref" : "#/definitions/award_type" },
     "reprints": { "type": "array", "items": { "$ref" : "#/definitions/source_type" }, "minItems": 1, "uniqueItems": true },
@@ -54,6 +56,7 @@
     "award": { "required": ["source"] },
     "versionists": { "required": ["version-of"] }
   },
+  "not": { "required": ["version-of", "correction-of"] },
   "additionalProperties": false,
 
   "definitions": {

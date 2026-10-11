@@ -2,7 +2,7 @@
 
 # local
 import model
-import board
+from yacpdb import board
 import gui
 import logging
 

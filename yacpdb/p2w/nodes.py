@@ -1,6 +1,6 @@
 
-import model
-from board import Square
+from yacpdb import model
+from yacpdb.board import Square
 from functools import reduce
 
 

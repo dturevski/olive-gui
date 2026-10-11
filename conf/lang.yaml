@@ -708,11 +708,11 @@ EE_Reference_memo:
   de: YACPDB-ID
   ro: ID YACPDB
 EE_Versions_memo:
-  en: "Version of: the original composition. Versionists: people responsible for this version, if different from the authors. Correctors: people responsible for a correction; a parent reference is optional. After: the composition acknowledged as inspiration. References are YACPDB IDs and are not checked online. For YACPDB submission, versionists require a Version of reference."
-  rs: "Верзија композиције: изворна композиција. Аутори верзије: особе одговорне за верзију, ако се разликују од аутора. Аутори исправке: особе одговорне за исправку; веза са изворном композицијом није обавезна. По узору на: композиција наведена као инспирација. Везе су YACPDB бројеви и не проверавају се на мрежи. За слање у YACPDB, аутори верзије захтевају везу са изворном композицијом."
-  ru: "Версия задачи: исходная композиция. Авторы версии: создатели версии, если они отличаются от авторов. Авторы исправления: создатели исправления; ссылка на исходную задачу необязательна. По мотивам: композиция, указанная как источник вдохновения. Ссылки — номера в YACPDB, без проверки в сети. Для отправки в YACPDB авторам версии нужна ссылка на исходную задачу."
-  de: "Version von: die ursprüngliche Komposition. Verfasser der Version: Personen, die diese Version erstellt haben, falls sie sich von den Autoren unterscheiden. Verfasser der Korrektur: Personen, die eine Korrektur erstellt haben; ein Verweis ist optional. Nach: die als Anregung genannte Komposition. Verweise sind YACPDB-IDs und werden nicht online geprüft. Für YACPDB benötigen Verfasser einer Version einen Verweis auf das Original."
-  ro: "Versiune a: compoziția originală. Autorii versiunii: persoanele responsabile pentru versiune, dacă diferă de autori. Autorii corecției: persoanele responsabile pentru o corecție; referința la original este opțională. După: compoziția menționată ca inspirație. Referințele sunt ID-uri YACPDB și nu sunt verificate online. Pentru trimiterea la YACPDB, autorii versiunii necesită o referință la original."
+  en: "Version of: the original composition. Versionists: people responsible for this version, if different from the authors. Correctors: people responsible for a correction; a parent reference is optional. After: the composition acknowledged as inspiration. References are YACPDB IDs and are not checked online. For YACPDB submission, versionists require a Version of reference. Correction of identifies the corrected composition and cannot coexist with Version of. Anticipated by identifies an earlier composition that anticipated this one."
+  rs: "Верзија композиције: изворна композиција. Аутори верзије: особе одговорне за верзију, ако се разликују од аутора. Аутори исправке: особе одговорне за исправку; веза са изворном композицијом није обавезна. По узору на: композиција наведена као инспирација. Везе су YACPDB бројеви и не проверавају се на мрежи. За слање у YACPDB, аутори верзије захтевају везу са изворном композицијом. Исправка композиције означава исправљену композицију и не може се комбиновати са верзијом композиције. Претходно остварено у означава ранију композицију која је претходила овој."
+  ru: "Версия задачи: исходная композиция. Авторы версии: создатели версии, если они отличаются от авторов. Авторы исправления: создатели исправления; ссылка на исходную задачу необязательна. По мотивам: композиция, указанная как источник вдохновения. Ссылки — номера в YACPDB, без проверки в сети. Для отправки в YACPDB авторам версии нужна ссылка на исходную задачу. Исправление задачи указывает исправленную композицию и несовместимо с версией задачи. Предвосхищена задачей указывает более раннюю композицию, предвосхитившую эту."
+  de: "Version von: die ursprüngliche Komposition. Verfasser der Version: Personen, die diese Version erstellt haben, falls sie sich von den Autoren unterscheiden. Verfasser der Korrektur: Personen, die eine Korrektur erstellt haben; ein Verweis ist optional. Nach: die als Anregung genannte Komposition. Verweise sind YACPDB-IDs und werden nicht online geprüft. Für YACPDB benötigen Verfasser einer Version einen Verweis auf das Original. Korrektur von bezeichnet die korrigierte Komposition und kann nicht mit Version von kombiniert werden. Vorweggenommen durch bezeichnet eine frühere Komposition, die diese vorweggenommen hat."
+  ro: "Versiune a: compoziția originală. Autorii versiunii: persoanele responsabile pentru versiune, dacă diferă de autori. Autorii corecției: persoanele responsabile pentru o corecție; referința la original este opțională. După: compoziția menționată ca inspirație. Referințele sunt ID-uri YACPDB și nu sunt verificate online. Pentru trimiterea la YACPDB, autorii versiunii necesită o referință la original. Corecție a indică compoziția corectată și nu poate coexista cu Versiune a. Anticipată de indică o compoziție anterioară care a anticipat-o pe aceasta."
 EE_Non_standard_stipulation_memo:
   en: "Actual stipulation when Popeye cannot express it. Keep a standard stipulation above for solver input. For YACPDB, use English and at most 255 characters."
   rs: "Стварни услов када га Popeye не подржава. Задржите стандардни услов изнад за програм за решавање. За YACPDB користите енглески и највише 255 знакова."
@@ -1105,3 +1105,28 @@ DSTN_Special:
   ru: спец.
   de: sp.
   ro: Special
+
+EP_Correction_of:
+  en: Correction of
+  rs: Исправка композиције
+  ru: Исправление задачи
+  de: Korrektur von
+  ro: Corecție a
+EP_Correction:
+  en: Correction
+  rs: Исправка
+  ru: Исправление
+  de: Korrektur
+  ro: Corecție
+EP_Anticipated_by:
+  en: Anticipated by
+  rs: Претходно остварено у
+  ru: Предвосхищена задачей
+  de: Vorweggenommen durch
+  ro: Anticipată de
+CO_Of:
+  en: of
+  rs: композиције
+  ru: задачи
+  de: der Komposition
+  ro: a

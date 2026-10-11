@@ -6,7 +6,7 @@ import re
 
 from unidecode import unidecode
 
-import board
+from yacpdb import board
 
 
 class NoDatesSafeLoader(yaml.SafeLoader):

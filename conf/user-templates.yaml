@@ -3,7 +3,7 @@ entry-header: |
     <b>{{name}}</b><br/>
   {{/author}}
   {{#attribution}}
-    {{label}}{{#reference}} {{reference}}{{/reference}}{{#names}} {{by}} <b>{{names}}</b>{{/names}}<br/>
+    {{label}}{{#names}} {{by}} <b>{{names}}</b>{{/names}}{{#reference}}{{#of}} {{of}}{{/of}} {{reference}}{{/reference}}<br/>
   {{/attribution}}
   {{#source}}
     {{#problemid}}{{value}} {{/problemid}}<i>{{name}}</i>{{#issue}} <i>{{value}}</i>{{/issue}}

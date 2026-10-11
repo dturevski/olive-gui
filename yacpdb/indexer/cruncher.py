@@ -4,10 +4,8 @@ import os
 import sys
 import traceback
 
-sys.path.insert(0, os.getcwd())
-
-import model
-import validate
+from yacpdb import model
+from yacpdb import validation as validate
 import yacpdb.entry
 import yacpdb.indexer.analyzers.hma
 import yacpdb.indexer.analyzers.trajectories
@@ -15,8 +13,8 @@ import yacpdb.indexer.analyzers.miscellaneous
 import yacpdb.indexer.analyzers.hma
 import yacpdb.indexer.predicate
 import yacpdb.indexer.metadata
-from p2w.parser import parser
-from yacpdb.storage import dao
+from yacpdb.p2w.parser import parser
+from yacpdb.storage import Connection, dao
 
 
 def calculateAshGlobally():
@@ -36,16 +34,22 @@ def calculateAshGlobally():
 
 
 def calculateOrthoGlobally():
+    connection = Connection.get()
     i = 0
-    for e in dao.allEntries():
-        dao.ixr_updateEntryOrtho(e["id"], not model.hasFairyElements(e))
-        i += 1
-        if i % 10000 == 0:
-            print(i)
+    try:
+        for e in dao.allEntries():
+            dao.ixr_updateEntryOrtho(e["id"], not model.hasFairyElements(e))
+            i += 1
+            if i % 10000 == 0:
+                print(i)
+        connection.commit()
+    except BaseException:
+        connection.rollback()
+        raise
 
 
 def crunch(count):
-    predicateStorage = yacpdb.indexer.metadata.PredicateStorage('./')
+    predicateStorage = yacpdb.indexer.metadata.PredicateStorage()
     a0 = Analyzer0(["trajectories", "miscellaneous"], predicateStorage)
     a0.runBatch(count)
 
@@ -119,7 +123,7 @@ class Analyzer0:
 
 
 def main():
-    logging.basicConfig(filename='~/logs/cruncher.log', level=logging.DEBUG)
+    logging.basicConfig(filename=os.path.expanduser('~/logs/cruncher.log'), level=logging.DEBUG)
     os.nice(19)
     if "--crunch" in sys.argv:
         print("started", datetime.datetime.now())

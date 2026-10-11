@@ -19,6 +19,8 @@ import yaml
 # local
 import resources
 import base
+from yacpdb.board import FairyHelper
+FairyHelper.instance = FairyHelper(os.path.join(base.get_write_dir(), "conf"))
 import gui
 
 # logging uncaught exceptions

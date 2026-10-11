@@ -357,4 +357,4 @@ def p_error(t):
 
 
 from .lexer import *
-parser = yacc.yacc()
+parser = yacc.yacc(debug=False, write_tables=False)

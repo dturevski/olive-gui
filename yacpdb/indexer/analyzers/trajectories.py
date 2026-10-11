@@ -1,8 +1,8 @@
 import copy
 
-import board, model
-from legacy.common import all_different
-import p2w.nodes
+from yacpdb import board, model
+from yacpdb.legacy.common import all_different
+import yacpdb.p2w.nodes
 
 PATTERNS = {
     'Star': [(1, 1), (1, -1), (-1, 1), (-1, -1)],
@@ -67,7 +67,7 @@ class TrajectoriesBuilderAndPlatzwechselAnalyzer:
 
         # building TNodes tree
         for origin, departure, arrival in displacements:
-            is_capture = (isinstance(node, p2w.nodes.MoveNode)) and \
+            is_capture = (isinstance(node, yacpdb.p2w.nodes.MoveNode)) and \
                          (departure == node.departure) and \
                          (node.capture != -1)
             tnode = TNode(arrival, origin, board.board[arrival].toPredicatePieceDomain(), is_capture)
