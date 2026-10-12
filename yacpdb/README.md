@@ -15,6 +15,12 @@ the desktop GUI, configuration/startup, Qt and exporters are excluded.
 - `yacpdb.indexer`: query parser, predicates, documentation and analyzers.
 - `yacpdb.storage`: existing MySQL execution/indexer adapter; connections are lazy.
 
+Web consumers call `Connection.start_request()` before database work. It checks
+the cached session without implicit reconnection, replaces a stale connection,
+and ends any previous read transaction. `Connection.get()` within transaction
+work never reconnects automatically. New connections explicitly use UTF-8 and
+disable autocommit. `Connection.discard()` removes a failed cached session.
+
 Importing these modules does not change cwd or sys.path, configure logging,
 load desktop settings, or require Qt. Data files are resolved relative to the
 installed package. Parser construction writes no tables or debug output.
