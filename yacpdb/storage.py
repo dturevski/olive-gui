@@ -10,10 +10,31 @@ class Connection:
     def get():
         if Connection.instance is None:
             Connection.instance = pymysql.connect(host = "localhost", user = "root", passwd = "", db = "yacpdb",
+                                   charset="utf8", autocommit=False,
                                    cursorclass=pymysql.cursors.DictCursor)
-            Connection.instance.cursor().execute("SET NAMES utf8")
         return Connection.instance
     get = staticmethod(get)
+
+    @staticmethod
+    def discard():
+        connection, Connection.instance = Connection.instance, None
+        if connection is not None:
+            try:
+                connection.close()
+            except pymysql.Error:
+                pass
+
+    @staticmethod
+    def start_request():
+        """Refresh the session before request work; never reconnect mid-transaction."""
+        connection = Connection.get()
+        try:
+            connection.ping(reconnect=False)
+            connection.rollback()
+        except pymysql.Error:
+            Connection.discard()
+            connection = Connection.get()
+        return connection
 
 
 def commit(query, params):
