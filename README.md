@@ -26,6 +26,12 @@ Then run:
 make dependencies
 make resources.py
 ```
+
+`make dependencies` installs the application dependencies from `requirements.txt`.
+Indirect dependency versions are pinned in `constraints.txt`; pip installs only
+those needed for the current Python version and platform. Formatter and linter
+tools are not required to run or package Olive.
+
 Start Olive with:
 
 `python3 olive.py`
@@ -41,7 +47,7 @@ For example, on Ubuntu/Debian, install `pyqt5-dev-tools`.
 #### Commands
 
 - Optionally, set up a virtual environment.
-- `pip install -r requirements.txt`
+- `pip install -r requirements-build.txt` (or `make build-dependencies`)
 - `pyrcc5 -o resources.py resources/olive.qrc`
 - `pyinstaller olive.unx.spec --clean`
 - `pyinstaller olive.mac.spec --clean`

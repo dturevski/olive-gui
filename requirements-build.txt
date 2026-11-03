@@ -1,0 +1,4 @@
+# Binary packaging includes all application dependencies and their constraints.
+-r requirements.txt
+
+pyinstaller==6.16.0
